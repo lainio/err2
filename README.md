@@ -1,2 +1,2 @@
 # err2
-Experimental error handling package for Go
+Experimental error handling extension for Go
