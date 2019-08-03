@@ -48,6 +48,8 @@ few error handlers per function.
 */
 package err2
 
+import "fmt"
+
 type transport struct {
 	error
 }
@@ -146,7 +148,7 @@ func Catch(f func(err error)) {
 }
 
 // Return is same as Handle but it's for functions which don't wrap or annotate
-// their errors.
+// their errors. If you want to annotate errors see Returnf for more information.
 func Return(err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
@@ -157,5 +159,20 @@ func Return(err *error) {
 			panic(r) // Not ours, carry on panicking
 		}
 		*err = e.error
+	}
+}
+
+// Returnf is for annotating an error. It's similar to Errorf.
+func Returnf(err *error, format string, a ...interface{}) {
+	// This and Handle are similar but we need to call recover here because how
+	// it works with defer. We cannot refactor these two to use same function.
+
+	if r := recover(); r != nil {
+		e, ok := r.(transport)
+		if !ok {
+			panic(r) // Not ours, carry on panicking
+		}
+		*err = e
+		*err = fmt.Errorf(format, a...)
 	}
 }

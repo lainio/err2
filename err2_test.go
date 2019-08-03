@@ -1,8 +1,8 @@
 package err2_test
 
 import (
-	"github.com/lainio/err2"
 	"fmt"
+	"github.com/lainio/err2"
 	"io"
 	"os"
 	"testing"
@@ -173,6 +173,17 @@ func ExampleReturn() {
 	var err error
 	defer err2.Return(&err)
 	err2.Try(noThrow())
+	// Output:
+}
+
+func ExampleAnnotate() {
+	annotated := func() (err error) {
+		defer err2.Returnf(&err, "annotated: %v", err)
+		err2.Try(throw())
+		return err
+	}
+	err := annotated()
+	fmt.Printf("%v", err)
 	// Output:
 }
 
