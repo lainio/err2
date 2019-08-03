@@ -65,9 +65,8 @@ func TestDefault_Error(t *testing.T) {
 
 func TestTry_Error(t *testing.T) {
 	var err error
-	defer err2.Handle(&err, func() error {
+	defer err2.Handle(&err, func() {
 		//fmt.Printf("error and defer handling:%s\n", err)
-		return err
 	})
 
 	err2.Try(throw())
@@ -77,9 +76,7 @@ func TestTry_Error(t *testing.T) {
 
 func panickingHandle() {
 	var err error
-	defer err2.Handle(&err, func() error {
-		return err
-	})
+	defer err2.Handle(&err, func() {})
 
 	err2.Try(wrongSignature())
 }
@@ -137,31 +134,22 @@ func TestCatch_Error(t *testing.T) {
 
 func Example_copyFile() {
 	copyFile := func(src, dst string) (err error) {
-		defer err2.Handle(&err, func() error {
-			if err != nil {
-				err = fmt.Errorf("copy %s %s: %v", src, dst, err)
-			}
-			return err
+		defer err2.Handle(&err, func() {
+			err = fmt.Errorf("copy %s %s: %v", src, dst, err)
 		})
-
 		r := err2.Try(os.Open(src))[0].(*os.File) // Slow & ugly but possible.
 		defer r.Close()
-
 		w, err := os.Create(dst)
 		err2.Check(err) // As fast as if != nil. This is preferred.
-
-		defer err2.Handle(&err, func() error {
-			_ = w.Close()
-			if err != nil {
-				_ = os.Remove(dst)
-			}
-			return err
+		defer err2.Handle(&err, func() {
+			w.Close()
+			os.Remove(dst)
 		})
-
 		err2.Try(io.Copy(w, r))
 		err2.Check(w.Close())
 		return nil
 	}
+
 	err := copyFile("/notfound/path/file.go", "/notfound/path/file.bak")
 	if err != nil {
 		fmt.Println(err)
@@ -178,13 +166,38 @@ func ExampleReturn() {
 
 func ExampleAnnotate() {
 	annotated := func() (err error) {
-		defer err2.Returnf(&err, "annotated: %v", err)
+		defer err2.Annotate( "annotated: ", &err)
 		err2.Try(throw())
 		return err
 	}
 	err := annotated()
 	fmt.Printf("%v", err)
-	// Output:
+	// Output: annotated: this is an ERROR
+}
+
+func ExampleAnnotate2() {
+	annotated := func() (err error) {
+		defer err2.Annotate( "annotated 2nd: ", &err)
+		defer err2.Annotate( "annotated 1st: ", &err)
+		err2.Try(throw())
+		return err
+	}
+	err := annotated()
+	fmt.Printf("%v", err)
+	// Output: annotated 2nd: annotated 1st: this is an ERROR
+}
+
+func ExampleHandle() {
+	doSomething := func(a, b int) (err error) {
+		defer err2.Handle(&err, func() {
+			err = fmt.Errorf("error with (%d, %d): %v", a, b, err)
+		})
+		err2.Try(throw())
+		return err
+	}
+	err := doSomething(1, 2)
+	fmt.Printf("%v", err)
+	// Output: error with (1, 2): this is an ERROR
 }
 
 func BenchmarkOldErrorCheckingWithIfClause(b *testing.B) {

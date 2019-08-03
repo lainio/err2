@@ -48,7 +48,7 @@ few error handlers per function.
 */
 package err2
 
-import "fmt"
+import "errors"
 
 type transport struct {
 	error
@@ -101,11 +101,10 @@ func check(args []interface{}) {
 }
 
 // Handle is for adding an error handler to a function by defer. It's for
-// functions returning an error them self. For those functions that doesn't
-// return an error there is Catch function. It calls handler function f in all
-// cases not only when an error occurs which makes it proper deferred cleanup
-// function for success cases as well.
-func Handle(err *error, f func() error) {
+// functions returning errors them self. For those functions that doesn't
+// return errors there is a Catch function. Note! The handler function f is
+// called only when err != nil.
+func Handle(err *error, f func()) {
 	// This and Catch are similar but we need to call recover() here because
 	// how it works with defer. We cannot refactor these to use same function.
 
@@ -116,22 +115,25 @@ func Handle(err *error, f func() error) {
 	case nil:
 		// Defers are in the stack and the first from the stack gets the
 		// opportunity to get panic object's error (below). We still must
-		// call handler functions to the rest of the handlers.
-		*err = f()
+		// call handler functions to the rest of the handlers if there is
+		// an error.
+		if *err != nil {
+			f()
+		}
 	case transport:
 		// We did transport this error thru panic.
 		e := r.(transport)
 		*err = e.error
-		*err = f()
+		f()
 	default:
-		// There seems to be 'real' panic, carry on, but call the f first.
-		*err = f()
 		panic(r)
 	}
 }
 
-// Catch is same as Handle but it's for use those functions that doesn't return
-// an error. See Handle for more information.
+// Catch is a convenient helper to those functions that doesn't return errors.
+// The main function good example of that kind of function. Note! There can be
+// only one deferred Catch function per non error returning function. See Handle
+// for more information.
 func Catch(f func(err error)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
@@ -142,8 +144,6 @@ func Catch(f func(err error)) {
 			panic(r) // Not ours, carry on panicking
 		}
 		f(e)
-	} else {
-		f(nil)
 	}
 }
 
@@ -162,8 +162,9 @@ func Return(err *error) {
 	}
 }
 
-// Returnf is for annotating an error. It's similar to Errorf.
-func Returnf(err *error, format string, a ...interface{}) {
+// Returnf is for annotating an error. It's similar to Errorf but it takes only
+// two arguments: prefix string and a pointer to error.
+func Annotate(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
@@ -173,6 +174,10 @@ func Returnf(err *error, format string, a ...interface{}) {
 			panic(r) // Not ours, carry on panicking
 		}
 		*err = e
-		*err = fmt.Errorf(format, a...)
+		format := prefix + e.Error()
+		*err = errors.New(format)
+	} else if *err != nil { // if other handlers call recovery() we still..
+		format := prefix + (*err).Error()
+		*err = errors.New(format)
 	}
 }
