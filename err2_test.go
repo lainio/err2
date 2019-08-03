@@ -175,7 +175,7 @@ func ExampleAnnotate() {
 	// Output: annotated: this is an ERROR
 }
 
-func ExampleAnnotate2() {
+func ExampleAnnotate_deferStack() {
 	annotated := func() (err error) {
 		defer err2.Annotate("annotated 2nd: ", &err)
 		defer err2.Annotate("annotated 1st: ", &err)
