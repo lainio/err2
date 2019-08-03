@@ -1,4 +1,4 @@
-#err2
+# err2
 
 The package provides simple helper functions for error handling.
 
