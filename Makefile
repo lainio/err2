@@ -1,6 +1,6 @@
 # Original from github.com/pkg/errors
 
-PKGS := err2
+PKGS := github.com/lainio/err2
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 GO := go
 
