@@ -1,7 +1,7 @@
 package err2_test
 
 import (
-	"err2"
+	"github.com/lainio/err2"
 	"fmt"
 	"io"
 	"os"
