@@ -162,7 +162,7 @@ func Return(err *error) {
 	}
 }
 
-// Returnf is for annotating an error. It's similar to Errorf but it takes only
+// Annotate is for annotating an error. It's similar to Errorf but it takes only
 // two arguments: prefix string and a pointer to error.
 func Annotate(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
