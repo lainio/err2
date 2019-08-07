@@ -163,7 +163,8 @@ func Return(err *error) {
 }
 
 // Annotate is for annotating an error. It's similar to Errorf but it takes only
-// two arguments: prefix string and a pointer to error.
+// two arguments: a prefix string and a pointer to error. It adds ": " between
+// the prefix and the error text automatically.
 func Annotate(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
@@ -174,10 +175,10 @@ func Annotate(prefix string, err *error) {
 			panic(r) // Not ours, carry on panicking
 		}
 		*err = e
-		format := prefix + e.Error()
+		format := prefix + ": " + e.Error()
 		*err = errors.New(format)
 	} else if *err != nil { // if other handlers call recovery() we still..
-		format := prefix + (*err).Error()
+		format := prefix + ": " + (*err).Error()
 		*err = errors.New(format)
 	}
 }
