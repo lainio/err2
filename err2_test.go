@@ -2,10 +2,11 @@ package err2_test
 
 import (
 	"fmt"
-	"github.com/lainio/err2"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/lainio/err2"
 )
 
 func throw() (string, error) {
@@ -137,15 +138,19 @@ func Example_copyFile() {
 		defer err2.Handle(&err, func() {
 			err = fmt.Errorf("copy %s %s: %v", src, dst, err)
 		})
-		r := err2.Try(os.Open(src))[0].(*os.File) // Slow & ugly but possible.
-		defer r.Close()
-		w, err := os.Create(dst)
-		err2.Check(err) // As fast as if != nil. This is preferred.
+
+		// These helpers are as fast as Check() calls
+		r := err2.File.Try(os.Open(src))
+		defer func() {
+			_ = r.Close()
+		}()
+
+		w := err2.File.Try(os.Create(dst))
 		defer err2.Handle(&err, func() {
-			w.Close()
-			os.Remove(dst)
+			_ = w.Close()
+			_ = os.Remove(dst)
 		})
-		err2.Try(io.Copy(w, r))
+		err2.Empty.Try(io.Copy(w, r))
 		err2.Check(w.Close())
 		return nil
 	}

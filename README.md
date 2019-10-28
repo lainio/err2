@@ -31,7 +31,7 @@ we can call
 err2.Try(ioutil.ReadAll(r))
 ```
 
-**but not without the handler**.
+**but not without a handler**.
 
 ## Error handling
 
@@ -62,17 +62,44 @@ performance of the error path is essential, don't use this mechanism presented
 here. For happy paths by using `err2.Check` there seems to be no performance
 penalty.
 
-The original goal was to make it possible to write similar code than Go2 and
-do it right now. The goal seems to be more than valid now when the latest Go
-proposal is to have a `try` macro and let the error handling be implemented in
-defer blocks.
+However, the mandatory use of the `defer` might prevent some code optimise like
+function inlining. If you have a performance critical use case we recommend to
+write a performance tests to measure the effect.
+
+The original goal was to make it possible to write similar code than proposed
+Go2 error handling would allow and do it right now. The goal was well 
+aligned with the latest Go proposal where it would brought a `try` macro and let
+the error handling be implemented in defer blocks. Unfortunately the try-
+proposal was put on the hold or cancelled at its latest form. 
+
+## Learning by so far
+
+We have used the err2 package in several internal projects. The results have
+been so far very encouraging:
+
+- If you forget to use handler but you use checks from the package, you will get
+panics if error occurs. That is much better than getting unrelated panic later.
+There has been even cases when code reports error correctly because the 'upper'
+handler catches it.
+
+- Because the use of `err2.Annocate()` is so relatively easy, developers use it
+always which makes error messages much better and informative. Could say, they
+include a logical call stack in the user friendly form.
+
+- There has been a couple of the cases when a quite complex function has needed
+update. When error handling is based on the actual error handlers, not just
+passing them up in the stack, the code changes have been much easier.
 
 ## Roadmap
 
 Version history:
-- 0.1, first draft (Current)
+- 0.1, first draft (Summer 2019)
+- 0.2, code generation for helpers (Current)
 
-When Go2 `try` macro is released this package should be updated accordingly.
-However, the actual effect of such an update seems to be minor, but the
-`err.Try/Check` calls should be **changed** to `try` macro calls. The err2 handlers
-should work as is.
+When Go2 `try` macro would be released this package should be updated
+accordingly. However, the actual effect of such an update seems to be minor, but
+the `err.Try/Check` calls should be **changed** to `try` macro calls. The err2
+handlers should work as is.
+
+We are monitoring what will happened for the Go-native error handling and tune
+the library accordingly.

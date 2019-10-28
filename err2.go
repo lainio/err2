@@ -54,18 +54,16 @@ type transport struct {
 	error
 }
 
-type _string struct {
-}
+type _empty struct{}
 
-// String is a helper variable to demonstrate how we could build 'type wrappers'
+// Empty is a helper variable to demonstrate how we could build 'type wrappers'
 // to make Try function as fast as Check.
-var String _string
+var Empty _empty
 
 // Try is a helper method to call func() (string, error) functions with it and
 // be as fast as Check(err).
-func (s _string) Try(str string, err error) string {
+func (s _empty) Try(_ interface{}, err error) {
 	Check(err)
-	return str
 }
 
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
@@ -148,7 +146,8 @@ func Catch(f func(err error)) {
 }
 
 // Return is same as Handle but it's for functions which don't wrap or annotate
-// their errors. If you want to annotate errors see Returnf for more information.
+// their errors. If you want to annotate errors see Annotate for more
+// information.
 func Return(err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
