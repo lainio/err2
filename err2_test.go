@@ -13,13 +13,11 @@ func throw() (string, error) {
 	return "", fmt.Errorf("this is an ERROR")
 }
 
-func noThrow() (string, error) {
-	return "test", nil
-}
+func twoStrNoThrow() (string, string, error) { return "test", "test", nil }
 
-func wrongSignature() (int, int) {
-	return 0, 0
-}
+func noThrow() (string, error) { return "test", nil }
+
+func wrongSignature() (int, int) { return 0, 0 }
 
 func recursion(a int) int {
 	if a == 0 {
@@ -53,6 +51,7 @@ func noErr() error {
 
 func TestTry_noError(t *testing.T) {
 	err2.Try(noThrow())
+	err2.StrStr.Try(twoStrNoThrow())
 }
 
 func TestDefault_Error(t *testing.T) {
