@@ -48,7 +48,10 @@ few error handlers per function.
 */
 package err2
 
-import "errors"
+import (
+	"errors"
+	"runtime/debug"
+)
 
 type transport struct {
 	error
@@ -129,9 +132,9 @@ func Handle(err *error, f func()) {
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
-// The main function good example of that kind of function. Note! There can be
-// only one deferred Catch function per non error returning function. See Handle
-// for more information.
+// Go's main function is a good example. Note! There can be only one deferred
+// Catch function per non error returning function. See Handle for more
+// information.
 func Catch(f func(err error)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
@@ -139,9 +142,43 @@ func Catch(f func(err error)) {
 	if r := recover(); r != nil {
 		e, ok := r.(transport)
 		if !ok {
-			panic(r) // Not ours, carry on panicking
+			panic(r)
 		}
 		f(e)
+	}
+}
+
+// CatchAll is a helper function to catch and write handlers for all errors and
+// all panics thrown in the current go routine.
+func CatchAll(errorHandler func(err error), panicHandler func(v interface{})) {
+	// This and Handle are similar but we need to call recover here because how
+	// it works with defer. We cannot refactor these 2 to use same function.
+
+	if r := recover(); r != nil {
+		e, ok := r.(transport)
+		if ok {
+			errorHandler(e)
+		} else {
+			panicHandler(r)
+		}
+	}
+}
+
+// CatchTrace is a helper function to catch and handle all errors. It recovers a
+// panic as well and prints its call stack. This is preferred helper for go
+// workers on long running servers.
+func CatchTrace(errorHandler func(err error)) {
+	// This and Handle are similar but we need to call recover here because how
+	// it works with defer. We cannot refactor these 2 to use same function.
+
+	if r := recover(); r != nil {
+		e, ok := r.(transport)
+		if ok {
+			errorHandler(e)
+		} else {
+			println(r)
+			debug.PrintStack()
+		}
 	}
 }
 

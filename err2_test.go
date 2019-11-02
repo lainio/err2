@@ -65,9 +65,7 @@ func TestDefault_Error(t *testing.T) {
 
 func TestTry_Error(t *testing.T) {
 	var err error
-	defer err2.Handle(&err, func() {
-		//fmt.Printf("error and defer handling:%s\n", err)
-	})
+	defer err2.Handle(&err, func() {})
 
 	err2.Try(throw())
 
@@ -83,11 +81,41 @@ func panickingHandle() {
 
 func TestPanickingCarryOn_Handle(t *testing.T) {
 	defer func() {
-		if r := recover(); r == nil {
-			t.Fail()
+		if recover() == nil {
+			t.Error("panics should went thru when not our errors")
 		}
 	}()
 	panickingHandle()
+}
+
+func panickingCatchAll() {
+	defer err2.CatchAll(func(err error) {}, func(v interface{}) {})
+
+	err2.Try(wrongSignature())
+}
+
+func TestPanickingCatchAll(t *testing.T) {
+	defer func() {
+		if recover() != nil {
+			t.Error("panics should not fly thru")
+		}
+	}()
+	panickingCatchAll()
+}
+
+func panickingCatchTrace() {
+	defer err2.CatchTrace(func(err error) {})
+
+	err2.Try(wrongSignature())
+}
+
+func TestPanickingCatchTrace(t *testing.T) {
+	defer func() {
+		if recover() != nil {
+			t.Error("panics should NOT carry on when tracing")
+		}
+	}()
+	panickingCatchTrace()
 }
 
 func panickingReturn() {
@@ -99,24 +127,23 @@ func panickingReturn() {
 
 func TestPanicking_Return(t *testing.T) {
 	defer func() {
-		if r := recover(); r == nil {
-			t.Fail()
+		if recover() == nil {
+			t.Error("panics should carry on")
 		}
 	}()
 	panickingReturn()
 }
 
 func panickingCatch() {
-	defer err2.Catch(func(err error) {
-	})
+	defer err2.Catch(func(err error) {})
 
 	err2.Try(wrongSignature())
 }
 
 func TestPanicking_Catch(t *testing.T) {
 	defer func() {
-		if r := recover(); r == nil {
-			t.Fail()
+		if recover() == nil {
+			t.Error("panics should carry on")
 		}
 	}()
 	panickingCatch()
