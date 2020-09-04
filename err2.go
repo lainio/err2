@@ -53,10 +53,6 @@ import (
 	"runtime/debug"
 )
 
-type transport struct {
-	error
-}
-
 type _empty struct{}
 
 // Empty is a helper variable to demonstrate how we could build 'type wrappers'
@@ -82,13 +78,13 @@ func Try(args ...interface{}) []interface{} {
 // {return err} on happy path.
 func Check(err error) {
 	if err != nil {
-		panic(transport{err})
+		panic(err)
 	}
 }
 
 // Checks the error status of the last argument. It panics with "wrong
 // signature" if the last calling parameter is not error. In case of error it
-// wraps it to transport{} and delivers it by panicking.
+// delivers it by panicking.
 func check(args []interface{}) {
 	argCount := len(args)
 	last := argCount - 1
@@ -97,7 +93,7 @@ func check(args []interface{}) {
 		if !ok {
 			panic("wrong signature")
 		}
-		panic(transport{err})
+		panic(err)
 	}
 }
 
@@ -121,10 +117,9 @@ func Handle(err *error, f func()) {
 		if *err != nil {
 			f()
 		}
-	case transport:
-		// We did transport this error thru panic.
-		e := r.(transport)
-		*err = e.error
+	case error:
+		// We or someone did transport this error thru panic.
+		*err = r.(error)
 		f()
 	default:
 		panic(r)
@@ -140,7 +135,7 @@ func Catch(f func(err error)) {
 	// it works with defer. We cannot refactor these 2 to use same function.
 
 	if r := recover(); r != nil {
-		e, ok := r.(transport)
+		e, ok := r.(error)
 		if !ok {
 			panic(r)
 		}
@@ -155,7 +150,7 @@ func CatchAll(errorHandler func(err error), panicHandler func(v interface{})) {
 	// it works with defer. We cannot refactor these 2 to use same function.
 
 	if r := recover(); r != nil {
-		e, ok := r.(transport)
+		e, ok := r.(error)
 		if ok {
 			errorHandler(e)
 		} else {
@@ -172,7 +167,7 @@ func CatchTrace(errorHandler func(err error)) {
 	// it works with defer. We cannot refactor these 2 to use same function.
 
 	if r := recover(); r != nil {
-		e, ok := r.(transport)
+		e, ok := r.(error)
 		if ok {
 			errorHandler(e)
 		} else {
@@ -190,11 +185,11 @@ func Return(err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	if r := recover(); r != nil {
-		e, ok := r.(transport)
+		e, ok := r.(error)
 		if !ok {
 			panic(r) // Not ours, carry on panicking
 		}
-		*err = e.error
+		*err = e
 	}
 }
 
@@ -206,7 +201,7 @@ func Annotate(prefix string, err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	if r := recover(); r != nil {
-		e, ok := r.(transport)
+		e, ok := r.(error)
 		if !ok {
 			panic(r) // Not ours, carry on panicking
 		}
