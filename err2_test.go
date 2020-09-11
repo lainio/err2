@@ -161,20 +161,16 @@ func TestCatch_Error(t *testing.T) {
 
 func Example_copyFile() {
 	copyFile := func(src, dst string) (err error) {
-		defer err2.Handle(&err, func() {
-			err = fmt.Errorf("copy %s %s: %v", src, dst, err)
-		})
+		defer err2.Returnf(&err, "copy %s %s", src, dst)
 
 		// These helpers are as fast as Check() calls
 		r := err2.File.Try(os.Open(src))
-		defer func() {
-			_ = r.Close()
-		}()
+		defer r.Close()
 
 		w := err2.File.Try(os.Create(dst))
 		defer err2.Handle(&err, func() {
-			_ = w.Close()
-			_ = os.Remove(dst)
+			w.Close()
+			os.Remove(dst)
 		})
 		err2.Empty.Try(io.Copy(w, r))
 		err2.Check(w.Close())
@@ -204,6 +200,17 @@ func ExampleAnnotate() {
 	err := annotated()
 	fmt.Printf("%v", err)
 	// Output: annotated: this is an ERROR
+}
+
+func ExampleReturnf() {
+	annotated := func() (err error) {
+		defer err2.Returnf(&err, "annotated: %s", "err2")
+		err2.Try(throw())
+		return err
+	}
+	err := annotated()
+	fmt.Printf("%v", err)
+	// Output: annotated: err2: this is an ERROR
 }
 
 func ExampleAnnotate_deferStack() {
