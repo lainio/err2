@@ -169,11 +169,10 @@ func Example_copyFile() {
 
 		w := err2.File.Try(os.Create(dst))
 		defer err2.Handle(&err, func() {
-			w.Close()
 			os.Remove(dst)
 		})
+		defer w.Close()
 		err2.Empty.Try(io.Copy(w, r))
-		err2.Check(w.Close())
 		return nil
 	}
 
