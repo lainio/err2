@@ -48,7 +48,7 @@ err2.Try(ioutil.ReadAll(r))
 
 ####Type Helpers
 
-The package includes performance optimized versions of `Try` function where the actual return types of the checked function are told to `err2` package by *type helper variables*. This removes the need to use dynamic type conversion. However, *when Go2 generics are out we can replace all of these with generics*.
+The package includes performance optimised versions of `Try` function where the actual return types of the checked function are told to `err2` package by *type helper variables*. This removes the need to use dynamic type conversion. However, *when Go2 generics are out we can replace all of these with generics*.
 
 The sample call with type helper variable
 ```go
