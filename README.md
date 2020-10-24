@@ -78,7 +78,8 @@ Version history:
 - 0.1, first draft (Summer 2019)
 - 0.2, code generation for type helpers
 - 0.3, `Returnf` added, not use own transport type anymore but just `error`
-- 0.4, Documentation update (current)
+- 0.4, Documentation update
+- 0.5, Go modules are in use now (current)
 
 
 We will update this package when Go2 generics are released. There is a working version which uses Go generics. We are also monitoring what will happen for the Go-native error handling and tune the library accordingly.
