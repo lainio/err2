@@ -5,7 +5,7 @@ The package provides simple helper functions for error propagation.
 `go get github.com/lainio/err2`
 
 
-##Error Propagation
+## Error Propagation
 
 The current version of Go tends to produce too much error checking and too little error handling. This package helps you fix that.
 1. It helps to declare error handlers with `defer`.
@@ -48,7 +48,7 @@ err2.Try(ioutil.ReadAll(r))
 **but not without an error handler (`Return`, `Annote`, `Handle`) or it just panics your app** if you don't have a `recovery` call in the goroutines calls stack.
 
 
-####Type Helpers
+#### Type Helpers
 
 The package includes performance optimised versions of `Try` function where the actual return types of the checked function are told to `err2` package by *type helper variables*. This removes the need to use dynamic type conversion. However, *when Go2 generics are out we can replace all of these with generics*.
 
