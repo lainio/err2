@@ -1,23 +1,30 @@
 # Original from github.com/pkg/errors
 
 PKGS := github.com/lainio/err2
+PKGS2 := github.com/lainio/err2/assert
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 GO := go
 
 check: test vet gofmt misspell unconvert staticcheck ineffassign unparam
 
 test:
-	$(GO) test $(PKGS)
+	$(GO) test $(PKGS) $(PKGS2)
 
 bench:
+	$(GO) test -bench=. $(PKGS) $(PKGS2)
+
+bench1:
 	$(GO) test -bench=. $(PKGS)
 
+bench2:
+	$(GO) test -bench=. $(PKGS2)
+
 vet: | test
-	$(GO) vet $(PKGS)
+	$(GO) vet $(PKGS) $(PKGS2)
 
 staticcheck:
 	$(GO) get honnef.co/go/tools/cmd/staticcheck
-	staticcheck -checks all $(PKGS)
+	staticcheck -checks all $(PKGS) $(PKGS2)
 
 misspell:
 	$(GO) get github.com/client9/misspell/cmd/misspell

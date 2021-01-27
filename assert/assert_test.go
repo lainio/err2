@@ -2,19 +2,17 @@ package assert_test
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/lainio/err2"
 	"github.com/lainio/err2/assert"
 )
 
-func ExampleTrue() {
-	// we want errors instead of immediate panics for examples
-	assert.ProductionMode = true
-
+func ExampleAsserter_True() {
 	sample := func() (err error) {
 		defer err2.Annotate("sample", &err)
 
-		assert.True(false, "assertion test")
+		assert.P.True(false, "assertion test")
 		return err
 	}
 	err := sample()
@@ -22,14 +20,23 @@ func ExampleTrue() {
 	// Output: sample: assertion test
 }
 
-func ExampleLen() {
-	// we want errors instead of immediate panics for examples
-	assert.ProductionMode = true
+func ExampleAsserter_Truef() {
+	sample := func() (err error) {
+		defer err2.Annotate("sample", &err)
 
+		assert.P.Truef(false, "assertion test %d", 2)
+		return err
+	}
+	err := sample()
+	fmt.Printf("%v", err)
+	// Output: sample: assertion test 2
+}
+
+func ExampleAsserter_Len() {
 	sample := func(b []byte) (err error) {
 		defer err2.Annotate("sample", &err)
 
-		assert.Len(b, 3)
+		assert.P.Len(b, 3)
 		return err
 	}
 	err := sample([]byte{1, 2})
@@ -37,14 +44,35 @@ func ExampleLen() {
 	// Output: sample: got 2, want 3
 }
 
-func ExampleEmpty() {
-	// we want errors instead of immediate panics for examples
-	assert.ProductionMode = true
-
+func ExampleAsserter_FastLen() {
 	sample := func(b []byte) (err error) {
 		defer err2.Annotate("sample", &err)
 
-		assert.Empty(b)
+		assert.P.FastLen(len(b), 3)
+		return err
+	}
+	err := sample([]byte{1, 2})
+	fmt.Printf("%v", err)
+	// Output: sample: got 2, want 3
+}
+
+func ExampleAsserter_Lenf() {
+	sample := func(b []byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.P.Lenf(b, 3, "actual len = %d", len(b))
+		return err
+	}
+	err := sample([]byte{1, 2})
+	fmt.Printf("%v", err)
+	// Output: sample: actual len = 2
+}
+
+func ExampleAsserter_Empty() {
+	sample := func(b []byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.P.Empty(b)
 		return err
 	}
 	err := sample([]byte{1, 2})
@@ -52,25 +80,7 @@ func ExampleEmpty() {
 	// Output: sample: got 2, want == 0
 }
 
-func ExampleNotNil() {
-	// we want errors instead of immediate panics for examples
-	assert.ProductionMode = true
-
-	sample := func(b []byte) (err error) {
-		defer err2.Annotate("sample", &err)
-
-		assert.NotNil(b)
-		return err
-	}
-	err := sample(nil)
-	fmt.Printf("%v", err)
-	// Output: sample: nil detected
-}
-
-func ExampleNoImplementation() {
-	// we want errors instead of immediate panics for examples
-	assert.ProductionMode = true
-
+func ExampleAsserter_NoImplementation() {
 	sample := func(m int) (err error) {
 		defer err2.Annotate("sample", &err)
 
@@ -78,11 +88,55 @@ func ExampleNoImplementation() {
 		case 1:
 			return nil
 		default:
-			assert.NoImplementation()
+			assert.P.NoImplementation()
 		}
 		return err
 	}
 	err := sample(0)
 	fmt.Printf("%v", err)
 	// Output: sample: not implemented
+}
+
+func ifPanicZero(i int) {
+	if i == 0 {
+		panic("i == 0")
+	}
+}
+
+func assertZero(i int) {
+	assert.D.True(i != 0)
+}
+
+func assertLen(b []byte) {
+	assert.D.Len(b, 2)
+}
+
+func assertFLen(b []byte) {
+	assert.D.FastLen(len(b), 2)
+}
+
+func BenchmarkAsserter_True(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		assertZero(4)
+	}
+}
+
+func BenchmarkAsserter_TrueIfVersion(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ifPanicZero(4)
+	}
+}
+
+func BenchmarkAsserter_Len(b *testing.B) {
+	d := []byte{1, 2}
+	for n := 0; n < b.N; n++ {
+		assertLen(d)
+	}
+}
+
+func BenchmarkAsserter_FLen(b *testing.B) {
+	d := []byte{1, 2}
+	for n := 0; n < b.N; n++ {
+		assertFLen(d)
+	}
 }

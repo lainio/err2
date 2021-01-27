@@ -4,34 +4,51 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"runtime/debug"
 )
 
-var ProductionMode = false
+type Asserter uint32
+
+const (
+	AsserterToError Asserter = 1 << iota
+	AsserterStackTrace
+)
+
+var (
+	P          = AsserterToError
+	D Asserter = 0
+)
 
 // NoImplementation always fails with no implementation
-func NoImplementation(a ...interface{}) {
-	reportAssertionFault("not implemented", a...)
+func (asserter Asserter) NoImplementation(a ...interface{}) {
+	asserter.reportAssertionFault("not implemented", a...)
 }
 
 // True asserts that term is true. If not it panics with the given formatting
-// string.
-func True(term bool, a ...interface{}) {
+// string. Note! This and Truef are the most performant of all the assertion
+// functions
+func (asserter Asserter) True(term bool, a ...interface{}) {
 	if !term {
-		reportAssertionFault("assertion fault", a...)
+		asserter.reportAssertionFault("assertion fault", a...)
 	}
 }
 
-// NotNil asserts that object isn't nil. If not it panics with the given
-// formatting string.
-func NotNil(obj interface{}, a ...interface{}) {
-	if obj != nil {
-		reportAssertionFault("nil detected", a...)
+// Truef asserts that term is true. If not it panics with the given formatting
+// string.
+func (asserter Asserter) Truef(term bool, format string, a ...interface{}) {
+	if !term {
+		if asserter.HasStackTrace() {
+			debug.PrintStack()
+		}
+		asserter.reportPanic(fmt.Sprintf(format, a...))
 	}
 }
 
-// Len asserts that length of the object is equal. If not it panics with the
-// given formatting string.
-func Len(obj interface{}, length int, a ...interface{}) {
+// Len asserts that length of the object is equal to given. If not it
+// panics/errors (current Asserter) with the given msg. Note! This is very slow
+// (before we have generics). If you need performance use FastLen. It's not so
+// convenient, though.
+func (asserter Asserter) Len(obj interface{}, length int, a ...interface{}) {
 	ok, l := getLen(obj)
 	if !ok {
 		panic("cannot get length")
@@ -39,13 +56,31 @@ func Len(obj interface{}, length int, a ...interface{}) {
 
 	if l != length {
 		defMsg := fmt.Sprintf("got %d, want %d", l, length)
-		reportAssertionFault(defMsg, a...)
+		asserter.reportAssertionFault(defMsg, a...)
 	}
 }
 
-// Empty asserts that length of the object is zero. If not it panics with the
+// FastLen asserts that length of the object is equal. If not it panics with the
 // given formatting string.
-func Empty(obj interface{}, msg ...interface{}) {
+func (asserter Asserter) FastLen(length, want int, a ...interface{}) {
+	if want != length {
+		defMsg := fmt.Sprintf("got %d, want %d", length, want)
+		asserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// Lenf asserts that length of the object is equal to given. If not it
+// panics/errors (current Asserter) with the given msg. Note! This is very slow
+// (before we have generics). If you need performance use FastLen. It's not so
+// convenient, though.
+func (asserter Asserter) Lenf(obj interface{}, length int, format string, a ...interface{}) {
+	args := combineArgs(format, a)
+	asserter.Len(obj, length, args...)
+}
+
+// Empty asserts that length of the object is zero. If not it panics with the
+// given formatting string. Note! This is slow.
+func (asserter Asserter) Empty(obj interface{}, msg ...interface{}) {
 	ok, l := getLen(obj)
 	if !ok {
 		panic("cannot get length")
@@ -53,13 +88,20 @@ func Empty(obj interface{}, msg ...interface{}) {
 
 	if l != 0 {
 		defMsg := fmt.Sprintf("got %d, want == 0", l)
-		reportAssertionFault(defMsg, msg...)
+		asserter.reportAssertionFault(defMsg, msg...)
 	}
 }
 
+// NotEmptyf asserts that length of the object greater than zero. If not it
+// panics with the given formatting string. Note! This is slow.
+func (asserter Asserter) NotEmptyf(obj interface{}, format string, msg ...interface{}) {
+	args := combineArgs(format, msg)
+	asserter.Empty(obj, args...)
+}
+
 // NotEmpty asserts that length of the object greater than zero. If not it
-// panics with the given formatting string.
-func NotEmpty(obj interface{}, msg ...interface{}) {
+// panics with the given formatting string. Note! This is slow.
+func (asserter Asserter) NotEmpty(obj interface{}, msg ...interface{}) {
 	ok, l := getLen(obj)
 	if !ok {
 		panic("cannot get length")
@@ -67,19 +109,22 @@ func NotEmpty(obj interface{}, msg ...interface{}) {
 
 	if l == 0 {
 		defMsg := fmt.Sprintf("got %d, want > 0", l)
-		reportAssertionFault(defMsg, msg...)
+		asserter.reportAssertionFault(defMsg, msg...)
 	}
 }
 
-func reportAssertionFault(defaultMsg string, a ...interface{}) {
+func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...interface{}) {
+	if asserter.HasStackTrace() {
+		debug.PrintStack()
+	}
 	if len(a) > 0 {
 		if format, ok := a[0].(string); ok {
-			reportPanic(fmt.Sprintf(format, a[1:]...))
+			asserter.reportPanic(fmt.Sprintf(format, a[1:]...))
 		} else {
-			reportPanic(fmt.Sprintln(a...))
+			asserter.reportPanic(fmt.Sprintln(a...))
 		}
 	} else {
-		reportPanic(defaultMsg)
+		asserter.reportPanic(defaultMsg)
 	}
 }
 
@@ -93,9 +138,24 @@ func getLen(x interface{}) (ok bool, length int) {
 	return true, v.Len()
 }
 
-func reportPanic(s string) {
-	if ProductionMode {
+func (asserter Asserter) reportPanic(s string) {
+	if asserter.HasToError() {
 		panic(errors.New(s))
 	}
 	panic(s)
+}
+
+func (asserter Asserter) HasToError() bool {
+	return asserter&AsserterToError != 0
+}
+
+func (asserter Asserter) HasStackTrace() bool {
+	return asserter&AsserterStackTrace != 0
+}
+
+func combineArgs(format string, a []interface{}) []interface{} {
+	args := make([]interface{}, 1, len(a)+1)
+	args[0] = format
+	args = append(args, a...)
+	return args
 }
