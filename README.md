@@ -63,7 +63,7 @@ The err2 package includes a CLI tool to generate these helpers for your own type
 
 ## Assertion (design by contract)
 
-The `assert` package has been since version 0.6. It offers design by contract -type precondition checkers, i.e. asserters.
+The `assert` package has been since version 0.6. The package is meant to be used for design by contract -type of development where you set preconditions for your functions. It's not meant to replace normal error checking but speed up incremental hacking cycle. That's the reason why default mode (`var D Asserter`) is to panic. By panicking developer get immediate and proper feedback which allows cleanup the code and APIs before actual production release.
 
 ```go
 func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData) []byte {
