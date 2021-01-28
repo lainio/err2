@@ -46,7 +46,7 @@ func (asserter Asserter) Truef(term bool, format string, a ...interface{}) {
 
 // Len asserts that length of the object is equal to given. If not it
 // panics/errors (current Asserter) with the given msg. Note! This is very slow
-// (before we have generics). If you need performance use FastLen. It's not so
+// (before we have generics). If you need performance use EqualInt. It's not so
 // convenient, though.
 func (asserter Asserter) Len(obj interface{}, length int, a ...interface{}) {
 	ok, l := getLen(obj)
@@ -60,18 +60,18 @@ func (asserter Asserter) Len(obj interface{}, length int, a ...interface{}) {
 	}
 }
 
-// FastLen asserts that length of the object is equal. If not it panics with the
-// given formatting string.
-func (asserter Asserter) FastLen(length, want int, a ...interface{}) {
-	if want != length {
-		defMsg := fmt.Sprintf("got %d, want %d", length, want)
+// EqualInt asserts that integers are equal. If not it panics/errors (current
+// Asserter) with the given msg.
+func (asserter Asserter) EqualInt(val, want int, a ...interface{}) {
+	if want != val {
+		defMsg := fmt.Sprintf("got %d, want %d", val, want)
 		asserter.reportAssertionFault(defMsg, a...)
 	}
 }
 
 // Lenf asserts that length of the object is equal to given. If not it
 // panics/errors (current Asserter) with the given msg. Note! This is very slow
-// (before we have generics). If you need performance use FastLen. It's not so
+// (before we have generics). If you need performance use EqualInt. It's not so
 // convenient, though.
 func (asserter Asserter) Lenf(obj interface{}, length int, format string, a ...interface{}) {
 	args := combineArgs(format, a)

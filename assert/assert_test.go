@@ -44,11 +44,11 @@ func ExampleAsserter_Len() {
 	// Output: sample: got 2, want 3
 }
 
-func ExampleAsserter_FastLen() {
+func ExampleAsserter_EqualInt() {
 	sample := func(b []byte) (err error) {
 		defer err2.Annotate("sample", &err)
 
-		assert.P.FastLen(len(b), 3)
+		assert.P.EqualInt(len(b), 3)
 		return err
 	}
 	err := sample([]byte{1, 2})
@@ -111,8 +111,8 @@ func assertLen(b []byte) {
 	assert.D.Len(b, 2)
 }
 
-func assertFLen(b []byte) {
-	assert.D.FastLen(len(b), 2)
+func assertEqualInt(b []byte) {
+	assert.D.EqualInt(len(b), 2)
 }
 
 func BenchmarkAsserter_True(b *testing.B) {
@@ -134,9 +134,9 @@ func BenchmarkAsserter_Len(b *testing.B) {
 	}
 }
 
-func BenchmarkAsserter_FLen(b *testing.B) {
+func BenchmarkAsserter_EqualInt(b *testing.B) {
 	d := []byte{1, 2}
 	for n := 0; n < b.N; n++ {
-		assertFLen(d)
+		assertEqualInt(d)
 	}
 }
