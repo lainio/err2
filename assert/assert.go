@@ -7,26 +7,36 @@ import (
 	"runtime/debug"
 )
 
+// Asserter is type for asserter object guided by its flags.
 type Asserter uint32
 
 const (
+	// AsserterToError is Asserter flag to guide asserter to use Go's error
+	// type for panics.
 	AsserterToError Asserter = 1 << iota
+
+	// AsserterStackTrace is Asserter flag to print call stack to stdout.
 	AsserterStackTrace
 )
 
 var (
+	// P is a production Asserter that types panic objects to errors which
+	// allows err2 handlers to catch them.
 	P          = AsserterToError
+
+	// D is a development Asserter that types panic objects to strings that
+	// doesn't by caught by err2 handlers.
 	D Asserter = 0
 )
 
-// NoImplementation always fails with no implementation
+// NoImplementation always fails with no implementation.
 func (asserter Asserter) NoImplementation(a ...interface{}) {
 	asserter.reportAssertionFault("not implemented", a...)
 }
 
 // True asserts that term is true. If not it panics with the given formatting
 // string. Note! This and Truef are the most performant of all the assertion
-// functions
+// functions.
 func (asserter Asserter) True(term bool, a ...interface{}) {
 	if !term {
 		asserter.reportAssertionFault("assertion fault", a...)
