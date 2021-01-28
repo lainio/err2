@@ -11,10 +11,11 @@ or
 
 The package offers a convenient way to set preconditions to code which allow us
 detect programming errors and API usage violations faster. Still allowing proper
-path to production-time error handling if needed. When used with the err2 package panics
-can be turned to normal Go's error values by using proper Asserter like P:
+path to production-time error handling if needed. When used with the err2
+package panics can be turned to normal Go's error values by using proper
+Asserter like P:
 
- assert.True(a > b)
+ assert.P.True(s != "", "sub command cannot be empty")
 
 Please see the code examples for more information.
 
