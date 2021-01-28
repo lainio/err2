@@ -22,7 +22,7 @@ const (
 var (
 	// P is a production Asserter that types panic objects to errors which
 	// allows err2 handlers to catch them.
-	P          = AsserterToError
+	P = AsserterToError
 
 	// D is a development Asserter that types panic objects to strings that
 	// doesn't by caught by err2 handlers.
