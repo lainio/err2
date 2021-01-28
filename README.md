@@ -120,7 +120,7 @@ Version history:
 - 0.3, `Returnf` added, not use own transport type anymore but just `error`
 - 0.4, Documentation update
 - 0.5, Go modules are in use now
-- 0.6, `assert` package added, and new type helpers (current)
+- 0.6.1, `assert` package added, and new type helpers (current)
 
 
 We will update both packages when Go2 generics are released. There is already a working version which uses Go generics. That has been shown that the switch will be prompt. We are also monitoring what will happen for the Go-native error handling and tune the library accordingly.
