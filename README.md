@@ -9,7 +9,7 @@ The package provides simple helper functions for _automatic_ error propagation.
 
 The current version of Go tends to produce too much error checking and too little error handling. This package helps us fix that.
 1. It helps to declare error handlers with `defer`.
-2. It helps to check and transport errors to the nearest (defer stack) error handler. 
+2. It helps to check and transport errors to the nearest (the defer-stack) error handler. 
 
 You can use both of them or just the other. However, if you use `err2` for error checks you must remember use Go's `recover()` by yourself, or your error isn't transformed to an `error`.
 
@@ -120,7 +120,7 @@ Version history:
 - 0.3, `Returnf` added, not use own transport type anymore but just `error`
 - 0.4, Documentation update
 - 0.5, Go modules are in use now
-- 0.6, `assert` package added (current)
+- 0.6, `assert` package added, and new type helpers (current)
 
 
 We will update both packages when Go2 generics are released. There is already a working version which uses Go generics. That has been shown that the switch will be prompt. We are also monitoring what will happen for the Go-native error handling and tune the library accordingly.
