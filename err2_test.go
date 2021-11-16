@@ -1,6 +1,7 @@
 package err2_test
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -157,6 +158,34 @@ func TestCatch_Error(t *testing.T) {
 	err2.Try(throw())
 
 	t.Fail() // If everything works we are newer here
+}
+
+func Example_ioEOF() {
+	copyStream := func(src string) (s string, err error) {
+		defer err2.Returnf(&err, "copy stream %s", src)
+
+		buf := bytes.NewBufferString(src)
+		tmp := make([]byte, 4)
+		var out bytes.Buffer
+		stop := false
+		for n, err := buf.Read(tmp); !stop; n, err = buf.Read(tmp) {
+			stop = err2.FilterCheck(io.EOF, err)
+			if n > 0 {
+				out.Write(tmp[:n])
+			} else {
+				stop = true
+			}
+		}
+
+		return out.String(), nil
+	}
+
+	str, err := copyStream("testing string")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+	// Output: testing string
 }
 
 func Example_copyFile() {

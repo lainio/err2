@@ -26,13 +26,30 @@ func Try(args ...interface{}) []interface{} {
 	return args
 }
 
-// Check performs the error check for the given argument. If the err is nil,
-// it does nothing. According the measurements, it's as fast as if err != nil
-// {return err} on happy path.
+// Check performs error check for the given argument. If the err is nil, it does
+// nothing. According the measurements, it's as fast as 
+//  if err != nil {
+//      return err
+//  }
+// on happy path.
 func Check(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// FilterCheck performs filtered error check for the given argument. It's same
+// as Check but before throwing an error it checks if error matches the filter.
+// The return value false tells that there are no errors and true that filter is
+// matched.
+func FilterCheck(filter, err error) bool {
+	if err != nil {
+		if err == filter {
+			return true
+		}
+		panic(err)
+	}
+	return false
 }
 
 // Checks the error status of the last argument. It panics with "wrong
