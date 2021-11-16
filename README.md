@@ -61,6 +61,20 @@ data := err2.Bytes.Try(ioutil.ReadAll(r))
 ```
 The err2 package includes a CLI tool to generate these helpers for your own types. Please see the Makefile for example.
 
+#### Filters for non-errors like io.EOF
+
+Cases when error values are used to transport some other information instead of
+real errors we have functions like `FilterTry` and even `TryEOF` for convenient.
+
+With these you can write code where error is translated to boolean value:
+```go
+	notExist := err2.FilterTry(plugin.ErrNotExist, r2.err)
+
+	// real errors are cought and the returned booleans tell if value
+	// dosen't exist
+```
+For more information see the examples of both functions.
+
 ## Assertion (design by contract)
 
 The `assert` package has been since version 0.6. The package is meant to be used for design by contract -type of development where you set preconditions for your functions. It's not meant to replace normal error checking but speed up incremental hacking cycle. That's the reason why default mode (`var D Asserter`) is to panic. By panicking developer get immediate and proper feedback which allows cleanup the code and APIs before actual production release.
@@ -121,6 +135,7 @@ Version history:
 - 0.4, Documentation update
 - 0.5, Go modules are in use now
 - 0.6.1, `assert` package added, and new type helpers (current)
-
+- 0.7.0 filter functions for the cases where errors aren't real errors like
+  io.EOF
 
 We will update both packages when Go2 generics are released. There is already a working version which uses Go generics. That has been shown that the switch will be prompt. We are also monitoring what will happen for the Go-native error handling and tune the library accordingly.
