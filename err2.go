@@ -3,6 +3,7 @@ package err2
 import (
 	"errors"
 	"fmt"
+	"io"
 	"runtime/debug"
 )
 
@@ -27,7 +28,7 @@ func Try(args ...interface{}) []interface{} {
 }
 
 // Check performs error check for the given argument. If the err is nil, it does
-// nothing. According the measurements, it's as fast as 
+// nothing. According the measurements, it's as fast as
 //  if err != nil {
 //      return err
 //  }
@@ -38,11 +39,11 @@ func Check(err error) {
 	}
 }
 
-// FilterCheck performs filtered error check for the given argument. It's same
+// FilterTry performs filtered error check for the given argument. It's same
 // as Check but before throwing an error it checks if error matches the filter.
 // The return value false tells that there are no errors and true that filter is
 // matched.
-func FilterCheck(filter, err error) bool {
+func FilterTry(filter, err error) bool {
 	if err != nil {
 		if err == filter {
 			return true
@@ -50,6 +51,13 @@ func FilterCheck(filter, err error) bool {
 		panic(err)
 	}
 	return false
+}
+
+// TryEOF checks errors but filters io.EOF from the exception handling and
+// returns boolean which tells if io.EOF is present. See more info from
+// FilterCheck.
+func TryEOF(err error) bool {
+	return FilterTry(io.EOF, err)
 }
 
 // Checks the error status of the last argument. It panics with "wrong

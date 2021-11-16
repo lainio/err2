@@ -160,21 +160,37 @@ func TestCatch_Error(t *testing.T) {
 	t.Fail() // If everything works we are newer here
 }
 
-func Example_ioEOF() {
+func ExampleFilterTry() {
 	copyStream := func(src string) (s string, err error) {
 		defer err2.Returnf(&err, "copy stream %s", src)
 
-		buf := bytes.NewBufferString(src)
+		in := bytes.NewBufferString(src)
 		tmp := make([]byte, 4)
 		var out bytes.Buffer
-		stop := false
-		for n, err := buf.Read(tmp); !stop; n, err = buf.Read(tmp) {
-			stop = err2.FilterCheck(io.EOF, err)
-			if n > 0 {
-				out.Write(tmp[:n])
-			} else {
-				stop = true
-			}
+		for n, err := in.Read(tmp); !err2.FilterTry(io.EOF, err); n, err = in.Read(tmp) {
+			out.Write(tmp[:n])
+		}
+
+		return out.String(), nil
+	}
+
+	str, err := copyStream("testing string")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+	// Output: testing string
+}
+
+func ExampleTryEOF() {
+	copyStream := func(src string) (s string, err error) {
+		defer err2.Returnf(&err, "copy stream %s", src)
+
+		in := bytes.NewBufferString(src)
+		tmp := make([]byte, 4)
+		var out bytes.Buffer
+		for n, err := in.Read(tmp); !err2.TryEOF(err); n, err = in.Read(tmp) {
+			out.Write(tmp[:n])
 		}
 
 		return out.String(), nil
