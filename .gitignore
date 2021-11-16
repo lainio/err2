@@ -1,5 +1,6 @@
 # IDEs, etc.
 .idea
+Session.vim
 
 # Binaries for programs and plugins
 *.exe
