@@ -1,6 +1,6 @@
 module github.com/lainio/err2
 
-go 1.14
+go 1.18
 
 require (
 	github.com/client9/misspell v0.3.4 // indirect

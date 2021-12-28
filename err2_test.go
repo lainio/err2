@@ -15,6 +15,8 @@ func throw() (string, error) {
 }
 
 func twoStrNoThrow() (string, string, error) { return "test", "test", nil }
+func intStrNoThrow() (int, string, error) { return 1, "test", nil }
+func boolIntStrNoThrow() (bool, int, string, error) { return true, 1, "test", nil }
 
 func noThrow() (string, error) { return "test", nil }
 
@@ -51,8 +53,10 @@ func noErr() error {
 }
 
 func TestTry_noError(t *testing.T) {
-	err2.Try(noThrow())
-	err2.StrStr.Try(twoStrNoThrow())
+	err2.Try1(noThrow())
+	err2.Try2(twoStrNoThrow())
+	err2.Try2(intStrNoThrow())
+	err2.Try3(boolIntStrNoThrow())
 }
 
 func TestDefault_Error(t *testing.T) {
@@ -306,7 +310,7 @@ func BenchmarkTry_ErrVar(b *testing.B) {
 
 func BenchmarkTry_StringHelper(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		_ = err2.String.Try(noThrow())
+		_ = err2.Try1(noThrow())
 	}
 }
 
