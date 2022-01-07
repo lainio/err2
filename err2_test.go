@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
+	"github.com/lainio/err2/try"
 )
 
 func throw() (string, error) {
@@ -57,6 +58,11 @@ func TestTry_noError(t *testing.T) {
 	err2.Try2(twoStrNoThrow())
 	err2.Try2(intStrNoThrow())
 	err2.Try3(boolIntStrNoThrow())
+
+	try.To1(noThrow())
+	try.To2(twoStrNoThrow())
+	try.To2(intStrNoThrow())
+	try.To3(boolIntStrNoThrow())
 }
 
 func TestDefault_Error(t *testing.T) {
@@ -310,7 +316,13 @@ func BenchmarkTry_ErrVar(b *testing.B) {
 
 func BenchmarkTry_StringHelper(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		_ = err2.Try1(noThrow())
+		_ = try.To1(noThrow())
+	}
+}
+
+func BenchmarkTry_StrStrHelper(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_, _ = try.To2(twoStrNoThrow())
 	}
 }
 
