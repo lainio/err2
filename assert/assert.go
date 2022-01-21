@@ -30,14 +30,14 @@ var (
 )
 
 // NoImplementation always fails with no implementation.
-func (asserter Asserter) NoImplementation(a ...interface{}) {
+func (asserter Asserter) NoImplementation(a ...any) {
 	asserter.reportAssertionFault("not implemented", a...)
 }
 
 // True asserts that term is true. If not it panics with the given formatting
 // string. Note! This and Truef are the most performant of all the assertion
 // functions.
-func (asserter Asserter) True(term bool, a ...interface{}) {
+func (asserter Asserter) True(term bool, a ...any) {
 	if !term {
 		asserter.reportAssertionFault("assertion fault", a...)
 	}
@@ -45,7 +45,7 @@ func (asserter Asserter) True(term bool, a ...interface{}) {
 
 // Truef asserts that term is true. If not it panics with the given formatting
 // string.
-func (asserter Asserter) Truef(term bool, format string, a ...interface{}) {
+func (asserter Asserter) Truef(term bool, format string, a ...any) {
 	if !term {
 		if asserter.HasStackTrace() {
 			debug.PrintStack()
@@ -58,7 +58,7 @@ func (asserter Asserter) Truef(term bool, format string, a ...interface{}) {
 // panics/errors (current Asserter) with the given msg. Note! This is very slow
 // (before we have generics). If you need performance use EqualInt. It's not so
 // convenient, though.
-func (asserter Asserter) Len(obj interface{}, length int, a ...interface{}) {
+func (asserter Asserter) Len(obj any, length int, a ...any) {
 	ok, l := getLen(obj)
 	if !ok {
 		panic("cannot get length")
@@ -72,7 +72,7 @@ func (asserter Asserter) Len(obj interface{}, length int, a ...interface{}) {
 
 // EqualInt asserts that integers are equal. If not it panics/errors (current
 // Asserter) with the given msg.
-func (asserter Asserter) EqualInt(val, want int, a ...interface{}) {
+func (asserter Asserter) EqualInt(val, want int, a ...any) {
 	if want != val {
 		defMsg := fmt.Sprintf("got %d, want %d", val, want)
 		asserter.reportAssertionFault(defMsg, a...)
@@ -83,14 +83,14 @@ func (asserter Asserter) EqualInt(val, want int, a ...interface{}) {
 // panics/errors (current Asserter) with the given msg. Note! This is very slow
 // (before we have generics). If you need performance use EqualInt. It's not so
 // convenient, though.
-func (asserter Asserter) Lenf(obj interface{}, length int, format string, a ...interface{}) {
+func (asserter Asserter) Lenf(obj any, length int, format string, a ...any) {
 	args := combineArgs(format, a)
 	asserter.Len(obj, length, args...)
 }
 
 // Empty asserts that length of the object is zero. If not it panics with the
 // given formatting string. Note! This is slow.
-func (asserter Asserter) Empty(obj interface{}, msg ...interface{}) {
+func (asserter Asserter) Empty(obj any, msg ...any) {
 	ok, l := getLen(obj)
 	if !ok {
 		panic("cannot get length")
@@ -104,14 +104,14 @@ func (asserter Asserter) Empty(obj interface{}, msg ...interface{}) {
 
 // NotEmptyf asserts that length of the object greater than zero. If not it
 // panics with the given formatting string. Note! This is slow.
-func (asserter Asserter) NotEmptyf(obj interface{}, format string, msg ...interface{}) {
+func (asserter Asserter) NotEmptyf(obj any, format string, msg ...any) {
 	args := combineArgs(format, msg)
 	asserter.Empty(obj, args...)
 }
 
 // NotEmpty asserts that length of the object greater than zero. If not it
 // panics with the given formatting string. Note! This is slow.
-func (asserter Asserter) NotEmpty(obj interface{}, msg ...interface{}) {
+func (asserter Asserter) NotEmpty(obj any, msg ...any) {
 	ok, l := getLen(obj)
 	if !ok {
 		panic("cannot get length")
@@ -123,7 +123,7 @@ func (asserter Asserter) NotEmpty(obj interface{}, msg ...interface{}) {
 	}
 }
 
-func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...interface{}) {
+func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 	if asserter.HasStackTrace() {
 		debug.PrintStack()
 	}
@@ -138,7 +138,7 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...interface{
 	}
 }
 
-func getLen(x interface{}) (ok bool, length int) {
+func getLen(x any) (ok bool, length int) {
 	v := reflect.ValueOf(x)
 	defer func() {
 		if e := recover(); e != nil {
@@ -163,8 +163,8 @@ func (asserter Asserter) HasStackTrace() bool {
 	return asserter&AsserterStackTrace != 0
 }
 
-func combineArgs(format string, a []interface{}) []interface{} {
-	args := make([]interface{}, 1, len(a)+1)
+func combineArgs(format string, a []any) []any {
+	args := make([]any, 1, len(a)+1)
 	args[0] = format
 	args = append(args, a...)
 	return args

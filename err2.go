@@ -15,14 +15,14 @@ var Empty _empty
 
 // Try is a helper method to call func() (string, error) functions with it and
 // be as fast as Check(err).
-func (s _empty) Try(_ interface{}, err error) {
+func (s _empty) Try(_ any, err error) {
 	Check(err)
 }
 
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
 // returns slice of interfaces. It has quite big performance penalty when
 // compared to Check function.
-func Try(args ...interface{}) []interface{} {
+func Try(args ...any) []any {
 	check(args)
 	return args
 }
@@ -63,7 +63,7 @@ func TryEOF(err error) bool {
 // Checks the error status of the last argument. It panics with "wrong
 // signature" if the last calling parameter is not error. In case of error it
 // delivers it by panicking.
-func check(args []interface{}) {
+func check(args []any) {
 	argCount := len(args)
 	last := argCount - 1
 	if args[last] != nil {
@@ -106,7 +106,7 @@ func Handle(err *error, f func()) {
 
 // Returnf wraps an error. It's similar to fmt.Errorf, but it's called only if
 // error != nil.
-func Returnf(err *error, format string, args ...interface{}) {
+func Returnf(err *error, format string, args ...any) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
@@ -140,7 +140,7 @@ func Catch(f func(err error)) {
 
 // CatchAll is a helper function to catch and write handlers for all errors and
 // all panics thrown in the current go routine.
-func CatchAll(errorHandler func(err error), panicHandler func(v interface{})) {
+func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
 

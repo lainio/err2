@@ -95,7 +95,7 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 }
 
 func panickingCatchAll() {
-	defer err2.CatchAll(func(err error) {}, func(v interface{}) {})
+	defer err2.CatchAll(func(err error) {}, func(v any) {})
 
 	err2.Try(wrongSignature())
 }
