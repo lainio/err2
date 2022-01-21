@@ -54,11 +54,6 @@ func noErr() error {
 }
 
 func TestTry_noError(t *testing.T) {
-	err2.Try1(noThrow())
-	err2.Try2(twoStrNoThrow())
-	err2.Try2(intStrNoThrow())
-	err2.Try3(boolIntStrNoThrow())
-
 	try.To1(noThrow())
 	try.To2(twoStrNoThrow())
 	try.To2(intStrNoThrow())
