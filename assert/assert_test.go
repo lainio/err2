@@ -56,6 +56,82 @@ func ExampleAsserter_EqualInt() {
 	// Output: sample: got 2, want 3
 }
 
+func ExampleNotNil() {
+	sample := func(b *byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.NotNil(b)
+		return err
+	}
+	var b *byte
+	err := sample(b)
+	fmt.Printf("%v", err)
+	// Output: sample: pointer is nil
+}
+
+func ExampleMNotNil() {
+	sample := func(b map[string]byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.MNotNil(b)
+		return err
+	}
+	var b map[string]byte
+	err := sample(b)
+	fmt.Printf("%v", err)
+	// Output: sample: map is nil
+}
+
+func ExampleCNotNil() {
+	sample := func(c chan byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.CNotNil(c)
+		return err
+	}
+	var c chan byte
+	err := sample(c)
+	fmt.Printf("%v", err)
+	// Output: sample: channel is nil
+}
+
+func ExampleSNotNil() {
+	sample := func(b []byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.SNotNil(b)
+		return err
+	}
+	var b []byte
+	err := sample(b)
+	fmt.Printf("%v", err)
+	// Output: sample: slice is nil
+}
+
+func ExampleEqual() {
+	sample := func(b []byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.Equal(len(b), 3)
+		return err
+	}
+	err := sample([]byte{1, 2})
+	fmt.Printf("%v", err)
+	// Output: sample: got 2, want 3
+}
+
+func ExampleLen() {
+	sample := func(b []byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.SLen(b, 3)
+		return err
+	}
+	err := sample([]byte{1, 2})
+	fmt.Printf("%v", err)
+	// Output: sample: got 2, want 3
+}
+
 func ExampleAsserter_Lenf() {
 	sample := func(b []byte) (err error) {
 		defer err2.Annotate("sample", &err)
@@ -103,21 +179,58 @@ func ifPanicZero(i int) {
 	}
 }
 
+func assertThat(term bool) {
+	assert.That(term)
+}
+
 func assertZero(i int) {
 	assert.D.True(i != 0)
+}
+
+func assertZeroGen(i int) {
+	assert.Equal(i, 0)
 }
 
 func assertLen(b []byte) {
 	assert.D.Len(b, 2)
 }
 
+func assertLenf(b []byte, l int) {
+	assert.D.Lenf(b, l, "")
+}
+
+func assertSLen(b []byte, l int) {
+	assert.SLen(b, l)
+}
+
+func assertMLen(b map[byte]byte, l int) {
+	assert.MLen(b, l)
+}
+
 func assertEqualInt(b []byte) {
 	assert.D.EqualInt(len(b), 2)
+}
+
+func assertEqualInt2(b int) {
+	assert.Equal(b, 2)
+}
+
+func BenchmarkThat(b *testing.B) {
+	const four = 4
+	for n := 0; n < b.N; n++ {
+		assertThat(2+2 == four)
+	}
 }
 
 func BenchmarkAsserter_True(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		assertZero(4)
+	}
+}
+
+func BenchmarkEqual(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		assertZeroGen(0)
 	}
 }
 
@@ -134,9 +247,37 @@ func BenchmarkAsserter_Len(b *testing.B) {
 	}
 }
 
+func BenchmarkAsserter_Lenf(b *testing.B) {
+	d := []byte{1, 2}
+	for n := 0; n < b.N; n++ {
+		assertLenf(d, 2)
+	}
+}
+
+func BenchmarkMLen(b *testing.B) {
+	d := map[byte]byte{1: 1, 2: 2}
+	for n := 0; n < b.N; n++ {
+		assertMLen(d, 2)
+	}
+}
+
+func BenchmarkSLen(b *testing.B) {
+	d := []byte{1, 2}
+	for n := 0; n < b.N; n++ {
+		assertSLen(d, 2)
+	}
+}
+
 func BenchmarkAsserter_EqualInt(b *testing.B) {
 	d := []byte{1, 2}
 	for n := 0; n < b.N; n++ {
 		assertEqualInt(d)
+	}
+}
+
+func BenchmarkEqualInt(b *testing.B) {
+	const d = 2
+	for n := 0; n < b.N; n++ {
+		assertEqualInt2(d)
 	}
 }
