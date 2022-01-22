@@ -15,8 +15,8 @@ func throw() (string, error) {
 	return "", fmt.Errorf("this is an ERROR")
 }
 
-func twoStrNoThrow() (string, string, error) { return "test", "test", nil }
-func intStrNoThrow() (int, string, error) { return 1, "test", nil }
+func twoStrNoThrow() (string, string, error)        { return "test", "test", nil }
+func intStrNoThrow() (int, string, error)           { return 1, "test", nil }
 func boolIntStrNoThrow() (bool, int, string, error) { return true, 1, "test", nil }
 
 func noThrow() (string, error) { return "test", nil }
@@ -213,16 +213,18 @@ func Example_copyFile() {
 	copyFile := func(src, dst string) (err error) {
 		defer err2.Returnf(&err, "copy %s %s", src, dst)
 
-		// These helpers are as fast as Check() calls
-		r := err2.File.Try(os.Open(src))
+		// These try package helpers are as fast as Check() calls which as
+		// fast as `if err != nil block`
+
+		r := try.To1(os.Open(src))
 		defer r.Close()
 
-		w := err2.File.Try(os.Create(dst))
+		w := try.To1(os.Create(dst))
 		defer err2.Handle(&err, func() {
 			os.Remove(dst)
 		})
 		defer w.Close()
-		err2.Empty.Try(io.Copy(w, r))
+		try.To1(io.Copy(w, r))
 		return nil
 	}
 
@@ -309,13 +311,13 @@ func BenchmarkTry_ErrVar(b *testing.B) {
 	}
 }
 
-func BenchmarkTry_StringHelper(b *testing.B) {
+func BenchmarkTry_StringGenerics(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = try.To1(noThrow())
 	}
 }
 
-func BenchmarkTry_StrStrHelper(b *testing.B) {
+func BenchmarkTry_StrStrGenerics(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, _ = try.To2(twoStrNoThrow())
 	}
