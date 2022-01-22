@@ -56,16 +56,3 @@ errcheck:
 gofmt:
 	@echo Checking code is gofmted
 	@test -z "$(shell gofmt -s -l -d -e $(SRCDIRS) | tee /dev/stderr)"
-
-gen:
-	go run cmd/main.go -name=Int -type=int > int.go
-	go run cmd/main.go -name=String -type=string > string.go
-	go run cmd/main.go -name=StrStr -type=string -type2=string
-	go run cmd/main.go -name=File -type=*os.File > file.go
-	go run cmd/main.go -name=Bytes -type=[]byte > bytes.go
-	go run cmd/main.go -name=Byte -type=byte > byte.go
-	go run cmd/main.go -name=Strings -type=[]string > strings.go
-	go run cmd/main.go -name=Ints -type=[]int > ints.go
-	go run cmd/main.go -name=Bool -type=bool > bool.go
-	go run cmd/main.go -name=Bools -type=[]bool > bools.go
-	goimports -l -w .
