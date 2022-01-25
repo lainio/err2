@@ -21,8 +21,7 @@ var (
 )
 
 // That asserts that term is true. If not it panics with the given formatting
-// string. Note! This and Truef are the most performant of all the assertion
-// functions.
+// string. Note! That is the most performant of all the assertion functions.
 func That(term bool, a ...any) {
 	if !term {
 		DefaultAsserter.reportAssertionFault("assertion fault", a...)
