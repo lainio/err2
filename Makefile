@@ -5,7 +5,7 @@ PKGS2 := github.com/lainio/err2/assert
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
 # GO := go
-GO := go1.18beta1
+GO := go1.18beta2
 
 check: test vet gofmt misspell unconvert staticcheck ineffassign unparam
 
