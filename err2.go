@@ -115,9 +115,9 @@ func Returnf(err *error, format string, args ...any) {
 		if !ok {
 			panic(r) // Not ours, carry on panicking
 		}
-		*err = fmt.Errorf(format+": %v", append(args, e)...)
+		*err = fmt.Errorf(format+": %w", append(args, e)...)
 	} else if *err != nil { // if other handlers call recovery() we still..
-		*err = fmt.Errorf(format+": %v", append(args, *err)...)
+		*err = fmt.Errorf(format+": %w", append(args, *err)...)
 	}
 }
 
