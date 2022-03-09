@@ -47,3 +47,6 @@ func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {
 	To(err)
 	return v1, v2, v3
 }
+
+// TODO: add ToIsX() & ToAsX() funcs to support errors.Is & errors.As IFF we
+// will support wrapping at all.
