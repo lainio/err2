@@ -45,7 +45,7 @@ func Check(err error) {
 // matched.
 func FilterTry(filter, err error) bool {
 	if err != nil {
-		if err == filter {
+		if errors.Is(filter, err) {
 			return true
 		}
 		panic(err)
@@ -201,10 +201,10 @@ func Annotate(prefix string, err *error) {
 			panic(r) // Not ours, carry on panicking
 		}
 		*err = e
-		format := prefix + ": " + e.Error()
-		*err = errors.New(format)
+		format := prefix + ": %w" 
+		*err = fmt.Errorf(format, e)
 	} else if *err != nil { // if other handlers call recovery() we still..
-		format := prefix + ": " + (*err).Error()
-		*err = errors.New(format)
+		format := prefix + ": %w"
+		*err = fmt.Errorf(format, (*err))
 	}
 }
