@@ -7,34 +7,53 @@ The package provides simple helper functions for _automatic_ error propagation.
 
 ## Error Propagation
 
-The current version of Go tends to produce too much error checking and too little error handling. This package helps us fix that.
-1. It helps to declare error handlers with `defer`.
-2. It helps to check and transport errors to the nearest (the defer-stack) error handler. 
+The current version of Go tends to produce too much error checking and too
+little error handling. This package helps us fix that.
 
-You can use both of them or just the other. However, if you use `err2` for error checks you must remember use Go's `recover()` by yourself, or your error isn't transformed to an `error`.
+1. It helps to declare error handlers with `defer`.
+2. It helps to check and transport errors to the nearest (the defer-stack) error
+   handler. 
+
+You can use both of them or just the other. However, if you use `err2` for error
+checks you must remember use Go's `recover()` by yourself, or your error isn't
+transformed to an `error`.
 
 ## Error handling
 
-Package `err2` relies on Go's declarative programming structure `defer`. The `err2` helps to set deferred functions (error handlers) which are only called if `err != nil`.
+Package `err2` relies on Go's declarative programming structure `defer`. The
+`err2` helps to set deferred functions (error handlers) which are only called if
+`err != nil`.
 
-In every function which uses err2 for error-checking should have at least one error handler. If there are no error handlers and error occurs the current function panics. However, if function above in the call stack has `err2` error handler it will catch the error. The panicking for the errors at the start of the development is far better than not checking errors at all.
+In every function which uses err2 for error-checking should have at least one
+error handler. If there are no error handlers and error occurs the current
+function panics. However, if function above in the call stack has `err2` error
+handler it will catch the error. The panicking for the errors at the start of
+the development is far better than not checking errors at all.
 
 This is the simplest `err2` error handler
 ```go
 defer err2.Return(&err)
 ```
-which is the helper handler for cases that don't need to annotate the error. If you need to annotate the error you can use either `Annotate` or `Returnf`.
+which is the helper handler for cases that don't need to annotate the error. If
+you need to annotate the error you can use either `Annotate` or `Returnf`.
 
 #### Error Handler
-The `err2.Handle` is a helper function to add actual error handlers which are called only if an error has occurred. In most real-world cases, we have multiple error checks and only one or just a few error handlers. However, you can have as many error handlers per function as you need.
 
-[Read the package documentation for more information](https://pkg.go.dev/github.com/lainio/err2).
+The `err2.Handle` is a helper function to add actual error handlers which are
+called only if an error has occurred. In most real-world cases, we have multiple
+error checks and only one or just a few error handlers. However, you can have as
+many error handlers per function as you need.
+
+[Read the package documentation for more
+information](https://pkg.go.dev/github.com/lainio/err2).
 
 ## Error checks
 
-The `err2` provides convenient helpers to check the errors.
+The `err2` provides convenient helpers to check the errors. Since the Go 1.18 we
+use generics to solve fast and convenient error checks.
 
 For example, instead of
+
 ```go
 b, err := ioutil.ReadAll(r)
 if err != nil {
@@ -44,27 +63,26 @@ if err != nil {
 ```
 we can call
 ```go
-b := err2.Bytes.Try(ioutil.ReadAll(r))
+b := try.To1(ioutil.ReadAll(r))
 ...
 ```
 
-but not without an error handler (`Return`, `Annotate`, `Handle`) or it just panics your app if you don't have a `recovery` call in the goroutines calls stack.
+but not without an error handler (`Return`, `Annotate`, `Handle`) or it just
+panics your app if you don't have a `recovery` call in the goroutines calls
+stack. However, you can put your error handlers where ever in your call stacks.
+That can be handy in the internal packages.
 
 
 #### Type Helpers
 
-The package includes performance optimised versions of `Try` function where the actual return types of the checked function are told to `err2` package by *type helper variables*. This removes the need to use dynamic type conversion. However, *when Go2 generics are out we can replace all of these with generics*.
-
-The sample call with type helper variable
-```go
-data := err2.Bytes.Try(ioutil.ReadAll(r))
-```
-The err2 package includes a CLI tool to generate these helpers for your own types. Please see the Makefile for example.
+These are now obsolete:
+	*when Go2 generics are out we can replace all of these with generics*.
 
 #### Filters for non-errors like io.EOF
 
-Cases when error values are used to transport some other information instead of
-real errors we have functions like `FilterTry` and even `TryEOF` for convenient.
+When error values are used to transport some other information instead of
+actual errors we have functions like `FilterTry` and even `TryEOF` for
+convenience.
 
 With these you can write code where error is translated to boolean value:
 ```go
@@ -77,7 +95,12 @@ For more information see the examples of both functions.
 
 ## Assertion (design by contract)
 
-The `assert` package has been since version 0.6. The package is meant to be used for design by contract -type of development where you set preconditions for your functions. It's not meant to replace normal error checking but speed up incremental hacking cycle. That's the reason why default mode (`var D Asserter`) is to panic. By panicking developer get immediate and proper feedback which allows cleanup the code and APIs before actual production release.
+The `assert` package has been since version 0.6. The package is meant to be used
+for design by contract -type of development where you set preconditions for your
+functions. It's not meant to replace normal error checking but speed up
+incremental hacking cycle. That's the reason why default mode (`var D Asserter`)
+is to panic. By panicking developer get immediate and proper feedback which
+allows cleanup the code and APIs before actual production release.
 
 ```go
 func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData) []byte {
@@ -137,5 +160,6 @@ Version history:
 - 0.6.1, `assert` package added, and new type helpers (current)
 - 0.7.0 filter functions for the cases where errors aren't real errors like
   io.EOF
+- 0.8.0 try.To() function with the help of the generics
 
 We will update both packages when Go2 generics are released. There is already a working version which uses Go generics. That has been shown that the switch will be prompt. We are also monitoring what will happen for the Go-native error handling and tune the library accordingly.
