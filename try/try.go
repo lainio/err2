@@ -17,6 +17,7 @@ package try
 
 import (
 	"errors"
+	"io"
 )
 
 // To is a helper function to call functions which returns (error)
@@ -64,6 +65,31 @@ func Is(filter, err error) bool {
 		panic(err)
 	}
 	return false
+}
+
+// Is1 performs filtered error check for the given argument. It's same
+// as To but before throwing an error it checks if error matches the filter.
+// The return value false tells that there are no errors and true that filter is
+// matched.
+func IsEOF1[T any](v T, err error) (bool, T) {
+	isFilter := Is(io.EOF, err)
+	return isFilter, v
+}
+
+// Is2 performs filtered error check for the given argument. It's same
+// as To but before throwing an error it checks if error matches the filter.
+// The return value false tells that there are no errors and true that filter is
+// matched.
+func IsEOF2[T, U any](v1 T, v2 U, err error) (bool, T, U) {
+	isFilter := Is(io.EOF, err)
+	return isFilter, v1, v2
+}
+
+// IsEOF checks errors but filters io.EOF from the exception handling and
+// returns boolean which tells if io.EOF is present. See more info from
+// FilterCheck.
+func IsEOF(err error) bool {
+	return Is(io.EOF, err)
 }
 
 // TODO: add ToIsX() & ToAsX() funcs to support errors.Is & errors.As IFF we
