@@ -239,3 +239,17 @@ func Annotate(prefix string, err *error) {
 		*err = fmt.Errorf(format, (*err))
 	}
 }
+
+type _empty struct{}
+
+// Empty is deprecated. Use try.To functions instead.
+// Empty is a helper variable to demonstrate how we could build 'type wrappers'
+// to make Try function as fast as Check.
+var Empty _empty
+
+// Try is deprecated. Use try.To functions instead.
+// Try is a helper method to call func() (string, error) functions with it and
+// be as fast as Check(err).
+func (s _empty) Try(_ any, err error) {
+	Check(err)
+}
