@@ -104,23 +104,6 @@ func Handle(err *error, f func()) {
 	}
 }
 
-// Returnf wraps an error. It's similar to fmt.Errorf, but it's called only if
-// error != nil.
-func Returnf(err *error, format string, args ...any) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these two to use same function.
-
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if !ok {
-			panic(r) // Not ours, carry on panicking
-		}
-		*err = fmt.Errorf(format+": %w", append(args, e)...)
-	} else if *err != nil { // if other handlers call recovery() we still..
-		*err = fmt.Errorf(format+": %w", append(args, *err)...)
-	}
-}
-
 // Catch is a convenient helper to those functions that doesn't return errors.
 // Go's main function is a good example. Note! There can be only one deferred
 // Catch function per non error returning function. See Handle for more
@@ -188,10 +171,27 @@ func Return(err *error) {
 	}
 }
 
-// Annotate is for annotating an error. It's similar to Returnf but it takes only
+// Returnw wraps an error. It's similar to fmt.Errorf, but it's called only if
+// error != nil. Note! If you don't want to wrap the error use Returnf instead.
+func Returnw(err *error, format string, args ...any) {
+	// This and Handle are similar but we need to call recover here because how
+	// it works with defer. We cannot refactor these two to use same function.
+
+	if r := recover(); r != nil {
+		e, ok := r.(error)
+		if !ok {
+			panic(r) // Not ours, carry on panicking
+		}
+		*err = fmt.Errorf(format+": %w", append(args, e)...)
+	} else if *err != nil { // if other handlers call recovery() we still..
+		*err = fmt.Errorf(format+": %w", append(args, *err)...)
+	}
+}
+
+// Annotatew is for annotating an error. It's similar to Returnf but it takes only
 // two arguments: a prefix string and a pointer to error. It adds ": " between
 // the prefix and the error text automatically.
-func Annotate(prefix string, err *error) {
+func Annotatew(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
@@ -205,6 +205,45 @@ func Annotate(prefix string, err *error) {
 		*err = fmt.Errorf(format, e)
 	} else if *err != nil { // if other handlers call recovery() we still..
 		format := prefix + ": %w"
+		*err = fmt.Errorf(format, (*err))
+	}
+}
+
+// Returnf builds an error. It's similar to fmt.Errorf, but it's called only if
+// error != nil. Note! It doesn't use %w to wrap the error. Use Returnw for
+// that.
+func Returnf(err *error, format string, args ...any) {
+	// This and Handle are similar but we need to call recover here because how
+	// it works with defer. We cannot refactor these two to use same function.
+
+	if r := recover(); r != nil {
+		e, ok := r.(error)
+		if !ok {
+			panic(r) // Not ours, carry on panicking
+		}
+		*err = fmt.Errorf(format+": %v", append(args, e)...)
+	} else if *err != nil { // if other handlers call recovery() we still..
+		*err = fmt.Errorf(format+": %v", append(args, *err)...)
+	}
+}
+
+// Annotate is for annotating an error. It's similar to Returnf but it takes only
+// two arguments: a prefix string and a pointer to error. It adds ": " between
+// the prefix and the error text automatically.
+func Annotate(prefix string, err *error) {
+	// This and Handle are similar but we need to call recover here because how
+	// it works with defer. We cannot refactor these two to use same function.
+
+	if r := recover(); r != nil {
+		e, ok := r.(error)
+		if !ok {
+			panic(r) // Not ours, carry on panicking
+		}
+		*err = e
+		format := prefix + ": %v" 
+		*err = fmt.Errorf(format, e)
+	} else if *err != nil { // if other handlers call recovery() we still..
+		format := prefix + ": %v"
 		*err = fmt.Errorf(format, (*err))
 	}
 }
