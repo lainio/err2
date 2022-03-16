@@ -50,7 +50,7 @@ information](https://pkg.go.dev/github.com/lainio/err2).
 ## Error checks
 
 The `err2` provides convenient helpers to check the errors. Since the Go 1.18 we
-use generics to solve fast and convenient error checks.
+use generics to solve fast and convenient error checking.
 
 For example, instead of
 
@@ -69,8 +69,9 @@ b := try.To1(ioutil.ReadAll(r))
 
 but not without an error handler (`Return`, `Annotate`, `Handle`) or it just
 panics your app if you don't have a `recovery` call in the goroutines calls
-stack. However, you can put your error handlers where ever in your call stacks.
-That can be handy in the internal packages.
+stack. However, you can put your error handlers where ever you want in your call
+stack. That can be handy in the internal packages and certain types of
+algorithms.
 
 
 #### Type Helpers
@@ -110,11 +111,18 @@ func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData
 	...
 ```
 
-Previous code block shows the use of the asserter (`D`) for developing. If any of the assertion fails, code panics. These type of assertions can be used without help of the `err2` package.
+Previous code block shows the use of the asserter (`D`) for developing. If any
+of the assertion fails, code panics. These type of assertions can be used
+without help of the `err2` package.
 
-During the software development lifecycle it isn't all the time crystal clear what are preconditions for a programmer and what should be translated to end-user errors as well. That's why `assert` package uses concept called `Asserter` to have different type of asserter for different phases of a software project.
+During the software development lifecycle it isn't all the time crystal clear
+what are preconditions for a programmer and what should be translated to
+end-user errors as well. That's why `assert` package uses concept called
+`Asserter` to have different type of asserter for different phases of a software
+project.
 
-The following code block is a sample where production time asserter is used to generate proper error messages.
+The following code block is a sample where production time asserter is used to
+generate proper error messages.
 
 ```go
 func (ac *Cmd) Validate() (err error) {
@@ -132,22 +140,55 @@ func (ac *Cmd) Validate() (err error) {
 }
 ```
 
-When asserts are used to generate end-user error messages instead of immediate panics, `err2` handlers are needed to translate asserts to errors in convenient way. That's the reason we decided to build `assert` as a sub package of `err2` even there are no real dependencies between them. See the `assert` packages own documentation and examples for more information.
+When asserts are used to generate end-user error messages instead of immediate
+panics, `err2` handlers are needed to translate asserts to errors in convenient
+way. That's the reason we decided to build `assert` as a sub package of `err2`
+even there are no real dependencies between them. See the `assert` packages own
+documentation and examples for more information.
 
 ## Background
-`err2` implements similar error handling mechanism as drafted in the original [check/handle proposal](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md). The package does it by using internally `panic/recovery`, which some might think isn't perfect. We have run many benchmarks to try to minimise the performance penalty this kind of mechanism might bring. We have focused on the _happy path_ analyses. If the performance of the error path is essential, don't use this mechanism presented here. For happy paths by using `err2.Check` type helper variables there seems to be no performance penalty.
+`err2` implements similar error handling mechanism as drafted in the original
+[check/handle
+proposal](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md).
+The package does it by using internally `panic/recovery`, which some might think
+isn't perfect. We have run many benchmarks to try to minimise the performance
+penalty this kind of mechanism might bring. We have focused on the _happy path_
+analyses. If the performance of the error path is essential, don't use this
+mechanism presented here. For happy paths by using `err2.Check` type helper
+variables there seems to be no performance penalty.
 
-However, the mandatory use of the `defer` might prevent some code optimisations like function inlining. If you have a performance-critical use case, we recommend you to write performance tests to measure the effect.
+However, the mandatory use of the `defer` might prevent some code optimisations
+like function inlining. If you have a performance-critical use case, we
+recommend you to write performance tests to measure the effect.
 
-The original goal was to make it possible to write similar code than proposed Go2 error handling would allow and do it right now. The goal was well aligned with the latest Go2 proposal where it would bring a `try` macro and let the error handling be implemented in defer blocks. The try-proposal was put on the hold or cancelled at its latest form. However, we have learned that using panics for early-stage error transport isn't a bad thing but opposite. It seems to help to draft algorithms.
+The original goal was to make it possible to write similar code than proposed
+Go2 error handling would allow and do it right now. The goal was well aligned
+with the latest Go2 proposal where it would bring a `try` macro and let the
+error handling be implemented in defer blocks. The try-proposal was put on the
+hold or cancelled at its latest form. However, we have learned that using panics
+for early-stage error transport isn't a bad thing but opposite. It seems to help
+to draft algorithms.
 
 ## Learnings by so far
 
-We have used the `err2` and `assert` packages in several internal projects. The results have been so far very encouraging:
+We have used the `err2` and `assert` packages in several internal projects. The
+results have been so far very encouraging:
 
-- If you forget to use handler, but you use checks from the package, you will get panics if an error occurs. That is much better than getting unrelated panic somewhere else in the code later. There have also been cases when code reports error correctly because the 'upper' handler catches it.
-- Because the use of `err2.Annotate` is so relatively easy, error messages much better and informative.
-- When error handling is based on the actual error handlers, code changes have been much easier.
+- If you forget to use handler, but you use checks from the package, you will
+get panics if an error occurs. That is much better than getting unrelated panic
+somewhere else in the code later. There have also been cases when code reports
+error correctly because the 'upper' handler catches it.
+
+- Because the use of `err2.Annotate` is so relatively easy, error messages much
+better and informative.
+
+- When error handling is based on the actual error handlers, code changes have
+been much easier.
+
+- You don't seem to need '%w' wrapping. See the Go's official blog post what are
+[cons](https://go.dev/blog/go1.13-errors) of that.
+
+> Do not wrap an error when doing so would expose implementation details.
 
 ## Roadmap
 
@@ -160,6 +201,5 @@ Version history:
 - 0.6.1, `assert` package added, and new type helpers (current)
 - 0.7.0 filter functions for the cases where errors aren't real errors like
   io.EOF
-- 0.8.0 try.To() function with the help of the generics
+- 0.8.0 `try.To()` & `assert.That()`, etc. functions with the help of the generics
 
-We will update both packages when Go2 generics are released. There is already a working version which uses Go generics. That has been shown that the switch will be prompt. We are also monitoring what will happen for the Go-native error handling and tune the library accordingly.
