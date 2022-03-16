@@ -15,6 +15,10 @@
 //  ...
 package try
 
+import (
+	"errors"
+)
+
 // To is a helper function to call functions which returns (error)
 // and check the error value. If error occurs it panics the error where err2
 // handlers can catch it if needed.
@@ -48,5 +52,18 @@ func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {
 	return v1, v2, v3
 }
 
+// Is performs filtered error check for the given argument. It's same
+// as To but before throwing an error it checks if error matches the filter.
+// The return value false tells that there are no errors and true that filter is
+// matched.
+func Is(filter, err error) bool {
+	if err != nil {
+		if errors.Is(filter, err) {
+			return true
+		}
+		panic(err)
+	}
+	return false
+}
 // TODO: add ToIsX() & ToAsX() funcs to support errors.Is & errors.As IFF we
 // will support wrapping at all.
