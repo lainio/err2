@@ -114,4 +114,3 @@ func combineArgs(format string, a []any) []any {
 	args = append(args, a...)
 	return args
 }
-

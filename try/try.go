@@ -65,5 +65,6 @@ func Is(filter, err error) bool {
 	}
 	return false
 }
+
 // TODO: add ToIsX() & ToAsX() funcs to support errors.Is & errors.As IFF we
 // will support wrapping at all.

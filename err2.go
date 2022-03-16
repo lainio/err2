@@ -201,7 +201,7 @@ func Annotatew(prefix string, err *error) {
 			panic(r) // Not ours, carry on panicking
 		}
 		*err = e
-		format := prefix + ": %w" 
+		format := prefix + ": %w"
 		*err = fmt.Errorf(format, e)
 	} else if *err != nil { // if other handlers call recovery() we still..
 		format := prefix + ": %w"
@@ -240,7 +240,7 @@ func Annotate(prefix string, err *error) {
 			panic(r) // Not ours, carry on panicking
 		}
 		*err = e
-		format := prefix + ": %v" 
+		format := prefix + ": %v"
 		*err = fmt.Errorf(format, e)
 	} else if *err != nil { // if other handlers call recovery() we still..
 		format := prefix + ": %v"
