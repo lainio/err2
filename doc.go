@@ -1,6 +1,6 @@
 /*
-Package err2 provides three main functionality: 
-  1. err2 package includes helper functions for error handling. 
+Package err2 provides three main functionality:
+  1. err2 package includes helper functions for error handling.
   2. try package is for error checking
   3. assert package is for design-by-contract and preconditions
 
