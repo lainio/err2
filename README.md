@@ -31,9 +31,11 @@ handler it will catch the error. The panicking for the errors at the start of
 the development is far better than not checking errors at all.
 
 This is the simplest `err2` error handler
+
 ```go
 defer err2.Return(&err)
 ```
+
 which is the helper handler for cases that don't need to annotate the error. If
 you need to annotate the error you can use either `Annotate` or `Returnf`.
 
@@ -50,7 +52,7 @@ information](https://pkg.go.dev/github.com/lainio/err2).
 ## Error checks
 
 The `err2` provides convenient helpers to check the errors. Since the Go 1.18 we
-use generics to solve fast and convenient error checking.
+use generics to have fast and convenient error checking.
 
 For example, instead of
 
@@ -89,9 +91,10 @@ With these you can write code where error is translated to boolean value:
 ```go
 	notExist := err2.FilterTry(plugin.ErrNotExist, r2.err)
 
-	// real errors are cought and the returned booleans tell if value
-	// dosen't exist
+	// real errors are cought and the returned boolean tells if value
+	// dosen't exist returnend as `plugin.ErrNotExist`
 ```
+
 For more information see the examples of both functions.
 
 ## Assertion (design by contract)

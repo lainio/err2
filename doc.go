@@ -1,6 +1,8 @@
 /*
-Package err2 provides simple helper functions for Go's error handling. Please
-see the try for error checking.
+Package err2 provides three main functionality: 
+  1. err2 package includes helper functions for error handling. 
+  2. try package is for error checking
+  3. assert package is for design-by-contract and preconditions
 
 The traditional error handling idiom in Go is roughly akin to
 
@@ -17,8 +19,8 @@ easy (help of the declarative control structures) that we never forget them.
 
 Error checks
 
-The err2/try provides convenient helpers to check the errors. For example, instead
-of
+The err2/try provides convenient helpers to check the errors. For example,
+instead of
 
  b, err := ioutil.ReadAll(r)
  if err != nil {
@@ -35,10 +37,11 @@ Error handling
 
 Package err2 relies on error handlers. In every function which uses err2 or try
 package for error-checking has to have at least one error handler. If there are
-no error handlers and error occurs it panics. Nevertheless we think that
+no error handlers and error occurs it panics. Nevertheless, we think that
 panicking for the errors during the development is much better than not checking
-the error at all. However, if the call stack includes any err2 error handlers like
-err2.Handle() the error is handled there.
+errors at all. However, if the call stack includes any err2 error handlers like
+err2.Handle() the error is handled there where the handler is saved to defer
+stack.
 
 The handler for the previous sample is
 

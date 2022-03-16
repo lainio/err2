@@ -7,18 +7,7 @@ import (
 	"runtime/debug"
 )
 
-type _empty struct{}
-
-// Empty is a helper variable to demonstrate how we could build 'type wrappers'
-// to make Try function as fast as Check.
-var Empty _empty
-
-// Try is a helper method to call func() (string, error) functions with it and
-// be as fast as Check(err).
-func (s _empty) Try(_ any, err error) {
-	Check(err)
-}
-
+// Try is deprecated. Use try.To functions from try package instead.
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
 // returns slice of interfaces. It has quite big performance penalty when
 // compared to Check function.
@@ -27,6 +16,7 @@ func Try(args ...any) []any {
 	return args
 }
 
+// Check is deprecated. Use try.To function instead.
 // Check performs error check for the given argument. If the err is nil, it does
 // nothing. According the measurements, it's as fast as
 //  if err != nil {
@@ -39,6 +29,7 @@ func Check(err error) {
 	}
 }
 
+// FilterTry is deprecated. Use try.Is function instead.
 // FilterTry performs filtered error check for the given argument. It's same
 // as Check but before throwing an error it checks if error matches the filter.
 // The return value false tells that there are no errors and true that filter is
@@ -53,6 +44,7 @@ func FilterTry(filter, err error) bool {
 	return false
 }
 
+// TryEOF is deprecated. Use try.IsEOF function instead.
 // TryEOF checks errors but filters io.EOF from the exception handling and
 // returns boolean which tells if io.EOF is present. See more info from
 // FilterCheck.

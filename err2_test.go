@@ -187,6 +187,28 @@ func ExampleFilterTry() {
 	// Output: testing string
 }
 
+func Example_TryIsEOF1() {
+	copyStream := func(src string) (s string, err error) {
+		defer err2.Returnf(&err, "copy stream %s", src)
+
+		in := bytes.NewBufferString(src)
+		tmp := make([]byte, 4)
+		var out bytes.Buffer
+		for eof, n := try.IsEOF1(in.Read(tmp)); !eof; eof, n = try.IsEOF1(in.Read(tmp)) {
+			out.Write(tmp[:n])
+		}
+
+		return out.String(), nil
+	}
+
+	str, err := copyStream("testing string")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+	// Output: testing string
+}
+
 func ExampleTryEOF() {
 	copyStream := func(src string) (s string, err error) {
 		defer err2.Returnf(&err, "copy stream %s", src)
