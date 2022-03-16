@@ -3,7 +3,7 @@
 set -e
 
 if [[ -z "$1" ]]; then
-	echo "ERROR: give version number"
+	echo "ERROR: give version number, e.g. v0.8.2"
 	exit 1
 fi
 
