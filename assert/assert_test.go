@@ -120,7 +120,7 @@ func ExampleEqual() {
 	// Output: sample: got 2, want 3
 }
 
-func ExampleLen() {
+func ExampleSLen() {
 	sample := func(b []byte) (err error) {
 		defer err2.Annotate("sample", &err)
 
