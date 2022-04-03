@@ -2,6 +2,9 @@
 .idea
 Session.vim
 
+# to suppress neomake temporary 
+.golangci.yml
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
