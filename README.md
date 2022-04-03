@@ -27,8 +27,7 @@ Package `err2` relies on Go's declarative programming structure `defer`. The
 In every function which uses err2 for error-checking should have at least one
 error handler. If there are no error handlers and error occurs the current
 function panics. However, if function above in the call stack has `err2` error
-handler it will catch the error. The panicking for the errors at the start of
-the development is far better than not checking errors at all.
+handler it will catch the error.
 
 This is the simplest `err2` error handler
 
@@ -52,7 +51,7 @@ information](https://pkg.go.dev/github.com/lainio/err2).
 ## Error checks
 
 The `err2` provides convenient helpers to check the errors. Since the Go 1.18 we
-use generics to have fast and convenient error checking.
+have been using generics to have fast and convenient error checking.
 
 For example, instead of
 
@@ -70,16 +69,12 @@ b := try.To1(ioutil.ReadAll(r))
 ```
 
 but not without an error handler (`Return`, `Annotate`, `Handle`) or it just
-panics your app if you don't have a `recovery` call in the goroutines calls
-stack. However, you can put your error handlers where ever you want in your call
-stack. That can be handy in the internal packages and certain types of
-algorithms.
+panics your app if you don't have a `recovery` call in the current call stack.
+However, you can put your error handlers where ever you want in your call stack.
+That can be handy in the internal packages and certain types of algorithms.
+Also, panicking for the errors at the start of the development is far better
+than not checking errors at all.
 
-
-#### Type Helpers
-
-These are now obsolete:
-	*when Go2 generics are out we can replace all of these with generics*.
 
 #### Filters for non-errors like io.EOF
 
@@ -156,21 +151,24 @@ proposal](https://go.googlesource.com/proposal/+/master/design/go2draft-error-ha
 The package does it by using internally `panic/recovery`, which some might think
 isn't perfect. We have run many benchmarks to try to minimise the performance
 penalty this kind of mechanism might bring. We have focused on the _happy path_
-analyses. If the performance of the error path is essential, don't use this
-mechanism presented here. For happy paths by using `err2.Check` type helper
-variables there seems to be no performance penalty.
+analyses. If the performance of the *error path* is essential, don't use this
+mechanism presented here. But be aware that if your code uses the error path as 
+a part of algorithm itself something is badly wrong.
 
-However, the mandatory use of the `defer` might prevent some code optimisations
-like function inlining. If you have a performance-critical use case, we
-recommend you to write performance tests to measure the effect.
+**For happy paths** by using `try.ToX` error check functions **there are no
+performance penalty at all**. However, the mandatory use of the `defer` might
+prevent some code optimisations like function inlining. If you have a
+performance-critical use case, we recommend you to write performance tests to
+measure the effect. As a general guideline for maximum performance we recommend
+to put error handlers as high in the call stack as possible.
 
 The original goal was to make it possible to write similar code than proposed
-Go2 error handling would allow and do it right now. The goal was well aligned
-with the latest Go2 proposal where it would bring a `try` macro and let the
-error handling be implemented in defer blocks. The try-proposal was put on the
-hold or cancelled at its latest form. However, we have learned that using panics
+Go2 error handling would allow and do it right now (summer 2019). The goal was
+well aligned with the latest Go2 proposal where it would bring a `try` macro and
+let the error handling be implemented in defer blocks. The try-proposal was put
+cancelled at its latest form. Nevertheless, we have learned that using panics
 for early-stage error transport isn't a bad thing but opposite. It seems to help
-to draft algorithms.
+to draft algorithms much faster, and still maintains the readability.
 
 ## Learnings by so far
 
