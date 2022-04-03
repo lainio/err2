@@ -1,18 +1,24 @@
-// Package try is a new sub package for `try to` functions which replace all of
-// the error checking. The error handlers still stay in the main package err2.
-// For more information see FileCopy example in err2:
-//  ...
-//  r := try.To1(os.Open(src))
-//  defer r.Close()
-//
-//  w := try.To1(os.Create(dst))
-//  defer err2.Handle(&err, func() {
-//  	os.Remove(dst)
-//  })
-//  defer w.Close()
-//  try.To1(io.Copy(w, r))
-//  return nil
-//  ...
+/*
+Package try is a package for `try to` functions that implement the error
+checking. 'try.To' functions check if err != nil and if it throws the err to the
+error handlers, which are implemented by the err2 package. More information
+about err2 and try packager roles can be seen in the FileCopy example in err2:
+  ...
+  r := try.To1(os.Open(src))
+  defer r.Close()
+
+  w := try.To1(os.Create(dst))
+  defer err2.Handle(&err, func() {
+  	os.Remove(dst)
+  })
+  defer w.Close()
+  try.To1(io.Copy(w, r))
+  return nil
+  ...
+
+All of the try package functions are as fast as the simple 'if err != nil {'
+statement, thanks to the compiler inlining and optimization.
+*/
 package try
 
 import (
@@ -21,7 +27,7 @@ import (
 )
 
 // To is a helper function to call functions which returns (error)
-// and check the error value. If error occurs it panics the error where err2
+// and check the error value. If an error occurs, it panics the error where err2
 // handlers can catch it if needed.
 func To(err error) {
 	if err != nil {
@@ -30,7 +36,7 @@ func To(err error) {
 }
 
 // To1 is a helper function to call functions which returns (any, error)
-// and check the error value. If error occurs it panics the error where err2
+// and check the error value. If an error occurs, it panics the error where err2
 // handlers can catch it if needed.
 func To1[T any](v T, err error) T {
 	To(err)
@@ -38,7 +44,7 @@ func To1[T any](v T, err error) T {
 }
 
 // To2 is a helper function to call functions which returns (any, any, error)
-// and check the error value. If error occurs it panics the error where err2
+// and check the error value. If an error occurs, it panics the error where err2
 // handlers can catch it if needed.
 func To2[T, U any](v1 T, v2 U, err error) (T, U) {
 	To(err)
@@ -46,20 +52,20 @@ func To2[T, U any](v1 T, v2 U, err error) (T, U) {
 }
 
 // To3 is a helper function to call functions which returns (any, any, any, error)
-// and check the error value. If error occurs it panics the error where err2
+// and check the error value. If an error occurs, it panics the error where err2
 // handlers can catch it if needed.
 func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {
 	To(err)
 	return v1, v2, v3
 }
 
-// Is performs filtered error check for the given argument. It's same
-// as To but before throwing an error it checks if error matches the filter.
-// The return value false tells that there are no errors and true that filter is
-// matched.
-func Is(filter, err error) bool {
+// Is-function performs a filtered error check for the given argument. It's the
+// same as To-function, but it checks if the error matches the filter before
+// throwing an error. The false return value tells that there are no errors and
+// the true value that the error is the filter.
+func Is(err, filter error) bool {
 	if err != nil {
-		if errors.Is(filter, err) {
+		if errors.Is(err, filter) {
 			return true
 		}
 		panic(err)
@@ -67,30 +73,28 @@ func Is(filter, err error) bool {
 	return false
 }
 
-// Is1 performs filtered error check for the given argument. It's same
-// as To but before throwing an error it checks if error matches the filter.
-// The return value false tells that there are no errors and true that filter is
-// matched.
+// IsEOF1-function performs a filtered error check for the given argument. It's the
+// same as To-function, but it checks if the error matches the 'io.EOF' before
+// throwing an error. The false return value tells that there are no errors and
+// the true value that the error is the 'io.EOF'.
 func IsEOF1[T any](v T, err error) (bool, T) {
-	isFilter := Is(io.EOF, err)
+	isFilter := Is(err, io.EOF)
 	return isFilter, v
 }
 
-// Is2 performs filtered error check for the given argument. It's same
-// as To but before throwing an error it checks if error matches the filter.
-// The return value false tells that there are no errors and true that filter is
-// matched.
+// IsEOF2-function performs a filtered error check for the given argument. It's the
+// same as To-function, but it checks if the error matches the 'io.EOF' before
+// throwing an error. The false return value tells that there are no errors and
+// the true value that the error is the 'io.EOF'.
 func IsEOF2[T, U any](v1 T, v2 U, err error) (bool, T, U) {
-	isFilter := Is(io.EOF, err)
+	isFilter := Is(err, io.EOF)
 	return isFilter, v1, v2
 }
 
-// IsEOF checks errors but filters io.EOF from the exception handling and
-// returns boolean which tells if io.EOF is present. See more info from
-// FilterCheck.
+// IsEOF-function performs a filtered error check for the given argument. It's the
+// same as To-function, but it checks if the error matches the 'io.EOF' before
+// throwing an error. The false return value tells that there are no errors and
+// the true value that the error is the 'io.EOF'.
 func IsEOF(err error) bool {
-	return Is(io.EOF, err)
+	return Is(err, io.EOF)
 }
-
-// TODO: add ToIsX() & ToAsX() funcs to support errors.Is & errors.As IFF we
-// will support wrapping at all.
