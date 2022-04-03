@@ -36,7 +36,7 @@ func Check(err error) {
 // matched.
 func FilterTry(filter, err error) bool {
 	if err != nil {
-		if errors.Is(filter, err) {
+		if errors.Is(err, filter) {
 			return true
 		}
 		panic(err)
