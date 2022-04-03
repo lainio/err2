@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"runtime/debug"
+	"os"
+
+	"github.com/lainio/err2/internal/debug"
 )
 
 // Try is deprecated. Use try.To functions from try package instead.
@@ -141,8 +143,8 @@ func CatchTrace(errorHandler func(err error)) {
 		if ok {
 			errorHandler(e)
 		} else {
-			println(r)
-			debug.PrintStack()
+			fmt.Fprintf(os.Stderr, "---\n%v\n---\n", r)
+			debug.PrintStack(4)
 		}
 	}
 }
