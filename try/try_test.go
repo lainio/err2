@@ -14,7 +14,7 @@ var (
 	errForTesting = fmt.Errorf("error for %s", "testing")
 )
 
-func ExampleIs_ErrorHappens() {
+func ExampleIs_errorHappens() {
 	copyStream := func(src string) (s string, err error) {
 		defer err2.Returnf(&err, "copy stream %s", src)
 
@@ -31,7 +31,7 @@ func ExampleIs_ErrorHappens() {
 	// Output: copy stream testing string: error for testing
 }
 
-func ExampleIs_ErrorHappensNot() {
+func ExampleIs_errorHappensNot() {
 	copyStream := func(src string) (s string, err error) {
 		defer err2.Returnf(&err, "copy stream %s", src)
 
