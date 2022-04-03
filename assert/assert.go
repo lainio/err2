@@ -13,18 +13,23 @@ var (
 	// doesn't by caught by err2 handlers.
 	D Asserter = 0
 
-	// DefaultAsserter is a default asserter used for package level functions.
-	// If not changed it is the same as P the production asserter that treats
-	// assert failures as Go errors, i.e. if err2 handlers are found in the
-	// callstack these errors are caught.
-	DefaultAsserter = AsserterToError
+	// DefaultAsserter is a default asserter used for package-level functions
+	// like assert.That(). It is the same as the production asserter P, which
+	// treats assert failures as Go errors, but in addition to that, it formats
+	// the assertion message properly. Naturally, only if err2 handlers are
+	// found in the call stack, these errors are caught.
+	//
+	// You are free to set it according to your current preferences. For
+	// example, it might be better to panic about every assertion fault during
+	// the tests. When in other cases, throw an error.
+	DefaultAsserter = AsserterToError | AsserterFormattedCallerInfo
 )
 
 // That asserts that term is true. If not it panics with the given formatting
 // string. Note! That is the most performant of all the assertion functions.
 func That(term bool, a ...any) {
 	if !term {
-		DefaultAsserter.reportAssertionFault("assertion fault", a...)
+		DefaultAsserter.reportAssertionFault("", a...)
 	}
 }
 

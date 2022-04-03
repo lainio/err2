@@ -3,8 +3,11 @@ package assert
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"runtime/debug"
+	"strings"
 )
 
 // Asserter is type for asserter object guided by its flags.
@@ -17,6 +20,15 @@ const (
 
 	// AsserterStackTrace is Asserter flag to print call stack to stdout.
 	AsserterStackTrace
+
+	// AsserterCallerInfo is an asserter flag to add info of the function
+	// asserting. It includes filename, line number and function name.
+	AsserterCallerInfo
+
+	// AsserterFormattedCallerInfo is an asserter flag to add info of the function
+	// asserting. It includes filename, line number and function name in
+	// multi-line formatted string output.
+	AsserterFormattedCallerInfo
 )
 
 // NoImplementation always fails with no implementation.
@@ -117,6 +129,9 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 	if asserter.hasStackTrace() {
 		debug.PrintStack()
 	}
+	if asserter.hasCallerInfo() {
+		defaultMsg = asserter.callerInfo(defaultMsg)
+	}
 	if len(a) > 0 {
 		if format, ok := a[0].(string); ok {
 			asserter.reportPanic(fmt.Sprintf(format, a[1:]...))
@@ -145,10 +160,52 @@ func (asserter Asserter) reportPanic(s string) {
 	panic(s)
 }
 
+var longFmtStr = `
+--------------------------------
+Assertion Fault at:
+%s:%d %s
+%s
+--------------------------------
+`
+
+var shortFmtStr = `%s:%d %s %s`
+
+func (asserter Asserter) callerInfo(msg string) (info string) {
+	const stackLevel = 3
+	pc, file, line, ok := runtime.Caller(stackLevel)
+	if !ok {
+		return msg
+	}
+
+	ourFmtStr := shortFmtStr
+	if asserter.hasFormattedCallerInfo() {
+		ourFmtStr = longFmtStr
+	}
+
+	fn := runtime.FuncForPC(pc)
+	filename := filepath.Base(file)
+	ext := filepath.Ext(filename)
+	trimmedFilename := strings.TrimSuffix(filename, ext) + "."
+	funcName := strings.TrimPrefix(filepath.Base(fn.Name()), trimmedFilename)
+	info = fmt.Sprintf(ourFmtStr,
+		filename, line,
+		funcName, msg)
+
+	return
+}
+
 func (asserter Asserter) hasToError() bool {
 	return asserter&AsserterToError != 0
 }
 
 func (asserter Asserter) hasStackTrace() bool {
 	return asserter&AsserterStackTrace != 0
+}
+
+func (asserter Asserter) hasCallerInfo() bool {
+	return asserter&AsserterCallerInfo != 0 || asserter.hasFormattedCallerInfo()
+}
+
+func (asserter Asserter) hasFormattedCallerInfo() bool {
+	return asserter&AsserterFormattedCallerInfo != 0
 }

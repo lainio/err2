@@ -1,7 +1,8 @@
-package assert_test
+package assert_test // Note!! Some tests here are related to line # of the file
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/lainio/err2"
@@ -66,7 +67,7 @@ func ExampleNotNil() {
 	var b *byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: pointer is nil
+	// Output: sample: assert_test.go:64 ExampleNotNil.func1 pointer is nil
 }
 
 func ExampleMNotNil() {
@@ -79,7 +80,7 @@ func ExampleMNotNil() {
 	var b map[string]byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: map is nil
+	// Output: sample: assert_test.go:77 ExampleMNotNil.func1 map is nil
 }
 
 func ExampleCNotNil() {
@@ -92,7 +93,7 @@ func ExampleCNotNil() {
 	var c chan byte
 	err := sample(c)
 	fmt.Printf("%v", err)
-	// Output: sample: channel is nil
+	// Output: sample: assert_test.go:90 ExampleCNotNil.func1 channel is nil
 }
 
 func ExampleSNotNil() {
@@ -105,7 +106,7 @@ func ExampleSNotNil() {
 	var b []byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: slice is nil
+	// Output: sample: assert_test.go:103 ExampleSNotNil.func1 slice is nil
 }
 
 func ExampleEqual() {
@@ -117,7 +118,7 @@ func ExampleEqual() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: got 2, want 3
+	// Output: sample: assert_test.go:116 ExampleEqual.func1 got 2, want 3
 }
 
 func ExampleSLen() {
@@ -129,7 +130,7 @@ func ExampleSLen() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: got 2, want 3
+	// Output: sample: assert_test.go:128 ExampleSLen.func1 got 2, want 3
 }
 
 func ExampleAsserter_Lenf() {
@@ -281,3 +282,16 @@ func BenchmarkEqualInt(b *testing.B) {
 		assertEqualInt2(d)
 	}
 }
+
+func TestMain(m *testing.M) {
+	setUp()
+	code := m.Run()
+	tearDown()
+	os.Exit(code)
+}
+
+func setUp() {
+	assert.DefaultAsserter = assert.AsserterToError | assert.AsserterCallerInfo
+}
+
+func tearDown() {}
