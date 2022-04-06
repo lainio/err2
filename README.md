@@ -4,8 +4,14 @@ The package provides simple helper functions for _automatic_ error propagation.
 
 `go get github.com/lainio/err2`
 
+## Structure
 
-## Error Propagation
+err2 has the following package structure:
+- The `err2` (main) package includes declarative error handling functions.
+- The `try` package offers error checking functions.
+- The `assert` package implements assertion helpers for *design-by-contract*.
+
+## Automatic Error Propagation
 
 The current version of Go tends to produce too much error checking and too
 little error handling. This package helps us fix that.
@@ -13,10 +19,11 @@ little error handling. This package helps us fix that.
 1. It helps to declare error handlers with `defer`.
 2. It helps to check and transport errors to the nearest (the defer-stack) error
    handler. 
+3. It helps us use design-by-contract type preconditions.
 
-You can use both of them or just the other. However, if you use `err2` for error
+You can use all of them or just the other. However, if you use `try` for error
 checks you must remember use Go's `recover()` by yourself, or your error isn't
-transformed to an `error`.
+transformed to an `error` return value at any point.
 
 ## Error handling
 
@@ -26,17 +33,18 @@ Package `err2` relies on Go's declarative programming structure `defer`. The
 
 In every function which uses err2 for error-checking should have at least one
 error handler. If there are no error handlers and error occurs the current
-function panics. However, if function above in the call stack has `err2` error
-handler it will catch the error.
+function panics. However, if *any* function above in the call stack has `err2`
+error handler it will catch the error.
 
-This is the simplest `err2` error handler
+This is the simplest form of `err2` error handler
 
 ```go
 defer err2.Return(&err)
 ```
 
 which is the helper handler for cases that don't need to annotate the error. If
-you need to annotate the error you can use either `Annotate` or `Returnf`.
+you need to annotate the error you can use either `Annotate` or `Returnf`. These
+functions have their error wrapping versions as well: `Annotatew` and `Returnw`.
 
 #### Error Handler
 
@@ -50,8 +58,8 @@ information](https://pkg.go.dev/github.com/lainio/err2).
 
 ## Error checks
 
-The `err2` provides convenient helpers to check the errors. Since the Go 1.18 we
-have been using generics to have fast and convenient error checking.
+The `try` package provides convenient helpers to check the errors. Since the Go
+1.18 we have been using generics to have fast and convenient error checking.
 
 For example, instead of
 
@@ -72,19 +80,20 @@ but not without an error handler (`Return`, `Annotate`, `Handle`) or it just
 panics your app if you don't have a `recovery` call in the current call stack.
 However, you can put your error handlers where ever you want in your call stack.
 That can be handy in the internal packages and certain types of algorithms.
-Also, panicking for the errors at the start of the development is far better
-than not checking errors at all.
+
+We think that panicking for the errors at the start of the development is far
+better than not checking errors at all.
 
 
 #### Filters for non-errors like io.EOF
 
 When error values are used to transport some other information instead of
-actual errors we have functions like `FilterTry` and even `TryEOF` for
+actual errors we have functions like `try.Is` and even `try.IsEOF` for
 convenience.
 
 With these you can write code where error is translated to boolean value:
 ```go
-	notExist := err2.FilterTry(plugin.ErrNotExist, r2.err)
+	notExist := try.Is(r2.err, plugin.ErrNotExist)
 
 	// real errors are cought and the returned boolean tells if value
 	// dosen't exist returnend as `plugin.ErrNotExist`
@@ -94,23 +103,28 @@ For more information see the examples of both functions.
 
 ## Assertion (design by contract)
 
-The `assert` package has been since version 0.6. The package is meant to be used
-for design by contract -type of development where you set preconditions for your
-functions. It's not meant to replace normal error checking but speed up
-incremental hacking cycle. That's the reason why default mode (`var D Asserter`)
-is to panic. By panicking developer get immediate and proper feedback which
-allows cleanup the code and APIs before actual production release.
+The `assert` package is meant to be used for design-by-contract-type of
+development where you set preconditions for your functions. It's not meant to
+replace normal error checking but speed up incremental hacking cycle. That's the
+reason why default mode (`var D Asserter`) is to panic. By panicking developer
+get immediate and proper feedback which allows cleanup the code and APIs before
+actual production release.
 
 ```go
 func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData) []byte {
-	assert.D.EqualInt(len(data.AttData.AAGUID), 16, "wrong AAGUID length")
-	assert.D.NotEmpty(data.AttData.CredentialID, "empty credential id")
-	assert.D.NotEmpty(data.AttData.CredentialPublicKey, "empty credential public key")
+	assert.Equal(len(data.AttData.AAGUID), 16, "wrong AAGUID length")
+	assert.That(data.AttData.CredentialID != "", "empty credential id")
+	assert.That(len(data.AttData.CredentialPublicKey) != 0, "empty credential public key")
 	...
 ```
 
-Previous code block shows the use of the asserter (`D`) for developing. If any
-of the assertion fails, code panics. These type of assertions can be used
+Previous code block shows the use of the default asserter for developing.
+
+```go
+assert.DefaultAsserter = 0
+```
+
+If any of the assertion fails, code panics. These type of assertions can be used
 without help of the `err2` package.
 
 During the software development lifecycle it isn't all the time crystal clear
@@ -144,7 +158,9 @@ way. That's the reason we decided to build `assert` as a sub package of `err2`
 even there are no real dependencies between them. See the `assert` packages own
 documentation and examples for more information.
 
+
 ## Background
+
 `err2` implements similar error handling mechanism as drafted in the original
 [check/handle
 proposal](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md).
@@ -203,4 +219,5 @@ Version history:
 - 0.7.0 filter functions for the cases where errors aren't real errors like
   io.EOF
 - 0.8.0 `try.To()` & `assert.That()`, etc. functions with the help of the generics
+- 0.8.3 `try.IsXX()` bug fix, lots of new documentation
 
