@@ -45,6 +45,8 @@ defer err2.Return(&err)
 which is the helper handler for cases that don't need to annotate the error. If
 you need to annotate the error you can use either `Annotate` or `Returnf`. These
 functions have their error wrapping versions as well: `Annotatew` and `Returnw`.
+Our general guideline is:
+> Do not wrap an error when doing so would expose implementation details.
 
 #### Error Handler
 
@@ -203,7 +205,7 @@ better and informative.
 been much easier.
 
 - You don't seem to need '%w' wrapping. See the Go's official blog post what are
-[cons](https://go.dev/blog/go1.13-errors) of that.
+[cons](https://go.dev/blog/go1.13-errors) for that.
 
 > Do not wrap an error when doing so would expose implementation details.
 
