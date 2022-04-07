@@ -207,6 +207,15 @@ been much easier.
 
 > Do not wrap an error when doing so would expose implementation details.
 
+## Support
+
+The package has been in experimental mode quite long time. Since the Go generics
+we are transiting towards more official mode. Currently we offer support by
+author's email. Before sending questions about the package we suggest you will
+read all the documentation and examples thru. They are pretty comprehensive.
+
+- harlain at gmail.com
+
 ## Roadmap
 
 Version history:
