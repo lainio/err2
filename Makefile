@@ -9,8 +9,13 @@ GO := go
 
 check: test vet gofmt misspell unconvert staticcheck ineffassign unparam
 
-test:
-	$(GO) test $(PKGS) $(PKGS2)
+test1:
+	$(GO) test $(PKGS)
+
+test2:
+	$(GO) test $(PKGS2)
+
+test: test1 test2
 
 bench:
 	$(GO) test -bench=. $(PKGS) $(PKGS2)
