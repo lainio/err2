@@ -12,6 +12,15 @@ GO := go
 
 check: test vet gofmt misspell unconvert staticcheck ineffassign unparam
 
+test1:
+	$(GO) test $(PKG1)
+
+test2:
+	$(GO) test $(PKG2)
+
+test3:
+	$(GO) test $(PKG3)
+
 test:
 	$(GO) test $(PKGS)
 

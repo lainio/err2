@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 
+	"runtime"
+
 	"github.com/lainio/err2/internal/debug"
 )
 
@@ -70,10 +72,10 @@ func check(args []any) {
 }
 
 // Handle is for adding an error handler to a function by defer. It's for
-// functions returning errors them self. For those functions that doesn't
-// return errors there is a Catch function. Note! The handler function f is
-// called only when err != nil.
-func Handle(err *error, f func()) {
+// functions returning errors them self. For those functions that doesn't return
+// errors there is a Catch function. Note! The handler is called only when err
+// != nil.
+func Handle(err *error, handler func()) {
 	// This and Catch are similar but we need to call recover() here because
 	// how it works with defer. We cannot refactor these to use same function.
 
@@ -87,12 +89,14 @@ func Handle(err *error, f func()) {
 		// call handler functions to the rest of the handlers if there is
 		// an error.
 		if *err != nil {
-			f()
+			handler()
 		}
+	case runtime.Error:
+		panic(r)
 	case error:
 		// We or someone did transport this error thru panic.
 		*err = r.(error)
-		f()
+		handler()
 	default:
 		panic(r)
 	}
@@ -106,12 +110,15 @@ func Catch(f func(err error)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if !ok {
-			panic(r)
-		}
-		f(e)
+	switch r := recover(); r.(type) {
+	case nil:
+		break
+	case runtime.Error:
+		panic(r)
+	case error:
+		f(r.(error))
+	default:
+		panic(r)
 	}
 }
 
@@ -121,13 +128,15 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if ok {
-			errorHandler(e)
-		} else {
-			panicHandler(r)
-		}
+	switch r := recover(); r.(type) {
+	case nil:
+		break
+	case runtime.Error:
+		panicHandler(r)
+	case error:
+		errorHandler(r.(error))
+	default:
+		panicHandler(r)
 	}
 }
 
@@ -138,14 +147,17 @@ func CatchTrace(errorHandler func(err error)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if ok {
-			errorHandler(e)
-		} else {
-			fmt.Fprintf(os.Stderr, "---\n%v\n---\n", r)
-			debug.PrintStack(4)
-		}
+	switch r := recover(); r.(type) {
+	case nil:
+		break
+	case runtime.Error:
+		fmt.Fprintf(os.Stderr, "---\n%v\n---\n", r)
+		debug.PrintStack(4)
+	case error:
+		errorHandler(r.(error))
+	default:
+		fmt.Fprintf(os.Stderr, "---\n%v\n---\n", r)
+		debug.PrintStack(4)
 	}
 }
 
@@ -156,12 +168,15 @@ func Return(err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if !ok {
-			panic(r) // Not ours, carry on panicking
-		}
-		*err = e
+	switch r := recover(); r.(type) {
+	case nil:
+		break
+	case runtime.Error:
+		panic(r)
+	case error:
+		*err = r.(error)
+	default:
+		panic(r)
 	}
 }
 
@@ -171,14 +186,16 @@ func Returnw(err *error, format string, args ...any) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if !ok {
-			panic(r) // Not ours, carry on panicking
+	switch r := recover(); r.(type) {
+	case runtime.Error:
+		panic(r)
+	case error:
+		e := r.(error)
+		*err = fmt.Errorf(format, e)
+	default:
+		if *err != nil { // if other handlers call recovery() we still..
+			*err = fmt.Errorf(format+": %w", append(args, *err)...)
 		}
-		*err = fmt.Errorf(format+": %w", append(args, e)...)
-	} else if *err != nil { // if other handlers call recovery() we still..
-		*err = fmt.Errorf(format+": %w", append(args, *err)...)
 	}
 }
 
@@ -189,17 +206,18 @@ func Annotatew(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if !ok {
-			panic(r) // Not ours, carry on panicking
-		}
-		*err = e
+	switch r := recover(); r.(type) {
+	case runtime.Error:
+		panic(r)
+	case error:
+		e := r.(error)
 		format := prefix + ": %w"
 		*err = fmt.Errorf(format, e)
-	} else if *err != nil { // if other handlers call recovery() we still..
-		format := prefix + ": %w"
-		*err = fmt.Errorf(format, (*err))
+	default:
+		if *err != nil { // if other handlers call recovery() we still..
+			format := prefix + ": %w"
+			*err = fmt.Errorf(format, (*err))
+		}
 	}
 }
 
@@ -210,14 +228,16 @@ func Returnf(err *error, format string, args ...any) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if !ok {
-			panic(r) // Not ours, carry on panicking
-		}
+	switch r := recover(); r.(type) {
+	case runtime.Error:
+		panic(r)
+	case error:
+		e := r.(error)
 		*err = fmt.Errorf(format+": %v", append(args, e)...)
-	} else if *err != nil { // if other handlers call recovery() we still..
-		*err = fmt.Errorf(format+": %v", append(args, *err)...)
+	default:
+		if *err != nil { // if other handlers call recovery() we still..
+			*err = fmt.Errorf(format+": %v", append(args, *err)...)
+		}
 	}
 }
 
@@ -228,17 +248,19 @@ func Annotate(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	if r := recover(); r != nil {
-		e, ok := r.(error)
-		if !ok {
-			panic(r) // Not ours, carry on panicking
-		}
-		*err = e
+	switch r := recover(); r.(type) {
+	case runtime.Error:
+		panic(r)
+	case error:
+		e := r.(error)
 		format := prefix + ": %v"
 		*err = fmt.Errorf(format, e)
-	} else if *err != nil { // if other handlers call recovery() we still..
-		format := prefix + ": %v"
-		*err = fmt.Errorf(format, (*err))
+	default:
+		if *err != nil { // if other handlers call recovery() we still..
+			format := prefix + ": %v"
+			*err = fmt.Errorf(format, (*err))
+		}
+
 	}
 }
 

@@ -230,5 +230,6 @@ Version history:
 - 0.7.0 filter functions for the cases where errors aren't real errors like
   io.EOF
 - 0.8.0 `try.To()` & `assert.That()`, etc. functions with the help of the generics
+- 0.8.1 **bug-fix**: `runtime.Error` types are treated as `panics` now (Issue #1)
 - 0.8.3 `try.IsXX()` bug fix, lots of new documentation
 
