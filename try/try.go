@@ -2,7 +2,7 @@
 Package try is a package for `try to` functions that implement the error
 checking. 'try.To' functions check if err != nil and if it throws the err to the
 error handlers, which are implemented by the err2 package. More information
-about err2 and try packager roles can be seen in the FileCopy example in err2:
+about err2 and try packager roles can be seen in the FileCopy example from err2:
   ...
   r := try.To1(os.Open(src))
   defer r.Close()
