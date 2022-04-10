@@ -68,3 +68,7 @@ errcheck:
 gofmt:
 	@echo Checking code is gofmted
 	@test -z "$(shell gofmt -s -l -d -e $(SRCDIRS) | tee /dev/stderr)"
+
+godoc:
+	@GO111MODULE=off godoc -http=0.0.0.0:6060
+
