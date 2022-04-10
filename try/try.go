@@ -1,15 +1,15 @@
 /*
-Package try is a package for `try to` functions that implement the error
-checking. 'try.To' functions check if err != nil and if it throws the err to the
+Package try is a package for try.ToX functions that implement the error
+checking. try.ToX functions check if err != nil and if it throws the err to the
 error handlers, which are implemented by the err2 package. More information
-about err2 and try packager roles can be seen in the FileCopy example from err2:
+about err2 and try packager roles can be seen in the FileCopy example:
   ...
   r := try.To1(os.Open(src))
   defer r.Close()
 
   w := try.To1(os.Create(dst))
   defer err2.Handle(&err, func() {
-  	os.Remove(dst)
+       os.Remove(dst)
   })
   defer w.Close()
   try.To1(io.Copy(w, r))
@@ -19,11 +19,11 @@ about err2 and try packager roles can be seen in the FileCopy example from err2:
 All of the try package functions are as fast as the simple 'if err != nil {'
 statement, thanks to the compiler inlining and optimization.
 
-Note that the function names end to a number because:
+Note that try.ToX function names end to a number (x) because:
 
  "No variadic type parameters. There is no support for variadic type parameters,
  which would permit writing a single generic function that takes different
- numbers of both type parameters and regular parameters."
+ numbers of both type parameters and regular parameters." - Go Generics
 
 The leading number at the end of the To2 tells that To2 takes two different
 non-error arguments, and the third one must be an error value.
@@ -32,6 +32,8 @@ If you now look at the FileCopy example again you see that all the functions
 which are directed to try.To1 are returning (type1, error) tuples. All of these
 tuples are correct input to try.To1. However, if you have a function that
 returns (type1, type2, error) you must use try.To2 function to check the error.
+Currently the try.To3 takes (3 + 1) return values which is the greatest amount.
+If more in needed let us know.
 */
 package try
 
