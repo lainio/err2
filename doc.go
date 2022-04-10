@@ -51,13 +51,14 @@ the try package documentation for more information about the error checks.
 
 Error handling
 
-Package err2 relies on error handlers. It uses declarative control structures to
-achieve error and panic safety. In every function which uses err2 or try package
-for error-checking has to have at least one error handler. If there are no error
-handlers and error occurs it panics. We think that panicking for
-the errors is much better than not checking errors at
-all. Nevertheless, if the call stack includes any err2 error handlers like
-err2.Handle() the error is handled where the handler is saved to defer-stack.
+Package err2 relies on declarative control structures to achieve error and panic
+safety. In every function which uses err2 or try package for error-checking has
+to have at least one declarative error handler if it returns error value. If
+there are no error handlers and error occurs it panics. We think that panicking
+for the errors is much better than not checking errors at all. Nevertheless, if
+the call stack includes any err2 error handlers like err2.Handle the error is
+handled where the handler is saved to defer-stack. (defer is not lexically
+scoped)
 
 err2 includes many examples to play with like previous CopyFile. Please see them
 for more information.
