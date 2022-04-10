@@ -1,6 +1,6 @@
 /*
 Package try is a package for try.ToX functions that implement the error
-checking. try.ToX functions check if err != nil and if it throws the err to the
+checking. try.ToX functions check 'if err != nil' and if it throws the err to the
 error handlers, which are implemented by the err2 package. More information
 about err2 and try packager roles can be seen in the FileCopy example:
   ...

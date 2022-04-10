@@ -10,9 +10,9 @@ The traditional error handling idiom in Go is roughly akin to
 
 which applied recursively.
 
-The err2 package drives programmers more to focus on error handling rather than
+The err2 package drives programmers to focus more on error handling rather than
 checking errors. We think that checks should be so easy that we never forget
-them.
+them. The CopyFile example shows how it works:
 
  func CopyFile(src, dst string) (err error) {
       defer err2.Returnf(&err, "copy %s %s", src, dst)
@@ -32,42 +32,34 @@ them.
       return nil
  }
 
-(help of the declarative control structures)
-
 Error checks
 
-The err2/try provides convenient helpers to check the errors. For example,
+The `try` package provides convenient helpers to check the errors. For example,
 instead of
 
  b, err := ioutil.ReadAll(r)
  if err != nil {
- 	return err
+    return err
  }
 
 we can write
 
  b := try.To1(ioutil.ReadAll(r))
 
-but not without the handler.
+Note that try.ToX functions are as fast as if err != nil statements. Please see
+the try package documentation for more information about the error checks.
 
 Error handling
 
-Package err2 relies on error handlers. In every function which uses err2 or try
-package for error-checking has to have at least one error handler. If there are
-no error handlers and error occurs it panics. Nevertheless, we think that
-panicking for the errors during the development is much better than not checking
-errors at all. However, if the call stack includes any err2 error handlers like
-err2.Handle() the error is handled there where the handler is saved to defer
-stack.
+Package err2 relies on error handlers. It uses declarative control structures to
+achieve error and panic safety. In every function which uses err2 or try package
+for error-checking has to have at least one error handler. If there are no error
+handlers and error occurs it panics. We think that panicking for
+the errors is much better than not checking errors at
+all. Nevertheless, if the call stack includes any err2 error handlers like
+err2.Handle() the error is handled where the handler is saved to defer-stack.
 
-The handler for the previous sample is
-
- defer err2.Return(&err)
-
-which is the helper handler for cases that don't annotate errors.
-err2.Handle is a helper function to add needed error handlers to defer stack.
-In most real-world cases, we have multiple error checks and only one or just a
-few error handlers per function. And if whole control flow is thought the ratio
-is even greater.
+err2 includes many examples to play with like previous CopyFile. Please see them
+for more information.
 */
 package err2
