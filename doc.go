@@ -39,7 +39,7 @@ them. The CopyFile example shows how it works:
       // will be called in the reversed order. And final return error is
       // properly annotated in all the cases.
       try.To1(io.Copy(w, r))
-	 
+
       // All OK, just return nil.
       return nil
  }
