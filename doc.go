@@ -6,16 +6,33 @@ Package err2 provides three main functionality:
 
 The traditional error handling idiom in Go is roughly akin to
 
- if err != nil {
- 	return err
+ if err != nil { return err }
+
+which applied recursively.
+
+The err2 package drives programmers more to focus on error handling rather than
+checking errors. We think that checks should be so easy that we never forget
+them.
+
+ func CopyFile(src, dst string) (err error) {
+      defer err2.Returnf(&err, "copy %s %s", src, dst)
+
+      // These try package helpers are as fast as Check() calls which is as
+      // fast as `if err != nil {}`
+
+      r := try.To1(os.Open(src))
+      defer r.Close()
+
+      w := try.To1(os.Create(dst))
+      defer err2.Handle(&err, func() {
+      	os.Remove(dst)
+      })
+      defer w.Close()
+      try.To1(io.Copy(w, r))
+      return nil
  }
 
-which applied recursively. That leads to code smells: redundancy, noise&verbose,
-or suppressed checks. The err2 package drives programmers more to focus on
-error handling rather than checking errors. We think that checks should be so
-easy (help of the declarative control structures) that we never forget them.
-
- try.To1(io.Copy(w, r))
+(help of the declarative control structures)
 
 Error checks
 
