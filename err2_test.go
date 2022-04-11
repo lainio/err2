@@ -62,7 +62,7 @@ func TestDefault_Error(t *testing.T) {
 	var err error
 	defer err2.Return(&err)
 
-	err2.Try(throw())
+	try.To1(throw())
 
 	t.Fail() // If everything works we are newer here
 }
@@ -71,7 +71,7 @@ func TestTry_Error(t *testing.T) {
 	var err error
 	defer err2.Handle(&err, func() {})
 
-	err2.Try(throw())
+	try.To1(throw())
 
 	t.Fail() // If everything works we are newer here
 }
@@ -89,7 +89,7 @@ func TestPanickingCatchAll(t *testing.T) {
 			args{
 				func() {
 					defer err2.CatchAll(func(err error) {}, func(v any) {})
-					err2.Try(wrongSignature())
+					panic("panic")
 				},
 			},
 			nil,
@@ -130,7 +130,7 @@ func TestPanickingCatchTrace(t *testing.T) {
 			args{
 				func() {
 					defer err2.CatchTrace(func(err error) {})
-					err2.Try(wrongSignature())
+					panic("panic")
 				},
 			},
 			nil,
@@ -172,7 +172,7 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 				func() {
 					var err error
 					defer err2.Handle(&err, func() {})
-					err2.Try(wrongSignature())
+					panic("panic")
 				},
 			},
 			nil,
@@ -215,7 +215,7 @@ func TestPanicking_Return(t *testing.T) {
 				func() {
 					var err error
 					defer err2.Return(&err)
-					err2.Try(wrongSignature())
+					panic("panic")
 				},
 			},
 			nil,
@@ -257,7 +257,7 @@ func TestPanicking_Catch(t *testing.T) {
 			args{
 				func() {
 					defer err2.Catch(func(err error) {})
-					err2.Try(wrongSignature())
+					panic("panic")
 				},
 			},
 			nil,
@@ -290,7 +290,7 @@ func TestCatch_Error(t *testing.T) {
 		//fmt.Printf("error and defer handling:%s\n", err)
 	})
 
-	err2.Try(throw())
+	try.To1(throw())
 
 	t.Fail() // If everything works we are newer here
 }
@@ -368,14 +368,14 @@ func Example_copyFile() {
 func ExampleReturn() {
 	var err error
 	defer err2.Return(&err)
-	err2.Try(noThrow())
+	try.To1(noThrow())
 	// Output:
 }
 
 func ExampleAnnotate() {
 	annotated := func() (err error) {
 		defer err2.Annotate("annotated", &err)
-		err2.Try(throw())
+		try.To1(throw())
 		return err
 	}
 	err := annotated()
@@ -386,7 +386,7 @@ func ExampleAnnotate() {
 func ExampleReturnf() {
 	annotated := func() (err error) {
 		defer err2.Returnf(&err, "annotated: %s", "err2")
-		err2.Try(throw())
+		try.To1(throw())
 		return err
 	}
 	err := annotated()
@@ -398,7 +398,7 @@ func ExampleAnnotate_deferStack() {
 	annotated := func() (err error) {
 		defer err2.Annotate("annotated 2nd", &err)
 		defer err2.Annotate("annotated 1st", &err)
-		err2.Try(throw())
+		try.To1(throw())
 		return err
 	}
 	err := annotated()
@@ -411,7 +411,7 @@ func ExampleHandle() {
 		defer err2.Handle(&err, func() {
 			err = fmt.Errorf("error with (%d, %d): %v", a, b, err)
 		})
-		err2.Try(throw())
+		try.To1(throw())
 		return err
 	}
 	err := doSomething(1, 2)
@@ -430,14 +430,14 @@ func BenchmarkOldErrorCheckingWithIfClause(b *testing.B) {
 
 func BenchmarkTry(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		err2.Try(noThrow())
+		try.To1(noThrow())
 	}
 }
 
 func BenchmarkTry_ErrVar(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, err := noThrow()
-		err2.Try(err)
+		try.To(err)
 	}
 }
 
