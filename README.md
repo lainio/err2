@@ -201,13 +201,12 @@ error correctly because the 'upper' handler catches it.
 - Because the use of `err2.Annotate` is so relatively easy, error messages much
 better and informative.
 
-- When error handling is based on the actual error handlers, code changes have
-been much easier.
+- **When error handling is based on the actual error handlers, code changes have
+been much easier.**
 
 - You don't seem to need '%w' wrapping. See the Go's official blog post what are
 [cons](https://go.dev/blog/go1.13-errors) for that.
-
-> Do not wrap an error when doing so would expose implementation details.
+  > Do not wrap an error when doing so would expose implementation details.
 
 ## Support
 
