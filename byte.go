@@ -4,7 +4,7 @@ type _Byte struct{}
 
 // Byte is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
-// Note! Deprecated, use try package
+// Note! Deprecated, use try package.
 var Byte _Byte
 
 // Try is a helper method to call func() (byte, error) functions

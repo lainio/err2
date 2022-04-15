@@ -269,7 +269,7 @@ type _empty struct{}
 // Empty is deprecated. Use try.To functions instead.
 // Empty is a helper variable to demonstrate how we could build 'type wrappers'
 // to make Try function as fast as Check.
-// Note! Deprecated, use try package
+// Note! Deprecated, use try package.
 var Empty _empty
 
 // Try is deprecated. Use try.To functions instead.

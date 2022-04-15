@@ -6,7 +6,7 @@ type _Request struct{}
 
 // Request is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
-// Note! Deprecated, use try package
+// Note! Deprecated, use try package.
 var Request _Request
 
 // Try is a helper method to call func() (*http.Request, error) functions
