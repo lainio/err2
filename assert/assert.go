@@ -5,11 +5,11 @@ import (
 )
 
 var (
-	// P is a production Asserter that types panic objects to errors which
+	// P is a production Asserter that sets panic objects to errors which
 	// allows err2 handlers to catch them.
 	P = AsserterToError
 
-	// D is a development Asserter that types panic objects to strings that
+	// D is a development Asserter that sets panic objects to strings that
 	// doesn't by caught by err2 handlers.
 	D Asserter = 0
 
@@ -25,16 +25,17 @@ var (
 	DefaultAsserter = AsserterToError | AsserterFormattedCallerInfo
 )
 
-// That asserts that term is true. If not it panics with the given formatting
-// string. Note! That is the most performant of all the assertion functions.
+// That asserts that the term is true. If not it panics with the given
+// formatting string. Note! That is the most performant of all the assertion
+// functions.
 func That(term bool, a ...any) {
 	if !term {
 		DefaultAsserter.reportAssertionFault("", a...)
 	}
 }
 
-// NotNil asserts that value in not nil. If it is it panics/errors (default
-// Asserter) with the given msg.
+// NotNil asserts that the value is not nil. If it is it panics/errors (default
+// Asserter) with the given message.
 func NotNil[T any](p *T, a ...any) {
 	if p == nil {
 		defMsg := "pointer is nil"
@@ -42,8 +43,8 @@ func NotNil[T any](p *T, a ...any) {
 	}
 }
 
-// SNotNil asserts that value in not nil. If it is it panics/errors (default
-// Asserter) with the given msg.
+// SNotNil asserts that the slice is not nil. If it is it panics/errors (default
+// Asserter) with the given message.
 func SNotNil[T any](s []T, a ...any) {
 	if s == nil {
 		defMsg := "slice is nil"
@@ -51,8 +52,8 @@ func SNotNil[T any](s []T, a ...any) {
 	}
 }
 
-// CNotNil asserts that value in not nil. If it is it panics/errors (default
-// Asserter) with the given msg.
+// CNotNil asserts that the channel is not nil. If it is it panics/errors
+// (default Asserter) with the given message.
 func CNotNil[T any](c chan T, a ...any) {
 	if c == nil {
 		defMsg := "channel is nil"
@@ -60,8 +61,8 @@ func CNotNil[T any](c chan T, a ...any) {
 	}
 }
 
-// MNotNil asserts that value in not nil. If it is it panics/errors (default
-// Asserter) with the given msg.
+// MNotNil asserts that the map is not nil. If it is it panics/errors (default
+// Asserter) with the given message.
 func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 	if m == nil {
 		defMsg := "map is nil"
@@ -69,8 +70,8 @@ func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 	}
 }
 
-// NotEqual asserts that values are equal. If not it panics/errors (current
-// Asserter) with the given msg.
+// NotEqual asserts that the values are equal. If not it panics/errors (current
+// Asserter) with the given message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
 		defMsg := fmt.Sprintf("got %v, want %v", val, want)
@@ -78,8 +79,8 @@ func NotEqual[T comparable](val, want T, a ...any) {
 	}
 }
 
-// Equal asserts that values are equal. If not it panics/errors (current
-// Asserter) with the given msg.
+// Equal asserts that the values are equal. If not it panics/errors (current
+// Asserter) with the given message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
 		defMsg := fmt.Sprintf("got %v, want %v", val, want)
@@ -87,10 +88,10 @@ func Equal[T comparable](val, want T, a ...any) {
 	}
 }
 
-// SLen asserts that length of the object is equal to given. If not it
-// panics/errors (current Asserter) with the given msg. Note! This is very slow
-// (before we have generics). If you need performance use EqualInt. It's not so
-// convenient, though.
+// SLen asserts that the length of the slice is equal to given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonable fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
 func SLen[T any](obj []T, length int, a ...any) {
 	l := len(obj)
 
@@ -100,15 +101,52 @@ func SLen[T any](obj []T, length int, a ...any) {
 	}
 }
 
-// MLen asserts that length of the object is equal to given. If not it
-// panics/errors (current Asserter) with the given msg. Note! This is very slow
-// (before we have generics). If you need performance use EqualInt. It's not so
-// convenient, though.
+// MLen asserts that the length of the map is equal to given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonable fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
 func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
 		defMsg := fmt.Sprintf("got %d, want %d", l, length)
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// NotEmpty asserts that the string is NOT empty. If not it panics/errors
+// (current Asserter) with the given message. Note! This is reasonable fast but
+// not as fast as 'That' because of lacking inlining for the current
+// implementation of Go's type parametric functions.
+func NotEmpty(obj string, a ...any) {
+	if obj == "" {
+		defMsg := "string shouldn't be empty"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// SNotEmpty asserts that the slice is NOT empty. If not it panics/errors
+// (current Asserter) with the given message. Note! This is reasonable fast but
+// not as fast as 'That' because of lacking inlining for the current
+// implementation of Go's type parametric functions.
+func SNotEmpty[T any](obj []T, a ...any) {
+	l := len(obj)
+
+	if l == 0 {
+		defMsg := "slice shouldn't be empty"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// MNotEmpty asserts that the map is NOT empty. If not it panics/errors
+// (current Asserter) with the given message. Note! This is reasonable fast but
+// not as fast as 'That' because of lacking inlining for the current
+// implementation of Go's type parametric functions.
+func MNotEmpty[T comparable, U any](obj map[T]U, length int, a ...any) {
+	l := len(obj)
+
+	if l == 0 {
+		defMsg := "map shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }

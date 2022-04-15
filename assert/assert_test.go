@@ -174,6 +174,30 @@ func ExampleAsserter_NoImplementation() {
 	// Output: sample: not implemented
 }
 
+func ExampleSNotEmpty() {
+	sample := func(b []byte) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.SNotEmpty(b)
+		return err
+	}
+	err := sample([]byte{})
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:181 ExampleSNotEmpty.func1 slice shouldn't be empty
+}
+
+func ExampleNotEmpty() {
+	sample := func(b string) (err error) {
+		defer err2.Annotate("sample", &err)
+
+		assert.NotEmpty(b)
+		return err
+	}
+	err := sample("")
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:193 ExampleNotEmpty.func1 string shouldn't be empty
+}
+
 func ifPanicZero(i int) {
 	if i == 0 {
 		panic("i == 0")
