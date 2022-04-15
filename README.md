@@ -114,9 +114,9 @@ actual production release.
 
 ```go
 func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData) []byte {
-	assert.Equal(len(data.AttData.AAGUID), 16, "wrong AAGUID length")
-	assert.That(data.AttData.CredentialID != "", "empty credential id")
-	assert.That(len(data.AttData.CredentialPublicKey) != 0, "empty credential public key")
+	assert.SLen(data.AttData.AAGUID, 16, "wrong AAGUID length")
+	assert.NotEmpty(data.AttData.CredentialID, "empty credential id")
+	assert.SNotEmpty(data.AttData.CredentialPublicKey, "empty credential public key")
 	...
 ```
 
