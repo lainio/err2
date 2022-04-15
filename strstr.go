@@ -4,6 +4,7 @@ type _StrStr struct{}
 
 // StrStr is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
+// Note! Deprecated, use try package
 var StrStr _StrStr
 
 // Try is a helper method to call func() (string, error) functions

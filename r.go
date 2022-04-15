@@ -6,6 +6,7 @@ type _R struct{}
 
 // R is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
+// Note! Deprecated, use try package
 var R _R
 
 // Try is a helper method to call func() (io.Reader, error) functions

@@ -6,6 +6,7 @@ type _Response struct{}
 
 // Response is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
+// Note! Deprecated, use try package
 var Response _Response
 
 // Try is a helper method to call func() (*http.Response, error) functions

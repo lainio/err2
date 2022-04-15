@@ -4,6 +4,7 @@ type _Bools struct{}
 
 // Bools is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
+// Note! Deprecated, use try package
 var Bools _Bools
 
 // Try is a helper method to call func() ([]bool, error) functions

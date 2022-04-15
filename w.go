@@ -6,6 +6,7 @@ type _W struct{}
 
 // W is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
+// Note! Deprecated, use try package
 var W _W
 
 // Try is a helper method to call func() (io.Writer, error) functions

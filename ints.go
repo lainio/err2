@@ -4,6 +4,7 @@ type _Ints struct{}
 
 // Ints is a helper variable to generated
 // 'type wrappers' to make Try function as fast as Check.
+// Note! Deprecated, use try package
 var Ints _Ints
 
 // Try is a helper method to call func() ([]int, error) functions
