@@ -114,7 +114,7 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 	}
 }
 
-// NotEmpty asserts that the string is NOT empty. If not it panics/errors
+// NotEmpty asserts that the string is not empty. If not it panics/errors
 // (current Asserter) with the given message. Note! This is reasonable fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
@@ -125,7 +125,7 @@ func NotEmpty(obj string, a ...any) {
 	}
 }
 
-// SNotEmpty asserts that the slice is NOT empty. If not it panics/errors
+// SNotEmpty asserts that the slice is not empty. If not it panics/errors
 // (current Asserter) with the given message. Note! This is reasonable fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
@@ -138,7 +138,7 @@ func SNotEmpty[T any](obj []T, a ...any) {
 	}
 }
 
-// MNotEmpty asserts that the map is NOT empty. If not it panics/errors
+// MNotEmpty asserts that the map is not empty. If not it panics/errors
 // (current Asserter) with the given message. Note! This is reasonable fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
