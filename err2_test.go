@@ -26,10 +26,10 @@ func recursion(a int) (r int, err error) {
 	if a == 0 {
 		return 0, nil
 	}
-	s, err := noThrow()
+	s := try.To1(noThrow())
 	err2.Check(err)
 	_ = s
-	r, _ = recursion(a - 1)
+	r = try.To1(recursion(a - 1))
 	r += a
 	return r, nil
 }
@@ -485,19 +485,19 @@ func BenchmarkCheck_ErrVar(b *testing.B) {
 	}
 }
 
-func BenchmarkCleanRecursion_NotRelated(b *testing.B) {
+func BenchmarkCleanRecursionWithTryCall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = cleanRecursion(100)
 	}
 }
 
-func BenchmarkRecursionNoCheck_NotRelated(b *testing.B) {
+func BenchmarkRecursionWithCheckAndDefer(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, _ = recursion(100)
 	}
 }
 
-func BenchmarkRecursionWithErrorCheck_NotRelated(b *testing.B) {
+func BenchmarkRecursionWithOldErrorCheck(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, err := recursionWithErrorCheck(100)
 		if err != nil {
