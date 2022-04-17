@@ -19,16 +19,28 @@ func twoStrNoThrow() (string, string, error)        { return "test", "test", nil
 func intStrNoThrow() (int, string, error)           { return 1, "test", nil }
 func boolIntStrNoThrow() (bool, int, string, error) { return true, 1, "test", nil }
 func noThrow() (string, error)                      { return "test", nil }
-func wrongSignature() (int, int)                    { return 0, 0 }
 
-func recursion(a int) int {
+func recursion(a int) (r int, err error) {
+	defer err2.Return(&err)
+
 	if a == 0 {
-		return 0
+		return 0, nil
 	}
 	s, err := noThrow()
 	err2.Check(err)
 	_ = s
-	return a + recursion(a-1)
+	r, _ = recursion(a - 1)
+	r += a
+	return r, nil
+}
+
+func cleanRecursion(a int) int {
+	if a == 0 {
+		return 0
+	}
+	s := try.To1(noThrow())
+	_ = s
+	return a + cleanRecursion(a-1)
 }
 
 func recursionWithErrorCheck(a int) (int, error) {
@@ -428,9 +440,9 @@ func BenchmarkOldErrorCheckingWithIfClause(b *testing.B) {
 	}
 }
 
-func BenchmarkTry(b *testing.B) {
+func BenchmarkOriginalTry(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		try.To1(noThrow())
+		err2.Try(noThrow()) // we show here what can take time
 	}
 }
 
@@ -473,9 +485,15 @@ func BenchmarkCheck_ErrVar(b *testing.B) {
 	}
 }
 
+func BenchmarkCleanRecursion_NotRelated(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = cleanRecursion(100)
+	}
+}
+
 func BenchmarkRecursionNoCheck_NotRelated(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		_ = recursion(100)
+		_, _ = recursion(100)
 	}
 }
 
