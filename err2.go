@@ -4,11 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"runtime"
 
 	"github.com/lainio/err2/internal/debug"
+)
+
+var (
+	StackStraceWriter io.Writer
 )
 
 // Try is deprecated. Use try.To functions from try package instead.
@@ -151,13 +154,12 @@ func CatchTrace(errorHandler func(err error)) {
 	case nil:
 		break
 	case runtime.Error:
-		fmt.Fprintf(os.Stderr, "---\n%v\n---\n", r)
-		debug.PrintStack(4)
+		printStackIf(7, r)
 	case error:
+		printStackIf(6, r)
 		errorHandler(r.(error))
 	default:
-		fmt.Fprintf(os.Stderr, "---\n%v\n---\n", r)
-		debug.PrintStack(4)
+		printStackIf(7, r)
 	}
 }
 
@@ -168,7 +170,10 @@ func Return(err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	switch r := recover(); r.(type) {
+	r := recover()
+	checkStackTracePrinting(r)
+
+	switch r.(type) {
 	case nil:
 		break
 	case runtime.Error:
@@ -186,16 +191,21 @@ func Returnw(err *error, format string, args ...any) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	switch r := recover(); r.(type) {
+	r := recover()
+	checkStackTracePrinting(r)
+
+	switch r.(type) {
+	case nil:
+		if *err != nil { // if other handlers call recovery() we still..
+			*err = fmt.Errorf(format+": %w", append(args, *err)...)
+		}
 	case runtime.Error:
 		panic(r)
 	case error:
 		e := r.(error)
 		*err = fmt.Errorf(format, e)
 	default:
-		if *err != nil { // if other handlers call recovery() we still..
-			*err = fmt.Errorf(format+": %w", append(args, *err)...)
-		}
+		panic(r)
 	}
 }
 
@@ -206,7 +216,15 @@ func Annotatew(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	switch r := recover(); r.(type) {
+	r := recover()
+	checkStackTracePrinting(r)
+
+	switch r.(type) {
+	case nil:
+		if *err != nil { // if other handlers call recovery() we still..
+			format := prefix + ": %w"
+			*err = fmt.Errorf(format, (*err))
+		}
 	case runtime.Error:
 		panic(r)
 	case error:
@@ -214,10 +232,7 @@ func Annotatew(prefix string, err *error) {
 		format := prefix + ": %w"
 		*err = fmt.Errorf(format, e)
 	default:
-		if *err != nil { // if other handlers call recovery() we still..
-			format := prefix + ": %w"
-			*err = fmt.Errorf(format, (*err))
-		}
+		panic(r)
 	}
 }
 
@@ -228,16 +243,21 @@ func Returnf(err *error, format string, args ...any) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	switch r := recover(); r.(type) {
+	r := recover()
+	checkStackTracePrinting(r)
+
+	switch r.(type) {
+	case nil:
+		if *err != nil { // if other handlers call recovery() we still..
+			*err = fmt.Errorf(format+": %v", append(args, *err)...)
+		}
 	case runtime.Error:
 		panic(r)
 	case error:
 		e := r.(error)
 		*err = fmt.Errorf(format+": %v", append(args, e)...)
 	default:
-		if *err != nil { // if other handlers call recovery() we still..
-			*err = fmt.Errorf(format+": %v", append(args, *err)...)
-		}
+		panic(r)
 	}
 }
 
@@ -248,7 +268,15 @@ func Annotate(prefix string, err *error) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these two to use same function.
 
-	switch r := recover(); r.(type) {
+	r := recover()
+	checkStackTracePrinting(r)
+
+	switch r.(type) {
+	case nil:
+		if *err != nil { // if other handlers call recovery() we still..
+			format := prefix + ": %v"
+			*err = fmt.Errorf(format, (*err))
+		}
 	case runtime.Error:
 		panic(r)
 	case error:
@@ -256,11 +284,7 @@ func Annotate(prefix string, err *error) {
 		format := prefix + ": %v"
 		*err = fmt.Errorf(format, e)
 	default:
-		if *err != nil { // if other handlers call recovery() we still..
-			format := prefix + ": %v"
-			*err = fmt.Errorf(format, (*err))
-		}
-
+		panic(r)
 	}
 }
 
@@ -278,3 +302,29 @@ var Empty _empty
 func (s _empty) Try(_ any, err error) {
 	Check(err)
 }
+
+func printStackIf(lvl int, msg any) {
+	if StackStraceWriter != nil {
+		fmt.Fprintf(StackStraceWriter, "---\n%v\n---\n", msg)
+		debug.FprintStack(StackStraceWriter, lvl)
+	}
+}
+
+func checkStackTracePrinting(r any) {
+	switch r.(type) {
+	case nil:
+		break
+	case runtime.Error:
+		printStackIf(stackPrologRuntime, r)
+	case error:
+		printStackIf(stackPrologError, r)
+	default:
+		printStackIf(stackPrologPanic, r) // 5 => short call stack panic caused in the current line
+	}
+}
+
+const (
+	stackPrologRuntime = 6
+	stackPrologError   = 8
+	stackPrologPanic   = 6
+)
