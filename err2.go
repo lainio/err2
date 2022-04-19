@@ -85,7 +85,10 @@ func Handle(err *error, handler func()) {
 	// We put real panic objects back and keep only those which are
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
-	switch r := recover(); r.(type) {
+	r := recover()
+	checkStackTracePrinting("Handle", r)
+
+	switch r.(type) {
 	case nil:
 		// Defers are in the stack and the first from the stack gets the
 		// opportunity to get panic object's error (below). We still must
@@ -131,7 +134,10 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
 
-	switch r := recover(); r.(type) {
+	r := recover()
+	checkStackTracePrinting("CatchAll", r)
+
+	switch r.(type) {
 	case nil:
 		break
 	case runtime.Error:
@@ -154,12 +160,12 @@ func CatchTrace(errorHandler func(err error)) {
 	case nil:
 		break
 	case runtime.Error:
-		printStackIf(7, r)
+		printStackIf("CatchTrace", 7, r)
 	case error:
-		printStackIf(6, r)
+		printStackIf("CatchTrace", 6, r)
 		errorHandler(r.(error))
 	default:
-		printStackIf(7, r)
+		printStackIf("CatchTrace", 7, r)
 	}
 }
 
@@ -171,7 +177,7 @@ func Return(err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
+	checkStackTracePrinting("Return", r)
 
 	switch r.(type) {
 	case nil:
@@ -192,7 +198,7 @@ func Returnw(err *error, format string, args ...any) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
+	checkStackTracePrinting("Returnw", r)
 
 	switch r.(type) {
 	case nil:
@@ -217,7 +223,7 @@ func Annotatew(prefix string, err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
+	checkStackTracePrinting("Annotatew", r)
 
 	switch r.(type) {
 	case nil:
@@ -244,7 +250,7 @@ func Returnf(err *error, format string, args ...any) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
+	checkStackTracePrinting("Returnf", r)
 
 	switch r.(type) {
 	case nil:
@@ -269,7 +275,7 @@ func Annotate(prefix string, err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
+	checkStackTracePrinting("Annotate", r)
 
 	switch r.(type) {
 	case nil:
@@ -303,28 +309,34 @@ func (s _empty) Try(_ any, err error) {
 	Check(err)
 }
 
-func printStackIf(lvl int, msg any) {
+func printStackIf(fnName string, lvl int, msg any) {
 	if StackStraceWriter != nil {
 		fmt.Fprintf(StackStraceWriter, "---\n%v\n---\n", msg)
-		debug.FprintStack(StackStraceWriter, lvl)
+		debug.FprintStack(StackStraceWriter,
+			debug.StackInfo{
+				PackageName: "err2",
+				FuncName:    fnName,
+				Level:       lvl,
+			},
+		)
 	}
 }
 
-func checkStackTracePrinting(r any) {
+func checkStackTracePrinting(fnName string, r any) {
 	switch r.(type) {
 	case nil:
 		break
 	case runtime.Error:
-		printStackIf(stackPrologRuntime, r)
+		printStackIf(fnName, stackPrologRuntime, r)
 	case error:
-		printStackIf(stackPrologError, r)
+		printStackIf(fnName, stackPrologError, r)
 	default:
-		printStackIf(stackPrologPanic, r) // 5 => short call stack panic caused in the current line
+		printStackIf(fnName, stackPrologPanic, r) // 5 => short call stack panic caused in the current line
 	}
 }
 
 const (
-	stackPrologRuntime = 6
-	stackPrologError   = 8
-	stackPrologPanic   = 6
+	stackPrologRuntime = 0 //6
+	stackPrologError   = 0 //8
+	stackPrologPanic   = 0 //6
 )
