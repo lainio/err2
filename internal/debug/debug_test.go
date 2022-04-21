@@ -180,7 +180,29 @@ func TestStackPrint_noLimits(t *testing.T) {
 			require.EqualValues(t, tt.input, w.String())
 		})
 	}
+}
 
+func TestCalcAnchor(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		anchor int
+	}{
+		{"short", input, 6},
+		{"medium", input1, 10},
+		{"long", input2, 14},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := strings.NewReader(tt.input)
+			anchor := calcAnchor(r, StackInfo{
+				PackageName: "",
+				FuncName:    "panic(",
+				Level:       0,
+			})
+			require.EqualValues(t, tt.anchor, anchor)
+		})
+	}
 }
 
 func TestStackPrint_limit(t *testing.T) {

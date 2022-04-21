@@ -36,15 +36,15 @@ func PrintStack(stackLevel int) {
 	FprintStack(os.Stderr, StackInfo{Level: stackLevel})
 }
 
-// FprintStack prints to w the stack trace returned by runtime.Stack by starting
-// from StackInfo.
+// FprintStack prints the stack trace returned by runtime.Stack to the writer.
+// The StackInfo tells what it prints from the stack.
 func FprintStack(w io.Writer, si StackInfo) {
 	stackBuf := bytes.NewBuffer(debug.Stack())
 	stackPrint(stackBuf, w, si)
 }
 
-// stackPrint prints to standard error the stack trace returned by runtime.Stack
-// by starting from stackLevel.
+// stackPrint prints the stack trace read from reader and to the writer. The
+// StackInfo tells what it prints from the stack.
 func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 	scanner := bufio.NewScanner(r)
 
@@ -70,3 +70,24 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 		}
 	}
 }
+
+func calcAnchor(r io.Reader, si StackInfo) int {
+	scanner := bufio.NewScanner(r)
+
+	// there is a caption line first, that's why we start from -1
+	anchorLine := nilAnchor
+	for i := -1; scanner.Scan(); i++ {
+		line := scanner.Text()
+
+		// anchorLine can set when it is not the caption
+		// line AND it matches to StackInfo criteria
+		canSetAnchorLine := i > -1 && si.isAnchor(line)
+
+		if canSetAnchorLine {
+			anchorLine = i
+		}
+	}
+	return anchorLine
+}
+
+const nilAnchor = 0xffff
