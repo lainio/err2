@@ -9,6 +9,19 @@ import (
 )
 
 var (
+	inputByError = `goroutine 1 [running]:
+panic({0x137b20, 0x400007ac60})
+	/usr/local/go/src/runtime/panic.go:838 +0x20c
+github.com/lainio/err2/try.To(...)
+	/home/god/go/src/github.com/lainio/err2/try/try.go:50
+github.com/lainio/err2/try.To1[...](...)
+	/home/god/go/src/github.com/lainio/err2/try/try.go:58
+main.test1()
+	/home/god/go/src/github.com/lainio/ic/main.go:29 +0x110
+main.main()
+	/home/god/go/src/github.com/lainio/ic/main.go:73 +0x1b0
+`
+
 	input = `goroutine 1 [running]:
 github.com/lainio/err2.Handle(0x40000b5ed8, 0x40000b5ef8)
 	/home/god/go/src/github.com/lainio/err2/err2.go:107 +0x10c
@@ -126,6 +139,28 @@ main.main()
 `
 )
 
+func TestFullName(t *testing.T) {
+	type args struct {
+		StackInfo
+	}
+	tests := []struct {
+		name string
+		args
+		retval string
+	}{
+		{"all empty", args{StackInfo{"", "", 0}}, ""},
+		{"namespaces", args{StackInfo{"lainio/err2", "", 0}}, "lainio/err2"},
+		{"both", args{StackInfo{"lainio/err2", "try", 0}}, "lainio/err2.try"},
+		{"func", args{StackInfo{"", "try", 0}}, "try"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.retval, tt.fullName())
+		})
+	}
+
+}
+
 func TestIsAnchor(t *testing.T) {
 	type args struct {
 		input string
@@ -151,6 +186,9 @@ func TestIsAnchor(t *testing.T) {
 		{"long", args{
 			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
 			StackInfo{"err2", "Handle", 0}}, true},
+		{"package name only", args{
+			"github.com/lainio/err2/try.To1[...](...)",
+			StackInfo{"lainio/err2", "", 0}}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -239,5 +277,4 @@ func TestStackPrint_limit(t *testing.T) {
 			require.Equal(t, tt.output, w.String())
 		})
 	}
-
 }

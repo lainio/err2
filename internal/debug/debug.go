@@ -18,6 +18,9 @@ type StackInfo struct {
 
 func (si StackInfo) fullName() string {
 	if si.PackageName != "" {
+		if si.FuncName == "" {
+			return si.PackageName
+		}
 		return fmt.Sprintf("%s.%s", si.PackageName, si.FuncName)
 	}
 	return si.FuncName
