@@ -63,6 +63,15 @@ main.main()
 	/home/god/go/src/github.com/lainio/ic/main.go:74 +0x1d0
 `
 
+	output1panic = `goroutine 1 [running]:
+panic({0x12e3e0, 0x188f50})
+	/usr/local/go/src/runtime/panic.go:838 +0x20c
+main.test0()
+	/home/god/go/src/github.com/lainio/ic/main.go:18 +0x64
+main.main()
+	/home/god/go/src/github.com/lainio/ic/main.go:74 +0x1d0
+`
+
 	output12 = `goroutine 1 [running]:
 main.test0()
 	/home/god/go/src/github.com/lainio/ic/main.go:18 +0x64
@@ -187,6 +196,7 @@ func TestStackPrint_limit(t *testing.T) {
 		{"short", args{input, StackInfo{"err2", "Returnw(", 0}}, output},
 		{"medium", args{input1, StackInfo{"err2", "Returnw(", 0}}, output1},
 		{"medium level 2", args{input1, StackInfo{"err2", "Returnw(", 2}}, output12},
+		{"medium panic", args{input1, StackInfo{"", "panic(", 0}}, output1panic},
 		{"long", args{input2, StackInfo{"err2", "Handle(", 0}}, output2},
 		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3}}, output23},
 	}
