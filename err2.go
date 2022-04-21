@@ -331,7 +331,7 @@ func checkStackTracePrinting(r any) {
 }
 
 func newErrSI() debug.StackInfo {
-	return debug.StackInfo{PackageName: "lainio/err2", Level: 1}
+	return debug.StackInfo{PackageName: "lainio/err2/try.", Level: 1}
 }
 
 func newSI(pn, fn string, lvl int) debug.StackInfo {
