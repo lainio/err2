@@ -17,13 +17,11 @@ type StackInfo struct {
 }
 
 func (si StackInfo) fullName() string {
-	if si.PackageName != "" {
-		if si.FuncName == "" {
-			return si.PackageName
-		}
-		return fmt.Sprintf("%s.%s", si.PackageName, si.FuncName)
+	dot := ""
+	if si.PackageName != "" && si.FuncName != "" {
+		dot = "."
 	}
-	return si.FuncName
+	return fmt.Sprintf("%s%s%s", si.PackageName, dot, si.FuncName)
 }
 
 func (si StackInfo) isAnchor(s string) bool {
