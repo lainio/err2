@@ -1,6 +1,6 @@
 # IDEs, etc.
 .idea
-Session.vim
+Session.vim*
 
 # to suppress neomake temporary 
 .golangci.yml
