@@ -46,24 +46,20 @@ func FprintStack(w io.Writer, si StackInfo) {
 // stackPrint prints the stack trace read from reader and to the writer. The
 // StackInfo tells what it prints from the stack.
 func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
-	scanner := bufio.NewScanner(r)
+	var buf bytes.Buffer
+	r = io.TeeReader(r, &buf)
+	anchorLine := calcAnchor(r, si)
+	scanner := bufio.NewScanner(&buf)
 
-	// there is a caption line first, that's why we start from -1
-	anchorLine := 0xffff
 	for i := -1; scanner.Scan(); i++ {
 		line := scanner.Text()
 
-		// anchorLine can set when it's not yet set AND this is not the caption
-		// line AND it matches to StackInfo criteria
-		canSetAnchorLine := anchorLine == 0xffff && i > -1 && si.isAnchor(line)
-
-		if canSetAnchorLine {
-			anchorLine = i
-		}
-
 		// line can print when it is a caption OR there is no anchorLine
 		// criteria OR the line (pair) is creater than anchorLine
-		canPrint := i == -1 || 0 == si.Level+anchorLine || i >= 2*si.Level+anchorLine
+		canPrint := anchorLine == nilAnchor
+		if !canPrint {
+			canPrint = i == -1 || 0 == si.Level+anchorLine || i >= 2*si.Level+anchorLine
+		}
 
 		if canPrint {
 			fmt.Fprintln(w, line)
@@ -76,7 +72,8 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 
 	// there is a caption line first, that's why we start from -1
 	anchorLine := nilAnchor
-	for i := -1; scanner.Scan(); i++ {
+	var i int
+	for i = -1; scanner.Scan(); i++ {
 		line := scanner.Text()
 
 		// anchorLine can set when it is not the caption
@@ -86,6 +83,9 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 		if canSetAnchorLine {
 			anchorLine = i
 		}
+	}
+	if i-1 == anchorLine {
+		return nilAnchor
 	}
 	return anchorLine
 }

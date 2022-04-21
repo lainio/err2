@@ -183,23 +183,24 @@ func TestStackPrint_noLimits(t *testing.T) {
 }
 
 func TestCalcAnchor(t *testing.T) {
+	type args struct {
+		input string
+		StackInfo
+	}
 	tests := []struct {
-		name   string
-		input  string
+		name string
+		args
 		anchor int
 	}{
-		{"short", input, 6},
-		{"medium", input1, 10},
-		{"long", input2, 14},
+		{"short", args{input, StackInfo{"", "panic(", 0}}, 6},
+		{"short and nolimit", args{input, StackInfo{"", "", 0}}, nilAnchor},
+		{"medium", args{input1, StackInfo{"", "panic(", 0}}, 10},
+		{"long", args{input2, StackInfo{"", "panic(", 0}}, 14},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := strings.NewReader(tt.input)
-			anchor := calcAnchor(r, StackInfo{
-				PackageName: "",
-				FuncName:    "panic(",
-				Level:       0,
-			})
+			anchor := calcAnchor(r, tt.StackInfo)
 			require.EqualValues(t, tt.anchor, anchor)
 		})
 	}
