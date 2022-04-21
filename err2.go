@@ -11,6 +11,10 @@ import (
 )
 
 var (
+	// StackStraceWriter allows to set automatic stack tracing.
+	//  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+	//   or
+	//  err2.StackStraceWriter = log.Writer() // stack trace to std logger
 	StackStraceWriter io.Writer
 )
 

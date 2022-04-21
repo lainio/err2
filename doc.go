@@ -1,6 +1,6 @@
 /*
 Package err2 provides three main functionality:
-  1. err2 package includes helper functions for error handling.
+  1. err2 package includes helper functions for error handling & stack tracing
   2. try package is for error checking
   3. assert package is for design-by-contract and preconditions
 
@@ -60,6 +60,14 @@ we can write
 
 Note that try.ToX functions are as fast as if err != nil statements. Please see
 the try package documentation for more information about the error checks.
+
+Stack Tracing
+
+err2 offers optional stack tracing. It's automatic. Just set the
+StackTraceWriter to the stream you want traces to be written:
+  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+   or
+  err2.StackStraceWriter = log.Writer() // stack trace to std logger
 
 Error handling
 

@@ -11,7 +11,7 @@ err2 has the following package structure:
 - The `try` package offers error checking functions.
 - The `assert` package implements assertion helpers for *design-by-contract*.
 
-## Automatic Error Propagation
+## Automatic Error Propagation And Stack Tracing
 
 The current version of Go tends to produce too much error checking and too
 little error handling. This package helps us fix that.
@@ -20,6 +20,7 @@ little error handling. This package helps us fix that.
 2. It helps to check and transport errors to the nearest (the defer-stack) error
    handler. 
 3. It helps us use design-by-contract type preconditions.
+4. It offers automatic stack tracing for every error, runtime error, or panic.
 
 You can use all of them or just the other. However, if you use `try` for error
 checks you must remember use Go's `recover()` by yourself, or your error isn't
@@ -47,6 +48,21 @@ you need to annotate the error you can use either `Annotate` or `Returnf`. These
 functions have their error wrapping versions as well: `Annotatew` and `Returnw`.
 Our general guideline is:
 > Do not wrap an error when doing so would expose implementation details.
+
+#### Optional Stack Tracing
+
+err2 offers optional stack tracing. It's automatic. Just set the
+`StackTraceWriter` to the stream you want traces to be written:
+
+```go
+  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+   or
+  err2.StackStraceWriter = log.Writer() // stack trace to std logger
+```
+
+If `StackTraceWriter` is not set no stack tracing is done. This is the default
+because in the most cases proper error messages are enough and panics are
+handled immediately anyhow.
 
 #### Error Handler
 
