@@ -273,7 +273,6 @@ func TestStackPrint_limit(t *testing.T) {
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(w.String(), "\n")
 			require.Greater(t, len(ins), len(outs), tt.FuncName)
-			println(len(outs), "/", len(ins))
 			require.Equal(t, tt.output, w.String())
 		})
 	}
