@@ -195,7 +195,7 @@ isn't perfect. We have run many benchmarks to try to minimise the performance
 penalty this kind of mechanism might bring. We have focused on the _happy path_
 analyses. If the performance of the *error path* is essential, don't use this
 mechanism presented here. But be aware that if your code uses the error path as 
-a part of algorithm itself something is badly wrong.
+a part of algorithm itself something is wrong.
 
 **For happy paths** by using `try.ToX` error check functions **there are no
 performance penalty at all**. However, the mandatory use of the `defer` might
@@ -207,7 +207,7 @@ to put error handlers as high in the call stack as possible.
 The original goal was to make it possible to write similar code than proposed
 Go2 error handling would allow and do it right now (summer 2019). The goal was
 well aligned with the latest Go2 proposal where it would bring a `try` macro and
-let the error handling be implemented in defer blocks. The try-proposal was put
+let the error handling be implemented in defer blocks. The try-proposal was
 cancelled at its latest form. Nevertheless, we have learned that using panics
 for early-stage error transport isn't a bad thing but opposite. It seems to help
 to draft algorithms much faster, and still maintains the readability.
@@ -254,5 +254,5 @@ Version history:
   io.EOF
 - 0.8.0 `try.To()` & `assert.That()`, etc. functions with the help of the generics
 - 0.8.1 **bug-fix**: `runtime.Error` types are treated as `panics` now (Issue #1)
-- 0.8.3 `try.IsXX()` bug fix, lots of new docs, and automatic stack tracing!
+- 0.8.3 `try.IsXX()` bug fix, lots of new docs, and **automatic stack tracing!**
 
