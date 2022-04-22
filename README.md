@@ -55,9 +55,9 @@ err2 offers optional stack tracing. It's automatic. Just set the
 `StackTraceWriter` to the stream you want traces to be written:
 
 ```go
-  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
-   or
-  err2.StackStraceWriter = log.Writer() // stack trace to std logger
+err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+  or
+err2.StackStraceWriter = log.Writer() // stack trace to std logger
 ```
 
 If `StackTraceWriter` is not set no stack tracing is done. This is the default
@@ -119,10 +119,10 @@ convenience.
 
 With these you can write code where error is translated to boolean value:
 ```go
-	notExist := try.Is(r2.err, plugin.ErrNotExist)
+notExist := try.Is(r2.err, plugin.ErrNotExist)
 
-	// real errors are cought and the returned boolean tells if value
-	// dosen't exist returnend as `plugin.ErrNotExist`
+// real errors are cought and the returned boolean tells if value
+// dosen't exist returnend as `plugin.ErrNotExist`
 ```
 
 For more information see the examples of both functions.
