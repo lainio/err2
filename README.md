@@ -246,5 +246,5 @@ Version history:
   io.EOF
 - 0.8.0 `try.To()` & `assert.That()`, etc. functions with the help of the generics
 - 0.8.1 **bug-fix**: `runtime.Error` types are treated as `panics` now (Issue #1)
-- 0.8.3 `try.IsXX()` bug fix, lots of new documentation
+- 0.8.3 `try.IsXX()` bug fix, lots of new docs, and automatic stack tracing!
 
