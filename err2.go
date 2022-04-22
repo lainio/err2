@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"runtime"
 
@@ -159,7 +160,7 @@ func CatchTrace(errorHandler func(err error)) {
 	// it works with defer. We cannot refactor these 2 to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
+	printStackTrace(os.Stderr, r)
 
 	switch r.(type) {
 	case nil:
@@ -309,10 +310,14 @@ func (s _empty) Try(_ any, err error) {
 	Check(err)
 }
 
+func printStack(w io.Writer, si debug.StackInfo, msg any) {
+	fmt.Fprintf(w, "---\n%v\n---\n", msg)
+	debug.FprintStack(w, si)
+}
+
 func printStackIf(si debug.StackInfo, msg any) {
 	if StackStraceWriter != nil {
-		fmt.Fprintf(StackStraceWriter, "---\n%v\n---\n", msg)
-		debug.FprintStack(StackStraceWriter, si)
+		printStack(StackStraceWriter, si, msg)
 	}
 }
 
@@ -329,6 +334,22 @@ func checkStackTracePrinting(r any) {
 	default:
 		si := stackPrologPanic
 		printStackIf(si, r)
+	}
+}
+
+func printStackTrace(w io.Writer, r any) {
+	switch r.(type) {
+	case nil:
+		break
+	case runtime.Error:
+		si := stackPrologRuntime
+		printStack(w, si, r)
+	case error:
+		si := stackPrologError
+		printStack(w, si, r)
+	default:
+		si := stackPrologPanic
+		printStack(w, si, r)
 	}
 }
 
