@@ -75,8 +75,8 @@ func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 	}
 }
 
-// NotEqual asserts that the values are equal. If not it panics/errors (current
-// Asserter) with the given message.
+// NotEqual asserts that the values aren't equal. If they are it panics/errors
+// (current Asserter) with the given message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
 		defMsg := fmt.Sprintf("got %v, want %v", val, want)
@@ -119,7 +119,7 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 	}
 }
 
-// NotEmpty asserts that the string is not empty. If not it panics/errors
+// NotEmpty asserts that the string is not empty. If it is, it panics/errors
 // (current Asserter) with the given message. Note! This is reasonable fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
@@ -130,7 +130,7 @@ func NotEmpty(obj string, a ...any) {
 	}
 }
 
-// SNotEmpty asserts that the slice is not empty. If not it panics/errors
+// SNotEmpty asserts that the slice is not empty. If it is, it panics/errors
 // (current Asserter) with the given message. Note! This is reasonable fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
@@ -143,7 +143,7 @@ func SNotEmpty[T any](obj []T, a ...any) {
 	}
 }
 
-// MNotEmpty asserts that the map is not empty. If not it panics/errors
+// MNotEmpty asserts that the map is not empty. If it is, it panics/errors
 // (current Asserter) with the given message. Note! This is reasonable fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
