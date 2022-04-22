@@ -49,7 +49,7 @@ functions have their error wrapping versions as well: `Annotatew` and `Returnw`.
 Our general guideline is:
 > Do not wrap an error when doing so would expose implementation details.
 
-#### Optional Stack Tracing
+#### Automatic Stack Tracing
 
 err2 offers optional stack tracing. It's automatic. Just set the
 `StackTraceWriter` to the stream you want traces to be written:
@@ -63,6 +63,14 @@ err2 offers optional stack tracing. It's automatic. Just set the
 If `StackTraceWriter` is not set no stack tracing is done. This is the default
 because in the most cases proper error messages are enough and panics are
 handled immediately anyhow.
+
+#### Manual Stack Tracing
+
+err2 offers two error catchers for manual stack tracing: `CatchTrace` and
+`CatchAll`. The first one lets you to handle errors and it will print stack
+trace to `stderr` for panic and `runtime.Error`. The second is same but you have
+separated handler function for panic and `runtime.Error` so you can decide by
+yourself where to print them or what to do with them.
 
 #### Error Handler
 
