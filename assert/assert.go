@@ -11,7 +11,7 @@ var (
 
 	// D is a development Asserter that sets panic objects to strings that
 	// doesn't by caught by err2 handlers.
-	D Asserter = 0
+	D Asserter = AsserterDebug
 
 	// DefaultAsserter is a default asserter used for package-level functions
 	// like assert.That(). It is the same as the production asserter P, which
@@ -24,6 +24,11 @@ var (
 	// the tests. When in other cases, throw an error.
 	DefaultAsserter = AsserterToError | AsserterFormattedCallerInfo
 )
+
+// NotImplemented always panics with 'not implemented' assertion message.
+func NotImplemented(a ...any) {
+	D.reportAssertionFault("not implemented", a...)
+}
 
 // That asserts that the term is true. If not it panics with the given
 // formatting string. Note! That is the most performant of all the assertion

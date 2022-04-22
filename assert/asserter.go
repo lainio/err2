@@ -15,6 +15,10 @@ import (
 type Asserter uint32
 
 const (
+	// AsserterDebug is the default mode where all asserts are treaded as
+	// panics
+	AsserterDebug Asserter = 0
+
 	// AsserterToError is Asserter flag to guide asserter to use Go's error
 	// type for panics.
 	AsserterToError Asserter = 1 << iota
