@@ -28,12 +28,12 @@ Note that try.ToX function names end to a number (x) because:
 The leading number at the end of the To2 tells that To2 takes two different
 non-error arguments, and the third one must be an error value.
 
-If you now look at the FileCopy example again you see that all the functions
-which are directed to try.To1 are returning (type1, error) tuples. All of these
-tuples are correct input to try.To1. However, if you have a function that
-returns (type1, type2, error) you must use try.To2 function to check the error.
+Looking at the FileCopy example again, you see that all the functions
+are directed to try.To1 are returning (type1, error) tuples. All of these
+tuples are the correct input to try.To1. However, if you have a function that
+returns (type1, type2, error), you must use try.To2 function to check the error.
 Currently the try.To3 takes (3 + 1) return values which is the greatest amount.
-If more in needed let us know.
+If more is needed, let us know.
 */
 package try
 
