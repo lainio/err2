@@ -10,13 +10,11 @@ import (
 	"github.com/lainio/err2/internal/debug"
 )
 
-var (
-	// StackStraceWriter allows to set automatic stack tracing.
-	//  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
-	//   or
-	//  err2.StackStraceWriter = log.Writer() // stack trace to std logger
-	StackStraceWriter io.Writer
-)
+// StackStraceWriter allows to set automatic stack tracing.
+//  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+//   or
+//  err2.StackStraceWriter = log.Writer() // stack trace to std logger
+var StackStraceWriter io.Writer
 
 // Try is deprecated. Use try.To functions from try package instead.
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
