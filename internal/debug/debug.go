@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"runtime/debug"
 	"strings"
 )
@@ -14,6 +15,8 @@ type StackInfo struct {
 	PackageName string
 	FuncName    string
 	Level       int
+
+	*regexp.Regexp
 }
 
 func (si StackInfo) fullName() string {
@@ -25,6 +28,10 @@ func (si StackInfo) fullName() string {
 }
 
 func (si StackInfo) isAnchor(s string) bool {
+	// Regexp matching is high priority. That's why it's the first one.
+	if si.Regexp != nil {
+		return si.Regexp.MatchString(s)
+	}
 	if si.PackageName == "" && si.FuncName == "" {
 		return true // cannot calculate anchor, calling algorithm set it zero
 	}

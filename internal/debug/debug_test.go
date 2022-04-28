@@ -2,11 +2,14 @@ package debug
 
 import (
 	"bytes"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+var packageRegexp = regexp.MustCompile(`lainio/err2/.*\.`)
 
 var (
 	inputByError = `goroutine 1 [running]:
@@ -148,10 +151,10 @@ func TestFullName(t *testing.T) {
 		args
 		retval string
 	}{
-		{"all empty", args{StackInfo{"", "", 0}}, ""},
-		{"namespaces", args{StackInfo{"lainio/err2", "", 0}}, "lainio/err2"},
-		{"both", args{StackInfo{"lainio/err2", "try", 0}}, "lainio/err2.try"},
-		{"func", args{StackInfo{"", "try", 0}}, "try"},
+		{"all empty", args{StackInfo{"", "", 0, nil}}, ""},
+		{"namespaces", args{StackInfo{"lainio/err2", "", 0, nil}}, "lainio/err2"},
+		{"both", args{StackInfo{"lainio/err2", "try", 0, nil}}, "lainio/err2.try"},
+		{"func", args{StackInfo{"", "try", 0, nil}}, "try"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -171,24 +174,30 @@ func TestIsAnchor(t *testing.T) {
 		args
 		retval bool
 	}{
+		{"short regexp no match", args{
+			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
+			StackInfo{"", "", 0, packageRegexp}}, false},
+		{"short regexp", args{
+			"github.com/lainio/err2/assert.That({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
+			StackInfo{"", "", 0, packageRegexp}}, true},
 		{"short", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0}}, true},
+			StackInfo{"", "", 0, nil}}, true},
 		{"short-but-false", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"err2", "Handle", 0}}, false},
+			StackInfo{"err2", "Handle", 0, nil}}, false},
 		{"medium", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Returnw", 0}}, true},
+			StackInfo{"err2", "Returnw", 0, nil}}, true},
 		{"medium-but-false", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Return(", 0}}, false},
+			StackInfo{"err2", "Return(", 0, nil}}, false},
 		{"long", args{
 			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
-			StackInfo{"err2", "Handle", 0}}, true},
+			StackInfo{"err2", "Handle", 0, nil}}, true},
 		{"package name only", args{
 			"github.com/lainio/err2/try.To1[...](...)",
-			StackInfo{"lainio/err2", "", 0}}, true},
+			StackInfo{"lainio/err2", "", 0, nil}}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -230,10 +239,10 @@ func TestCalcAnchor(t *testing.T) {
 		args
 		anchor int
 	}{
-		{"short", args{input, StackInfo{"", "panic(", 0}}, 6},
-		{"short and nolimit", args{input, StackInfo{"", "", 0}}, nilAnchor},
-		{"medium", args{input1, StackInfo{"", "panic(", 0}}, 10},
-		{"long", args{input2, StackInfo{"", "panic(", 0}}, 14},
+		{"short", args{input, StackInfo{"", "panic(", 0, nil}}, 6},
+		{"short and nolimit", args{input, StackInfo{"", "", 0, nil}}, nilAnchor},
+		{"medium", args{input1, StackInfo{"", "panic(", 0, nil}}, 10},
+		{"long", args{input2, StackInfo{"", "panic(", 0, nil}}, 14},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -254,12 +263,12 @@ func TestStackPrint_limit(t *testing.T) {
 		args
 		output string
 	}{
-		{"short", args{input, StackInfo{"err2", "Returnw(", 0}}, output},
-		{"medium", args{input1, StackInfo{"err2", "Returnw(", 0}}, output1},
-		{"medium level 2", args{input1, StackInfo{"err2", "Returnw(", 2}}, output12},
-		{"medium panic", args{input1, StackInfo{"", "panic(", 0}}, output1panic},
-		{"long", args{input2, StackInfo{"err2", "Handle(", 0}}, output2},
-		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3}}, output23},
+		{"short", args{input, StackInfo{"err2", "Returnw(", 0, nil}}, output},
+		{"medium", args{input1, StackInfo{"err2", "Returnw(", 0, nil}}, output1},
+		{"medium level 2", args{input1, StackInfo{"err2", "Returnw(", 2, nil}}, output12},
+		{"medium panic", args{input1, StackInfo{"", "panic(", 0, nil}}, output1panic},
+		{"long", args{input2, StackInfo{"err2", "Handle(", 0, nil}}, output2},
+		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3, nil}}, output23},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
