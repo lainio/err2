@@ -38,6 +38,13 @@ func (si StackInfo) isAnchor(s string) bool {
 	return strings.Contains(s, si.fullName())
 }
 
+func (si StackInfo) isFuncAnchor(s string) bool {
+	if si.PackageName == "" && si.FuncName == "" {
+		return true // cannot calculate anchor, calling algorithm set it zero
+	}
+	return strings.Contains(s, si.fullName())
+}
+
 // PrintStack prints to standard error the stack trace returned by runtime.Stack
 // by starting from stackLevel.
 func PrintStack(stackLevel int) {
@@ -76,6 +83,21 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 }
 
 func calcAnchor(r io.Reader, si StackInfo) int {
+	anchor := calc(r, si, func(s string) bool {
+		return si.isAnchor(s)
+	})
+	if si.FuncName != "" && si.Regexp != nil {
+		a := calc(r, si, func(s string) bool {
+			return si.isFuncAnchor(s)
+		})
+		if a > anchor {
+			return a
+		}
+	}
+	return anchor
+}
+
+func calc(r io.Reader, si StackInfo, anchor func(s string) bool) int {
 	scanner := bufio.NewScanner(r)
 
 	// there is a caption line first, that's why we start from -1
@@ -86,7 +108,7 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 
 		// anchorLine can set when it is not the caption
 		// line AND it matches to StackInfo criteria
-		canSetAnchorLine := i > -1 && si.isAnchor(line)
+		canSetAnchorLine := i > -1 && anchor(line)
 
 		if canSetAnchorLine {
 			anchorLine = i

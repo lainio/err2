@@ -10,8 +10,38 @@ import (
 )
 
 var packageRegexp = regexp.MustCompile(`lainio/err2/.*\.`)
+var noHitRegexp = regexp.MustCompile(`^$`)
 
 var (
+	inputFromTest = `goroutine 31 [running]:
+testing.tRunner.func1.2({0xa8e0e0, 0x40001937d0})
+        /usr/local/go/src/testing/testing.go:1389 +0x1c8
+testing.tRunner.func1()
+        /usr/local/go/src/testing/testing.go:1392 +0x380
+panic({0xa8e0e0, 0x40001937d0})
+        /usr/local/go/src/runtime/panic.go:838 +0x20c
+github.com/lainio/err2.Catch(0xd14818)
+        /home/god/go/src/github.com/lainio/err2/err2.go:133 +0xac
+panic({0xa8e0e0, 0x40001937d0})
+        /usr/local/go/src/runtime/panic.go:838 +0x20c
+github.com/lainio/err2/assert.Asserter.reportPanic(...)
+        /home/god/go/src/github.com/lainio/err2/assert/asserter.go:165
+github.com/lainio/err2/assert.Asserter.reportAssertionFault(0x0, {0xba0fe9?, 0x0?}, {0x0?, 0x0, 0x0})
+        /home/god/go/src/github.com/lainio/err2/assert/asserter.go:147 +0x21c
+github.com/lainio/err2/assert.Asserter.True(...)
+        /home/god/go/src/github.com/lainio/err2/assert/asserter.go:49
+github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).AssertWallet(...)
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/ssi/agent.go:146
+github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).myCreateDID(0x40003f92c0?, {0x0?, 0x0?})
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/ssi/agent.go:274 +0x78
+github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).NewDID(0x40003f92c0?, 0x40000449a0?, {0x0?, 0x0?})
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/ssi/agent.go:230 +0x60
+github.com/findy-network/findy-agent/agent/sec_test.TestPipe_packPeer(0x4000106d00?)
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/sec/pipe_test.go:355 +0x1b8
+testing.tRunner(0x4000106d00, 0xd14820)
+        /usr/local/go/src/testing/testing.go:1439 +0x110
+`
+
 	inputByError = `goroutine 1 [running]:
 panic({0x137b20, 0x400007ac60})
 	/usr/local/go/src/runtime/panic.go:838 +0x20c
@@ -174,9 +204,12 @@ func TestIsAnchor(t *testing.T) {
 		args
 		retval bool
 	}{
+		{"func hit and regexp on", args{
+			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
+			StackInfo{"", "printStackIf(", 0, noHitRegexp}}, false},
 		{"short regexp no match", args{
 			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, packageRegexp}}, false},
+			StackInfo{"", "", 0, noHitRegexp}}, false},
 		{"short regexp", args{
 			"github.com/lainio/err2/assert.That({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
 			StackInfo{"", "", 0, packageRegexp}}, true},
@@ -202,6 +235,48 @@ func TestIsAnchor(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require.Equal(t, tt.retval, tt.isAnchor(tt.input))
+		})
+	}
+}
+
+func TestIsFuncAnchor(t *testing.T) {
+	type args struct {
+		input string
+		StackInfo
+	}
+	tests := []struct {
+		name string
+		args
+		retval bool
+	}{
+		{"func hit and regexp on", args{
+			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
+			StackInfo{"", "printStackIf(", 0, noHitRegexp}}, true},
+		{"short regexp", args{
+			"github.com/lainio/err2/assert.That({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
+			StackInfo{"", "", 0, packageRegexp}}, true},
+		{"short", args{
+			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
+			StackInfo{"", "", 0, nil}}, true},
+		{"short-but-false", args{
+			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
+			StackInfo{"err2", "Handle", 0, nil}}, false},
+		{"medium", args{
+			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
+			StackInfo{"err2", "Returnw", 0, nil}}, true},
+		{"medium-but-false", args{
+			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
+			StackInfo{"err2", "Return(", 0, nil}}, false},
+		{"long", args{
+			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"err2", "Handle", 0, nil}}, true},
+		{"package name only", args{
+			"github.com/lainio/err2/try.To1[...](...)",
+			StackInfo{"lainio/err2", "", 0, nil}}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.retval, tt.isFuncAnchor(tt.input))
 		})
 	}
 }
@@ -243,6 +318,7 @@ func TestCalcAnchor(t *testing.T) {
 		{"short and nolimit", args{input, StackInfo{"", "", 0, nil}}, nilAnchor},
 		{"medium", args{input1, StackInfo{"", "panic(", 0, nil}}, 10},
 		{"long", args{input2, StackInfo{"", "panic(", 0, nil}}, 14},
+		{"from test", args{inputFromTest, StackInfo{"", "", 0, packageRegexp}}, 15},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

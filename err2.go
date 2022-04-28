@@ -119,8 +119,10 @@ func Handle(err *error, handler func()) {
 func Catch(f func(err error)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
+	r := recover()
+	checkStackTracePrinting(r)
 
-	switch r := recover(); r.(type) {
+	switch r.(type) {
 	case nil:
 		break
 	case runtime.Error:
@@ -362,7 +364,12 @@ func newErrSI() debug.StackInfo {
 }
 
 func newSI(pn, fn string, lvl int) debug.StackInfo {
-	return debug.StackInfo{PackageName: pn, FuncName: fn, Level: lvl}
+	return debug.StackInfo{
+		PackageName: pn,
+		FuncName:    fn,
+		Level:       lvl,
+		Regexp:      packageRegexp,
+	}
 }
 
 var (
