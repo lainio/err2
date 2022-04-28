@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 
 	"runtime"
 
@@ -356,11 +355,9 @@ func printStackTrace(w io.Writer, r any) {
 	}
 }
 
-var packageRegexp = regexp.MustCompile(`lainio/err2/.*\.`)
-
 func newErrSI() debug.StackInfo {
 	//return debug.StackInfo{PackageName: "lainio/err2/try.", Level: 1}
-	return debug.StackInfo{Regexp: packageRegexp, Level: 1}
+	return debug.StackInfo{Regexp: debug.PackageRegexp, Level: 1}
 }
 
 func newSI(pn, fn string, lvl int) debug.StackInfo {
@@ -368,7 +365,7 @@ func newSI(pn, fn string, lvl int) debug.StackInfo {
 		PackageName: pn,
 		FuncName:    fn,
 		Level:       lvl,
-		Regexp:      packageRegexp,
+		Regexp:      debug.PackageRegexp,
 	}
 }
 

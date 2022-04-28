@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var packageRegexp = regexp.MustCompile(`lainio/err2/.*\.`)
-var noHitRegexp = regexp.MustCompile(`^$`)
+var (
+	noHitRegexp = regexp.MustCompile(`^$`)
+)
 
 var (
 	inputFromTest = `goroutine 31 [running]:
@@ -212,7 +213,7 @@ func TestIsAnchor(t *testing.T) {
 			StackInfo{"", "", 0, noHitRegexp}}, false},
 		{"short regexp", args{
 			"github.com/lainio/err2/assert.That({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, packageRegexp}}, true},
+			StackInfo{"", "", 0, PackageRegexp}}, true},
 		{"short", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
 			StackInfo{"", "", 0, nil}}, true},
@@ -254,7 +255,7 @@ func TestIsFuncAnchor(t *testing.T) {
 			StackInfo{"", "printStackIf(", 0, noHitRegexp}}, true},
 		{"short regexp", args{
 			"github.com/lainio/err2/assert.That({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, packageRegexp}}, true},
+			StackInfo{"", "", 0, PackageRegexp}}, true},
 		{"short", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
 			StackInfo{"", "", 0, nil}}, true},
@@ -317,8 +318,8 @@ func TestCalcAnchor(t *testing.T) {
 		{"short", args{input, StackInfo{"", "panic(", 0, nil}}, 6},
 		{"short and nolimit", args{input, StackInfo{"", "", 0, nil}}, nilAnchor},
 		{"medium", args{input1, StackInfo{"", "panic(", 0, nil}}, 10},
-		{"long", args{input2, StackInfo{"", "panic(", 0, nil}}, 14},
-		{"from test", args{inputFromTest, StackInfo{"", "", 0, packageRegexp}}, 15},
+		{"from test using panic", args{inputFromTest, StackInfo{"", "panic(", 0, nil}}, 8},
+		{"from test", args{inputFromTest, StackInfo{"", "panic(", 0, PackageRegexp}}, 14},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

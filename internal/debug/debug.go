@@ -19,6 +19,10 @@ type StackInfo struct {
 	*regexp.Regexp
 }
 
+var (
+	PackageRegexp = regexp.MustCompile(`lainio/err2/\w*\.`)
+)
+
 func (si StackInfo) fullName() string {
 	dot := ""
 	if si.PackageName != "" && si.FuncName != "" {
@@ -83,14 +87,17 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 }
 
 func calcAnchor(r io.Reader, si StackInfo) int {
+	var buf bytes.Buffer
+	r = io.TeeReader(r, &buf)
+
 	anchor := calc(r, si, func(s string) bool {
 		return si.isAnchor(s)
 	})
 	if si.FuncName != "" && si.Regexp != nil {
-		a := calc(r, si, func(s string) bool {
+		a := calc(&buf, si, func(s string) bool {
 			return si.isFuncAnchor(s)
 		})
-		if a > anchor {
+		if a != nilAnchor && a > anchor {
 			return a
 		}
 	}
