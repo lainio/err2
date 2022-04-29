@@ -62,9 +62,9 @@ func TryEOF(err error) bool {
 	return FilterTry(io.EOF, err)
 }
 
-// Checks the error status of the last argument. It panics with "wrong
-// signature" if the last calling parameter is not error. In case of error it
-// delivers it by panicking.
+// check is deprecated. Used by Try. Checks the error status of the last
+// argument. It panics with "wrong signature" if the last calling parameter is
+// not error. In case of error it delivers it by panicking.
 func check(args []any) {
 	argCount := len(args)
 	last := argCount - 1
@@ -356,7 +356,6 @@ func printStackTrace(w io.Writer, r any) {
 }
 
 func newErrSI() debug.StackInfo {
-	//return debug.StackInfo{PackageName: "lainio/err2/try.", Level: 1}
 	return debug.StackInfo{Regexp: debug.PackageRegexp, Level: 1}
 }
 
