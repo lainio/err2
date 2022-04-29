@@ -68,16 +68,20 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
 	anchorLine := calcAnchor(r, si)
-	scanner := bufio.NewScanner(&buf)
 
+	scanner := bufio.NewScanner(&buf)
 	for i := -1; scanner.Scan(); i++ {
 		line := scanner.Text()
 
-		// line can print when it is a caption OR there is no anchorLine
-		// criteria OR the line (pair) is creater than anchorLine
+		// we can print a line if we didn't find anything, i.e. anchorLine is
+		// nilAnchor
 		canPrint := anchorLine == nilAnchor
+		// if it's not nilAnchor we need to check it more carefully
 		if !canPrint {
-			canPrint = i == -1 || 0 == si.Level+anchorLine || i >= 2*si.Level+anchorLine
+			// we can print a line when it is a caption OR there is no
+			// anchorLine criteria OR the line (pair) is creater than
+			// anchorLine
+			canPrint = i == -1 /*|| 0 == si.Level+anchorLine*/ || i >= 2*si.Level+anchorLine
 		}
 
 		if canPrint {
@@ -93,12 +97,14 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 	anchor := calc(r, si, func(s string) bool {
 		return si.isAnchor(s)
 	})
-	if si.FuncName != "" && si.Regexp != nil {
-		a := calc(&buf, si, func(s string) bool {
+
+	needToCalcFnNameAnchor := si.FuncName != "" && si.Regexp != nil
+	if needToCalcFnNameAnchor {
+		fnNameAnchor := calc(&buf, si, func(s string) bool {
 			return si.isFuncAnchor(s)
 		})
-		if a != nilAnchor && a > anchor {
-			return a
+		if fnNameAnchor != nilAnchor && fnNameAnchor > anchor {
+			return fnNameAnchor
 		}
 	}
 	return anchor
