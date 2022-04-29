@@ -36,10 +36,7 @@ func (si StackInfo) isAnchor(s string) bool {
 	if si.Regexp != nil {
 		return si.Regexp.MatchString(s)
 	}
-	if si.PackageName == "" && si.FuncName == "" {
-		return true // cannot calculate anchor, calling algorithm set it zero
-	}
-	return strings.Contains(s, si.fullName())
+	return si.isFuncAnchor(s)
 }
 
 func (si StackInfo) isFuncAnchor(s string) bool {
