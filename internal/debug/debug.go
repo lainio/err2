@@ -78,10 +78,9 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 		canPrint := anchorLine == nilAnchor
 		// if it's not nilAnchor we need to check it more carefully
 		if !canPrint {
-			// we can print a line when it is a caption OR there is no
-			// anchorLine criteria OR the line (pair) is creater than
-			// anchorLine
-			canPrint = i == -1 /*|| 0 == si.Level+anchorLine*/ || i >= 2*si.Level+anchorLine
+			// we can print a line when it's a caption OR the line (pair) is
+			// greater than anchorLine
+			canPrint = i == -1 || i >= 2*si.Level+anchorLine
 		}
 
 		if canPrint {
@@ -90,6 +89,8 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 	}
 }
 
+// calcAnchor calculates the optimal anchor line. Optimal is the shortest but
+// including all the needed information.
 func calcAnchor(r io.Reader, si StackInfo) int {
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
@@ -103,13 +104,17 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 		fnNameAnchor := calc(&buf, si, func(s string) bool {
 			return si.isFuncAnchor(s)
 		})
-		if fnNameAnchor != nilAnchor && fnNameAnchor > anchor {
+
+		fnAnchorIsMoreOptimal := fnNameAnchor != nilAnchor &&
+			fnNameAnchor > anchor
+		if fnAnchorIsMoreOptimal {
 			return fnNameAnchor
 		}
 	}
 	return anchor
 }
 
+// calc calculates anchor line it takes criteria function as an argument.
 func calc(r io.Reader, si StackInfo, anchor func(s string) bool) int {
 	scanner := bufio.NewScanner(r)
 
@@ -119,10 +124,9 @@ func calc(r io.Reader, si StackInfo, anchor func(s string) bool) int {
 	for i = -1; scanner.Scan(); i++ {
 		line := scanner.Text()
 
-		// anchorLine can set when it is not the caption
-		// line AND it matches to StackInfo criteria
+		// anchorLine can set when it's not the caption line AND it matches to
+		// StackInfo criteria
 		canSetAnchorLine := i > -1 && anchor(line)
-
 		if canSetAnchorLine {
 			anchorLine = i
 		}
@@ -133,4 +137,4 @@ func calc(r io.Reader, si StackInfo, anchor func(s string) bool) int {
 	return anchorLine
 }
 
-const nilAnchor = 0xffff
+const nilAnchor = 0xffff // reserve nilAnchor, remember we need -1 for algorithm
