@@ -90,9 +90,9 @@ func Handle(err *error, handlerFn func()) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:   StackStraceWriter,
 		Any: r,
 		NilHandler: func() {
 			// Defers are in the stack and the first from the stack gets the
@@ -119,9 +119,9 @@ func Catch(f func(err error)) {
 	// This and Handle are similar but we need to call recover here because how
 	// it works with defer. We cannot refactor these 2 to use same function.
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:            StackStraceWriter,
 		Any:          r,
 		ErrorHandler: f,
 	})
@@ -134,9 +134,9 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// it works with defer. We cannot refactor these 2 to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:            StackStraceWriter,
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
@@ -151,9 +151,9 @@ func CatchTrace(errorHandler func(err error)) {
 	// it works with defer. We cannot refactor these 2 to use same function.
 
 	r := recover()
-	printStackTrace(os.Stderr, r)
 
 	handler.Process(handler.Info{
+		W:            os.Stderr,
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: func(v any) {}, // suppress panicking
@@ -168,9 +168,9 @@ func Return(err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:            StackStraceWriter,
 		Any:          r,
 		ErrorHandler: func(e error) { *err = e },
 	})
@@ -183,9 +183,9 @@ func Returnw(err *error, format string, args ...any) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:   StackStraceWriter,
 		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -206,9 +206,9 @@ func Annotatew(prefix string, err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:   StackStraceWriter,
 		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -231,9 +231,9 @@ func Returnf(err *error, format string, args ...any) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:   StackStraceWriter,
 		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -254,9 +254,9 @@ func Annotate(prefix string, err *error) {
 	// it works with defer. We cannot refactor these two to use same function.
 
 	r := recover()
-	checkStackTracePrinting(r)
 
 	handler.Process(handler.Info{
+		W:   StackStraceWriter,
 		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..

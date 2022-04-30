@@ -1,6 +1,12 @@
 package handler
 
-import "runtime"
+import (
+	"fmt"
+	"io"
+	"runtime"
+
+	"github.com/lainio/err2/internal/debug"
+)
 
 type (
 	PanicHandler func(p any)
@@ -10,6 +16,7 @@ type (
 
 type Info struct {
 	Any any
+	W   io.Writer
 
 	NilHandler
 	ErrorHandler
@@ -23,12 +30,20 @@ func (i Info) CallNilHandler() {
 }
 
 func (i Info) CallErrorHandler() {
+	if i.W != nil {
+		si := stackPrologError
+		printStack(i.W, si, i.Any)
+	}
 	if i.ErrorHandler != nil {
 		i.ErrorHandler(i.Any.(error))
 	}
 }
 
 func (i Info) CallPanicHandler() {
+	if i.W != nil {
+		si := stackPrologPanic
+		printStack(i.W, si, i.Any)
+	}
 	if i.PanicHandler != nil {
 		i.PanicHandler(i.Any)
 	} else {
@@ -47,5 +62,29 @@ func Process(info Info) {
 	default:
 		info.CallPanicHandler()
 	}
-
 }
+
+func printStack(w io.Writer, si debug.StackInfo, msg any) {
+	fmt.Fprintf(w, "---\n%v\n---\n", msg)
+	debug.FprintStack(w, si)
+}
+
+var (
+	stackPrologRuntime = newSI("", "panic(", 1)
+	stackPrologError   = newErrSI()
+	stackPrologPanic   = newSI("", "panic(", 1)
+)
+
+func newErrSI() debug.StackInfo {
+	return debug.StackInfo{Regexp: debug.PackageRegexp, Level: 1}
+}
+
+func newSI(pn, fn string, lvl int) debug.StackInfo {
+	return debug.StackInfo{
+		PackageName: pn,
+		FuncName:    fn,
+		Level:       lvl,
+		Regexp:      debug.PackageRegexp,
+	}
+}
+
