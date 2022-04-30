@@ -143,9 +143,9 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	handler.All(handler.Info{
+	handler.Process(handler.Info{
 		Any:          r,
-		ErrorHandler: func(err error, out *error) { errorHandler(err) },
+		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
 	})
 }
@@ -160,12 +160,11 @@ func CatchTrace(errorHandler func(err error)) {
 	r := recover()
 	printStackTrace(os.Stderr, r)
 
-	switch r.(type) {
-	case nil:
-		break
-	case error:
-		errorHandler(r.(error))
-	}
+	handler.Process(handler.Info{
+		Any:          r,
+		ErrorHandler: errorHandler,
+		PanicHandler: func(v any) {}, // suppress panicking
+	})
 }
 
 // Return is same as Handle but it's for functions which don't wrap or annotate
@@ -178,16 +177,10 @@ func Return(err *error) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		break
-	case runtime.Error:
-		panic(r)
-	case error:
-		*err = r.(error)
-	default:
-		panic(r)
-	}
+	handler.Process(handler.Info{
+		Any:          r,
+		ErrorHandler: func(e error) { *err = e },
+	})
 }
 
 // Returnw wraps an error. It's similar to fmt.Errorf, but it's called only if
@@ -199,19 +192,17 @@ func Returnw(err *error, format string, args ...any) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		if *err != nil { // if other handlers call recovery() we still..
-			*err = fmt.Errorf(format+": %w", append(args, *err)...)
-		}
-	case runtime.Error:
-		panic(r)
-	case error:
-		e := r.(error)
-		*err = fmt.Errorf(format, e)
-	default:
-		panic(r)
-	}
+	handler.Process(handler.Info{
+		Any: r,
+		NilHandler: func() {
+			if *err != nil { // if other handlers call recovery() we still..
+				*err = fmt.Errorf(format+": %w", append(args, *err)...)
+			}
+		},
+		ErrorHandler: func(e error) {
+			*err = fmt.Errorf(format+": %w", append(args, e)...)
+		},
+	})
 }
 
 // Annotatew is for annotating an error. It's similar to Returnf but it takes only
@@ -224,21 +215,19 @@ func Annotatew(prefix string, err *error) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		if *err != nil { // if other handlers call recovery() we still..
+	handler.Process(handler.Info{
+		Any: r,
+		NilHandler: func() {
+			if *err != nil { // if other handlers call recovery() we still..
+				format := prefix + ": %w"
+				*err = fmt.Errorf(format, (*err))
+			}
+		},
+		ErrorHandler: func(e error) {
 			format := prefix + ": %w"
-			*err = fmt.Errorf(format, (*err))
-		}
-	case runtime.Error:
-		panic(r)
-	case error:
-		e := r.(error)
-		format := prefix + ": %w"
-		*err = fmt.Errorf(format, e)
-	default:
-		panic(r)
-	}
+			*err = fmt.Errorf(format, e)
+		},
+	})
 }
 
 // Returnf builds an error. It's similar to fmt.Errorf, but it's called only if
@@ -251,19 +240,17 @@ func Returnf(err *error, format string, args ...any) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		if *err != nil { // if other handlers call recovery() we still..
-			*err = fmt.Errorf(format+": %v", append(args, *err)...)
-		}
-	case runtime.Error:
-		panic(r)
-	case error:
-		e := r.(error)
-		*err = fmt.Errorf(format+": %v", append(args, e)...)
-	default:
-		panic(r)
-	}
+	handler.Process(handler.Info{
+		Any: r,
+		NilHandler: func() {
+			if *err != nil { // if other handlers call recovery() we still..
+				*err = fmt.Errorf(format+": %v", append(args, *err)...)
+			}
+		},
+		ErrorHandler: func(e error) {
+			*err = fmt.Errorf(format+": %v", append(args, e)...)
+		},
+	})
 }
 
 // Annotate is for annotating an error. It's similar to Returnf but it takes only
@@ -276,21 +263,19 @@ func Annotate(prefix string, err *error) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		if *err != nil { // if other handlers call recovery() we still..
+	handler.Process(handler.Info{
+		Any: r,
+		NilHandler: func() {
+			if *err != nil { // if other handlers call recovery() we still..
+				format := prefix + ": %v"
+				*err = fmt.Errorf(format, (*err))
+			}
+		},
+		ErrorHandler: func(e error) {
 			format := prefix + ": %v"
-			*err = fmt.Errorf(format, (*err))
-		}
-	case runtime.Error:
-		panic(r)
-	case error:
-		e := r.(error)
-		format := prefix + ": %v"
-		*err = fmt.Errorf(format, e)
-	default:
-		panic(r)
-	}
+			*err = fmt.Errorf(format, e)
+		},
+	})
 }
 
 type _empty struct{}
