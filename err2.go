@@ -6,9 +6,6 @@ import (
 	"io"
 	"os"
 
-	"runtime"
-
-	"github.com/lainio/err2/internal/debug"
 	"github.com/lainio/err2/internal/handler"
 )
 
@@ -285,65 +282,3 @@ var Empty _empty
 func (s _empty) Try(_ any, err error) {
 	Check(err)
 }
-
-func printStack(w io.Writer, si debug.StackInfo, msg any) {
-	fmt.Fprintf(w, "---\n%v\n---\n", msg)
-	debug.FprintStack(w, si)
-}
-
-func printStackIf(si debug.StackInfo, msg any) {
-	if StackStraceWriter != nil {
-		printStack(StackStraceWriter, si, msg)
-	}
-}
-
-func checkStackTracePrinting(r any) {
-	switch r.(type) {
-	case nil:
-		break
-	case runtime.Error:
-		si := stackPrologRuntime
-		printStackIf(si, r)
-	case error:
-		si := stackPrologError
-		printStackIf(si, r)
-	default:
-		si := stackPrologPanic
-		printStackIf(si, r)
-	}
-}
-
-func printStackTrace(w io.Writer, r any) {
-	switch r.(type) {
-	case nil:
-		break
-	case runtime.Error:
-		si := stackPrologRuntime
-		printStack(w, si, r)
-	case error:
-		si := stackPrologError
-		printStack(w, si, r)
-	default:
-		si := stackPrologPanic
-		printStack(w, si, r)
-	}
-}
-
-func newErrSI() debug.StackInfo {
-	return debug.StackInfo{Regexp: debug.PackageRegexp, Level: 1}
-}
-
-func newSI(pn, fn string, lvl int) debug.StackInfo {
-	return debug.StackInfo{
-		PackageName: pn,
-		FuncName:    fn,
-		Level:       lvl,
-		Regexp:      debug.PackageRegexp,
-	}
-}
-
-var (
-	stackPrologRuntime = newSI("", "panic(", 1)
-	stackPrologError   = newErrSI()
-	stackPrologPanic   = newSI("", "panic(", 1)
-)
