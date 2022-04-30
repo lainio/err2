@@ -4,16 +4,12 @@ import "runtime"
 
 type (
 	PanicHandler func(p any)
-	ErrorHandler func(err error, errOut *error)
-	NilHandler   func(errOut *error)
+	ErrorHandler func(err error)
+	NilHandler   func()
 )
 
 type Info struct {
-	Any  any
-	Err  error
-	Out  *error
-	Fmt  string
-	Args []any
+	Any any
 
 	NilHandler
 	ErrorHandler
@@ -22,23 +18,25 @@ type Info struct {
 
 func (i Info) CallNilHandler() {
 	if i.NilHandler != nil {
-		i.NilHandler(i.Out)
+		i.NilHandler()
 	}
 }
 
 func (i Info) CallErrorHandler() {
 	if i.ErrorHandler != nil {
-		i.ErrorHandler(i.Any.(error), i.Out)
+		i.ErrorHandler(i.Any.(error))
 	}
 }
 
 func (i Info) CallPanicHandler() {
 	if i.PanicHandler != nil {
 		i.PanicHandler(i.Any)
+	} else {
+		panic(i.Any)
 	}
 }
 
-func All(info Info) {
+func Process(info Info) {
 	switch info.Any.(type) {
 	case nil:
 		info.CallNilHandler()
@@ -48,20 +46,6 @@ func All(info Info) {
 		info.CallErrorHandler()
 	default:
 		info.CallPanicHandler()
-	}
-
-}
-
-func Return(info Info) {
-	switch info.Any.(type) {
-	case nil:
-		info.NilHandler(info.Out)
-	case runtime.Error:
-		panic(info.Any)
-	case error:
-		info.ErrorHandler(info.Any.(error), info.Out)
-	default:
-		panic(info.Any)
 	}
 
 }
