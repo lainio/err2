@@ -82,7 +82,7 @@ func check(args []any) {
 // functions returning errors them self. For those functions that doesn't return
 // errors there is a Catch function. Note! The handler is called only when err
 // != nil.
-func Handle(err *error, handler func()) {
+func Handle(err *error, handlerFn func()) {
 	// This and Catch are similar but we need to call recover() here because
 	// how it works with defer. We cannot refactor these to use same function.
 
@@ -92,24 +92,23 @@ func Handle(err *error, handler func()) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		// Defers are in the stack and the first from the stack gets the
-		// opportunity to get panic object's error (below). We still must
-		// call handler functions to the rest of the handlers if there is
-		// an error.
-		if *err != nil {
-			handler()
-		}
-	case runtime.Error:
-		panic(r)
-	case error:
-		// We or someone did transport this error thru panic.
-		*err = r.(error)
-		handler()
-	default:
-		panic(r)
-	}
+	handler.Process(handler.Info{
+		Any: r,
+		NilHandler: func() {
+			// Defers are in the stack and the first from the stack gets the
+			// opportunity to get panic object's error (below). We still must
+			// call handler functions to the rest of the handlers if there is
+			// an error.
+			if *err != nil {
+				handlerFn()
+			}
+		},
+		ErrorHandler: func(e error) {
+			// We or someone did transport this error thru panic.
+			*err = r.(error)
+			handlerFn()
+		},
+	})
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
@@ -122,16 +121,10 @@ func Catch(f func(err error)) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		break
-	case runtime.Error:
-		panic(r)
-	case error:
-		f(r.(error))
-	default:
-		panic(r)
-	}
+	handler.Process(handler.Info{
+		Any:          r,
+		ErrorHandler: f,
+	})
 }
 
 // CatchAll is a helper function to catch and write handlers for all errors and
