@@ -9,6 +9,7 @@ import (
 	"runtime"
 
 	"github.com/lainio/err2/internal/debug"
+	"github.com/lainio/err2/internal/handler"
 )
 
 // StackStraceWriter allows to set automatic stack tracing.
@@ -142,16 +143,11 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	r := recover()
 	checkStackTracePrinting(r)
 
-	switch r.(type) {
-	case nil:
-		break
-	case runtime.Error:
-		panicHandler(r)
-	case error:
-		errorHandler(r.(error))
-	default:
-		panicHandler(r)
-	}
+	handler.All(handler.Info{
+		Any:          r,
+		ErrorHandler: func(err error, out *error) { errorHandler(err) },
+		PanicHandler: panicHandler,
+	})
 }
 
 // CatchTrace is a helper function to catch and handle all errors. It recovers a
