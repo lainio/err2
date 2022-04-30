@@ -23,13 +23,13 @@ type Info struct {
 	PanicHandler
 }
 
-func (i Info) CallNilHandler() {
+func (i Info) callNilHandler() {
 	if i.NilHandler != nil {
 		i.NilHandler()
 	}
 }
 
-func (i Info) CallErrorHandler() {
+func (i Info) callErrorHandler() {
 	if i.W != nil {
 		si := stackPrologError
 		printStack(i.W, si, i.Any)
@@ -39,7 +39,7 @@ func (i Info) CallErrorHandler() {
 	}
 }
 
-func (i Info) CallPanicHandler() {
+func (i Info) callPanicHandler() {
 	if i.W != nil {
 		si := stackPrologPanic
 		printStack(i.W, si, i.Any)
@@ -54,13 +54,13 @@ func (i Info) CallPanicHandler() {
 func Process(info Info) {
 	switch info.Any.(type) {
 	case nil:
-		info.CallNilHandler()
+		info.callNilHandler()
 	case runtime.Error:
-		info.CallPanicHandler()
+		info.callPanicHandler()
 	case error:
-		info.CallErrorHandler()
+		info.callErrorHandler()
 	default:
-		info.CallPanicHandler()
+		info.callPanicHandler()
 	}
 }
 
@@ -87,4 +87,3 @@ func newSI(pn, fn string, lvl int) debug.StackInfo {
 		Regexp:      debug.PackageRegexp,
 	}
 }
-
