@@ -80,14 +80,13 @@ func check(args []any) {
 // errors there is a Catch function. Note! The handler is called only when err
 // != nil.
 func Handle(err *error, handlerFn func()) {
-	// This and Catch are similar but we need to call recover() here because
-	// how it works with defer. We cannot refactor these to use same function.
+	// This and others are similar but we need to call `recover` here because
+	// how how it works with defer.
+	r := recover()
 
 	// We put real panic objects back and keep only those which are
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
-	r := recover()
-
 	handler.Process(handler.Info{
 		W:   StackStraceWriter,
 		Any: r,
@@ -113,8 +112,8 @@ func Handle(err *error, handlerFn func()) {
 // Catch function per non error returning function. See Handle for more
 // information.
 func Catch(f func(err error)) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these 2 to use same function.
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
@@ -127,9 +126,8 @@ func Catch(f func(err error)) {
 // CatchAll is a helper function to catch and write handlers for all errors and
 // all panics thrown in the current go routine.
 func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these 2 to use same function.
-
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
@@ -144,9 +142,8 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // panic as well and prints its call stack. This is preferred helper for go
 // workers on long running servers.
 func CatchTrace(errorHandler func(err error)) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these 2 to use same function.
-
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
@@ -161,9 +158,8 @@ func CatchTrace(errorHandler func(err error)) {
 // their errors. If you want to annotate errors see Annotate for more
 // information.
 func Return(err *error) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these two to use same function.
-
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
@@ -176,9 +172,8 @@ func Return(err *error) {
 // Returnw wraps an error. It's similar to fmt.Errorf, but it's called only if
 // error != nil. Note! If you don't want to wrap the error use Returnf instead.
 func Returnw(err *error, format string, args ...any) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these two to use same function.
-
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
@@ -199,9 +194,8 @@ func Returnw(err *error, format string, args ...any) {
 // two arguments: a prefix string and a pointer to error. It adds ": " between
 // the prefix and the error text automatically.
 func Annotatew(prefix string, err *error) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these two to use same function.
-
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
@@ -224,9 +218,8 @@ func Annotatew(prefix string, err *error) {
 // error != nil. Note! It doesn't use %w to wrap the error. Use Returnw for
 // that.
 func Returnf(err *error, format string, args ...any) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these two to use same function.
-
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
@@ -247,9 +240,8 @@ func Returnf(err *error, format string, args ...any) {
 // two arguments: a prefix string and a pointer to error. It adds ": " between
 // the prefix and the error text automatically.
 func Annotate(prefix string, err *error) {
-	// This and Handle are similar but we need to call recover here because how
-	// it works with defer. We cannot refactor these two to use same function.
-
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
