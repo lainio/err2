@@ -99,9 +99,9 @@ handled immediately anyhow.
 #### Manual Stack Tracing
 
 err2 offers two error catchers for manual stack tracing: `CatchTrace` and
-`CatchAll`. The first one lets you to handle errors and it will print stack
-trace to `stderr` for panic and `runtime.Error`. The second is same but you have
-separated handler function for panic and `runtime.Error` so you can decide by
+`CatchAll`. The first one lets you handle errors and it will print the stack
+trace to `stderr` for panic and `runtime.Error`. The second is the same but you have
+a separate handler function for panic and `runtime.Error` so you can decide by
 yourself where to print them or what to do with them.
 
 #### Error Handler
@@ -179,20 +179,19 @@ func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData
 Previous code block shows the use of the default asserter for developing.
 
 ```go
-assert.DefaultAsserter = 0
+assert.DefaultAsserter = AsserterDebug
 ```
 
 If any of the assertion fails, code panics. These type of assertions can be used
-without help of the `err2` package.
+without help of the `err2` package if wanted.
 
-During the software development lifecycle it isn't all the time crystal clear
-what are preconditions for a programmer and what should be translated to
-end-user errors as well. That's why `assert` package uses concept called
-`Asserter` to have different type of asserter for different phases of a software
-project.
+During the software development lifecycle, it isn't crystal clear what
+preconditions are for a programmer and what should be translated to end-user
+errors as well. The `assert` package uses a concept called `Asserter` to have
+different types of asserter for different phases of a software project.
 
-The following code block is a sample where production time asserter is used to
-generate proper error messages.
+The following code block is a sample where the production time asserter is used
+to generate proper error messages.
 
 ```go
 func (ac *Cmd) Validate() (err error) {
@@ -210,11 +209,11 @@ func (ac *Cmd) Validate() (err error) {
 }
 ```
 
-When asserts are used to generate end-user error messages instead of immediate
-panics, `err2` handlers are needed to translate asserts to errors in convenient
-way. That's the reason we decided to build `assert` as a sub package of `err2`
-even there are no real dependencies between them. See the `assert` packages own
-documentation and examples for more information.
+When assert statements are used to generate end-user error messages instead of
+immediate panics, `err2` handlers are needed to translate asserts to errors in a
+convenient way. That's why we decided to build `assert` as a sub package of
+`err2` even though there are no actual dependencies between them. See the
+`assert` package's documentation and examples for more information.
 
 
 ## Background
@@ -236,29 +235,30 @@ performance-critical use case, we recommend you to write performance tests to
 measure the effect. As a general guideline for maximum performance we recommend
 to put error handlers as high in the call stack as possible, and use only error
 checking (`try.To()` calls) in the inner loops. And yes, that leads to non-local
-control structures, but it's the fastest solution.
+control structures, but it's the most performant solution of all.
 
-The original goal was to make it possible to write similar code than proposed
-Go2 error handling would allow and do it right now (summer 2019). The goal was
-well aligned with the Go2 proposal where it would bring a `try` macro and let
-the error handling be implemented in defer blocks. The try-proposal was
-cancelled at its latest form. Nevertheless, we have learned that **using
-panics** for early-stage **error transport isn't a bad thing but opposite**. It
-seems to help:
+The original goal was to make it possible to write similar code that the
+proposed Go2 error handling would allow and do it right now (summer 2019). The
+goal was well aligned with the Go2 proposal, where it would bring a `try` macro
+and let the error handling be implemented in defer blocks. The try-proposal was
+canceled at its latest form. Nevertheless, we have learned that **using panics**
+for early-stage **error transport isn't bad but the opposite**. It seems to
+help:
 - to draft algorithms much faster,
 - still maintains the readability,
-- and most importantly **it keeps your code more refactor-able** because you
+- and most importantly, **it keeps your code more refactorable** because you
   don't have to repeat yourself.
 
 ## Learnings by so far
 
-We have used the `err2` and `assert` packages in several internal projects. The
-results have been so far very encouraging:
+We have used the `err2` and `assert` packages in several projects. The results
+have been so far very encouraging:
 
 - If you forget to use handler, but you use checks from the package, you will
-get panics if an error occurs. That is much better than getting unrelated panic
-somewhere else in the code later. There have also been cases when code reports
-error correctly because the 'upper' handler catches it.
+get panics (and optionally stack traces) if an error occurs. That is much better
+than getting unrelated panic somewhere else in the code later. There have also
+been cases when code reports error correctly because the 'upper' handler catches
+it.
 
 - Because the use of `err2.Annotate` is so relatively easy, error messages much
 better and informative.
