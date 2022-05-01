@@ -15,8 +15,8 @@ type (
 )
 
 type Info struct {
-	Any any
-	W   io.Writer
+	Any   any
+	Trace io.Writer
 
 	NilHandler
 	ErrorHandler
@@ -30,9 +30,9 @@ func (i Info) callNilHandler() {
 }
 
 func (i Info) callErrorHandler() {
-	if i.W != nil {
+	if i.Trace != nil {
 		si := stackPrologError
-		printStack(i.W, si, i.Any)
+		printStack(i.Trace, si, i.Any)
 	}
 	if i.ErrorHandler != nil {
 		i.ErrorHandler(i.Any.(error))
@@ -40,9 +40,9 @@ func (i Info) callErrorHandler() {
 }
 
 func (i Info) callPanicHandler() {
-	if i.W != nil {
+	if i.Trace != nil {
 		si := stackPrologPanic
-		printStack(i.W, si, i.Any)
+		printStack(i.Trace, si, i.Any)
 	}
 	if i.PanicHandler != nil {
 		i.PanicHandler(i.Any)

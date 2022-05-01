@@ -355,8 +355,7 @@ func Example_copyFile() {
 	copyFile := func(src, dst string) (err error) {
 		defer err2.Returnf(&err, "copy %s %s", src, dst)
 
-		// These try package helpers are as fast as Check() calls which is as
-		// fast as `if err != nil {}`
+		// These try.To() checkers are as fast as `if err != nil {}`
 
 		r := try.To1(os.Open(src))
 		defer r.Close()
