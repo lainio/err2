@@ -49,10 +49,42 @@ functions have their error wrapping versions as well: `Annotatew` and `Returnw`.
 Our general guideline is:
 > Do not wrap an error when doing so would expose implementation details.
 
-#### Automatic Stack Tracing
+#### Automatic And Optimized Stack Tracing
 
-err2 offers optional stack tracing. It's automatic. Just set the
-`StackTraceWriter` to the stream you want traces to be written:
+err2 offers optional stack tracing. It's automatic and optimized. Optimized
+means that call stack is processes before output. That means that stack trace
+starts from where the actual error/panic is occurred and not from where the
+error is caught. You don't need to search your self the actual line where the
+pointer was nil or error was received. That line is in the first one you are
+seeing.
+
+```console
+---
+runtime error: index out of range [0] with length 0
+---
+goroutine 1 [running]:
+main.test2({0x0, 0x0, 0x40XXXXXf00?}, 0x2?)
+	/home/.../go/src/github.com/lainio/ic/main.go:43 +0x14c
+main.main()
+	/home/.../go/src/github.com/lainio/ic/main.go:77 +0x248
+```
+
+Without optimization call stack would have **at least two** more call stack
+entries:
+
+```console
+goroutine 1 [running]:
+runtime/debug.Stack()
+	/usr/local/go/src/runtime/debug/stack.go:24 +0x68
+panic({0x12e3e0, 0x188f50})
+	/usr/local/go/src/runtime/panic.go:838 +0x20c
+main.test2({0x0, 0x0, 0x40XXXXXf00?}, 0x2?)
+	/home/.../go/src/github.com/lainio/ic/main.go:43 +0x14c
+main.main()
+	/home/.../go/src/github.com/lainio/ic/main.go:77 +0x248
+```
+
+Just set the `StackTraceWriter` to the stream you want traces to be written:
 
 ```go
 err2.StackStraceWriter = os.Stderr // write stack trace to stderr
@@ -202,15 +234,21 @@ performance penalty at all**. However, the mandatory use of the `defer` might
 prevent some code optimisations like function inlining. If you have a
 performance-critical use case, we recommend you to write performance tests to
 measure the effect. As a general guideline for maximum performance we recommend
-to put error handlers as high in the call stack as possible.
+to put error handlers as high in the call stack as possible, and use only error
+checking (`try.To()` calls) in the inner loops. And yes, that leads to non-local
+control structures, but it's the fastest solution.
 
 The original goal was to make it possible to write similar code than proposed
 Go2 error handling would allow and do it right now (summer 2019). The goal was
-well aligned with the latest Go2 proposal where it would bring a `try` macro and
-let the error handling be implemented in defer blocks. The try-proposal was
-cancelled at its latest form. Nevertheless, we have learned that using panics
-for early-stage error transport isn't a bad thing but opposite. It seems to help
-to draft algorithms much faster, and still maintains the readability.
+well aligned with the Go2 proposal where it would bring a `try` macro and let
+the error handling be implemented in defer blocks. The try-proposal was
+cancelled at its latest form. Nevertheless, we have learned that **using
+panics** for early-stage **error transport isn't a bad thing but opposite**. It
+seems to help:
+- to draft algorithms much faster,
+- still maintains the readability,
+- and most importantly **it keeps your code more refactor-able** because you
+  don't have to repeat yourself.
 
 ## Learnings by so far
 
@@ -255,4 +293,5 @@ Version history:
 - 0.8.0 `try.To()` & `assert.That()`, etc. functions with the help of the generics
 - 0.8.1 **bug-fix**: `runtime.Error` types are treated as `panics` now (Issue #1)
 - 0.8.3 `try.IsXX()` bug fix, lots of new docs, and **automatic stack tracing!**
+- 0.8.4 **Optimized** Stack Tracing, documentation, benchmarks, etc.
 
