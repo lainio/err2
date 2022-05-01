@@ -21,10 +21,11 @@ can be turned to normal Go's error values by using proper Asserter like P:
 
 Please see the code examples for more information.
 
-Note! assert.That's performance is equal to if-statement. Go generics based
-versions are fast but not as fast, (maybe) because of lacking inlining of
-generics implementation.
+Note. assert.That's performance is equal to the if-statement. Most of the
+generics-based versions are as fast, but some of them (Equal, SLen, MLen)
+aren't. If your algorithm is performance-critical please run `make bench` in the
+err2 repo and decide case by case.
 
-Note! Format string functions need to be own instances because of Go's vet and
+Note. Format string functions need to be own instances because of Go's vet and
 test tool integration. */
 package assert

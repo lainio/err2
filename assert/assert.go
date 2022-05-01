@@ -31,8 +31,8 @@ func NotImplemented(a ...any) {
 }
 
 // That asserts that the term is true. If not it panics with the given
-// formatting string. Note! That is the most performant of all the assertion
-// functions.
+// formatting string. Thanks to inlining, the performance penalty is equal to a
+// single 'if-statement' that is almost nothing.
 func That(term bool, a ...any) {
 	if !term {
 		DefaultAsserter.reportAssertionFault("", a...)
@@ -93,9 +93,9 @@ func Equal[T comparable](val, want T, a ...any) {
 	}
 }
 
-// SLen asserts that the length of the slice is equal to given. If not it
+// SLen asserts that the length of the slice is equal to the given. If not it
 // panics/errors (current Asserter) with the given message. Note! This is
-// reasonable fast but not as fast as 'That' because of lacking inlining for the
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
 // current implementation of Go's type parametric functions.
 func SLen[T any](obj []T, length int, a ...any) {
 	l := len(obj)
@@ -106,9 +106,9 @@ func SLen[T any](obj []T, length int, a ...any) {
 	}
 }
 
-// MLen asserts that the length of the map is equal to given. If not it
+// MLen asserts that the length of the map is equal to the given. If not it
 // panics/errors (current Asserter) with the given message. Note! This is
-// reasonable fast but not as fast as 'That' because of lacking inlining for the
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
 // current implementation of Go's type parametric functions.
 func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 	l := len(obj)
@@ -120,9 +120,7 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 }
 
 // NotEmpty asserts that the string is not empty. If it is, it panics/errors
-// (current Asserter) with the given message. Note! This is reasonable fast but
-// not as fast as 'That' because of lacking inlining for the current
-// implementation of Go's type parametric functions.
+// (current Asserter) with the given message.
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
 		defMsg := "string shouldn't be empty"
@@ -131,7 +129,7 @@ func NotEmpty(obj string, a ...any) {
 }
 
 // SNotEmpty asserts that the slice is not empty. If it is, it panics/errors
-// (current Asserter) with the given message. Note! This is reasonable fast but
+// (current Asserter) with the given message. Note! This is reasonably fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
 func SNotEmpty[T any](obj []T, a ...any) {
@@ -144,7 +142,7 @@ func SNotEmpty[T any](obj []T, a ...any) {
 }
 
 // MNotEmpty asserts that the map is not empty. If it is, it panics/errors
-// (current Asserter) with the given message. Note! This is reasonable fast but
+// (current Asserter) with the given message. Note! This is reasonably fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
 func MNotEmpty[T comparable, U any](obj map[T]U, length int, a ...any) {
