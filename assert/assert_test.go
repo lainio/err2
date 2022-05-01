@@ -198,14 +198,13 @@ func ExampleNotEmpty() {
 	// Output: sample: assert_test.go:193 ExampleNotEmpty.func1 string shouldn't be empty
 }
 
+// ifPanicZero in needed that we have argument here! It's like a macro for
+// benchmarking. The others aren't needed below. TODO: refactor unneeded
+// helpers.
 func ifPanicZero(i int) {
 	if i == 0 {
 		panic("i == 0")
 	}
-}
-
-func assertThat(term bool) {
-	assert.That(term)
 }
 
 func assertZero(i int) {
@@ -224,10 +223,6 @@ func assertLenf(b []byte, l int) {
 	assert.D.Lenf(b, l, "")
 }
 
-func assertSLen(b []byte, l int) {
-	assert.SLen(b, l)
-}
-
 func assertMLen(b map[byte]byte, l int) {
 	assert.MLen(b, l)
 }
@@ -240,10 +235,31 @@ func assertEqualInt2(b int) {
 	assert.Equal(b, 2)
 }
 
+func BenchmarkSNotNil(b *testing.B) {
+	bs := []byte{0}
+	for n := 0; n < b.N; n++ {
+		assert.SNotNil(bs)
+	}
+}
+
+func BenchmarkNotNil(b *testing.B) {
+	bs := new(int)
+	for n := 0; n < b.N; n++ {
+		assert.NotNil(bs)
+	}
+}
+
 func BenchmarkThat(b *testing.B) {
 	const four = 4
 	for n := 0; n < b.N; n++ {
-		assertThat(2+2 == four)
+		assert.That(2+2 == four)
+	}
+}
+
+func BenchmarkNotEmpty(b *testing.B) {
+	str := "test"
+	for n := 0; n < b.N; n++ {
+		assert.NotEmpty(str)
 	}
 }
 
@@ -289,7 +305,14 @@ func BenchmarkMLen(b *testing.B) {
 func BenchmarkSLen(b *testing.B) {
 	d := []byte{1, 2}
 	for n := 0; n < b.N; n++ {
-		assertSLen(d, 2)
+		assert.SLen(d, 2)
+	}
+}
+
+func BenchmarkSLen_thatVersion(b *testing.B) {
+	d := []byte{1, 2}
+	for n := 0; n < b.N; n++ {
+		assert.That(len(d) == 2)
 	}
 }
 
