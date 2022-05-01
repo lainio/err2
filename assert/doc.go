@@ -21,7 +21,7 @@ can be turned to normal Go's error values by using proper Asserter like P:
 
 Please see the code examples for more information.
 
-Note! assert.That's preformance is equal to if-statement. Go generics based
+Note! assert.That's performance is equal to if-statement. Go generics based
 versions are fast but not as fast, (maybe) because of lacking inlining of
 generics implementation.
 
