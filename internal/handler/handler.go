@@ -31,7 +31,7 @@ func (i Info) callNilHandler() {
 
 func (i Info) callErrorHandler() {
 	if i.Trace != nil {
-		si := stackPrologError
+		si := stackPrologueError
 		printStack(i.Trace, si, i.Any)
 	}
 	if i.ErrorHandler != nil {
@@ -41,7 +41,7 @@ func (i Info) callErrorHandler() {
 
 func (i Info) callPanicHandler() {
 	if i.Trace != nil {
-		si := stackPrologPanic
+		si := stackProloguePanic
 		printStack(i.Trace, si, i.Any)
 	}
 	if i.PanicHandler != nil {
@@ -70,9 +70,9 @@ func printStack(w io.Writer, si debug.StackInfo, msg any) {
 }
 
 var (
-	stackPrologRuntime = newSI("", "panic(", 1)
-	stackPrologError   = newErrSI()
-	stackPrologPanic   = newSI("", "panic(", 1)
+	stackPrologueRuntime = newSI("", "panic(", 1)
+	stackPrologueError   = newErrSI()
+	stackProloguePanic   = newSI("", "panic(", 1)
 )
 
 func newErrSI() debug.StackInfo {
