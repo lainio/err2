@@ -9,11 +9,11 @@ import (
 	"github.com/lainio/err2/internal/handler"
 )
 
-// StackStraceWriter allows to set automatic stack tracing.
-//  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+// StackTraceWriter allows to set automatic stack tracing.
+//  err2.StackTraceWriter = os.Stderr // write stack trace to stderr
 //   or
-//  err2.StackStraceWriter = log.Writer() // stack trace to std logger
-var StackStraceWriter io.Writer
+//  err2.StackTraceWriter = log.Writer() // stack trace to std logger
+var StackTraceWriter io.Writer
 
 // Try is deprecated. Use try.To functions from try package instead.
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
@@ -89,7 +89,7 @@ func Handle(err *error, handlerFn func()) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	handler.Process(handler.Info{
-		Trace: StackStraceWriter,
+		Trace: StackTraceWriter,
 		Any:   r,
 		NilHandler: func() {
 			// Defers are in the stack and the first from the stack gets the
@@ -119,7 +119,7 @@ func Catch(f func(err error)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace:        StackStraceWriter,
+		Trace:        StackTraceWriter,
 		Any:          r,
 		ErrorHandler: f,
 	})
@@ -135,7 +135,7 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace:        StackStraceWriter,
+		Trace:        StackTraceWriter,
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
@@ -169,7 +169,7 @@ func Return(err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace:        StackStraceWriter,
+		Trace:        StackTraceWriter,
 		Any:          r,
 		ErrorHandler: func(e error) { *err = e },
 	})
@@ -184,7 +184,7 @@ func Returnw(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackStraceWriter,
+		Trace: StackTraceWriter,
 		Any:   r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -206,7 +206,7 @@ func Annotatew(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackStraceWriter,
+		Trace: StackTraceWriter,
 		Any:   r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -229,7 +229,7 @@ func Returnf(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackStraceWriter,
+		Trace: StackTraceWriter,
 		Any:   r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -251,7 +251,7 @@ func Annotate(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackStraceWriter,
+		Trace: StackTraceWriter,
 		Any:   r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..

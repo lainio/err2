@@ -87,9 +87,9 @@ main.main()
 Just set the `StackTraceWriter` to the stream you want traces to be written:
 
 ```go
-err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+err2.StackTraceWriter = os.Stderr // write stack trace to stderr
   or
-err2.StackStraceWriter = log.Writer() // stack trace to std logger
+err2.StackTraceWriter = log.Writer() // stack trace to std logger
 ```
 
 If `StackTraceWriter` is not set no stack tracing is done. This is the default

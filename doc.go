@@ -65,9 +65,9 @@ Stack Tracing
 
 err2 offers optional stack tracing. It's automatic. Just set the
 StackTraceWriter to the stream you want traces to be written:
-  err2.StackStraceWriter = os.Stderr // write stack trace to stderr
+  err2.StackTraceWriter = os.Stderr // write stack trace to stderr
    or
-  err2.StackStraceWriter = log.Writer() // stack trace to std logger
+  err2.StackTraceWriter = log.Writer() // stack trace to std logger
 
 Error handling
 
