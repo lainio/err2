@@ -274,10 +274,7 @@ been much easier.**
 
 The package has been in experimental mode quite long time. Since the Go generics
 we are transiting towards more official mode. Currently we offer support by
-author's email. Before sending questions about the package we suggest you will
-read all the documentation and examples thru. They are pretty comprehensive.
-
-- harlain at gmail.com
+GitHub Discussions. Naturally, any issues are welcome as well!
 
 ## Roadmap
 
@@ -286,12 +283,12 @@ Version history:
 - 0.2, code generation for type helpers
 - 0.3, `Returnf` added, not use own transport type anymore but just `error`
 - 0.4, Documentation update
-- 0.5, Go modules are in use now
-- 0.6.1, `assert` package added, and new type helpers (current)
-- 0.7.0 filter functions for the cases where errors aren't real errors like
-  io.EOF
+- 0.5, Go modules are in use
+- 0.6.1, `assert` package added, and new type helpers
+- 0.7.0 filter functions for non-errors like `io.EOF`
 - 0.8.0 `try.To()` & `assert.That()`, etc. functions with the help of the generics
 - 0.8.1 **bug-fix**: `runtime.Error` types are treated as `panics` now (Issue #1)
 - 0.8.3 `try.IsXX()` bug fix, lots of new docs, and **automatic stack tracing!**
 - 0.8.4 **Optimized** Stack Tracing, documentation, benchmarks, etc.
+- 0.8.5 Typo in `StackTraceWriter` fixed
 
