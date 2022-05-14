@@ -20,7 +20,13 @@ type StackInfo struct {
 }
 
 var (
-	PackageRegexp = regexp.MustCompile(`lainio/err2/\w*\.`)
+	// PackageRegexp is regexp search that help us find those lines that
+	// includes function calls in our package and its sub packages. The
+	// following lines help you figure out what kind of lines we are talking
+	// about:
+	//   github.com/lainio/err2/try.To1[...](...)
+	//   github.com/lainio/err2/assert.Asserter.True(...)
+	PackageRegexp = regexp.MustCompile(`lainio/err2[a-zA-Z0-9_/.\[\]]*\(`)
 )
 
 func (si StackInfo) fullName() string {
