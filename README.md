@@ -291,4 +291,4 @@ Version history:
 - 0.8.3 `try.IsXX()` bug fix, lots of new docs, and **automatic stack tracing!**
 - 0.8.4 **Optimized** Stack Tracing, documentation, benchmarks, etc.
 - 0.8.5 Typo in `StackTraceWriter` fixed
-
+- 0.8.6 Stack Tracing bug fixed, URL helper restored until migration tool
