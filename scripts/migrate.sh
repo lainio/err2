@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## split to functions, that we can run the separately afterwards
+
 if [[ ! -z "$(git status --porcelain)" ]]; then
 	echo "ERR: your current branch must be clean" >&2
 	exit 1
@@ -16,6 +18,9 @@ done
 set -e
 
 git checkout -b err2-migration
+
+go get github.com/lainio/err2
+go build -o /dev/null ./...
 
 location=$(dirname "$BASH_SOURCE")
 # echo $location
