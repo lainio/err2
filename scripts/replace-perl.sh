@@ -1,9 +1,6 @@
 #!/bin/bash
 
 location=$(dirname "$BASH_SOURCE")
-name=$(basename "$location")
-[[ "$name" = "." ]] && name=$(basename "$PWD")
-echo $location
-echo $name
 
+# debug=1 use_perl=perl "$location"/replace.sh "$@"
 use_perl=perl "$location"/replace.sh "$@"

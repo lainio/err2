@@ -1,7 +1,6 @@
 #!/bin/bash
 
 use_perl=${use_perl:-""}
-
 osname="$(~/aws/os-name)"
 
 process_args() {
@@ -9,9 +8,7 @@ process_args() {
 		echo "Usage: "$(basename "$0")" <search> <replace>"
 		exit 1
 	fi
-
 	first="$1"
-
 	if [ "$3" != "" ]; then
 		second="$2"
 		third="$3"
@@ -19,14 +16,15 @@ process_args() {
 		second="$1"
 		third="$2"
 	fi
-
 	if [ -z $use_perl ]; then
 		sr="s/$second/$third/g"
 	else
 		sr="s/$second/$third/g"
 	fi
 
-	echo use_perl:$use_perl $first $sr
+	if [ ! -z $debug ]; then
+		echo MODE:$use_perl $first $sr
+	fi
 }
 
 do_work() {
@@ -37,7 +35,11 @@ do_work() {
 			ag -l "$first" | xargs perl -i -p0e "$sr"
 		fi
 	else
-		ag -l "$first" | xargs sed -Ei "$sr"
+		if [ -z $use_perl ]; then
+			ag -l "$first" | xargs sed -Ei "$sr"
+		else 
+			ag -l "$first" | xargs perl -i -p0e "$sr"
+		fi
 	fi
 }
 
