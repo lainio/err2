@@ -24,10 +24,13 @@ echo $location
 # 5 ok:
 #use_perl=perl "$location"/replace.sh '(, \w*)(, err)( :?= )([\w\(\)\[\],\. ]*)(\n)(\s*try.To\(err\))' '\1\3try.To2(\4)'
 #"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\(\)\[\],\. "]*)(\n)(\s*try.To\(err\))' '\1\3try.To2(\4)'
+# NEW, latest version
+"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 
+# '(, \w*)(, err)( :?= )([\w\s\.,:;%&\-\(\){}\[\]\$\^\?\\\|\+\"\*]*)(\s*try\.To\(err\))'
 # 6 ok:
 #"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,"\(\)\{\}\[\]\*]*)(\n)(\s*try.To\(err\))' '\2try.To1(\3)'
-"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:;%&\(\)\{\}\[\]\$\^\?\\\|\+]*)(\n)(\s*try.To\(err\))' '\2try.To1(\3)'
+#"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:;%&-\*\(\)\{\}\[\]\$\^\?\\\|\+\"]*)(\n)(\s*try.To\(err\))' '\2try.To1(\3)'
 
 # err :?=[\w\s\.,\(\)\{\}\[\]\*]*try\.To
 # cleanup and add needed imports
