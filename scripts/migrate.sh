@@ -1,77 +1,136 @@
 #!/bin/bash
 
-## split to functions, that we can run the separately afterwards
-
-if [[ ! -z "$(git status --porcelain)" ]]; then
-	echo "ERR: your current branch must be clean" >&2
-	exit 1
-fi
-
-for c in ag perl sed git xargs; do
-	if ! [ -x "$(command -v ${c})" ]; then
-		echo "ERR: missing command: '${c}'."
-		echo "Please install before continue." >&2
+check_prerequisites() {
+	if [[ ! -z "$(git status --porcelain)" ]]; then
+		echo "ERR: your current branch must be clean" >&2
 		exit 1
 	fi
-done
+
+	for c in ag perl sed git go xargs; do
+		if ! [ -x "$(command -v ${c})" ]; then
+			echo "ERR: missing command: '${c}'."
+			echo "Please install before continue." >&2
+			exit 1
+		fi
+	done
+}
 
 set -e
-
-git checkout -b err2-migration
-
-go get github.com/lainio/err2
-go build -o /dev/null ./...
-
 location=$(dirname "$BASH_SOURCE")
-# echo $location
+migration_branch="err2-auto-update"
 
-# Replace FilterTry with our new version
-"$location"/replace.sh 'err2\..*FilterTry\(' 'try.Is('
+check_dirty() {
+	dirty=$(git diff --name-only)
+}
 
-# Use IsEOF instead of TryEOF
-"$location"/replace.sh 'err2\.TryEOF\(' 'try.IsEOF('
+setup_repo() {
+	git checkout -b "$migration_branch"
+}
 
-# replace StrStr as it own because it returns two values
-"$location"/replace.sh 'err2\.StrStr\.Try\(' 'try.To2('
+deps() {
+	go get github.com/lainio/err2
+}
 
-# change all the rest type variable usages.
-# todo: if you have your own of them like e2.XxxxType.Try use this as guide
-"$location"/replace.sh 'err2\..*Try\(' 'try.To1('
+check_build() {
+	go build ./...
+}
 
-"$location"/replace.sh '(err2.Check\()(.*)(\))' 'try.To(\2\3'
+replace_easy1() {
+	# Replace FilterTry with our new version
+	"$location"/replace.sh 'err2\..*FilterTry\(' 'try.Is('
 
-# add try import
-"$location"/replace.sh '(try\.To|try\.Is)' '\"github.com\/lainio\/err2\"' '\"github.com\/lainio\/err2\"\n\t\"github.com\/lainio\/err2\/try\"' 
+	# Use IsEOF instead of TryEOF
+	"$location"/replace.sh 'err2\.TryEOF\(' 'try.IsEOF('
 
-# ============
-# == ff here =
-git diff --name-only | xargs goimports -l -w
-# ============
+	# replace StrStr as it own because it returns two values
+	"$location"/replace.sh 'err2\.StrStr\.Try\(' 'try.To2('
+}
 
-go build -o /dev/null ./...
-git commit -am 'automatic err2 migration phase 1 ok'
+replace_1() {
+	# change all the rest type variable usages.
+	# TODO: if you have your own of them like e2.XxxxType.Try use this as guide
+	"$location"/replace.sh 'err2\.\w*\.Try\(' 'try.To1('
+}
 
-# === three return values, don't use yet
-#"$location"/replace-perl.sh '(, \w*)(, \w*)(, err)( :?= )([\w\s\.,:;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\2\4try.To3(\5)'
+replace_2() {
+	# This is very RARE, remove is you have problems!!!
+	"$location"/replace-perl.sh '(err2\.Try\()(\w*?\.)(Read|Fprint|Write)' 'try.To1(\2\3'
 
-#use_perl=perl "$location"/replace.sh '(, \w*)(, err)( :?= )([\w\(\)\[\],\. ]*)(\n)(\s*try.To\(err\))' '\1\3try.To2(\4)'
-#"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\(\)\[\],\. "]*)(\n)(\s*try.To\(err\))' '\1\3try.To2(\4)'
-# NEW, latest version ====== this the SECOND
-"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+	# replace very rare err2.Try() call 
+	"$location"/replace.sh '\s*(err2\.Try\()' 'try.To('
 
-# '(, \w*)(, err)( :?= )([\w\s\.,:;%&\-\(\){}\[\]\$\^\?\\\|\+\"\*]*)(\s*try\.To\(err\))'
-# 6 ok:
-#"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,"\(\)\{\}\[\]\*]*)(\n)(\s*try.To\(err\))' '\2try.To1(\3)'
-#"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:;%&-\*\(\)\{\}\[\]\$\^\?\\\|\+\"]*)(\n)(\s*try.To\(err\))' '\2try.To1(\3)'
-"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	"$location"/replace.sh '(err2.Check\()(.*)(\))' 'try.To(\2\3'
+}
 
-# err :?=[\w\s\.,\(\)\{\}\[\]\*]*try\.To
-# cleanup and add needed imports
-#goimports -l -w .
+add_try_import() {
+	"$location"/replace.sh '(try\.To|try\.Is)' '\"github.com\/lainio\/err2\"' '\"github.com\/lainio\/err2\"\n\t\"github.com\/lainio\/err2\/try\"' 
+}
 
-git diff --name-only | xargs goimports -l -w
+goimports_to_changed() {
+	git diff --name-only | xargs goimports -l -w
+}
 
-go build -o /dev/null ./...
+commit() {
+	check_dirty
+	if [[ ! -z "$dirty" ]]; then
+		git commit -am "automatic err2 migration: $1"
+	fi
+}
 
-git commit -am 'automatic err2 migration phase 2 ok'
+multiline_3() {
+	"$location"/replace-perl.sh '(, \w*)(, \w*)(, err)( :?= )([\w\s\.,:;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\2\4try.To3(\5)'
+}
+
+multiline_2() {
+	"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+}
+
+multiline_1() {
+	"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+}
+
+# =================== main =====================
+
+check_prerequisites
+
+echo "update err2 package to latest version"
+setup_repo
+deps
+check_build
+commit "commit deps"
+
+echo "calling easy 1"
+replace_easy1
+echo "calling  1"
+replace_1
+echo "calling  2"
+replace_2
+echo "add try imports"
+add_try_import
+echo "fmt with goimports"
+goimports_to_changed
+echo "check build"
+check_build
+echo "commit phase1"
+commit "phase 1"
+
+echo "====== complex refactoring starts now ===="
+echo "multiline_3"
+multiline_3
+check_build
+commit "phase 2 multilines"
+
+echo "multiline_2"
+multiline_2
+check_build
+commit "phase 2 multilines"
+
+echo "multiline_1"
+multiline_1
+check_build
+commit "phase 2 multilines"
+
+goimports_to_changed
+check_build
+commit "phase 2 multilines"
 
