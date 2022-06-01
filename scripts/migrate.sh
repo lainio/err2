@@ -1,26 +1,36 @@
 #!/bin/bash
 
 check_prerequisites() {
-	if [[ ! -z "$(git status --porcelain)" ]]; then
-		echo "ERR: your current branch must be clean" >&2
-		exit 1
-	fi
-
-	for c in ag perl sed git go xargs; do
+	for c in ag perl sed git go jq xargs; do
 		if ! [ -x "$(command -v ${c})" ]; then
 			echo "ERR: missing command: '${c}'."
 			echo "Please install before continue." >&2
 			exit 1
 		fi
 	done
+
+	local go_version=$(go mod edit -json | jq -r '."Go"')
+	if [ $go_version \< 1.18 ]; then
+		echo "ERR: Go version number ($go_version) is too low" >&2
+		exit 1
+	fi
+
+	if [[ ! -z "$(git status --porcelain)" ]]; then
+		echo "ERR: your current branch must be clean" >&2
+		exit 1
+	fi
 }
 
 set -e
 location=$(dirname "$BASH_SOURCE")
 migration_branch="err2-auto-update"
+no_build_check=${no_build_check:-""}
 
 check_dirty() {
-	dirty=$(git diff --name-only)
+	dirty=""
+	if [ -z $no_build_check ]; then
+		dirty=$(git diff --name-only)
+	fi
 }
 
 setup_repo() {
@@ -32,7 +42,9 @@ deps() {
 }
 
 check_build() {
-	go build ./...
+	if [ -z $no_build_check ]; then
+		go build ./...
+	fi
 }
 
 replace_easy1() {
@@ -67,7 +79,7 @@ add_try_import() {
 }
 
 goimports_to_changed() {
-	git diff --name-only | xargs goimports -l -w
+	git diff --name-only | grep '^.*\.go$' | xargs goimports -l -w
 }
 
 commit() {
@@ -99,6 +111,7 @@ deps
 check_build
 commit "commit deps"
 
+echo "====== basic err2 refactoring starts now ===="
 echo "calling easy 1"
 replace_easy1
 echo "calling  1"

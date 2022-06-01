@@ -16,11 +16,7 @@ process_args() {
 		second="$1"
 		third="$2"
 	fi
-	if [ -z $use_perl ]; then
-		sr="s/$second/$third/g"
-	else
-		sr="s/$second/$third/g"
-	fi
+	sr="s/$second/$third/g"
 
 	if [ ! -z $debug ]; then
 		echo MODE:$use_perl $first $sr
