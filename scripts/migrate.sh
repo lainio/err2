@@ -48,8 +48,8 @@ check_build() {
 }
 
 replace_easy1() {
-	# Replace FilterTry with our new version
-	"$location"/replace.sh 'err2\..*FilterTry\(' 'try.Is('
+	# Replace FilterTry with our new version: notice argument order!!
+	"$location"/replace-perl.sh '(err2\.FilterTry\()(.*)(, )(.*)(\)\n)' 'try.Is(\4\3\2\5'
 
 	# Use IsEOF instead of TryEOF
 	"$location"/replace.sh 'err2\.TryEOF\(' 'try.IsEOF('
