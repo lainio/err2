@@ -124,9 +124,31 @@ commit() {
 }
 
 check_commit() {
+	echo "++ start check commit"
+	local goods=""
+	local bads=""
 	for file in $(ag -l "$1" ); do
+		echo "--> perl for $file"
 		perl -i -p0e "s/$1/$2/g" $file
-		go build -o /dev/null ./... && git commit -m "err2:$file" $file
+		if go build -o /dev/null ./... ; then
+			echo "build ok with updated: $file"
+			#goods+="${file}\n"
+			#git commit -m "err2:$file" $file
+		else
+			echo "TODO: manually check file: $file"
+			bads+="${file} "
+			git checkout -- $file
+		fi
+		echo "next file"
+	done
+	if go build -o /dev/null ./... ; then
+		git commit -am "err2 generator group commit"
+	else
+		echo "TODO: manually check file: $file"
+	fi
+	for file in $bads; do 
+		echo ">> really update BAD file: $file"
+		perl -i -p0e "s/$1/$2/g" $file
 	done
 }
 
@@ -148,14 +170,18 @@ multiline_2() {
 }
 
 multiline_1() {
+	go build ./...
+
 	echo "multiline_1"
 	# make a version whichi first change those who has two lines at a row!!
-	"$location"/replace-perl.sh '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
-	clean
-	check_build
-	commit "multiline 1: two lines"
+	#"$location"/replace-perl.sh '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	#check_commit '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	#clean
+	#check_build
+	#commit "multiline 1: two lines"
 
-	"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	check_commit '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	#"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
 	clean
 }
 
