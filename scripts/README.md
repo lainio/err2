@@ -1,7 +1,29 @@
 ## Automatic Migration
 
-You can migrate your `err2` using repos from version which is using a version
-which didn't had a Go generics based API. You don't need to do it manually but
+The err2 doesn't have type variables any more. They have been deprecated since
+version 0.8.0. No they are removed for the repo as obsolete.
+
+They were generated for performance reasons and convenience. You could write:
+
+```go
+b := err2.Bytes.Try(ioutil.ReadAll(r))
+```
+
+Instead of:
+
+```go
+b, err := ioutil.ReadAll(r)
+err2.Check(err)
+```
+
+Thanks for the Go generics we can write it for any type:
+
+```go
+b := try.To1(ioutil.ReadAll(r))
+```
+
+You can migrate your `err2` using repos from version which were using a version
+of `err2` which didn't have Go generics. You don't need to do it manually but
 just run the `./migrate.sh` bash script. It will do it for you.
 
 Go to your repo and enter the following command:
@@ -15,7 +37,7 @@ no_build_check=1 $GOPATH/src/github.com/lainio/err2/scripts/migrate.sh
 ```
 
 ```console
-use_current_branch no_build_check=1 $GOPATH/src/github.com/lainio/err2/scripts/migrate.sh
+use_current_branch $GOPATH/src/github.com/lainio/err2/scripts/migrate.sh
 ```
 
 ### Release Readme

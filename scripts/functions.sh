@@ -11,15 +11,20 @@ print_env() {
 
 check_prerequisites() {
 	for c in ag perl sed git go jq xargs; do
-		if ! [ -x "$(command -v ${c})" ]; then
-			echo "ERR: missing command: '${c}'."
+		if ! [[ -x "$(command -v ${c})" ]]; then
+			echo "ERR: missing command: '${c}'." >&2
 			echo "Please install before continue." >&2
 			exit 1
 		fi
 	done
 
+	if [[ $(git rev-parse --show-toplevel 2>/dev/null) != "$PWD" ]]; then
+		echo "ERR: your current dir must be repo's rood dir" >&2
+		exit 1
+	fi
+
 	local go_version=$(go mod edit -json | jq -r '."Go"')
-	if [ $go_version \< 1.18 ]; then
+	if [[ $go_version < 1.18 ]]; then
 		echo "ERR: Go version number ($go_version) is too low" >&2
 		exit 1
 	fi
@@ -48,7 +53,7 @@ deps() {
 }
 
 check_build() {
-	if [ -z $no_build_check ]; then
+	if [[ -z $no_build_check ]]; then
 		go build -o /dev/null ./...
 		echo "build check OK" 
 	else
@@ -58,6 +63,9 @@ check_build() {
 
 replace_easy1() {
 	echo "calling easy 1"
+
+	"$location"/replace.sh 'err2\.Check\(' 'try.To('
+
 	# Replace FilterTry with our new version: notice argument order!!
 	"$location"/replace-perl.sh '(err2\.FilterTry\()(.*)(, )(.*)(\)\n)' 'try.Is(\4\3\2\5'
 
@@ -90,18 +98,16 @@ replace_1() {
 	echo "calling  1"
 	# change all the rest type variable usages.
 	# TODO: if you have your own of them like e2.XxxxType.Try use this as guide
-	"$location"/replace.sh 'err2\.\w*\.Try\(' 'try.To1('
+	#"$location"/replace.sh 'err2\.\w*\.Try\(' 'try.To1('
 }
 
 replace_2() {
 	echo "calling  2"
-	# This is very RARE, remove is you have problems!!!
+	# This is very RARE, remove if you have problems!!!
 	"$location"/replace-perl.sh '(err2\.Try\()(\w*?\.)(Read|Fprint|Write)' 'try.To1(\2\3'
 
 	# replace very rare err2.Try() call 
 	"$location"/replace.sh '\s*(err2\.Try\()' 'try.To('
-
-	"$location"/replace.sh '(err2.Check\()(.*)(\))' 'try.To(\2\3'
 }
 
 add_try_import() {
@@ -123,33 +129,44 @@ commit() {
 	fi
 }
 
+fast_build_check() {
+	local pkg="./$(dirname ${1})/..."
+	echo "fast build check: $pkg"
+	go build -o /dev/null "$pkg"
+}
+
 check_commit() {
-	echo "++ start check commit"
-	local goods=""
 	local bads=""
 	for file in $(ag -l "$1" ); do
-		echo "--> perl for $file"
 		perl -i -p0e "s/$1/$2/g" $file
-		if go build -o /dev/null ./... ; then
-			echo "build ok with updated: $file"
-			#goods+="${file}\n"
-			#git commit -m "err2:$file" $file
+		# cleaning: '_ := '
+		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/g" $file
+		if fast_build_check $file; then
+			git commit -m "err2:$file" $file
 		else
-			echo "TODO: manually check file: $file"
 			bads+="${file} "
 			git checkout -- $file
 		fi
-		echo "next file"
 	done
-	if go build -o /dev/null ./... ; then
-		git commit -am "err2 generator group commit"
-	else
-		echo "TODO: manually check file: $file"
-	fi
 	for file in $bads; do 
-		echo ">> really update BAD file: $file"
+		echo "BAD file: $file, update manually!!!"
 		perl -i -p0e "s/$1/$2/g" $file
 	done
+}
+
+check_build_and_pick() {
+	check_dirty
+	local bads=""
+	for file in $dirty; do
+		if fast_build_check "$file"; then
+			echo "build ok with update: $file"
+			git commit -m "err2:$file" $file
+		else
+			echo "TODO: manually check file: $file"
+			bads+="${file} "
+		fi
+	done
+	echo $bads
 }
 
 clean() {
@@ -170,22 +187,16 @@ multiline_2() {
 }
 
 multiline_1() {
-	go build ./...
+	#go build ./...
 
 	echo "multiline_1"
 	# make a version whichi first change those who has two lines at a row!!
-	#"$location"/replace-perl.sh '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
-	#check_commit '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
-	#clean
-	#check_build
-	#commit "multiline 1: two lines"
+	check_commit '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
 
 	check_commit '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
-	#"$location"/replace-perl.sh '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
-	clean
 }
 
 todo() {
-	# Catch Return Handle Annotate StackTraceWriter
-	ag 'err2\.[^CRHAS]'
+	echo "searching err2 references out of catchers"
+	ag -l 'err2\.(Check|Try|Filter)'
 }
