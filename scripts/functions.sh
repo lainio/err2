@@ -4,7 +4,6 @@ print_env() {
 	echo "---------- env setup -----------------"
 	echo "start_branch: $start_branch"
 	echo "migration_branch: $migration_branch"
-	echo "no_build_check: $no_build_check"
 	echo "use_current_branch: $use_current_branch"
 	echo "---------- env setup -----------------"
 }
@@ -36,10 +35,7 @@ check_prerequisites() {
 }
 
 check_dirty() {
-	dirty=""
-	if [[ -z $no_build_check && $migration_branch != $start_branch ]]; then
-		dirty=$(git diff --name-only)
-	fi
+	dirty=$(git diff --name-only)
 }
 
 setup_repo() {
@@ -53,12 +49,7 @@ deps() {
 }
 
 check_build() {
-	if [[ -z $no_build_check ]]; then
-		go build -o /dev/null ./...
-		echo "build check OK" 
-	else
-		echo "skipping build check" 
-	fi
+	go build -o /dev/null ./...
 }
 
 replace_easy1() {
@@ -151,6 +142,8 @@ check_commit() {
 	for file in $bads; do 
 		echo "BAD file: $file, update manually!!!"
 		perl -i -p0e "s/$1/$2/g" $file
+		# cleaning: '_ := '
+		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/g" $file
 	done
 }
 
