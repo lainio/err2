@@ -24,7 +24,8 @@ check_prerequisites() {
 
 	local go_version=$(go mod edit -json | jq -r '."Go"')
 	if [[ $go_version < 1.18 ]]; then
-		echo "ERR: Go version number ($go_version) is too low" >&2
+		echo "ERROR:  Go version number ($go_version) is too low" >&2
+		echo "Sample: go mod edit -go=1.18 # sets the minimal version" >&2
 		exit 1
 	fi
 
@@ -115,6 +116,20 @@ commit() {
 	fi
 }
 
+undo_one() {
+	local file="$1"
+	if [[ -z "$no_commit" ]]; then
+		git checkout -- $file
+	fi
+}
+
+commit_one() {
+	local file="$1"
+	if [[ -z "$no_commit" ]]; then
+		git commit -m "err2:$file" $file 1>/dev/null
+	fi
+}
+
 fast_build_check() {
 	local pkg="./$(dirname ${1})/..."
 	go build -o /dev/null "$pkg"
@@ -123,21 +138,21 @@ fast_build_check() {
 check_commit() {
 	local bads=""
 	for file in $(ag -l "$1" ); do
-		perl -i -p0e "s/$1/$2/g" $file
+		perl -i -p0e "s/$1/$2/mg" $file
 		# cleaning: '_ := '
-		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/g" $file
+		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/mg" $file
 		if fast_build_check $file; then
-			git commit -m "err2:$file" $file 1>/dev/null
+			commit_one $file
 		else
 			bads+="${file} "
-			git checkout -- $file
+			undo_one $file
 		fi
 	done
 	for file in $bads; do 
 		echo "BAD file: $file, update manually!!!" >&2
-		perl -i -p0e "s/$1/$2/g" $file
+		perl -i -p0e "s/$1/$2/mg" $file
 		# cleaning: '_ := '
-		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/g" $file
+		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/mg" $file
 	done
 }
 
@@ -169,22 +184,45 @@ multiline_3() {
 
 multiline_2() {
 	echo "Combine multiline try.To2() calls"
-	"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+	"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 	clean
 }
 
-multiline_1() {
-	#go build ./...
-
+# testing version
+multiline_0() {
 	echo "Combine multiline try.To1() calls: following lines"
 	# make a version whichi first change those who has two lines at a row!!
-	check_commit '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	check_commit '(, |)(err)( :?= )([\w\ \.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\3try.To1(\4)'
 
 	echo "Combine multiline try.To1() calls: unlimeted lines"
-	check_commit '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	check_commit '(, |)(err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\3try.To1(\4)'
+}
+
+multiline_1() {
+	echo "Combine multiline try.To1() calls: following lines"
+	# make a version whichi first change those who has two lines at a row!!
+	check_commit '(, err)( :?= )([\w\ \.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+
+	echo "Combine multiline try.To1() calls: unlimeted lines"
+	check_commit '(, err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+}
+
+multiline_11() {
+	echo "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
+	# make a version whichi first change those who has two lines at a row!!
+	#check_commit '(^\s*err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To(\3)'
+	check_commit '(^\s*)(err :?= )(.*)(\n)(\s*try\.To\(err\))' '\1try.To(\3)'
+
+	#echo "Combine multiline try.To1() calls: unlimeted lines"
+	#check_commit '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
 }
 
 todo() {
 	echo "Searching err2 references out of catchers"
 	ag -l 'err2\.(Check|Try|Filter)'
+}
+
+todo2() {
+	echo "Searching lone: try.To(err)"
+	ag -B 15  '^\s*try\.To\(err\)$'
 }
