@@ -35,6 +35,10 @@ goimports_to_changed
 check_build_and_pick
 
 echo "====== complex refactoring ===="
+
+multiline_11
+check_build_and_pick
+
 multiline_3
 check_build_and_pick
 
@@ -42,7 +46,7 @@ multiline_2
 check_build_and_pick
 
 multiline_1
-multiline_11
+check_build_and_pick
 
 # checking goimports at the end
 goimports_to_changed
