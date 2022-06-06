@@ -4,6 +4,23 @@ The package provides simple helper functions for _automatic_ error propagation.
 
 `go get github.com/lainio/err2`
 
+- [err2](#err2)
+  - [Structure](#structure)
+  - [Automatic Error Propagation And Stack Tracing](#automatic-error-propagation-and-stack-tracing)
+  - [Error handling](#error-handling)
+  - [Automatic And Optimized Stack Tracing](#automatic-and-optimized-stack-tracing)
+  - [Manual Stack Tracing](#manual-stack-tracing)
+  - [Error Handler](#Error-Handler)
+  - [Error checks](#Error-checks)
+  - [Auto-migration Deprecated Error Check Calls](#auto-migration-deprecated-error-check-calls)
+  - [Filters for non-errors like io.EOF](#Filters-for-non-errors-like-io.EOF)
+  - [Assertion (design by contract)](#assertion-design-by-contract)
+  - [Background](#Background)
+  - [Learnings by so far](#learnings-by-so-far)
+  - [Support](#support)
+  - [Roadmap](#roadmap)
+
+
 ## Structure
 
 err2 has the following package structure:
@@ -142,6 +159,23 @@ That can be handy in the internal packages and certain types of algorithms.
 We think that panicking for the errors at the start of the development is far
 better than not checking errors at all.
 
+#### Auto-migration Deprecated Error Check Calls
+
+The err2 doesn't have type variables anymore. They have been deprecated since
+version 0.8.0. Now they are removed from the repo as obsolete. Similarly
+`err2.Check(err)` is replaced by `try.To(err)`.
+
+You can migrate your `err2` using repos automatically. Just run the
+`./migrate.sh` bash script. It will do it for you. And it's safe. It uses git
+for every step that you stay in control.
+
+Go to your repo's root dir and enter the following command:
+
+```console
+$GOPATH/src/github.com/lainio/err2/scripts/migrate.sh
+```
+
+More information can be found from scripts [readme](./scripts/README.md).
 
 #### Filters for non-errors like io.EOF
 
@@ -292,3 +326,4 @@ Version history:
 - 0.8.4 **Optimized** Stack Tracing, documentation, benchmarks, etc.
 - 0.8.5 Typo in `StackTraceWriter` fixed
 - 0.8.6 Stack Tracing bug fixed, URL helper restored until migration tool
+- 0.8.7 **Auto-migration tool** to convert deprecated API usage for your repos
