@@ -27,7 +27,6 @@ commit "commit deps"
 
 echo "====== basic err2 refactoring ===="
 replace_easy1
-replace_1
 replace_2
 
 add_try_import
@@ -43,4 +42,6 @@ multiline_2
 check_build_and_pick
 
 multiline_1
+
+# checking goimports at the end
 goimports_to_changed

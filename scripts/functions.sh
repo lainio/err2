@@ -9,7 +9,7 @@ print_env() {
 }
 
 check_prerequisites() {
-	for c in ag perl sed git go jq xargs; do
+	for c in ag perl sed git go jq xargs goimports; do
 		if ! [[ -x "$(command -v ${c})" ]]; then
 			echo "ERR: missing command: '${c}'." >&2
 			echo "Please install before continue." >&2
@@ -53,7 +53,7 @@ check_build() {
 }
 
 replace_easy1() {
-	echo "calling easy 1"
+	echo "Replacing err2.Check, err2.FilterTry, err2.TryEOF, and type vars"
 
 	"$location"/replace.sh 'err2\.Check\(' 'try.To('
 
@@ -83,17 +83,12 @@ replace_easy1() {
 	"$location"/replace.sh 'err2\.Response\.Try\(' 'try.To1('
 
 	# TODO: add your own generated type helpers here!!
-}
-
-replace_1() {
-	echo "calling  1"
-	# change all the rest type variable usages.
 	# TODO: if you have your own of them like e2.XxxxType.Try use this as guide
 	#"$location"/replace.sh 'err2\.\w*\.Try\(' 'try.To1('
 }
 
 replace_2() {
-	echo "calling  2"
+	echo "Replacing err2.Try calls"
 	# This is very RARE, remove if you have problems!!!
 	"$location"/replace-perl.sh '(err2\.Try\()(\w*?\.)(Read|Fprint|Write)' 'try.To1(\2\3'
 
@@ -102,13 +97,13 @@ replace_2() {
 }
 
 add_try_import() {
-	echo "add try imports"
+	echo "Adding try imports"
 	"$location"/replace.sh '(try\.To|try\.Is)' '\"github.com\/lainio\/err2\"' '\"github.com\/lainio\/err2\"\n\t\"github.com\/lainio\/err2\/try\"' 
 }
 
 goimports_to_changed() {
-	echo "fmt with goimports"
-	git diff --name-only | grep '^.*\.go$' | xargs goimports -l -w
+	echo "Checking with goimports"
+	git diff --name-only | grep '^.*\.go$' | xargs goimports -w
 }
 
 commit() {
@@ -116,13 +111,12 @@ commit() {
 	if [[ ! -z "$dirty" ]]; then
 		git commit -am "automatic err2 migration: $1"
 	else
-		echo "skipping commit"
+		echo "All OK, nothing to commit at this phase, continuing checks..."
 	fi
 }
 
 fast_build_check() {
 	local pkg="./$(dirname ${1})/..."
-	echo "fast build check: $pkg"
 	go build -o /dev/null "$pkg"
 }
 
@@ -133,14 +127,14 @@ check_commit() {
 		# cleaning: '_ := '
 		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/g" $file
 		if fast_build_check $file; then
-			git commit -m "err2:$file" $file
+			git commit -m "err2:$file" $file 1>/dev/null
 		else
 			bads+="${file} "
 			git checkout -- $file
 		fi
 	done
 	for file in $bads; do 
-		echo "BAD file: $file, update manually!!!"
+		echo "BAD file: $file, update manually!!!" >&2
 		perl -i -p0e "s/$1/$2/g" $file
 		# cleaning: '_ := '
 		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/g" $file
@@ -152,10 +146,10 @@ check_build_and_pick() {
 	local bads=""
 	for file in $dirty; do
 		if fast_build_check "$file"; then
-			echo "build ok with update: $file"
-			git commit -m "err2:$file" $file
+			echo "Build OK with with err2 auto-refactoring: $file"
+			git commit -m "err2:$file" $file 1>/dev/null
 		else
-			echo "TODO: manually check file: $file"
+			echo "TODO: manually check file: $file" >&2
 			bads+="${file} "
 		fi
 	done
@@ -163,18 +157,18 @@ check_build_and_pick() {
 }
 
 clean() {
-	echo "running clean:"
+	echo "Cleaning: _ := try.To(... assignments"
 	"$location"/replace.sh '(_ :?= )(try\.To1)' '\2'
 }
 
 multiline_3() {
-	echo "multiline_3"
+	echo "Combine multiline try.To3() calls"
 	"$location"/replace-perl.sh '(, \w*)(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\2\4try.To3(\5)'
 	clean
 }
 
 multiline_2() {
-	echo "multiline_2"
+	echo "Combine multiline try.To2() calls"
 	"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 	clean
 }
@@ -182,14 +176,15 @@ multiline_2() {
 multiline_1() {
 	#go build ./...
 
-	echo "multiline_1"
+	echo "Combine multiline try.To1() calls: following lines"
 	# make a version whichi first change those who has two lines at a row!!
 	check_commit '(, err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
 
+	echo "Combine multiline try.To1() calls: unlimeted lines"
 	check_commit '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
 }
 
 todo() {
-	echo "searching err2 references out of catchers"
+	echo "Searching err2 references out of catchers"
 	ag -l 'err2\.(Check|Try|Filter)'
 }
