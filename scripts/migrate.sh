@@ -42,6 +42,7 @@ multiline_2
 check_build_and_pick
 
 multiline_1
+multiline_11
 
 # checking goimports at the end
 goimports_to_changed
