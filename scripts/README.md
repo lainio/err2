@@ -1,7 +1,8 @@
 ## Automatic Migration
 
 The err2 doesn't have type variables any more. They have been deprecated since
-version 0.8.0. No they are removed for the repo as obsolete.
+version 0.8.0. Now they are removed for the repo as obsolete. Similarly
+`err2.Check(err error)` is replaced by `try.To(err error)`
 
 They were generated for performance reasons and convenience. You could write:
 
