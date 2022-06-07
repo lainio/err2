@@ -30,11 +30,11 @@ do_work() {
 		else 
 			ag -l "$first" | xargs perl -i -p0e "$sr"
 		fi
-	else
+	else # Linux, etc.
 		if [ -z $use_perl ]; then
-			ag -l "$first" | xargs sed -Ei "$sr"
+			ag -l "$first" | xargs -r sed -Ei "$sr"
 		else 
-			ag -l "$first" | xargs perl -i -p0e "$sr"
+			ag -l "$first" | xargs -r perl -i -p0e "$sr"
 		fi
 	fi
 }
