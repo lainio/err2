@@ -188,6 +188,7 @@ multiline_2() {
 	clean
 }
 
+# TODO: not used
 # testing version
 multiline_0() {
 	echo "Combine multiline try.To1() calls: following lines"
