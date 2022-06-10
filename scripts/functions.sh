@@ -5,6 +5,7 @@ print_env() {
 	echo "start_branch: $start_branch"
 	echo "migration_branch: $migration_branch"
 	echo "use_current_branch: $use_current_branch"
+	echo "only_simple: $only_simple"
 	echo "---------- env setup -----------------"
 }
 
@@ -173,7 +174,9 @@ check_build_and_pick() {
 
 clean() {
 	echo "Cleaning: _ := try.To(... assignments"
-	"$location"/replace.sh '(_ :?= )(try\.To1)' '\2'
+	"$location"/replace.sh '(^\s*)(_ :?= )(try\.To1)' '\1\3'
+	"$location"/replace.sh '(^\s*)(_, _ :?= )(try\.To2)' '\1\3'
+	"$location"/replace.sh '(^\s*)(_, _, _ :?= )(try\.To3)' '\1\3'
 }
 
 multiline_3() {
@@ -184,7 +187,10 @@ multiline_3() {
 
 multiline_2() {
 	echo "Combine multiline try.To2() calls"
-	"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+
+	# TODO: important, remove me!!
+	#"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 	clean
 }
 
@@ -221,6 +227,12 @@ multiline_11() {
 todo() {
 	echo "Searching err2 references out of catchers"
 	ag -l 'err2\.(Check|Try|Filter)'
+}
+
+check_if_stop_for_simplex() {
+	if [[ ! -z $only_simple ]]; then
+		exit 0
+	fi
 }
 
 todo2() {

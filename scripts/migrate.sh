@@ -9,6 +9,7 @@ set -e
 start_branch=$(git rev-parse --abbrev-ref HEAD)
 migration_branch=${1:-"err2-auto-update"}
 use_current_branch=${use_current_branch:-""}
+only_simple=${only_simple:-""}
 
 if [[ ! -z $use_current_branch ]]; then
 	migration_branch="$start_branch"
@@ -33,6 +34,8 @@ add_try_import
 goimports_to_changed
 
 check_build_and_pick
+
+check_if_stop_for_simplex
 
 echo "====== complex refactoring ===="
 
