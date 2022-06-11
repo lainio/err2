@@ -6,27 +6,60 @@ location=$(dirname "$BASH_SOURCE")
 
 set -e
 
-start_branch=$(git rev-parse --abbrev-ref HEAD)
+# =================== main =====================
+while getopts 'voum:' OPTION; do
+	case "$OPTION" in
+	v)
+		echo "set verbose/debug mode"
+		verbose=1
+		;;
+	o)
+		vlog "running only simple migrations"
+		only_simple=1
+		;;
+	u)
+		vlog "using current branch"
+		use_current_branch=1
+		;;
+	m)
+		avalue="$OPTARG"
+		vlog "The runmode provided is $OPTARG"
+		;;
+	?)
+		echo "usage: $(basename $0) [-v] [-o] [-u] [-m runmode]" >&2
+		echo "       v: verbose" >&2
+		echo "       o: only simple migrations" >&2
+		echo "       u: using current branch" >&2
+		echo "       m: migration branch" >&2
+		exit 1
+		;;
+	esac
+done
+shift "$(($OPTIND -1))"
+
 migration_branch=${1:-"err2-auto-update"}
+
+start_branch=$(git rev-parse --abbrev-ref HEAD)
 use_current_branch=${use_current_branch:-""}
 only_simple=${only_simple:-""}
 
 if [[ ! -z $use_current_branch ]]; then
+	vlog "owerride migration branch with current branch"
+	vlog "use_current_branch: $use_current_branch"
 	migration_branch="$start_branch"
 fi
 
-# =================== main =====================
-# print_env
+print_env
 
 check_prerequisites
 
-echo "update err2 package to latest version"
+vlog "update err2 package to latest version"
 setup_repo
 deps
 check_build
 commit "commit deps"
 
-echo "====== basic err2 refactoring ===="
+vlog "====== basic err2 refactoring ===="
 replace_easy1
 replace_2
 
@@ -37,7 +70,7 @@ check_build_and_pick
 
 check_if_stop_for_simplex
 
-echo "====== complex refactoring ===="
+vlog "====== complex refactoring ===="
 
 multiline_11
 check_build_and_pick

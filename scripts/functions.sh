@@ -1,12 +1,20 @@
 #!/bin/bash
 
 print_env() {
-	echo "---------- env setup -----------------"
-	echo "start_branch: $start_branch"
-	echo "migration_branch: $migration_branch"
-	echo "use_current_branch: $use_current_branch"
-	echo "only_simple: $only_simple"
-	echo "---------- env setup -----------------"
+	if [[ "" != $verbose ]]; then
+		echo "---------- env setup -----------------"
+		echo "start_branch: $start_branch"
+		echo "migration_branch: $migration_branch"
+		echo "use_current_branch: $use_current_branch"
+		echo "only_simple: $only_simple"
+		echo "---------- env setup -----------------"
+	fi
+}
+
+vlog() {
+	if [[ "" != $verbose ]]; then
+		echo "$1"
+	fi
 }
 
 check_prerequisites() {
@@ -55,7 +63,7 @@ check_build() {
 }
 
 replace_easy1() {
-	echo "Replacing err2.Check, err2.FilterTry, err2.TryEOF, and type vars"
+	vlog "Replacing err2.Check, err2.FilterTry, err2.TryEOF, and type vars"
 
 	"$location"/replace.sh 'err2\.Check\(' 'try.To('
 
@@ -90,7 +98,7 @@ replace_easy1() {
 }
 
 replace_2() {
-	echo "Replacing err2.Try calls"
+	vlog "Replacing err2.Try calls"
 	# This is very RARE, remove if you have problems!!!
 	"$location"/replace-perl.sh '(err2\.Try\()(\w*?\.)(Read|Fprint|Write)' 'try.To1(\2\3'
 
@@ -99,12 +107,12 @@ replace_2() {
 }
 
 add_try_import() {
-	echo "Adding try imports"
+	vlog "Adding try imports"
 	"$location"/replace.sh '(try\.To|try\.Is)' '\"github.com\/lainio\/err2\"' '\"github.com\/lainio\/err2\"\n\t\"github.com\/lainio\/err2\/try\"' 
 }
 
 goimports_to_changed() {
-	echo "Checking with goimports"
+	vlog "Checking with goimports"
 	git diff --name-only | grep '^.*\.go$' | xargs goimports -w
 }
 
@@ -113,7 +121,7 @@ commit() {
 	if [[ ! -z "$dirty" ]]; then
 		git commit -am "automatic err2 migration: $1"
 	else
-		echo "All OK, nothing to commit at this phase, continuing checks..."
+		vlog "All OK, nothing to commit at this phase, continuing checks..."
 	fi
 }
 
@@ -139,6 +147,7 @@ fast_build_check() {
 check_commit() {
 	local bads=""
 	for file in $(ag -l "$1" ); do
+		vlog "processing: $file"
 		perl -i -p0e "s/$1/$2/mg" $file
 		# cleaning: '_ := '
 		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/mg" $file
@@ -162,7 +171,7 @@ check_build_and_pick() {
 	local bads=""
 	for file in $dirty; do
 		if fast_build_check "$file"; then
-			echo "Build OK with with err2 auto-refactoring: $file"
+			vlog "Build OK with with err2 auto-refactoring: $file"
 			git commit -m "err2:$file" $file 1>/dev/null
 		else
 			echo "TODO: manually check file: $file" >&2
@@ -173,69 +182,67 @@ check_build_and_pick() {
 }
 
 clean() {
-	echo "Cleaning: _ := try.To(... assignments"
+	vlog "Cleaning: _ := try.To(... assignments"
 	"$location"/replace.sh '(^\s*)(_ :?= )(try\.To1)' '\1\3'
 	"$location"/replace.sh '(^\s*)(_, _ :?= )(try\.To2)' '\1\3'
 	"$location"/replace.sh '(^\s*)(_, _, _ :?= )(try\.To3)' '\1\3'
 }
 
 multiline_3() {
-	echo "Combine multiline try.To3() calls"
-	"$location"/replace-perl.sh '(, \w*)(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\2\4try.To3(\5)'
+	vlog "Combine multiline try.To3() calls"
+	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4))'
 	clean
 }
 
 multiline_2() {
-	echo "Combine multiline try.To2() calls"
-	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
-
-	# TODO: important, remove me!!
-	#"$location"/replace-perl.sh '(, \w*)(, err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
-	clean
+	vlog "Combine multiline try.To2() calls"
+	check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4))'
 }
 
 # TODO: not used
 # testing version
 multiline_0() {
-	echo "Combine multiline try.To1() calls: following lines"
+	vlog "Combine multiline try.To1() calls: following lines"
 	# make a version whichi first change those who has two lines at a row!!
 	check_commit '(, |)(err)( :?= )([\w\ \.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\3try.To1(\4)'
 
-	echo "Combine multiline try.To1() calls: unlimeted lines"
+	vlog "Combine multiline try.To1() calls: unlimeted lines"
 	check_commit '(, |)(err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\3try.To1(\4)'
 }
 
 multiline_1() {
-	echo "Combine multiline try.To1() calls: following lines"
-	# make a version whichi first change those who has two lines at a row!!
-	check_commit '(, err)( :?= )([\w\ \.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
-
-	echo "Combine multiline try.To1() calls: unlimeted lines"
-	check_commit '(, err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	vlog "Combine multiline try.To1() calls: following lines"
+	check_commit '(^\s*\w*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4))'
+	check_commit '(^\s*\w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4))'
 }
 
 multiline_11() {
-	echo "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
+	vlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
 	# make a version whichi first change those who has two lines at a row!!
 	#check_commit '(^\s*err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To(\3)'
 	check_commit '(^\s*)(err :?= )(.*)(\n)(\s*try\.To\(err\))' '\1try.To(\3)'
 
-	#echo "Combine multiline try.To1() calls: unlimeted lines"
+	#vlog "Combine multiline try.To1() calls: unlimeted lines"
 	#check_commit '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
-}
-
-todo() {
-	echo "Searching err2 references out of catchers"
-	ag -l 'err2\.(Check|Try|Filter)'
 }
 
 check_if_stop_for_simplex() {
 	if [[ ! -z $only_simple ]]; then
-		exit 0
+		exit -1
 	fi
 }
 
+todo() {
+	vlog "Searching err2 references out of catchers"
+	ag -l 'err2\.(Check|Try|Filter)'
+}
+
+todo_show() {
+	vlog "Searching err2 references out of catchers"
+	ag 'err2\.(Check|Try|Filter)'
+}
+
 todo2() {
-	echo "Searching lone: try.To(err)"
+	vlog "Searching lone: try.To(err)"
 	ag -B 15  '^\s*try\.To\(err\)$'
 }
