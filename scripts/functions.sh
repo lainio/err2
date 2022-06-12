@@ -3,10 +3,10 @@
 print_env() {
 	if [[ "" != $verbose ]]; then
 		echo "---------- env setup -----------------"
-		echo "start_branch: $start_branch"
-		echo "migration_branch: $migration_branch"
-		echo "use_current_branch: $use_current_branch"
-		echo "only_simple: $only_simple"
+		echo "start_branch: '$start_branch'"
+		echo "migration_branch: '$migration_branch'"
+		echo "use_current_branch: '$use_current_branch'"
+		echo "only_simple: '$only_simple'"
 		echo "---------- env setup -----------------"
 	fi
 }
@@ -190,24 +190,14 @@ clean() {
 
 multiline_3() {
 	vlog "Combine multiline try.To3() calls"
+	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4))'
 	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4))'
-	clean
 }
 
 multiline_2() {
 	vlog "Combine multiline try.To2() calls"
+	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4))'
 	check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4))'
-}
-
-# TODO: not used
-# testing version
-multiline_0() {
-	vlog "Combine multiline try.To1() calls: following lines"
-	# make a version whichi first change those who has two lines at a row!!
-	check_commit '(, |)(err)( :?= )([\w\ \.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\3try.To1(\4)'
-
-	vlog "Combine multiline try.To1() calls: unlimeted lines"
-	check_commit '(, |)(err)( :?= )([\w\s\.,:!;%&=\/\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\3try.To1(\4)'
 }
 
 multiline_1() {
@@ -216,14 +206,12 @@ multiline_1() {
 	check_commit '(^\s*\w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4))'
 }
 
-multiline_11() {
+multiline_0() {
 	vlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
-	# make a version whichi first change those who has two lines at a row!!
-	#check_commit '(^\s*err)( :?= )([\w\ \.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To(\3)'
-	check_commit '(^\s*)(err :?= )(.*)(\n)(\s*try\.To\(err\))' '\1try.To(\3)'
+	#check_commit '(^\s*)(err :?= )(.*)(\n)(\s*try\.To\(err\))' '\1try.To(\3)'
 
-	#vlog "Combine multiline try.To1() calls: unlimeted lines"
-	#check_commit '(, err)( :?= )([\w\s\.,:!;%&=\-\(\)\{\}\[\]\$\^\?\\\|\+\"\*]*?)(\n)(\s*try\.To\(err\))' '\2try.To1(\3)'
+	check_commit '(^\s*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1try.To(\4))'
+	check_commit '(^\s*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1try.To(\4))'
 }
 
 check_if_stop_for_simplex() {

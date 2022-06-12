@@ -1,6 +1,7 @@
 #!/bin/bash
 
 location=$(dirname "$BASH_SOURCE")
+echo $location
 . $location/functions.sh
 
 set -e
@@ -9,7 +10,7 @@ set -e
 while getopts 'nvoum:' OPTION; do
 	case "$OPTION" in
 	n)
-		glog "no commits"
+		vlog "no commits"
 		no_commit=1
 		;;
 	v)
@@ -29,7 +30,7 @@ while getopts 'nvoum:' OPTION; do
 		vlog "migration_branch = $OPTARG"
 		;;
 	?)
-		echo "usage: $(basename $0) [-n] [-v] [-o] [-u] [-m runmode]" >&2
+		echo "usage: $(basename $0) [-n] [-v] [-o] [-u] [-m runmode] [functions...]" >&2
 		echo "       n: no commit" >&2
 		echo "       v: verbose" >&2
 		echo "       o: only simple migrations" >&2

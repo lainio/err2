@@ -1,6 +1,7 @@
 #!/bin/bash
 
 location=$(dirname "$BASH_SOURCE")
+echo $location
 
 . "$location"/functions.sh
 
@@ -26,11 +27,11 @@ while getopts 'voum:' OPTION; do
 		vlog "The runmode provided is $OPTARG"
 		;;
 	?)
-		echo "usage: $(basename $0) [-v] [-o] [-u] [-m runmode]" >&2
+		echo "usage: $(basename $0) [-v] [-o] [-u] [-m runmode] [migration_branch]" >&2
 		echo "       v: verbose" >&2
 		echo "       o: only simple migrations" >&2
 		echo "       u: using current branch" >&2
-		echo "       m: migration branch" >&2
+		echo "       m: reserved" >&2
 		exit 1
 		;;
 	esac
@@ -72,7 +73,7 @@ check_if_stop_for_simplex
 
 vlog "====== complex refactoring ===="
 
-multiline_11
+multiline_0
 check_build_and_pick
 
 multiline_3
