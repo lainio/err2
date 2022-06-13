@@ -150,19 +150,26 @@ check_commit() {
 		vlog "processing: $file"
 		perl -i -p0e "s/$1/$2/mg" $file
 		# cleaning: '_ := '
-		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/mg" $file
+		clean_noname_var_assings_1 $file
+		clean_orphan_var_1 $file
 		if fast_build_check $file; then
 			commit_one $file
 		else
+			# revert changes per bad file that we can test builds
+			# this is not perfect because we cannot test 'go builds'
+			# per file but package and if package is large one bad
+			# eg can ruine it.
 			bads+="${file} "
 			undo_one $file
 		fi
 	done
+	# still change bad apples that we don't lost all the automatic changes
 	for file in $bads; do 
 		echo "BAD file: $file, update manually!!!" >&2
 		perl -i -p0e "s/$1/$2/mg" $file
 		# cleaning: '_ := '
-		perl -i -p0e "s/(_ :?= )(try\.To1)/\2/mg" $file
+		clean_noname_var_assings_1 $file
+		clean_orphan_var_1 $file
 	done
 }
 
@@ -196,7 +203,7 @@ clean_orphan_var_1() {
 	perl -i -p0e 's/(^\s*)var (\w*) .*\n(^\s*)\2, _ = (try\.To2)/\1\2, _ := \4/mg' $file
 }
 
-clean_1() {
+clean_noname_var_assings_1() {
 	local file="$1"
 	vlog "Cleaning: _ := try.ToX() -> try.ToX(), for  $1"
 	perl -i -p0e 's/(^\s*)(_ :?= )(try\.To1)/\1\3/mg' $file
@@ -204,11 +211,16 @@ clean_1() {
 	perl -i -p0e 's/(^\s*)(_, _, _ :?= )(try\.To3)/\1\3/mg' $file
 }
 
-clean() {
+clean_noname_var_assings() {
 	vlog "Cleaning: _ := try.To(... assignments"
 	"$location"/replace.sh '(^\s*)(_ :?= )(try\.To1)' '\1\3'
 	"$location"/replace.sh '(^\s*)(_, _ :?= )(try\.To2)' '\1\3'
 	"$location"/replace.sh '(^\s*)(_, _, _ :?= )(try\.To3)' '\1\3'
+}
+
+clean() {
+	clean_orphan_var
+	clean_noname_var_assings
 }
 
 multiline_3() {
