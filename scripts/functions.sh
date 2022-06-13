@@ -191,17 +191,17 @@ clean_orphan_var() {
 clean_orphan_var_1() {
 	local file="$1"
 	vlog "Cleaning: var someVar Type\nsomeVar = try.ToX() -> someVar = try.ToX(), for $1"
-	perl -i -p0e 's/var (\w*) .*\n(^\s*)\1 = (try\.To1)/\2\3/mg' $file
-	perl -i -p0e 's/var (\w*) .*\n(^\s*)_, \1 = (try\.To2)/\2\3/mg' $file
-	perl -i -p0e 's/var (\w*) .*\n(^\s*)\1, _ = (try\.To2)/\2\3/mg' $file
+	perl -i -p0e 's/(^\s*)var (\w*) .*\n(^\s*)\2 = (try\.To1)/\1\2 := \4/mg' $file
+	perl -i -p0e 's/(^\s*)var (\w*) .*\n(^\s*)_, \2 = (try\.To2)/\1_, \2 := \4/mg' $file
+	perl -i -p0e 's/(^\s*)var (\w*) .*\n(^\s*)\2, _ = (try\.To2)/\1\2, _ := \4/mg' $file
 }
 
 clean_1() {
 	local file="$1"
 	vlog "Cleaning: _ := try.ToX() -> try.ToX(), for  $1"
-	perl -i -p0e '(^\s*)(_ :?= )(try\.To1)' '\1\3' $file
-	perl -i -p0e '(^\s*)(_, _ :?= )(try\.To2)' '\1\3' $file
-	perl -i -p0e '(^\s*)(_, _, _ :?= )(try\.To3)' '\1\3' $file
+	perl -i -p0e 's/(^\s*)(_ :?= )(try\.To1)/\1\3/mg' $file
+	perl -i -p0e 's/(^\s*)(_, _ :?= )(try\.To2)/\1\3/mg' $file
+	perl -i -p0e 's/(^\s*)(_, _, _ :?= )(try\.To3)/\1\3/mg' $file
 }
 
 clean() {
