@@ -70,7 +70,16 @@ check_build_and_pick
 
 check_if_stop_for_simplex
 
-vlog "====== complex refactoring ===="
+vlog "====== complex refactoring 1. ===="
+
+try_0
+try_3
+try_2
+try_1
+
+check_build_and_pick
+
+vlog "====== complex refactoring 2. ===="
 
 multiline_0
 check_build_and_pick

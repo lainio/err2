@@ -223,30 +223,52 @@ clean() {
 	clean_noname_var_assings
 }
 
+try_3() {
+	vlog "Combine one try.To3() call"
+	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
+}
+
 multiline_3() {
 	vlog "Combine multiline try.To3() calls"
-	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4))'
-	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4))'
+	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
+}
+
+try_2() {
+	vlog "Combine ONE try.To2() call"
+	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 }
 
 multiline_2() {
 	vlog "Combine multiline try.To2() calls"
-	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4))'
-	check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4))'
+	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+}
+
+multi_search_1() {
+	set +e # if you want to run many search!!
+
+	vlog "search test"
+	#ag '(^\s*\w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))'
+	ag '(^\s*\w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
+}
+
+try_1() {
+	vlog "Combine ONE try.To1() calls: to previous lines"
+	check_commit '(^\s*\w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
 }
 
 multiline_1() {
 	vlog "Combine multiline try.To1() calls: following lines"
-	check_commit '(^\s*\w*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4))'
-	check_commit '(^\s*\w*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4))'
+	check_commit '(^\s*\w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
+}
+
+try_0() {
+	vlog "Combine one err = XXXXX()\ntry.To()"
+	check_commit '(^\s*)(err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
 }
 
 multiline_0() {
 	vlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
-	#check_commit '(^\s*)(err :?= )(.*)(\n)(\s*try\.To\(err\))' '\1try.To(\3)'
-
-	check_commit '(^\s*)(, err)( :?= )(.*?)\)(\n)(\s*try\.To\(err\))' '\1try.To(\4))'
-	check_commit '(^\s*)(, err)( :?= )((.|\n)*?)\)(\n)(\s*try\.To\(err\))' '\1try.To(\4))'
+	check_commit '(^\s*)(err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
 }
 
 check_if_stop_for_simplex() {
