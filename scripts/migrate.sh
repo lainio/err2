@@ -1,7 +1,6 @@
 #!/bin/bash
 
 location=$(dirname "$BASH_SOURCE")
-echo $location
 
 . "$location"/functions.sh
 
