@@ -1,5 +1,23 @@
 #!/bin/bash
 
+iltered_build() {
+	local osname=$(uname -s)
+	local pkg=${1:-"./..."}
+	local awk_file="$location"/delete-"$osname".awk
+
+	del=$(go build -o /dev/null "$pkg" 2>&1 >/dev/null | grep 'declared but not used' | awk -F : -f "$awk_file") 
+
+	if [[ $del != "" ]]; then
+		eval $del
+		vlog "filtered"
+		echo "FILTERED"
+	else
+		vlog "BUILD OK"
+		echo "OK"
+	fi
+}
+
+
 print_env() {
 	if [[ "" != $verbose ]]; then
 		echo "---------- env setup -----------------"
@@ -18,7 +36,7 @@ vlog() {
 }
 
 check_prerequisites() {
-	for c in ag perl sed git go jq xargs goimports; do
+	for c in ag perl sed awk git go jq xargs goimports; do
 		if ! [[ -x "$(command -v ${c})" ]]; then
 			echo "ERR: missing command: '${c}'." >&2
 			echo "Please install before continue." >&2
@@ -141,7 +159,17 @@ commit_one() {
 
 fast_build_check() {
 	local pkg="./$(dirname ${1})/..."
-	go build -o /dev/null "$pkg"
+	#local result=$(filtered_build "$pkg")
+
+	#if [[ $result != "OK" ]]; then
+		if go build -o /dev/null "$pkg"; then
+			echo "OK"
+		else
+			echo "ERR"
+		fi
+	#else
+	#echo "OK"
+	#fi
 }
 
 check_commit() {
@@ -152,7 +180,7 @@ check_commit() {
 		# cleaning: '_ := '
 		clean_noname_var_assings_1 $file
 		clean_orphan_var_1 $file
-		if fast_build_check $file; then
+		if [[ $(fast_build_check $file) == "OK" ]]; then
 			commit_one $file
 		else
 			# revert changes per bad file that we can test builds
@@ -177,7 +205,8 @@ check_build_and_pick() {
 	check_dirty
 	local bads=""
 	for file in $dirty; do
-		if fast_build_check "$file"; then
+		if [[ $(fast_build_check $file) == "OK" ]]; then
+		# if fast_build_check "$file"; then
 			vlog "Build OK with with err2 auto-refactoring: $file"
 			git commit -m "err2:$file" $file 1>/dev/null
 		else
@@ -239,7 +268,7 @@ try_2() {
 }
 
 #search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
-search_2_multi="(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))"
+search_2_multi="(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
 #search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))"
 
 search_2() {
@@ -250,12 +279,9 @@ search_2() {
 
 multiline_2() {
 	vlog "Combine multiline try.To2() calls"
-	check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+	#check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+	check_commit "$search_2_multi" '\1\3try.To2(\4)'
 }
-
-#search_1_multi='(^\s*(\w|\.)*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
-#search_1_multi='(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
-search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))'
 
 search_1() {
 	set +e # if you want to run many search!!
@@ -272,9 +298,15 @@ try_1() {
 	check_commit '(^\s*\w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
 }
 
+search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
+#search_1_multi='(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
+#search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))'
+
 multiline_1() {
 	vlog "Combine multiline try.To1() calls: following lines"
-	check_commit '(^\s*\w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
+	vlog "$search_1_multi"
+	#check_commit '(^\s*\w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
+	check_commit "$search_1_multi" '\1\3try.To1(\4)'
 }
 
 try_0() {
