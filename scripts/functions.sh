@@ -238,9 +238,14 @@ try_2() {
 	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 }
 
+#search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
+search_2_multi="(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))"
+#search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))"
+
 search_2() {
 	set +e # if you want to run many search!!
-	ag '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
+	vlog "Searching: $search_2_multi"
+	ag "$search_2_multi"
 }
 
 multiline_2() {
@@ -248,13 +253,18 @@ multiline_2() {
 	check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 }
 
+#search_1_multi='(^\s*(\w|\.)*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
+#search_1_multi='(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
+search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))'
+
 search_1() {
 	set +e # if you want to run many search!!
 
-	vlog "search test"
+	vlog "search test $search_1_multi"
 	#ag '(^\s*\w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))'
 	#ag '(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*)(\n)(\s*try\.To\(err\))'
-	ag '(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
+	#ag '(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
+	ag "$search_1_multi"
 }
 
 try_1() {
