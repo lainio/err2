@@ -7,7 +7,7 @@ location=$(dirname "$BASH_SOURCE")
 set -e
 
 # =================== main =====================
-while getopts 'voum:' OPTION; do
+while getopts 'voushm:' OPTION; do
 	case "$OPTION" in
 	v)
 		echo "set verbose/debug mode"
@@ -25,11 +25,16 @@ while getopts 'voum:' OPTION; do
 		avalue="$OPTARG"
 		vlog "The runmode provided is $OPTARG"
 		;;
-	?)
+	s)
+		allow_subdir=1
+		vlog "Allowing subdir processing"
+		;;
+	h|?)
 		echo "usage: $(basename $0) [-v] [-o] [-u] [-m runmode] [migration_branch]" >&2
 		echo "       v: verbose" >&2
 		echo "       o: only simple migrations" >&2
 		echo "       u: using current branch" >&2
+		echo "       s: allow subdir processing" >&2
 		echo "       m: reserved" >&2
 		exit 1
 		;;
