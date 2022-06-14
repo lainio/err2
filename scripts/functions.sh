@@ -26,7 +26,7 @@ check_prerequisites() {
 		fi
 	done
 
-	if [[ $(git rev-parse --show-toplevel 2>/dev/null) != "$PWD" ]]; then
+	if [[ $allow_subdir == "" && $(git rev-parse --show-toplevel 2>/dev/null) != "$PWD" ]]; then
 		echo "ERR: your current dir must be repo's rood dir" >&2
 		exit 1
 	fi
@@ -238,17 +238,23 @@ try_2() {
 	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 }
 
-multiline_2() {
-	vlog "Combine multiline try.To2() calls"
-	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+search_2() {
+	set +e # if you want to run many search!!
+	ag '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
 }
 
-multi_search_1() {
+multiline_2() {
+	vlog "Combine multiline try.To2() calls"
+	check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+}
+
+search_1() {
 	set +e # if you want to run many search!!
 
 	vlog "search test"
 	#ag '(^\s*\w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))'
-	ag '(^\s*\w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
+	#ag '(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*)(\n)(\s*try\.To\(err\))'
+	ag '(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
 }
 
 try_1() {
