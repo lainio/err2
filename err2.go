@@ -15,33 +15,33 @@ import (
 //  err2.StackTraceWriter = log.Writer() // stack trace to std logger
 var StackTraceWriter io.Writer
 
-// Try is deprecated. Use try.To functions from try package instead.
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
 // returns slice of interfaces. It has quite big performance penalty when
 // compared to Check function.
+// Deprecated: Use try.To functions from try package instead.
 func Try(args ...any) []any {
 	check(args)
 	return args
 }
 
-// Check is deprecated. Use try.To function instead. Check performs error check
 // for the given argument. If the err is nil, it does nothing. According the
 // measurements, it's as fast as
 //  if err != nil {
 //      return err
 //  }
 // on happy path.
+// Deprecated: Use try.To function instead. Check performs error check
 func Check(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-// FilterTry is deprecated. Use try.Is function instead.
 // FilterTry performs filtered error check for the given argument. It's same
 // as Check but before throwing an error it checks if error matches the filter.
 // The return value false tells that there are no errors and true that filter is
 // matched.
+// Deprecated: Use try.Is function instead.
 func FilterTry(filter, err error) bool {
 	if err != nil {
 		if errors.Is(err, filter) {
@@ -52,10 +52,10 @@ func FilterTry(filter, err error) bool {
 	return false
 }
 
-// TryEOF is deprecated. Use try.IsEOF function instead.
 // TryEOF checks errors but filters io.EOF from the exception handling and
 // returns boolean which tells if io.EOF is present. See more info from
 // FilterCheck.
+// Deprecated: Use try.IsEOF function instead.
 func TryEOF(err error) bool {
 	return FilterTry(io.EOF, err)
 }
@@ -63,6 +63,7 @@ func TryEOF(err error) bool {
 // check is deprecated. Used by Try. Checks the error status of the last
 // argument. It panics with "wrong signature" if the last calling parameter is
 // not error. In case of error it delivers it by panicking.
+// Deprecated: Used by try package.
 func check(args []any) {
 	argCount := len(args)
 	last := argCount - 1
@@ -271,12 +272,12 @@ type _empty struct{}
 // Empty is deprecated. Use try.To functions instead.
 // Empty is a helper variable to demonstrate how we could build 'type wrappers'
 // to make Try function as fast as Check.
-// Note! Deprecated, use try package.
+// Deprecated: use try package.
 var Empty _empty
 
-// Try is deprecated. Use try.To functions instead.
 // Try is a helper method to call func() (string, error) functions with it and
 // be as fast as Check(err).
+// Deprecated: Use try.To functions instead.
 func (s _empty) Try(_ any, err error) {
 	Check(err)
 }
