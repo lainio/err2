@@ -61,17 +61,17 @@ check_prerequisites
 vlog "update err2 package to latest version"
 setup_repo
 deps
-check_build
+check_build ./...
 commit "commit deps"
 
-vlog "====== basic err2 refactoring ===="
+echo "====== basic err2 refactoring ===="
 replace_easy1
 replace_2
 
 add_try_import
 goimports_to_changed
 
-check_build_and_pick
+bads=$(check_build_and_pick)
 
 check_if_stop_for_simplex
 
@@ -82,21 +82,29 @@ try_3
 try_2
 try_1
 
-check_build_and_pick
+bads=$(check_build_and_pick)
 
-vlog "====== complex refactoring 2. ===="
+echo "====== complex refactoring 2. ===="
 
 multiline_0
-check_build_and_pick
+bads=$(check_build_and_pick)
 
 multiline_3
-check_build_and_pick
+bads=$(check_build_and_pick)
 
 multiline_2
-check_build_and_pick
+bads=$(check_build_and_pick)
 
 multiline_1
-check_build_and_pick
+bads=$(check_build_and_pick)
 
-# checking goimports at the end
-goimports_to_changed
+echo "====== auto-refactoring done ===="
+
+if [[ $bads != "" ]]; then
+	echo "Following files need to be manually checked before commit:" >&2
+	echo "$bads" >&2
+	exit 1
+fi
+
+echo "Easy peasy! All done."
+
