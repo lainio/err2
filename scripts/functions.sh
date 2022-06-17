@@ -347,3 +347,8 @@ todo2() {
 	vlog "Searching lone: try.To(err)"
 	ag -B 15  '^\s*try\.To\(err\)$'
 }
+
+todo2l() {
+	vlog "Searching lone: try.To(err) and listing files"
+	ag -l  '^\s*try\.To\(err\)$'
+}
