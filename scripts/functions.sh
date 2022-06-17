@@ -1,19 +1,25 @@
 #!/bin/bash
 
-iltered_build() {
+filtered_build() {
 	local osname=$(uname -s)
 	local pkg=${1:-"./..."}
 	local awk_file="$location"/delete-"$osname".awk
 
-	del=$(go build -o /dev/null "$pkg" 2>&1 >/dev/null | grep 'declared but not used' | awk -F : -f "$awk_file") 
+	res=$(go build -o /dev/null "$pkg" 2>&1 >/dev/null) 
+	del=$(echo "$res" | grep 'declared but not used' | awk -F : -f "$awk_file") 
 
 	if [[ $del != "" ]]; then
 		eval $del
 		vlog "filtered"
-		echo "FILTERED"
+		echo "FILTER"
 	else
-		vlog "BUILD OK"
-		echo "OK"
+		if [[ $res != "" ]]; then
+			vlog "BUILD ERR"
+			echo "ERR"
+		else
+			vlog "BUILD OK"
+			echo "OK"
+		fi
 	fi
 }
 
@@ -159,17 +165,14 @@ commit_one() {
 
 fast_build_check() {
 	local pkg="./$(dirname ${1})/..."
-	#local result=$(filtered_build "$pkg")
 
-	#if [[ $result != "OK" ]]; then
-		if go build -o /dev/null "$pkg"; then
-			echo "OK"
-		else
-			echo "ERR"
-		fi
-	#else
-	#echo "OK"
-	#fi
+	if go build -o /dev/null "$pkg"; then
+		echo "OK"
+	else
+		local result=$(filtered_build "$pkg")
+		vlog "$result"
+		echo "$result"
+	fi
 }
 
 check_commit() {
@@ -254,7 +257,7 @@ clean() {
 
 try_3() {
 	vlog "Combine one try.To3() call"
-	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
+	check_commit '(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
 }
 
 multiline_3() {
@@ -264,7 +267,7 @@ multiline_3() {
 
 try_2() {
 	vlog "Combine ONE try.To2() call"
-	check_commit '(^\s*\w*, \w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+	check_commit '(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 }
 
 #search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
@@ -295,12 +298,10 @@ search_1() {
 
 try_1() {
 	vlog "Combine ONE try.To1() calls: to previous lines"
-	check_commit '(^\s*\w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
+	check_commit '(^\s*[\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
 }
 
 search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
-#search_1_multi='(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
-#search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))'
 
 multiline_1() {
 	vlog "Combine multiline try.To1() calls: following lines"
@@ -314,9 +315,16 @@ try_0() {
 	check_commit '(^\s*)(err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
 }
 
+search_0_multi='(^\s*)(err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' 
+
 multiline_0() {
 	vlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
-	check_commit '(^\s*)(err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
+	check_commit "$search_0_multi" '\1try.To(\4)'
+}
+
+search_0() {
+	vlog "Search-0: $search_0_multi"
+	check_commit "$search_0_multi" '\1try.To(\4)'
 }
 
 check_if_stop_for_simplex() {
