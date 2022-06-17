@@ -83,7 +83,8 @@ deps() {
 }
 
 check_build() {
-	go build -o /dev/null ./...
+	local pkg="$1"
+	go build -o /dev/null "$pkg" &>/dev/null
 }
 
 replace_easy1() {
@@ -166,7 +167,7 @@ commit_one() {
 fast_build_check() {
 	local pkg="./$(dirname ${1})/..."
 
-	if go build -o /dev/null "$pkg"; then
+	if check_build "$pkg"; then
 		echo "OK"
 	else
 		local result=$(filtered_build "$pkg")
@@ -209,7 +210,6 @@ check_build_and_pick() {
 	local bads=""
 	for file in $dirty; do
 		if [[ $(fast_build_check $file) == "OK" ]]; then
-		# if fast_build_check "$file"; then
 			vlog "Build OK with with err2 auto-refactoring: $file"
 			git commit -m "err2:$file" $file 1>/dev/null
 		else
@@ -261,8 +261,8 @@ try_3() {
 }
 
 multiline_3() {
-	vlog "Combine multiline try.To3() calls"
-	check_commit '(^\s*\w*, \w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
+	vlog "Combine multiline try.To3() calls: $search_3_multi"
+	check_commit "$search_3_multi" '\1\3try.To3(\4)'
 }
 
 try_2() {
@@ -270,8 +270,13 @@ try_2() {
 	check_commit '(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 }
 
-#search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
+search_0_multi='(^\s*)(err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' 
+search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
 search_2_multi="(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
+search_3_multi="(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
+
+# other tested versions, left here for debugging purposes
+#search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
 #search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))"
 
 search_2() {
@@ -290,9 +295,6 @@ search_1() {
 	set +e # if you want to run many search!!
 
 	vlog "search test $search_1_multi"
-	#ag '(^\s*\w*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))'
-	#ag '(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*)(\n)(\s*try\.To\(err\))'
-	#ag '(^\s*(\w|\.)*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))'
 	ag "$search_1_multi"
 }
 
@@ -301,12 +303,10 @@ try_1() {
 	check_commit '(^\s*[\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
 }
 
-search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
 
 multiline_1() {
 	vlog "Combine multiline try.To1() calls: following lines"
 	vlog "$search_1_multi"
-	#check_commit '(^\s*\w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
 	check_commit "$search_1_multi" '\1\3try.To1(\4)'
 }
 
@@ -314,8 +314,6 @@ try_0() {
 	vlog "Combine one err = XXXXX()\ntry.To()"
 	check_commit '(^\s*)(err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
 }
-
-search_0_multi='(^\s*)(err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' 
 
 multiline_0() {
 	vlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
