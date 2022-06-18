@@ -7,8 +7,12 @@ location=$(dirname "$BASH_SOURCE")
 set -e
 
 # =================== main =====================
-while getopts 'voushm:' OPTION; do
+while getopts 'dvoushm:' OPTION; do
 	case "$OPTION" in
+	d)
+		echo "set verbose/debug mode"
+		debug=1
+		;;
 	v)
 		echo "set verbose/debug mode"
 		verbose=1
@@ -30,7 +34,8 @@ while getopts 'voushm:' OPTION; do
 		vlog "Allowing subdir processing"
 		;;
 	h|?)
-		echo "usage: $(basename $0) [-v] [-o] [-u] [-m runmode] [migration_branch]" >&2
+		echo "usage: $(basename $0) [-d] [-v] [-o] [-u] [-m runmode] [migration_branch]" >&2
+		echo "       d: add debug output" >&2
 		echo "       v: verbose" >&2
 		echo "       o: only simple migrations" >&2
 		echo "       u: using current branch" >&2
@@ -65,6 +70,8 @@ check_build ./...
 commit "commit deps"
 
 echo "====== basic err2 refactoring ===="
+echo "processing..."
+
 replace_easy1
 replace_2
 
@@ -75,7 +82,7 @@ bads=$(check_build_and_pick)
 
 check_if_stop_for_simplex
 
-vlog "====== complex refactoring 1. ===="
+echo "====== complex refactoring 1. ===="
 
 try_0
 try_3
@@ -98,6 +105,7 @@ bads=$(check_build_and_pick)
 multiline_1
 bads=$(check_build_and_pick)
 
+echo
 echo "================================="
 echo "====== auto-refactoring done ===="
 echo "================================="

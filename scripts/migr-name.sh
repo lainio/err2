@@ -6,11 +6,15 @@ location=$(dirname "$BASH_SOURCE")
 set -e
 
 # =================== main =====================
-while getopts 'nvoum:' OPTION; do
+while getopts 'dnvoum:' OPTION; do
 	case "$OPTION" in
 	n)
 		vlog "no commits"
 		no_commit=1
+		;;
+	d)
+		echo "set verbose/debug mode"
+		verbose=1
 		;;
 	v)
 		echo "set verbose/debug mode"
@@ -31,6 +35,7 @@ while getopts 'nvoum:' OPTION; do
 	?)
 		echo "usage: $(basename $0) [-n] [-v] [-o] [-u] [-m runmode] [functions...]" >&2
 		echo "       n: no commit" >&2
+		echo "       d: add debug output" >&2
 		echo "       v: verbose" >&2
 		echo "       o: only simple migrations" >&2
 		echo "       u: using current branch" >&2

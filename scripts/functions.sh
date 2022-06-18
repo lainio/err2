@@ -10,14 +10,12 @@ filtered_build() {
 
 	if [[ $del != "" ]]; then
 		eval $del
-		vlog "filtered"
+		dlog "filter prosessing working"
 		echo "FILTER"
 	else
 		if [[ $res != "" ]]; then
-			vlog "BUILD ERR"
 			echo "ERR"
 		else
-			vlog "BUILD OK"
 			echo "OK"
 		fi
 	fi
@@ -32,6 +30,12 @@ print_env() {
 		echo "use_current_branch: '$use_current_branch'"
 		echo "only_simple: '$only_simple'"
 		echo "---------- env setup -----------------"
+	fi
+}
+
+dlog() {
+	if [[ "" != $debug ]]; then
+		echo "$1" >&2
 	fi
 }
 
@@ -171,7 +175,7 @@ fast_build_check() {
 		echo "OK"
 	else
 		local result=$(filtered_build "$pkg")
-		vlog "$result"
+		dlog "$result"
 		echo "$result"
 	fi
 }
@@ -179,7 +183,7 @@ fast_build_check() {
 check_commit() {
 	local bads=""
 	for file in $(ag -l "$1" ); do
-		vlog "processing: $file"
+		echo "processing: $file"
 		perl -i -p0e "s/$1/$2/mg" $file
 		# cleaning: '_ := '
 		clean_noname_var_assings_1 $file
@@ -213,7 +217,7 @@ check_build_and_pick() {
 			vlog "Build OK with with err2 auto-refactoring: $file"
 			git commit -m "err2:$file" $file 1>/dev/null
 		else
-			echo "Cannot commit file: $file yet" >&2
+			echo "The file: $file needs more processing..." >&2
 			bads+="${file} "
 		fi
 	done
@@ -229,7 +233,7 @@ clean_orphan_var() {
 
 clean_orphan_var_1() {
 	local file="$1"
-	vlog "Cleaning: var someVar Type\nsomeVar = try.ToX() -> someVar = try.ToX(), for $1"
+	dlog "Cleaning: var someVar Type\nsomeVar = try.ToX() -> someVar = try.ToX(), for $1"
 	perl -i -p0e 's/(^\s*)var (\w*) .*\n(^\s*)\2 = (try\.To1)/\1\2 := \4/mg' $file
 	perl -i -p0e 's/(^\s*)var (\w*) .*\n(^\s*)_, \2 = (try\.To2)/\1_, \2 := \4/mg' $file
 	perl -i -p0e 's/(^\s*)var (\w*) .*\n(^\s*)\2, _ = (try\.To2)/\1\2, _ := \4/mg' $file
@@ -237,7 +241,7 @@ clean_orphan_var_1() {
 
 clean_noname_var_assings_1() {
 	local file="$1"
-	vlog "Cleaning: _ := try.ToX() -> try.ToX(), for  $1"
+	dlog "Cleaning: _ := try.ToX() -> try.ToX(), for  $1"
 	perl -i -p0e 's/(^\s*)(_ :?= )(try\.To1)/\1\3/mg' $file
 	perl -i -p0e 's/(^\s*)(_, _ :?= )(try\.To2)/\1\3/mg' $file
 	perl -i -p0e 's/(^\s*)(_, _, _ :?= )(try\.To3)/\1\3/mg' $file
@@ -266,68 +270,68 @@ search_3_multi="(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*t
 
 search_3() {
 	set +e # if you want to run many search!!
-	vlog "Searching: $search_3_multi"
+	dlog "Searching: $search_3_multi"
 	ag "$search_3_multi"
 }
 
 search_2() {
 	set +e # if you want to run many search!!
-	vlog "Searching: $search_2_multi"
+	dlog "Searching: $search_2_multi"
 	ag "$search_2_multi"
 }
 
 search_1() {
 	set +e # if you want to run many search!!
 
-	vlog "search test $search_1_multi"
+	dlog "search test $search_1_multi"
 	ag "$search_1_multi"
 }
 
 search_0() {
-	vlog "Search-0: $search_0_multi"
+	dlog "Search-0: $search_0_multi"
 	check_commit "$search_0_multi" '\1try.To(\4)'
 }
 
 try_3() {
-	vlog "Combine one try.To3() call"
+	dlog "Combine ONE try.To3() call"
 	check_commit '(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
 }
 
 try_2() {
-	vlog "Combine ONE try.To2() call"
+	dlog "Combine ONE try.To2() call"
 	check_commit '(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 }
 
 try_1() {
-	vlog "Combine ONE try.To1() calls: to previous lines"
+	dlog "Combine ONE try.To1() calls: to previous lines"
 	check_commit '(^\s*[\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
 }
 
 try_0() {
-	vlog "Combine one err = XXXXX()\ntry.To()"
+	dlog "Combine ONE err = XXXXX()\ntry.To()"
 	check_commit '(^\s*)(err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
 }
 
 multiline_3() {
-	vlog "Combine multiline try.To3() calls: $search_3_multi"
+	dlog "Combine multiline try.To3() calls: $search_3_multi"
 	check_commit "$search_3_multi" '\1\3try.To3(\4)'
 }
 
 multiline_2() {
-	vlog "Combine multiline try.To2() calls"
+	dlog "Combine multiline try.To2() calls"
 	#check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 	check_commit "$search_2_multi" '\1\3try.To2(\4)'
 }
 
 
 multiline_1() {
-	vlog "Combine multiline try.To1() calls: following lines"
-	vlog "$search_1_multi"
+	dlog "Combine multiline try.To1() calls: following lines"
+	dlog "$search_1_multi"
 	check_commit "$search_1_multi" '\1\3try.To1(\4)'
 }
 
 multiline_0() {
-	vlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
+	dlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
 	check_commit "$search_0_multi" '\1try.To(\4)'
 }
 
@@ -338,21 +342,21 @@ check_if_stop_for_simplex() {
 }
 
 todo() {
-	vlog "Searching err2 references out of catchers"
+	dlog "Searching err2 references out of catchers"
 	ag -l 'err2\.(Check|Try|Filter)'
 }
 
 todo_show() {
-	vlog "Searching err2 references out of catchers"
+	dlog "Searching err2 references out of catchers"
 	ag 'err2\.(Check|Try|Filter)'
 }
 
 todo2() {
-	vlog "Searching lone: try.To(err)"
+	dlog "Searching lone: try.To(err)"
 	ag -B 15  '^\s*try\.To\(err\)$'
 }
 
 todo2l() {
-	vlog "Searching lone: try.To(err) and listing files"
+	dlog "Searching lone: try.To(err) and listing files"
 	ag -l  '^\s*try\.To\(err\)$'
 }
