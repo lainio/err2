@@ -13,11 +13,11 @@ while getopts 'dnvoum:' OPTION; do
 		no_commit=1
 		;;
 	d)
-		echo "set verbose/debug mode"
+		echo "set verbose debug mode"
 		verbose=1
 		;;
 	v)
-		echo "set verbose/debug mode"
+		echo "set verbose output mode"
 		verbose=1
 		;;
 	o)
@@ -53,7 +53,7 @@ use_current_branch=${use_current_branch:-""}
 only_simple=${only_simple:-""}
 
 if [[ ! -z $use_current_branch ]]; then
-	vlog "owerride migration branch with current branch"
+	vlog "override migration branch with current branch"
 	vlog "use_current_branch: $use_current_branch"
 	migration_branch="$start_branch"
 fi
