@@ -98,11 +98,16 @@ bads=$(check_build_and_pick)
 multiline_1
 bads=$(check_build_and_pick)
 
+echo "================================="
 echo "====== auto-refactoring done ===="
+echo "================================="
+echo
 
 if [[ $bads != "" ]]; then
-	echo "Following files need to be manually checked before commit:" >&2
-	echo "$bads" >&2
+	echo "====== TODO Summary ====" >&2
+	echo "Please check the following files before commit:" >&2
+	echo "" >&2
+	echo "$bads" | tr " " "\n" >&2
 	exit 1
 fi
 

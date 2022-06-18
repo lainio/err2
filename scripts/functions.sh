@@ -42,7 +42,7 @@ vlog() {
 }
 
 check_prerequisites() {
-	for c in ag perl sed awk git go jq xargs goimports; do
+	for c in ag perl sed awk git go tr jq xargs goimports; do
 		if ! [[ -x "$(command -v ${c})" ]]; then
 			echo "ERR: missing command: '${c}'." >&2
 			echo "Please install before continue." >&2
@@ -197,7 +197,7 @@ check_commit() {
 	done
 	# still change bad apples that we don't lost all the automatic changes
 	for file in $bads; do 
-		echo "BAD file: $file, update manually!!!" >&2
+		echo "Problematic file: $file, keeping changes but no commit" >&2
 		perl -i -p0e "s/$1/$2/mg" $file
 		# cleaning: '_ := '
 		clean_noname_var_assings_1 $file
@@ -213,7 +213,7 @@ check_build_and_pick() {
 			vlog "Build OK with with err2 auto-refactoring: $file"
 			git commit -m "err2:$file" $file 1>/dev/null
 		else
-			echo "TODO: manually check file: $file" >&2
+			echo "Cannot commit file: $file yet" >&2
 			bads+="${file} "
 		fi
 	done
@@ -255,21 +255,6 @@ clean() {
 	clean_noname_var_assings
 }
 
-try_3() {
-	vlog "Combine one try.To3() call"
-	check_commit '(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
-}
-
-multiline_3() {
-	vlog "Combine multiline try.To3() calls: $search_3_multi"
-	check_commit "$search_3_multi" '\1\3try.To3(\4)'
-}
-
-try_2() {
-	vlog "Combine ONE try.To2() call"
-	check_commit '(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
-}
-
 search_0_multi='(^\s*)(err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' 
 search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
 search_2_multi="(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
@@ -279,16 +264,16 @@ search_3_multi="(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*t
 #search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
 #search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([.\n]*?)(\n)(\s*try\.To\(err\))"
 
+search_3() {
+	set +e # if you want to run many search!!
+	vlog "Searching: $search_3_multi"
+	ag "$search_3_multi"
+}
+
 search_2() {
 	set +e # if you want to run many search!!
 	vlog "Searching: $search_2_multi"
 	ag "$search_2_multi"
-}
-
-multiline_2() {
-	vlog "Combine multiline try.To2() calls"
-	#check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
-	check_commit "$search_2_multi" '\1\3try.To2(\4)'
 }
 
 search_1() {
@@ -298,9 +283,40 @@ search_1() {
 	ag "$search_1_multi"
 }
 
+search_0() {
+	vlog "Search-0: $search_0_multi"
+	check_commit "$search_0_multi" '\1try.To(\4)'
+}
+
+try_3() {
+	vlog "Combine one try.To3() call"
+	check_commit '(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To3(\4)'
+}
+
+try_2() {
+	vlog "Combine ONE try.To2() call"
+	check_commit '(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+}
+
 try_1() {
 	vlog "Combine ONE try.To1() calls: to previous lines"
 	check_commit '(^\s*[\w\.]*)(, err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1\3try.To1(\4)'
+}
+
+try_0() {
+	vlog "Combine one err = XXXXX()\ntry.To()"
+	check_commit '(^\s*)(err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
+}
+
+multiline_3() {
+	vlog "Combine multiline try.To3() calls: $search_3_multi"
+	check_commit "$search_3_multi" '\1\3try.To3(\4)'
+}
+
+multiline_2() {
+	vlog "Combine multiline try.To2() calls"
+	#check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
+	check_commit "$search_2_multi" '\1\3try.To2(\4)'
 }
 
 
@@ -310,18 +326,8 @@ multiline_1() {
 	check_commit "$search_1_multi" '\1\3try.To1(\4)'
 }
 
-try_0() {
-	vlog "Combine one err = XXXXX()\ntry.To()"
-	check_commit '(^\s*)(err)( :?= )(.*?)(\n)(\s*try\.To\(err\))' '\1try.To(\4)'
-}
-
 multiline_0() {
 	vlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
-	check_commit "$search_0_multi" '\1try.To(\4)'
-}
-
-search_0() {
-	vlog "Search-0: $search_0_multi"
 	check_commit "$search_0_multi" '\1try.To(\4)'
 }
 
