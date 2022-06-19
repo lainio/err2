@@ -1,27 +1,33 @@
 ## Automatic Migration
 
-The err2 doesn't have type variables (`err2.Int.Try(), err2.Bool.Try()`) since
-Go generics. They have been deprecated since version 0.8.0. Now they are removed
-from the repo as obsolete. Similarly `err2.Check(err error)` is replaced by
-`try.To(err error)`
+The err2 doesn't have type variables (`err2.Int.Try(), err2.Bool.Try()`, etc.)
+since Go generics. They have been deprecated as of version 0.8.0. Now they are
+removed from the repo as obsolete. Similarly `err2.Check()` is replaced by
+`try.To()`
 
 If your projects and repos are using `err2` version before Go generics, you can
-migrate them automatically. Just run the `./migrate.sh` bash script. It will do
-it for you, and it's safe. It uses git for undo buffer and stored any successful
-migration step.
+migrate them automatically. Just run the `migrate.sh` bash script. It will do it
+for you, and it's safe. It uses git for undo buffer. It stores all successful
+migration steps to git in its own working branch.
 
-First, to make it more convenient:
+First, to make the use of it more convenient:
 
-```console
-mkdir -p $GOPATH/src/github.com/lainio/
-cd $GOPATH/src/github.com/lainio/
-git clone https://github.com/lainio/err2
-cd err2/scripts
-source ./scripts/set-path.sh
-```
+1. Clone the `err2` if you don't already have it:
+   ```console
+   mkdir -p $GOPATH/src/github.com/lainio/
+   cd $GOPATH/src/github.com/lainio/
+   git clone https://github.com/lainio/err2
+   ```
+
+2. Use `set-path.sh` to add scripts directory to path:
+   ```console
+   cd err2/scripts
+   source ./scripts/set-path.sh
+   ```
 
 Second, go to your repo's root directory (NOTE, if you have sub-modules read the
-[Sub Modules In The Repo](#sub_modules) first!) and enter the following command:
+[Sub Modules In The Repo](#sub_modules-in-the-repo) first!) and enter the
+following command:
 
 ```console
 migrate.sh
@@ -96,14 +102,3 @@ script automatically checks that all of the needed tools are installed like:
 `ag`, `perl`, `git`, etc.
 
 Please let us know what you think, and give us feedback at GitHub Discussions.
-
-## Release Readme
-
-Run the `release.sh` script:
-
-```console
-./release.sh <VERSION_TO_RELEASE>
-```
-
-Note! The version string format is 'v0.8.0'. Don't forget the v at the
-beginning. TODO: update the script.
