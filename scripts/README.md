@@ -26,7 +26,7 @@ First, to make the use of it more convenient:
    ```
 
 Second, go to your repo's root directory (NOTE, if you have sub-modules read the
-[Sub Modules In The Repo](#sub_modules-in-the-repo) first!) and enter the
+[Sub Modules In The Repo](#sub-modules-in-the-repo) first!) and enter the
 following command:
 
 ```console
