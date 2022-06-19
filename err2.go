@@ -159,6 +159,25 @@ func CatchTrace(errorHandler func(err error)) {
 	})
 }
 
+// Throwf builds and throws (panics) an error. For creation it's similar to
+// fmt.Errorf. Because panic is used to transport the error instead of error
+// return value, it's called only if you want to non-local control structure for
+// error handling, i.e. your current function doesn't have error return value.
+// NOTE, Throwf is rarely needed. We suggest to use error return values instead.
+// Throwf is offered for deep recursive algorithms to help readability.
+//
+//  func yourFn() (res any) {
+//       ...
+//       if badHappens {
+//            err2.Throwf("we cannot do that for %v", subject)
+//       }
+//       ...
+//  }
+func Throwf(format string, args ...any) {
+	err := fmt.Errorf(format, args...)
+	panic(err)
+}
+
 // Return is the same as Handle but it's for functions that don't wrap or
 // annotate their errors. It's still needed to break panicking which is used for
 // error transport in err2. If you want to annotate errors see other Annotate

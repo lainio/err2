@@ -169,13 +169,14 @@ You can migrate your `err2` using repos automatically. Just run the
 `./migrate.sh` bash script. It will do it for you. And it's safe. It uses git
 for every step that you stay in control.
 
-Go to your repo's root dir and enter the following command:
+Go to your repo's root dir (no sub modules, or see `scripts/README.md` for more
+information) and enter the following command:
 
 ```console
 $GOPATH/src/github.com/lainio/err2/scripts/migrate.sh
 ```
 
-More information can be found from scripts [readme](./scripts/README.md).
+More information can be found from scripts' [readme file](./scripts/README.md).
 
 #### Filters for non-errors like io.EOF
 
@@ -326,4 +327,5 @@ Version history:
 - 0.8.4 **Optimized** Stack Tracing, documentation, benchmarks, etc.
 - 0.8.5 Typo in `StackTraceWriter` fixed
 - 0.8.6 Stack Tracing bug fixed, URL helper restored until migration tool
-- 0.8.7 **Auto-migration tool** to convert deprecated API usage for your repos
+- 0.8.7 **Auto-migration tool** to convert deprecated API usage for your repos,
+	`err2.Throwf` added

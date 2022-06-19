@@ -405,6 +405,32 @@ func ExampleReturnf() {
 	// Output: annotated: err2: this is an ERROR
 }
 
+func ExampleThrowf() {
+	type fn func(v int) int
+	var recursion fn
+	const recursionLimit = 77 // 12+11+10+9+8+7+6+5+4+3+2+1 = 78
+
+	recursion = func(i int) int {
+		if i > recursionLimit { // simulated error case
+			err2.Throwf("helper failed at: %d", i)
+		} else if i == 0 {
+			return 0 // recursion without error ends here
+		}
+		return i + recursion(i-1)
+	}
+
+	annotated := func() (err error) {
+		defer err2.Returnf(&err, "annotated: %s", "err2")
+
+		r := recursion(12) // call recursive algorithm successfully
+		recursion(r)       // call recursive algorithm unsuccessfully
+		return err
+	}
+	err := annotated()
+	fmt.Printf("%v", err)
+	// Output: annotated: err2: helper failed at: 78
+}
+
 func ExampleAnnotate_deferStack() {
 	annotated := func() (err error) {
 		defer err2.Annotate("annotated 2nd", &err)
