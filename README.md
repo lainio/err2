@@ -4,21 +4,20 @@ The package provides simple helper functions for _automatic_ error propagation.
 
 `go get github.com/lainio/err2`
 
-- [err2](#err2)
-  - [Structure](#structure)
-  - [Automatic Error Propagation And Stack Tracing](#automatic-error-propagation-and-stack-tracing)
-  - [Error handling](#error-handling)
+- [Structure](#structure)
+- [Automatic Error Propagation And Stack Tracing](#automatic-error-propagation-and-stack-tracing)
+- [Error handling](#error-handling)
   - [Automatic And Optimized Stack Tracing](#automatic-and-optimized-stack-tracing)
   - [Manual Stack Tracing](#manual-stack-tracing)
   - [Error Handler](#Error-Handler)
-  - [Error checks](#Error-checks)
+- [Error checks](#Error-checks)
   - [Auto-migration Deprecated Error Check Calls](#auto-migration-deprecated-error-check-calls)
   - [Filters for non-errors like io.EOF](#Filters-for-non-errors-like-io.EOF)
-  - [Assertion (design by contract)](#assertion-design-by-contract)
-  - [Background](#Background)
-  - [Learnings by so far](#learnings-by-so-far)
-  - [Support](#support)
-  - [Roadmap](#roadmap)
+- [Assertion (design by contract)](#assertion-design-by-contract)
+- [Background](#Background)
+- [Learnings by so far](#learnings-by-so-far)
+- [Support](#support)
+- [Roadmap](#roadmap)
 
 
 ## Structure
