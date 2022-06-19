@@ -86,6 +86,11 @@ deps() {
 	go get github.com/lainio/err2
 }
 
+build_all() {
+	local pkg=${1:-"./..."}
+	go build -o /dev/null "$pkg" 
+}
+
 check_build() {
 	local pkg="$1"
 	go build -o /dev/null "$pkg" &>/dev/null
