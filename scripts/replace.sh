@@ -1,7 +1,7 @@
 #!/bin/bash
 
 use_perl=${use_perl:-""}
-osname="$(~/aws/os-name)"
+osname="$(uname -s)"
 
 process_args() {
 	if [ "$2" = "" ]; then
@@ -28,7 +28,7 @@ process_args() {
 }
 
 do_work() {
-	if [[ "$osname" == "Mac" ]] ; then  
+	if [[ "$osname" == "Darwin" ]] ; then  
 		if [ -z $use_perl ]; then
 			ag -l "$first" | xargs sed -Ei '' "$sr"
 		else 
