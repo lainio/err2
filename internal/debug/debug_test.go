@@ -5,9 +5,23 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
+
+// require fails the test if the condition is false.
+func require(tb testing.TB, condition bool, v ...interface{}) {
+	tb.Helper()
+	if !condition {
+		tb.Fatal(v...)
+	}
+}
+
+// require fails the test if the condition is false.
+func requiref(tb testing.TB, condition bool, format string, v ...interface{}) {
+	tb.Helper()
+	if !condition {
+		tb.Fatalf(format, v...)
+	}
+}
 
 func TestFullName(t *testing.T) {
 	type args struct {
@@ -25,7 +39,8 @@ func TestFullName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			require.Equal(t, tt.retval, tt.fullName())
+			requiref(t, tt.retval == tt.fullName(), "must be equal: %s",
+				tt.retval)
 		})
 	}
 
@@ -74,7 +89,7 @@ func TestIsAnchor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			require.Equal(t, tt.retval, tt.isAnchor(tt.input))
+			require(t, tt.retval == tt.isAnchor(tt.input), "equal")
 		})
 	}
 }
@@ -116,7 +131,7 @@ func TestIsFuncAnchor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			require.Equal(t, tt.retval, tt.isFuncAnchor(tt.input))
+			require(t, tt.retval == tt.isFuncAnchor(tt.input), "equal")
 		})
 	}
 }
@@ -139,7 +154,7 @@ func TestStackPrint_noLimits(t *testing.T) {
 				FuncName:    "",
 				Level:       0,
 			})
-			require.EqualValues(t, tt.input, w.String())
+			require(t, tt.input == w.String(), "")
 		})
 	}
 }
@@ -167,7 +182,7 @@ func TestCalcAnchor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := strings.NewReader(tt.input)
 			anchor := calcAnchor(r, tt.StackInfo)
-			require.EqualValues(t, tt.anchor, anchor)
+			require(t, tt.anchor == anchor, "equal")
 		})
 	}
 }
@@ -200,8 +215,8 @@ func TestStackPrint_limit(t *testing.T) {
 			})
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(w.String(), "\n")
-			require.Greater(t, len(ins), len(outs), tt.FuncName)
-			require.Equal(t, tt.output, w.String())
+			require(t, len(ins) > len(outs), tt.FuncName, "len creater")
+			require(t, tt.output == w.String(), "equal")
 		})
 	}
 }
