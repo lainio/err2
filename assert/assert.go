@@ -2,6 +2,7 @@ package assert
 
 import (
 	"fmt"
+	"testing"
 )
 
 var (
@@ -25,6 +26,12 @@ var (
 	DefaultAsserter = AsserterToError | AsserterFormattedCallerInfo
 )
 
+var (
+	// Tester is must be set if assertion package is used for the unit testing.
+	// TODO: We will compbine this with DefaultAsserter and make the private. 
+	Tester testing.TB
+)
+
 // NotImplemented always panics with 'not implemented' assertion message.
 func NotImplemented(a ...any) {
 	D.reportAssertionFault("not implemented", a...)
@@ -35,6 +42,9 @@ func NotImplemented(a ...any) {
 // single 'if-statement' that is almost nothing.
 func That(term bool, a ...any) {
 	if !term {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		DefaultAsserter.reportAssertionFault("", a...)
 	}
 }
@@ -43,7 +53,22 @@ func That(term bool, a ...any) {
 // Asserter) with the given message.
 func NotNil[T any](p *T, a ...any) {
 	if p == nil {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := "pointer is nil"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// SNil asserts that the slice IS nil. If it is it panics/errors (default
+// Asserter) with the given message.
+func SNil[T any](s []T, a ...any) {
+	if s != nil {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
+		defMsg := "slice MUST be nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -52,6 +77,9 @@ func NotNil[T any](p *T, a ...any) {
 // Asserter) with the given message.
 func SNotNil[T any](s []T, a ...any) {
 	if s == nil {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := "slice is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -61,6 +89,9 @@ func SNotNil[T any](s []T, a ...any) {
 // (default Asserter) with the given message.
 func CNotNil[T any](c chan T, a ...any) {
 	if c == nil {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := "channel is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -70,6 +101,9 @@ func CNotNil[T any](c chan T, a ...any) {
 // Asserter) with the given message.
 func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 	if m == nil {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := "map is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -79,6 +113,9 @@ func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 // (current Asserter) with the given message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := fmt.Sprintf("got %v, want %v", val, want)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -88,6 +125,9 @@ func NotEqual[T comparable](val, want T, a ...any) {
 // Asserter) with the given message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := fmt.Sprintf("got %v, want %v", val, want)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -101,6 +141,9 @@ func SLen[T any](obj []T, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := fmt.Sprintf("got %d, want %d", l, length)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -114,6 +157,9 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := fmt.Sprintf("got %d, want %d", l, length)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -123,6 +169,9 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 // (current Asserter) with the given message.
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := "string shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -136,6 +185,9 @@ func SNotEmpty[T any](obj []T, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := "slice shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
@@ -149,6 +201,9 @@ func MNotEmpty[T comparable, U any](obj map[T]U, length int, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
+		if DefaultAsserter.isUnitTesting() {
+			Tester.Helper()
+		}
 		defMsg := "map shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
