@@ -42,7 +42,7 @@ const (
 // NoImplementation always fails with no implementation.
 func (asserter Asserter) NoImplementation(a ...any) {
 	if asserter.isUnitTesting() {
-		Tester.Helper()
+		tester().Helper()
 	}
 	asserter.reportAssertionFault("not implemented", a...)
 }
@@ -53,7 +53,7 @@ func (asserter Asserter) NoImplementation(a ...any) {
 func (asserter Asserter) True(term bool, a ...any) {
 	if !term {
 		if asserter.isUnitTesting() {
-			Tester.Helper()
+			tester().Helper()
 		}
 		asserter.reportAssertionFault("assertion fault", a...)
 	}
@@ -64,7 +64,7 @@ func (asserter Asserter) True(term bool, a ...any) {
 func (asserter Asserter) Truef(term bool, format string, a ...any) {
 	if !term {
 		if asserter.isUnitTesting() {
-			Tester.Helper()
+			tester().Helper()
 		}
 		if asserter.hasStackTrace() {
 			debug.PrintStack(1)
@@ -85,7 +85,7 @@ func (asserter Asserter) Len(obj any, length int, a ...any) {
 
 	if l != length {
 		if asserter.isUnitTesting() {
-			Tester.Helper()
+			tester().Helper()
 		}
 		defMsg := fmt.Sprintf("got %d, want %d", l, length)
 		asserter.reportAssertionFault(defMsg, a...)
@@ -97,7 +97,7 @@ func (asserter Asserter) Len(obj any, length int, a ...any) {
 func (asserter Asserter) EqualInt(val, want int, a ...any) {
 	if want != val {
 		if asserter.isUnitTesting() {
-			Tester.Helper()
+			tester().Helper()
 		}
 		defMsg := fmt.Sprintf("got %d, want %d", val, want)
 		asserter.reportAssertionFault(defMsg, a...)
@@ -123,7 +123,7 @@ func (asserter Asserter) Empty(obj any, msg ...any) {
 
 	if l != 0 {
 		if asserter.isUnitTesting() {
-			Tester.Helper()
+			tester().Helper()
 		}
 		defMsg := fmt.Sprintf("got %d, want == 0", l)
 		asserter.reportAssertionFault(defMsg, msg...)
@@ -147,7 +147,7 @@ func (asserter Asserter) NotEmpty(obj any, msg ...any) {
 
 	if l == 0 {
 		if asserter.isUnitTesting() {
-			Tester.Helper()
+			tester().Helper()
 		}
 		defMsg := fmt.Sprintf("got %d, want > 0", l)
 		asserter.reportAssertionFault(defMsg, msg...)
@@ -156,7 +156,7 @@ func (asserter Asserter) NotEmpty(obj any, msg ...any) {
 
 func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 	if asserter.isUnitTesting() {
-		Tester.Helper()
+		tester().Helper()
 	}
 	if asserter.hasStackTrace() {
 		debug.PrintStack(2)
@@ -187,8 +187,8 @@ func getLen(x any) (ok bool, length int) {
 
 func (asserter Asserter) reportPanic(s string) {
 	if asserter.isUnitTesting() {
-		Tester.Helper()
-		Tester.Fatal(s)
+		tester().Helper()
+		tester().Fatal(s)
 	}
 	if asserter.hasToError() {
 		panic(errors.New(s))
@@ -247,5 +247,5 @@ func (asserter Asserter) hasFormattedCallerInfo() bool {
 }
 
 func (asserter Asserter) isUnitTesting() bool {
-	return asserter&AsserterUnitTesting != 0 && Tester != nil
+	return asserter&AsserterUnitTesting != 0 && tester() != nil
 }
