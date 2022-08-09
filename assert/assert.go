@@ -50,20 +50,23 @@ func NotImplemented(a ...any) {
 	D.reportAssertionFault("not implemented", a...)
 }
 
+// ThatNot asserts that the term is NOT true. If is it panics with the given
+// formatting string. Thanks to inlining, the performance penalty is equal to a
+// single 'if-statement' that is almost nothing.
+func ThatNot(term bool, a ...any) {
+	That(!term, a...)
+}
+
 // That asserts that the term is true. If not it panics with the given
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 func That(term bool, a ...any) {
 	if !term {
-		if len(a) > 0 {
-			if t, ok := a[0].(testing.TB); ok {
-				t.Helper()
-			}
-		}
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		DefaultAsserter.reportAssertionFault("", a...)
+		defMsg := "assertion violation"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -74,7 +77,7 @@ func NotNil[T any](p *T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "pointer is nil"
+		defMsg := "assertion violation: pointer is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -86,7 +89,7 @@ func SNil[T any](s []T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "slice MUST be nil"
+		defMsg := "assertion violation: slice MUST be nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -98,7 +101,7 @@ func SNotNil[T any](s []T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "slice is nil"
+		defMsg := "assertion violation: slice is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -110,7 +113,7 @@ func CNotNil[T any](c chan T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "channel is nil"
+		defMsg := "assertion violation: channel is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -122,7 +125,7 @@ func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "map is nil"
+		defMsg := "assertion violation: map is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -134,7 +137,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("got %v, want %v", val, want)
+		defMsg := fmt.Sprintf("assertion violation: got %v, want %v", val, want)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -146,7 +149,7 @@ func Equal[T comparable](val, want T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("got %v, want %v", val, want)
+		defMsg := fmt.Sprintf("assertion violation: got %v, want %v", val, want)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -162,7 +165,7 @@ func SLen[T any](obj []T, length int, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("got %d, want %d", l, length)
+		defMsg := fmt.Sprintf("assertion violation: got %d, want %d", l, length)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -178,7 +181,7 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("got %d, want %d", l, length)
+		defMsg := fmt.Sprintf("assertion violation: got %d, want %d", l, length)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -190,7 +193,7 @@ func NotEmpty(obj string, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "string shouldn't be empty"
+		defMsg := "assertion violation: string shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -206,7 +209,7 @@ func SNotEmpty[T any](obj []T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "slice shouldn't be empty"
+		defMsg := "assertion violation: slice shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -222,7 +225,33 @@ func MNotEmpty[T comparable, U any](obj map[T]U, length int, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "map shouldn't be empty"
+		defMsg := "assertion violation: map shouldn't be empty"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// NoError asserts that the error is nil. If is not it panics with the given
+// formatting string. Thanks to inlining, the performance penalty is equal to a
+// single 'if-statement' that is almost nothing.
+func NoError(err error, a ...any) {
+	if err != nil {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := "assertion violation: " + err.Error()
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// Error asserts that the err is not nil. If it is it panics with the given
+// formatting string. Thanks to inlining, the performance penalty is equal to a
+// single 'if-statement' that is almost nothing.
+func Error(err error, a ...any) {
+	if err == nil {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := "assertion violation: missing error"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
