@@ -14,6 +14,7 @@ The package provides simple helper functions for _automatic_ error propagation.
   - [Auto-migration Deprecated Error Check Calls](#auto-migration-deprecated-error-check-calls)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Assertion (design by contract)](#assertion-design-by-contract)
+  - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
 - [Support](#support)
@@ -249,6 +250,33 @@ convenient way. That's why we decided to build `assert` as a sub package of
 `err2` even though there are no actual dependencies between them. See the
 `assert` package's documentation and examples for more information.
 
+#### Assertion Package for Unit Testing
+
+Same asserts can be used during the unit tests:
+
+```go
+func TestWebOfTrustInfo(t *testing.T) {
+	assert.PushTester(t)
+	defer assert.PopTester()
+
+	common := dave.CommonChains(eve.Node)
+	assert.SLen(common, 2)
+
+	wot := dave.WebOfTrustInfo(eve.Node)
+	assert.Equal(0, wot.CommonInvider)
+	assert.Equal(1, wot.Hops)
+
+	wot = NewWebOfTrust(bob.Node, carol.Node)
+	assert.Equal(-1, wot.CommonInvider)
+	assert.Equal(-1, wot.Hops)
+	...
+```
+
+Especially powerful feature is that even if some assertion violation happens
+during the execution of called functions like above `NewWebOfTrust()` function
+instead of the actual Test function, it's reported as normal test failure. That
+means that we don't need to open our internal preconditions just for testing.
+
 
 ## Background
 
@@ -328,3 +356,5 @@ Version history:
 - 0.8.6 Stack Tracing bug fixed, URL helper restored until migration tool
 - 0.8.7 **Auto-migration tool** to convert deprecated API usage for your repos,
 	`err2.Throwf` added
+- 0.8.8 Assertion package integrates Go's testing system. Type variables
+        removed.

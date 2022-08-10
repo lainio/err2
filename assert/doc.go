@@ -1,16 +1,22 @@
 /*
-Package assert includes runtime assertion helpers. They follow same practise used
-in C/C++ development where you can see lines like:
+Package assert includes runtime assertion helpers both for normal execution  as
+well as a helper packager for Go's testing. What makes solution unique is its
+capable to support both modes at the same time. Only thing you need to do is to
+add following to your unit tests:
 
- assert(ptr != NULL)
- ...
- assert(!"not implemented")
+  func TestInvite(t *testing.T) {
+  	assert.PushTester(t) // push testing variable t beginning of any test
+  	defer assert.PopTester()
+  
+  	alice.Node = root1.Invite(alice.Node, root1.Key, alice.PubKey, 1)
+  	assert.Equal(alice.Len(), 1) // assert any thing normally
 
-With the help of the assert package we can write the same preconditions in Go:
+Especially powerful feature is that even if some assertion violation happens
+during the execution of called functions like above Invite() function instead of
+the actual Test function, it's reported correctly as normal test failure!
 
- assert.NotNil(ptr)
- ...
- assert.NotImplemented()
+Instead of mocking or other mechanisms we can integrate our preconditions and
+raise up quality of our software.
 
 The package offers a convenient way to set preconditions to code which allow us
 detect programming errors and API violations faster. Still allowing
