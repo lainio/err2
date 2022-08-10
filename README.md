@@ -356,5 +356,5 @@ Version history:
 - 0.8.6 Stack Tracing bug fixed, URL helper restored until migration tool
 - 0.8.7 **Auto-migration tool** to convert deprecated API usage for your repos,
 	`err2.Throwf` added
-- 0.8.8 Assertion package integrates Go's testing system. Type variables
+- 0.8.8 Assertion package integrates with Go's testing system. Type variables
         removed.
