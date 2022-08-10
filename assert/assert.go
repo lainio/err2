@@ -33,6 +33,17 @@ var (
 	testers map[int]testing.TB = make(map[int]testing.TB)
 )
 
+// PushTester sets the current testing context for default asserter. This must
+// be called at the beginning of every test.
+//
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			assert.PushTester(t) // <- IMPORTANT!
+//			defer assert.PopTester()
+//			...
+//			assert.That(something, "test won't work")
+//		})
+//	}
 func PushTester(t testing.TB) {
 	if DefaultAsserter&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
@@ -42,12 +53,24 @@ func PushTester(t testing.TB) {
 	testers[goid()] = t
 }
 
-func tester() testing.TB {
-	return testers[goid()]
-}
-
+// PopTester pops the testing context reference from the memory. This isn't
+// totally necessary, but if you want play by book, please do it. Usually done
+// by defer after PushTester.
+//
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			assert.PushTester(t) // <- important!
+//			defer assert.PopTester() // <- for good girls and not so bad boys
+//			...
+//			assert.That(something, "test won't work")
+//		})
+//	}
 func PopTester() {
 	delete(testers, goid())
+}
+
+func tester() testing.TB {
+	return testers[goid()]
 }
 
 // NotImplemented always panics with 'not implemented' assertion message.
