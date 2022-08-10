@@ -26,7 +26,7 @@ The package provides simple helper functions for _automatic_ error propagation.
 err2 has the following package structure:
 - The `err2` (main) package includes declarative error handling functions.
 - The `try` package offers error checking functions.
-- The `assert` package implements assertion helpers for *design-by-contract*.
+- The `assert` package implements assertion helpers for **both** unit-testing and *design-by-contract*.
 
 ## Automatic Error Propagation And Stack Tracing
 
