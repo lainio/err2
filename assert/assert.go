@@ -48,7 +48,7 @@ func PushTester(t testing.TB) {
 	if DefaultAsserter&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
-		DefaultAsserter |= AsserterUnitTesting
+		DefaultAsserter = AsserterUnitTesting
 	}
 	testers[goid()] = t
 }
@@ -82,7 +82,13 @@ func NotImplemented(a ...any) {
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 func ThatNot(term bool, a ...any) {
-	That(!term, a...)
+	if term {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := "assertion violation"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
 }
 
 // That asserts that the term is true. If not it panics with the given
