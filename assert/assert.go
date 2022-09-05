@@ -3,6 +3,7 @@ package assert
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"runtime"
 	"testing"
 )
@@ -116,6 +117,18 @@ func NotNil[T any](p *T, a ...any) {
 	}
 }
 
+// INotNil asserts that the value is not nil. If it is it panics/errors (default
+// Asserter) with the given message.
+func INotNil(i any, a ...any) {
+	if i == nil {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := "assertion violation: interface is nil"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
 // SNil asserts that the slice IS nil. If it is it panics/errors (default
 // Asserter) with the given message.
 func SNil[T any](s []T, a ...any) {
@@ -188,6 +201,18 @@ func Equal[T comparable](val, want T, a ...any) {
 	}
 }
 
+// DeepEqual asserts that the (whatever) values are equal. If not it
+// panics/errors (current Asserter) with the given message.
+func DeepEqual(val, want any, a ...any) {
+	if !reflect.DeepEqual(val, want) {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := fmt.Sprintf("assertion violation: got %v, want %v", val, want)
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
 // SLen asserts that the length of the slice is equal to the given. If not it
 // panics/errors (current Asserter) with the given message. Note! This is
 // reasonably fast but not as fast as 'That' because of lacking inlining for the
@@ -228,6 +253,18 @@ func NotEmpty(obj string, a ...any) {
 			tester().Helper()
 		}
 		defMsg := "assertion violation: string shouldn't be empty"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// Empty asserts that the string is empty. If it is NOT, it panics/errors
+// (current Asserter) with the given message.
+func Empty(obj string, a ...any) {
+	if obj != "" {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := "assertion violation: string should be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
