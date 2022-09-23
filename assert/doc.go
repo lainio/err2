@@ -7,7 +7,7 @@ add following to your unit tests:
   func TestInvite(t *testing.T) {
   	assert.PushTester(t) // push testing variable t beginning of any test
   	defer assert.PopTester()
-  
+
   	alice.Node = root1.Invite(alice.Node, root1.Key, alice.PubKey, 1)
   	assert.Equal(alice.Len(), 1) // assert any thing normally
 
