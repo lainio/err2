@@ -11,9 +11,11 @@ import (
 
 // StackTraceWriter allows to set automatic stack tracing. TODO: Error/PanicTracer
 // StackTraceWriter allows to set automatic stack tracing. TODO: race
-//  err2.StackTraceWriter = os.Stderr // write stack trace to stderr
-//   or
-//  err2.StackTraceWriter = log.Writer() // stack trace to std logger
+//
+//	err2.StackTraceWriter = os.Stderr // write stack trace to stderr
+//	 or
+//	err2.StackTraceWriter = log.Writer() // stack trace to std logger
+//
 // Deprecated: Use SetErrorTracer and SetPanicTracer to set tracers.
 var StackTraceWriter io.Writer
 
@@ -28,9 +30,11 @@ func Try(args ...any) []any {
 
 // for the given argument. If the err is nil, it does nothing. According the
 // measurements, it's as fast as
-//  if err != nil {
-//      return err
-//  }
+//
+//	if err != nil {
+//	    return err
+//	}
+//
 // on happy path.
 // Deprecated: Use try.To function instead. Check performs error check
 func Check(err error) {
@@ -174,13 +178,13 @@ func CatchTrace(errorHandler func(err error)) {
 // NOTE, Throwf is rarely needed. We suggest to use error return values instead.
 // Throwf is offered for deep recursive algorithms to help readability.
 //
-//  func yourFn() (res any) {
-//       ...
-//       if badHappens {
-//            err2.Throwf("we cannot do that for %v", subject)
-//       }
-//       ...
-//  }
+//	func yourFn() (res any) {
+//	     ...
+//	     if badHappens {
+//	          err2.Throwf("we cannot do that for %v", subject)
+//	     }
+//	     ...
+//	}
 func Throwf(format string, args ...any) {
 	err := fmt.Errorf(format, args...)
 	panic(err)
