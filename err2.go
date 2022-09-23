@@ -9,10 +9,12 @@ import (
 	"github.com/lainio/err2/internal/handler"
 )
 
-// StackTraceWriter allows to set automatic stack tracing.
+// StackTraceWriter allows to set automatic stack tracing. TODO: Error/PanicTracer
+// StackTraceWriter allows to set automatic stack tracing. TODO: race
 //  err2.StackTraceWriter = os.Stderr // write stack trace to stderr
 //   or
 //  err2.StackTraceWriter = log.Writer() // stack trace to std logger
+// Deprecated: Use SetErrorTracer and SetPanicTracer to set tracers.
 var StackTraceWriter io.Writer
 
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
@@ -90,8 +92,9 @@ func Handle(err *error, handlerFn func()) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	handler.Process(handler.Info{
-		Trace: StackTraceWriter,
-		Any:   r,
+		ErrorTracer: StackTraceWriter,
+		PanicTracer: StackTraceWriter,
+		Any:         r,
 		NilHandler: func() {
 			// Defers are in the stack and the first from the stack gets the
 			// opportunity to get panic object's error (below). We still must
@@ -120,7 +123,8 @@ func Catch(f func(err error)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace:        StackTraceWriter,
+		ErrorTracer:  StackTraceWriter,
+		PanicTracer:  StackTraceWriter,
 		Any:          r,
 		ErrorHandler: f,
 	})
@@ -128,7 +132,7 @@ func Catch(f func(err error)) {
 
 // CatchAll is a helper function to catch and write handlers for all errors and
 // all panics thrown in the current go routine. It and CatchTrace are preferred
-// helperr for go workers on long running servers, because they stop panics as
+// helpers for go workers on long running servers, because they stop panics as
 // well.
 func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and others are similar but we need to call `recover` here because
@@ -136,7 +140,8 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace:        StackTraceWriter,
+		ErrorTracer:  StackTraceWriter,
+		PanicTracer:  StackTraceWriter,
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
@@ -146,14 +151,16 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // CatchTrace is a helper function to catch and handle all errors. It also
 // recovers a panic and prints its call stack. It and CatchAll are preferred
 // helpers for go-workers on long-running servers because they stop panics as
-// well.
+// well. CatchTrace prints only panic and runtime.Error stack trace if
+// StackTraceWriter isn't set. If it's set it prints both.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace:        os.Stderr,
+		ErrorTracer:  StackTraceWriter,
+		PanicTracer:  os.Stderr,
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: func(v any) {}, // suppress panicking
@@ -189,7 +196,8 @@ func Return(err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace:        StackTraceWriter,
+		ErrorTracer:  StackTraceWriter,
+		PanicTracer:  StackTraceWriter,
 		Any:          r,
 		ErrorHandler: func(e error) { *err = e },
 	})
@@ -204,8 +212,9 @@ func Returnw(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackTraceWriter,
-		Any:   r,
+		ErrorTracer: StackTraceWriter,
+		PanicTracer: StackTraceWriter,
+		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				*err = fmt.Errorf(format+": %w", append(args, *err)...)
@@ -226,8 +235,9 @@ func Annotatew(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackTraceWriter,
-		Any:   r,
+		ErrorTracer: StackTraceWriter,
+		PanicTracer: StackTraceWriter,
+		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				format := prefix + ": %w"
@@ -249,8 +259,9 @@ func Returnf(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackTraceWriter,
-		Any:   r,
+		ErrorTracer: StackTraceWriter,
+		PanicTracer: StackTraceWriter,
+		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				*err = fmt.Errorf(format+": %v", append(args, *err)...)
@@ -271,8 +282,9 @@ func Annotate(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Trace: StackTraceWriter,
-		Any:   r,
+		ErrorTracer: StackTraceWriter,
+		PanicTracer: StackTraceWriter,
+		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				format := prefix + ": %v"

@@ -15,8 +15,9 @@ type (
 )
 
 type Info struct {
-	Any   any
-	Trace io.Writer
+	Any         any
+	ErrorTracer io.Writer
+	PanicTracer io.Writer
 
 	NilHandler
 	ErrorHandler
@@ -30,9 +31,9 @@ func (i Info) callNilHandler() {
 }
 
 func (i Info) callErrorHandler() {
-	if i.Trace != nil {
+	if i.ErrorTracer != nil {
 		si := stackPrologueError
-		printStack(i.Trace, si, i.Any)
+		printStack(i.ErrorTracer, si, i.Any)
 	}
 	if i.ErrorHandler != nil {
 		i.ErrorHandler(i.Any.(error))
@@ -40,9 +41,9 @@ func (i Info) callErrorHandler() {
 }
 
 func (i Info) callPanicHandler() {
-	if i.Trace != nil {
+	if i.PanicTracer != nil {
 		si := stackProloguePanic
-		printStack(i.Trace, si, i.Any)
+		printStack(i.PanicTracer, si, i.Any)
 	}
 	if i.PanicHandler != nil {
 		i.PanicHandler(i.Any)
