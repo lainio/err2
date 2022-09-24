@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
+	"github.com/lainio/err2/internal/helper"
 	"github.com/lainio/err2/try"
 )
 
@@ -305,6 +306,15 @@ func TestCatch_Error(t *testing.T) {
 	try.To1(throw())
 
 	t.Fail() // If everything works we are newer here
+}
+
+func TestSetErrorTracer(t *testing.T) {
+	w := err2.ErrorTracer()
+	helper.Require(t, w == nil, "error tracer should be nil")
+	var w1 io.Writer
+	err2.SetErrorTracer(w1)
+	w = err2.ErrorTracer()
+	helper.Require(t, w == nil, "error tracer should be nil")
 }
 
 func ExampleFilterTry() {

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/lainio/err2/internal/handler"
+	"github.com/lainio/err2/internal/tracer"
 )
 
 // StackTraceWriter allows to set automatic stack tracing. TODO: Error/PanicTracer
@@ -18,6 +19,30 @@ import (
 //
 // Deprecated: Use SetErrorTracer and SetPanicTracer to set tracers.
 var StackTraceWriter io.Writer
+
+func ErrorTracer() io.Writer {
+	// Deprecated: until StackTraceWriter removed
+	if StackTraceWriter != nil {
+		return StackTraceWriter
+	}
+	return tracer.Error.Tracer()
+}
+
+func PanicTracer() io.Writer {
+	// Deprecated: until StackTraceWriter removed
+	if StackTraceWriter != nil {
+		return StackTraceWriter
+	}
+	return tracer.Panic.Tracer()
+}
+
+func SetErrorTracer(w io.Writer) {
+	tracer.Error.SetTracer(w)
+}
+
+func SetPanicTracer(w io.Writer) {
+	tracer.Panic.SetTracer(w)
+}
 
 // Try is as similar as proposed Go2 Try macro, but it's a function and it
 // returns slice of interfaces. It has quite big performance penalty when
@@ -155,7 +180,7 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // CatchTrace is a helper function to catch and handle all errors. It also
 // recovers a panic and prints its call stack. It and CatchAll are preferred
 // helpers for go-workers on long-running servers because they stop panics as
-// well. CatchTrace prints only panic and runtime.Error stack trace if
+// well. TODO: update!, CatchTrace prints only panic and runtime.Error stack trace if
 // StackTraceWriter isn't set. If it's set it prints both.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
