@@ -121,8 +121,8 @@ func Handle(err *error, handlerFn func()) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	handler.Process(handler.Info{
-		ErrorTracer: StackTraceWriter,
-		PanicTracer: StackTraceWriter,
+		ErrorTracer: ErrorTracer(),
+		PanicTracer: PanicTracer(),
 		Any:         r,
 		NilHandler: func() {
 			// Defers are in the stack and the first from the stack gets the
@@ -152,8 +152,8 @@ func Catch(f func(err error)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  StackTraceWriter,
-		PanicTracer:  StackTraceWriter,
+		ErrorTracer:  ErrorTracer(),
+		PanicTracer:  PanicTracer(),
 		Any:          r,
 		ErrorHandler: f,
 	})
@@ -169,8 +169,8 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  StackTraceWriter,
-		PanicTracer:  StackTraceWriter,
+		ErrorTracer:  ErrorTracer(),
+		PanicTracer:  PanicTracer(),
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
@@ -188,7 +188,7 @@ func CatchTrace(errorHandler func(err error)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  StackTraceWriter,
+		ErrorTracer:  ErrorTracer(),
 		PanicTracer:  os.Stderr,
 		Any:          r,
 		ErrorHandler: errorHandler,
@@ -225,8 +225,8 @@ func Return(err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  StackTraceWriter,
-		PanicTracer:  StackTraceWriter,
+		ErrorTracer:  ErrorTracer(),
+		PanicTracer:  PanicTracer(),
 		Any:          r,
 		ErrorHandler: func(e error) { *err = e },
 	})
@@ -241,8 +241,8 @@ func Returnw(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: StackTraceWriter,
-		PanicTracer: StackTraceWriter,
+		ErrorTracer: ErrorTracer(),
+		PanicTracer: PanicTracer(),
 		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -264,8 +264,8 @@ func Annotatew(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: StackTraceWriter,
-		PanicTracer: StackTraceWriter,
+		ErrorTracer: ErrorTracer(),
+		PanicTracer: PanicTracer(),
 		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -288,8 +288,8 @@ func Returnf(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: StackTraceWriter,
-		PanicTracer: StackTraceWriter,
+		ErrorTracer: ErrorTracer(),
+		PanicTracer: PanicTracer(),
 		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
@@ -311,8 +311,8 @@ func Annotate(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: StackTraceWriter,
-		PanicTracer: StackTraceWriter,
+		ErrorTracer: ErrorTracer(),
+		PanicTracer: PanicTracer(),
 		Any:         r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
