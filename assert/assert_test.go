@@ -252,7 +252,7 @@ func BenchmarkNotNil(b *testing.B) {
 func BenchmarkThat(b *testing.B) {
 	const four = 4
 	for n := 0; n < b.N; n++ {
-		assert.That(2+2 == four)
+		assert.That(four == 2+2)
 	}
 }
 

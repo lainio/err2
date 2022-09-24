@@ -1,3 +1,4 @@
+// Package handler implements handler for objects returned recovery() function.
 package handler
 
 import (
@@ -78,7 +79,7 @@ func printStack(w io.Writer, si debug.StackInfo, msg any) {
 }
 
 var (
-	stackPrologueRuntime = newSI("", "panic(", 1)
+	// stackPrologueRuntime = newSI("", "panic(", 1)
 	stackPrologueError   = newErrSI()
 	stackProloguePanic   = newSI("", "panic(", 1)
 )

@@ -1,3 +1,4 @@
+// Package tracer implements thread safe storage for stace trace writers.
 package tracer
 
 import (
