@@ -28,5 +28,5 @@ func (v *value) Tracer() io.Writer {
 }
 
 func (v *value) SetTracer(w io.Writer) {
-	v.Store(writer{w:w})
+	v.Store(writer{w: w})
 }

@@ -17,4 +17,3 @@ func Requiref(tb testing.TB, condition bool, format string, v ...interface{}) {
 		tb.Fatalf(format, v...)
 	}
 }
-
