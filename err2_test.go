@@ -28,7 +28,7 @@ func recursion(a int) (r int, err error) {
 		return 0, nil
 	}
 	s := try.To1(noThrow())
-	err2.Check(err)
+	err2.Check(err) // TODO:
 	_ = s
 	r = try.To1(recursion(a - 1))
 	r += a
