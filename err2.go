@@ -1,7 +1,6 @@
 package err2
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,8 +9,7 @@ import (
 	"github.com/lainio/err2/internal/tracer"
 )
 
-// StackTraceWriter allows to set automatic stack tracing. TODO: Error/PanicTracer
-// StackTraceWriter allows to set automatic stack tracing. TODO: race
+// StackTraceWriter allows to set automatic stack tracing.
 //
 //	err2.StackTraceWriter = os.Stderr // write stack trace to stderr
 //	 or
@@ -20,6 +18,7 @@ import (
 // Deprecated: Use SetErrorTracer and SetPanicTracer to set tracers.
 var StackTraceWriter io.Writer
 
+// ErrorTracer returns current io.Writer for automatic error stack tracing.
 func ErrorTracer() io.Writer {
 	// Deprecated: until StackTraceWriter removed
 	if StackTraceWriter != nil {
@@ -28,6 +27,9 @@ func ErrorTracer() io.Writer {
 	return tracer.Error.Tracer()
 }
 
+// PanicTracer returns current io.Writer for automatic panic stack tracing. Note
+// that runtime.Error types which are transported by panics are controlled by
+// this.
 func PanicTracer() io.Writer {
 	// Deprecated: until StackTraceWriter removed
 	if StackTraceWriter != nil {
@@ -36,75 +38,18 @@ func PanicTracer() io.Writer {
 	return tracer.Panic.Tracer()
 }
 
+// SetErrorTracer sets a io.Writer for automatic error stack tracing. Note
+// that runtime.Error types which are transported by panics are controlled by
+// this.
 func SetErrorTracer(w io.Writer) {
 	tracer.Error.SetTracer(w)
 }
 
+// SetPanicTracer sets a io.Writer for automatic panic stack tracing. Note
+// that runtime.Error types which are transported by panics are controlled by
+// this.
 func SetPanicTracer(w io.Writer) {
 	tracer.Panic.SetTracer(w)
-}
-
-// Try is as similar as proposed Go2 Try macro, but it's a function and it
-// returns slice of interfaces. It has quite big performance penalty when
-// compared to Check function.
-// Deprecated: Use try.To functions from try package instead.
-func Try(args ...any) []any {
-	check(args)
-	return args
-}
-
-// for the given argument. If the err is nil, it does nothing. According the
-// measurements, it's as fast as
-//
-//	if err != nil {
-//	    return err
-//	}
-//
-// on happy path.
-// Deprecated: Use try.To function instead. Check performs error check
-func Check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-// FilterTry performs filtered error check for the given argument. It's same
-// as Check but before throwing an error it checks if error matches the filter.
-// The return value false tells that there are no errors and true that filter is
-// matched.
-// Deprecated: Use try.Is function instead.
-func FilterTry(filter, err error) bool {
-	if err != nil {
-		if errors.Is(err, filter) {
-			return true
-		}
-		panic(err)
-	}
-	return false
-}
-
-// TryEOF checks errors but filters io.EOF from the exception handling and
-// returns boolean which tells if io.EOF is present. See more info from
-// FilterCheck.
-// Deprecated: Use try.IsEOF function instead.
-func TryEOF(err error) bool {
-	return FilterTry(io.EOF, err)
-}
-
-// check is deprecated. Used by Try. Checks the error status of the last
-// argument. It panics with "wrong signature" if the last calling parameter is
-// not error. In case of error it delivers it by panicking.
-// Deprecated: Used by try package.
-func check(args []any) {
-	argCount := len(args)
-	last := argCount - 1
-	if args[last] != nil {
-		err, ok := args[last].(error)
-		if !ok {
-			panic("wrong signature")
-		}
-		panic(err)
-	}
 }
 
 // Handle is for adding an error handler to a function by deferring. It's for
@@ -121,9 +66,7 @@ func Handle(err *error, handlerFn func()) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	handler.Process(handler.Info{
-		ErrorTracer: ErrorTracer(),
-		PanicTracer: PanicTracer(),
-		Any:         r,
+		Any: r,
 		NilHandler: func() {
 			// Defers are in the stack and the first from the stack gets the
 			// opportunity to get panic object's error (below). We still must
@@ -152,8 +95,6 @@ func Catch(f func(err error)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  ErrorTracer(),
-		PanicTracer:  PanicTracer(),
 		Any:          r,
 		ErrorHandler: f,
 	})
@@ -169,8 +110,6 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  ErrorTracer(),
-		PanicTracer:  PanicTracer(),
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
@@ -180,15 +119,15 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // CatchTrace is a helper function to catch and handle all errors. It also
 // recovers a panic and prints its call stack. It and CatchAll are preferred
 // helpers for go-workers on long-running servers because they stop panics as
-// well. TODO: update!, CatchTrace prints only panic and runtime.Error stack trace if
-// StackTraceWriter isn't set. If it's set it prints both.
+// well. CatchTrace prints only panic and runtime.Error stack trace if
+// ErrorTracer isn't set. If it's set it prints both. The panic trace is printed
+// to stderr.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  ErrorTracer(),
 		PanicTracer:  os.Stderr,
 		Any:          r,
 		ErrorHandler: errorHandler,
@@ -225,8 +164,6 @@ func Return(err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer:  ErrorTracer(),
-		PanicTracer:  PanicTracer(),
 		Any:          r,
 		ErrorHandler: func(e error) { *err = e },
 	})
@@ -241,9 +178,7 @@ func Returnw(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: ErrorTracer(),
-		PanicTracer: PanicTracer(),
-		Any:         r,
+		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				*err = fmt.Errorf(format+": %w", append(args, *err)...)
@@ -264,9 +199,7 @@ func Annotatew(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: ErrorTracer(),
-		PanicTracer: PanicTracer(),
-		Any:         r,
+		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				format := prefix + ": %w"
@@ -288,9 +221,7 @@ func Returnf(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: ErrorTracer(),
-		PanicTracer: PanicTracer(),
-		Any:         r,
+		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				*err = fmt.Errorf(format+": %v", append(args, *err)...)
@@ -311,9 +242,7 @@ func Annotate(prefix string, err *error) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		ErrorTracer: ErrorTracer(),
-		PanicTracer: PanicTracer(),
-		Any:         r,
+		Any: r,
 		NilHandler: func() {
 			if *err != nil { // if other handlers call recovery() we still..
 				format := prefix + ": %v"
@@ -325,19 +254,4 @@ func Annotate(prefix string, err *error) {
 			*err = fmt.Errorf(format, e)
 		},
 	})
-}
-
-type _empty struct{}
-
-// Empty is deprecated. Use try.To functions instead.
-// Empty is a helper variable to demonstrate how we could build 'type wrappers'
-// to make Try function as fast as Check.
-// Deprecated: use try package.
-var Empty _empty
-
-// Try is a helper method to call func() (string, error) functions with it and
-// be as fast as Check(err).
-// Deprecated: Use try.To functions instead.
-func (s _empty) Try(_ any, err error) {
-	Check(err)
 }

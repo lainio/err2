@@ -1,7 +1,6 @@
 package err2_test
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -28,7 +27,6 @@ func recursion(a int) (r int, err error) {
 		return 0, nil
 	}
 	s := try.To1(noThrow())
-	err2.Check(err) // TODO:
 	_ = s
 	r = try.To1(recursion(a - 1))
 	r += a
@@ -317,50 +315,6 @@ func TestSetErrorTracer(t *testing.T) {
 	helper.Require(t, w == nil, "error tracer should be nil")
 }
 
-func ExampleFilterTry() {
-	copyStream := func(src string) (s string, err error) {
-		defer err2.Returnf(&err, "copy stream %s", src)
-
-		in := bytes.NewBufferString(src)
-		tmp := make([]byte, 4)
-		var out bytes.Buffer
-		for n, err := in.Read(tmp); !err2.FilterTry(io.EOF, err); n, err = in.Read(tmp) {
-			out.Write(tmp[:n])
-		}
-
-		return out.String(), nil
-	}
-
-	str, err := copyStream("testing string")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(str)
-	// Output: testing string
-}
-
-func ExampleTryEOF() {
-	copyStream := func(src string) (s string, err error) {
-		defer err2.Returnf(&err, "copy stream %s", src)
-
-		in := bytes.NewBufferString(src)
-		tmp := make([]byte, 4)
-		var out bytes.Buffer
-		for n, err := in.Read(tmp); !err2.TryEOF(err); n, err = in.Read(tmp) {
-			out.Write(tmp[:n])
-		}
-
-		return out.String(), nil
-	}
-
-	str, err := copyStream("testing string")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(str)
-	// Output: testing string
-}
-
 func Example_copyFile() {
 	copyFile := func(src, dst string) (err error) {
 		defer err2.Returnf(&err, "copy %s %s", src, dst)
@@ -475,12 +429,6 @@ func BenchmarkOldErrorCheckingWithIfClause(b *testing.B) {
 	}
 }
 
-func BenchmarkOriginalTry(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		err2.Try(noThrow()) // we show here what can take time
-	}
-}
-
 func BenchmarkTry_ErrVar(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, err := noThrow()
@@ -502,21 +450,21 @@ func BenchmarkTry_StrStrGenerics(b *testing.B) {
 
 func BenchmarkCheckInsideCall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		err2.Check(noErr())
+		try.To(noErr())
 	}
 }
 
 func BenchmarkCheckVarCall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		err := noErr()
-		err2.Check(err)
+		try.To(err)
 	}
 }
 
 func BenchmarkCheck_ErrVar(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, err := noThrow()
-		err2.Check(err)
+		try.To(err)
 	}
 }
 
