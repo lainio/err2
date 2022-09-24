@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/lainio/err2/internal/debug"
+	"github.com/lainio/err2/internal/tracer"
 )
 
 type (
@@ -31,6 +32,9 @@ func (i Info) callNilHandler() {
 }
 
 func (i Info) callErrorHandler() {
+	if i.ErrorTracer == nil {
+		i.ErrorTracer = tracer.Error.Tracer()
+	}
 	if i.ErrorTracer != nil {
 		si := stackPrologueError
 		printStack(i.ErrorTracer, si, i.Any)
@@ -41,6 +45,9 @@ func (i Info) callErrorHandler() {
 }
 
 func (i Info) callPanicHandler() {
+	if i.PanicTracer == nil {
+		i.PanicTracer = tracer.Panic.Tracer()
+	}
 	if i.PanicTracer != nil {
 		si := stackProloguePanic
 		printStack(i.PanicTracer, si, i.Any)
