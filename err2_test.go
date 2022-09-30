@@ -349,7 +349,7 @@ func ExampleReturn() {
 
 func ExampleAnnotate() {
 	annotated := func() (err error) {
-		defer err2.Annotate("annotated", &err)
+		defer err2.Returnf(&err, "annotated")
 		try.To1(throw())
 		return err
 	}
@@ -397,8 +397,8 @@ func ExampleThrowf() {
 
 func ExampleAnnotate_deferStack() {
 	annotated := func() (err error) {
-		defer err2.Annotate("annotated 2nd", &err)
-		defer err2.Annotate("annotated 1st", &err)
+		defer err2.Returnf(&err, "annotated 2nd")
+		defer err2.Returnf(&err, "annotated 1st")
 		try.To1(throw())
 		return err
 	}

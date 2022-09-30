@@ -193,6 +193,7 @@ func Returnw(err *error, format string, args ...any) {
 // Annotatew is for annotating an error. It's similar to Returnf but it takes only
 // two arguments: a prefix string and a pointer to error. It adds ": " between
 // the prefix and the error text automatically.
+// Deprecated: Use Returnf
 func Annotatew(prefix string, err *error) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -236,6 +237,7 @@ func Returnf(err *error, format string, args ...any) {
 // Annotate is for annotating an error. It's similar to Returnf but it takes
 // only two arguments: a prefix string and a pointer to error. It adds ": "
 // between the prefix and the error text automatically.
+// Deprecated: Use Returnf
 func Annotate(prefix string, err *error) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
