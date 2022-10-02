@@ -22,7 +22,7 @@ First, to make the use of it more convenient:
 2. Use `set-path.sh` to add scripts directory to path:
    ```console
    cd err2/scripts
-   source ./scripts/set-path.sh
+   source ./set-path.sh
    ```
 
 Second, go to your repo's root directory (NOTE, if you have sub-modules read the
