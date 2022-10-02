@@ -96,6 +96,14 @@ check_build() {
 	go build -o /dev/null "$pkg" &>/dev/null
 }
 
+replace_annotate() {
+	# Replace Annotate with Returnf: notice argument order!!
+	"$location"/replace-perl.sh 'err2\.(Annotate\()(.*)(, )(.*)(\)\n)' 'err2.Returnf(\4\3\2\5'
+
+	# Replace Annotatew with Returnf: notice argument order!!
+	"$location"/replace-perl.sh 'err2\.(Annotatew\()(.*)(, )(.*)(\)\n)' 'err2.Returnw(\4\3\2\5'
+}
+
 replace_easy1() {
 	vlog "Replacing err2.Check, err2.FilterTry, err2.TryEOF, and type vars"
 
