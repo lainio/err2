@@ -111,8 +111,8 @@ func Throwf(format string, args ...any) {
 
 // Return is the same as Handle but it's for functions that don't wrap or
 // annotate their errors. It's still needed to break panicking which is used for
-// error transport in err2. If you want to annotate errors see other Annotate
-// and Return functions for more information.
+// error transport in err2. If you want to annotate errors see Returnf and
+// Returnw functions for more information.
 func Return(err *error) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -145,30 +145,6 @@ func Returnw(err *error, format string, args ...any) {
 	})
 }
 
-// Annotatew is for annotating an error. It's similar to Returnf but it takes only
-// two arguments: a prefix string and a pointer to error. It adds ": " between
-// the prefix and the error text automatically.
-// Deprecated: Use Returnf
-func Annotatew(prefix string, err *error) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	handler.Process(handler.Info{
-		Any: r,
-		NilHandler: func() {
-			if *err != nil { // if other handlers call recovery() we still..
-				format := prefix + ": %w"
-				*err = fmt.Errorf(format, (*err))
-			}
-		},
-		ErrorHandler: func(e error) {
-			format := prefix + ": %w"
-			*err = fmt.Errorf(format, e)
-		},
-	})
-}
-
 // Returnf builds an error. It's similar to fmt.Errorf, but it's called only if
 // error != nil. It uses '%v' to wrap the error not '%w'. Use Returnw for that.
 func Returnf(err *error, format string, args ...any) {
@@ -192,7 +168,7 @@ func Returnf(err *error, format string, args ...any) {
 // Annotate is for annotating an error. It's similar to Returnf but it takes
 // only two arguments: a prefix string and a pointer to error. It adds ": "
 // between the prefix and the error text automatically.
-// Deprecated: Use Returnf
+// Deprecated: Use Returnf instead and remember to add context information!
 func Annotate(prefix string, err *error) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -208,6 +184,30 @@ func Annotate(prefix string, err *error) {
 		},
 		ErrorHandler: func(e error) {
 			format := prefix + ": %v"
+			*err = fmt.Errorf(format, e)
+		},
+	})
+}
+
+// Annotatew is for annotating an error. It's similar to Returnf but it takes
+// only two arguments: a prefix string and a pointer to error. It adds ": "
+// between the prefix and the error text automatically.
+// Deprecated: Use Returnf instead and remember to add context information!
+func Annotatew(prefix string, err *error) {
+	// This and others are similar but we need to call `recover` here because
+	// how it works with defer.
+	r := recover()
+
+	handler.Process(handler.Info{
+		Any: r,
+		NilHandler: func() {
+			if *err != nil { // if other handlers call recovery() we still..
+				format := prefix + ": %w"
+				*err = fmt.Errorf(format, (*err))
+			}
+		},
+		ErrorHandler: func(e error) {
+			format := prefix + ": %w"
 			*err = fmt.Errorf(format, e)
 		},
 	})
