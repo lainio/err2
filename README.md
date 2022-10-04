@@ -119,9 +119,9 @@ handled immediately anyhow.
 
 err2 offers two error catchers for manual stack tracing: `CatchTrace` and
 `CatchAll`. The first one lets you handle errors and it will print the stack
-trace to `stderr` for panic and `runtime.Error`. The second is the same but you have
-a separate handler function for panic and `runtime.Error` so you can decide by
-yourself where to print them or what to do with them.
+trace to `stderr` for panic and `runtime.Error`. The second is the same but you
+have a separate handler function for panic and `runtime.Error` so you can decide
+by yourself where to print them or what to do with them.
 
 #### Error Handler
 
@@ -360,4 +360,4 @@ Version history:
 	`err2.Throwf` added
 - 0.8.8 Assertion package integrates with Go's testing system. Type variables
         removed.
-- 0.8.9 Fixes, deprecations, new Tracer API, preparing for API 1.0
+- 0.8.9 Bug fixes, deprecations, new Tracer API, preparing `err2` for 1.0
