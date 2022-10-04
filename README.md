@@ -26,7 +26,8 @@ The package provides simple helper functions for _automatic_ error propagation.
 err2 has the following package structure:
 - The `err2` (main) package includes declarative error handling functions.
 - The `try` package offers error checking functions.
-- The `assert` package implements assertion helpers for **both** unit-testing and *design-by-contract*.
+- The `assert` package implements assertion helpers for **both** unit-testing
+  and *design-by-contract*.
 
 ## Automatic Error Propagation And Stack Tracing
 
@@ -61,8 +62,9 @@ defer err2.Return(&err)
 ```
 
 which is the helper handler for cases that don't need to annotate the error. If
-you need to annotate the error you can use either `Annotate` or `Returnf`. These
-functions have their error wrapping versions as well: `Annotatew` and `Returnw`.
+you need to annotate the error you can use `Returnf`. There is a wrapping
+version `Returnw` even you will not need it.
+
 Our general guideline is:
 > Do not wrap an error when doing so would expose implementation details.
 
@@ -151,10 +153,10 @@ b := try.To1(ioutil.ReadAll(r))
 ...
 ```
 
-but not without an error handler (`Return`, `Annotate`, `Handle`) or it just
-panics your app if you don't have a `recovery` call in the current call stack.
-However, you can put your error handlers where ever you want in your call stack.
-That can be handy in the internal packages and certain types of algorithms.
+but not without an error handler (`Returnf`, `Handle`) or it just panics your
+app if you don't have a `recovery` call in the current call stack. However, you
+can put your error handlers where ever you want in your call stack. That can be
+handy in the internal packages and certain types of algorithms.
 
 We think that panicking for the errors at the start of the development is far
 better than not checking errors at all.
@@ -322,7 +324,7 @@ than getting unrelated panic somewhere else in the code later. There have also
 been cases when code reports error correctly because the 'upper' handler catches
 it.
 
-- Because the use of `err2.Annotate` is so relatively easy, error messages much
+- Because the use of `err2.Returnf` is so relatively easy, error messages much
 better and informative.
 
 - **When error handling is based on the actual error handlers, code changes have
