@@ -358,3 +358,4 @@ Version history:
 	`err2.Throwf` added
 - 0.8.8 Assertion package integrates with Go's testing system. Type variables
         removed.
+- 0.8.9 Fixes, deprecations, new Tracer API, preparing for API 1.0

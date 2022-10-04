@@ -80,8 +80,8 @@ func printStack(w io.Writer, si debug.StackInfo, msg any) {
 
 var (
 	// stackPrologueRuntime = newSI("", "panic(", 1)
-	stackPrologueError   = newErrSI()
-	stackProloguePanic   = newSI("", "panic(", 1)
+	stackPrologueError = newErrSI()
+	stackProloguePanic = newSI("", "panic(", 1)
 )
 
 func newErrSI() debug.StackInfo {
