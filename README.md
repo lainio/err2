@@ -1,6 +1,6 @@
 # err2
 
-The package provides simple helper functions for _automatic_ error propagation.
+The package provides functions for **automatic error propagation**.
 
 `go get github.com/lainio/err2`
 
@@ -11,8 +11,10 @@ The package provides simple helper functions for _automatic_ error propagation.
   - [Manual Stack Tracing](#manual-stack-tracing)
   - [Error Handler](#error-handler)
 - [Error checks](#Error-checks)
-  - [Auto-migration Deprecated Error Check Calls](#auto-migration-deprecated-error-check-calls)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
+- [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
+  - [Auto-migration Deprecated Error Check Calls](#auto-migration-deprecated-error-check-calls)
+  - [Type Variables Are Obsolete](#type-variables-are-obsolete)
 - [Assertion (design by contract)](#assertion-design-by-contract)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Background](#background)
@@ -23,7 +25,7 @@ The package provides simple helper functions for _automatic_ error propagation.
 
 ## Structure
 
-err2 has the following package structure:
+`err2` has the following package structure:
 - The `err2` (main) package includes declarative error handling functions.
 - The `try` package offers error checking functions.
 - The `assert` package implements assertion helpers for **both** unit-testing
@@ -161,25 +163,6 @@ handy in the internal packages and certain types of algorithms.
 We think that panicking for the errors at the start of the development is far
 better than not checking errors at all.
 
-#### Auto-migration Deprecated Error Check Calls
-
-The err2 doesn't have type variables anymore. They have been deprecated since
-version 0.8.0. Now they are removed from the repo as obsolete. Similarly
-`err2.Check(err)` is replaced by `try.To(err)`.
-
-You can migrate your `err2` using repos automatically. Just run the
-`./migrate.sh` bash script. It will do it for you. And it's safe. It uses git
-for every step that you stay in control.
-
-Go to your repo's root dir (no sub modules, or see `scripts/README.md` for more
-information) and enter the following command:
-
-```console
-$GOPATH/src/github.com/lainio/err2/scripts/migrate.sh
-```
-
-More information can be found from scripts' [readme file](./scripts/README.md).
-
 #### Filters for non-errors like io.EOF
 
 When error values are used to transport some other information instead of
@@ -195,6 +178,48 @@ notExist := try.Is(r2.err, plugin.ErrNotExist)
 ```
 
 For more information see the examples of both functions.
+
+## Backwards Compatibility Promise for the API
+
+The `err2` package's API will be **backwards Compatible**. Before the version
+1.0.0 is released the API changes time to time, but we promise to offer
+automatic conversion scripts for your repos to update them for latest API. We
+also mark functions deprecated before they become obsolete. We have tested our
+system with large code base and it works.
+
+#### Auto-migration Deprecated Function Calls
+
+##### Type Variables Are obsolete
+
+The err2 doesn't have type variables anymore. They have been deprecated since
+version 0.8.0. Now they are removed from the repo as obsolete. Similarly
+`err2.Check(err)` is replaced by `try.To(err)`.
+
+You can migrate your `err2` using repos automatically. Just run the
+`./migrate.sh` bash script. It will do it for you. And it's safe. It uses git
+for every step that you stay in control.
+
+Go to your repo's root dir (no sub modules, or see `scripts/README.md` for more
+information) and enter the following command:
+
+```console
+cd $GOPATH/src/github.com/lainio/err2/scripts/
+. ./set-path.sh
+migrate.sh
+```
+More information can be found from scripts' [readme file](./scripts/README.md).
+
+##### Type Variables Are obsolete
+
+`err2.Annotate()` and `err2.Annotatew()` are deprecated and they must be
+replaced with `err2.Returnf` or `err2.Returnw`.
+
+```console
+cd $GOPATH/src/github.com/lainio/err2/scripts/
+. ./set-path.sh
+migrate.sh -o
+```
+More information can be found from scripts' [readme file](./scripts/README.md).
 
 ## Assertion (design by contract)
 

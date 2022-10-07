@@ -1,5 +1,26 @@
 ## Automatic Migration
 
+The err2 package will offer auto-migration scripts until version 1.0.0 is
+published. That means that you can safely use the package even the API is not
+yet 100% staple. We have used that approach for our production code that uses
+`errw` and it works very well. Over 100 KLOC Go code has been auto-migrated
+successfully from type variables (see below) to Go generics API.
+
+This readme will guide you to use auto-migration scripts when ever we deprecate
+functions or make something obsolete.
+
+### `err2.Annotate` is deprecated and will be obsolete in version 0.8.10
+
+Please follow these guides to automatically replace all obsolete `err2.Annotate`
+functions:
+
+1. [Set up migration environment](#set-up-migration-environment)
+2. Execute following command to replace all `err2.Annotate(w)` with proper
+   `err2.Returnf/w` function:
+   `migrate.sh -o` or `migrate.sh -o YOUR-OWN-BRANCH-NAME`
+
+### Type Variables Are Obsolete
+
 The err2 doesn't have type variables (`err2.Int.Try(), err2.Bool.Try()`, etc.)
 since Go generics. They have been deprecated as of version 0.8.0. Now they are
 removed from the repo as obsolete. Similarly `err2.Check()` is replaced by
@@ -11,6 +32,8 @@ for you, and it's safe. It uses git for undo buffer. It stores all successful
 migration steps to git in its own working branch.
 
 First, to make the use of it more convenient:
+
+#### Set up Migration Environment
 
 1. Clone the `err2` if you don't already have it:
    ```console
@@ -25,7 +48,11 @@ First, to make the use of it more convenient:
    source ./set-path.sh
    ```
 
-Second, go to your repo's root directory (NOTE, if you have sub-modules read the
+Second, to update your repo for latest `err2` interface.
+
+#### Automatic Version Migration
+
+Go to your repo's root directory (NOTE, if you have sub-modules read the
 [Sub Modules In The Repo](#sub-modules-in-the-repo) first!) and enter the
 following command:
 
