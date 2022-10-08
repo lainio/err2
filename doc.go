@@ -44,7 +44,7 @@ them. The CopyFile example shows how it works:
 	     return nil
 	}
 
-# Error checks
+# Error checks and Automatic Error Propagation
 
 The try package provides convenient helpers to check the errors. For example,
 instead of
@@ -61,14 +61,14 @@ we can write
 Note that try.ToX functions are as fast as if err != nil statements. Please see
 the try package documentation for more information about the error checks.
 
-# Stack Tracing
+# Automatic Stack Tracing
 
-err2 offers optional stack tracing. It's automatic. Just set the
-StackTraceWriter to the stream you want traces to be written:
+err2 offers optional stack tracing. And yes, it's fully automatic. Just set the
+tracers to the stream you want traces to be written:
 
-	err2.StackTraceWriter = os.Stderr // write stack trace to stderr
+	err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
 	 or
-	err2.StackTraceWriter = log.Writer() // stack trace to std logger
+	err2.SetPanicTracer(log.Writer()) // panic stack trace to std logger
 
 # Error handling
 

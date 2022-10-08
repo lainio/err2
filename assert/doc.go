@@ -2,7 +2,7 @@
 Package assert includes runtime assertion helpers both for normal execution  as
 well as a helper packager for Go's testing. What makes solution unique is its
 capable to support both modes at the same time. Only thing you need to do is to
-add following to your unit tests:
+add following two lines at the beginning of your unit tests:
 
 	func TestInvite(t *testing.T) {
 		assert.PushTester(t) // push testing variable t beginning of any test
