@@ -47,3 +47,13 @@ gofmt:
 godoc:
 	@GO111MODULE=off godoc -http=0.0.0.0:6060
 
+test_cov_out:
+	go test -p 1 -failfast \
+		-coverpkg=$(PKG1)/... \
+		-coverprofile=coverage.txt  \
+		-covermode=atomic \
+		./...
+
+test_cov: test_cov_out
+	go tool cover -html=coverage.txt
+
