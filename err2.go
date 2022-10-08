@@ -59,6 +59,9 @@ func Catch(f func(err error)) {
 // all panics thrown in the current go routine. It and CatchTrace are preferred
 // helpers for go workers on long running servers, because they stop panics as
 // well.
+//
+// Note, if any Tracer is set stack traces are printed automatically. If you
+// want to do it in the handlers of the CatchAll, auto tracers should be nil.
 func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -74,9 +77,12 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // CatchTrace is a helper function to catch and handle all errors. It also
 // recovers a panic and prints its call stack. It and CatchAll are preferred
 // helpers for go-workers on long-running servers because they stop panics as
-// well. CatchTrace prints only panic and runtime.Error stack trace if
+// well.
+//
+// CatchTrace prints only panic and runtime.Error stack trace if
 // ErrorTracer isn't set. If it's set it prints both. The panic trace is printed
-// to stderr.
+// to stderr. If you need panic trace to be printed to some other io.Writer than
+// os.Stderr, you should use CatchAll or Catch with tracers.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
