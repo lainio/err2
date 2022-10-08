@@ -1,0 +1,25 @@
+name: test
+on: push
+jobs:
+  golangci:
+    name: lint
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.49.x
+  test:
+    steps:
+      - name: setup
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.19.x
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: test
+        run: make test_cov_out
+      - name: upload
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.txt

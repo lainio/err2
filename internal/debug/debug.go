@@ -98,13 +98,13 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
 
-	anchor := calc(r, si, func(s string) bool {
+	anchor := calc(r, func(s string) bool {
 		return si.isAnchor(s)
 	})
 
 	needToCalcFnNameAnchor := si.FuncName != "" && si.Regexp != nil
 	if needToCalcFnNameAnchor {
-		fnNameAnchor := calc(&buf, si, func(s string) bool {
+		fnNameAnchor := calc(&buf, func(s string) bool {
 			return si.isFuncAnchor(s)
 		})
 
@@ -118,7 +118,7 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 }
 
 // calc calculates anchor line it takes criteria function as an argument.
-func calc(r io.Reader, si StackInfo, anchor func(s string) bool) int {
+func calc(r io.Reader, anchor func(s string) bool) int {
 	scanner := bufio.NewScanner(r)
 
 	// there is a caption line first, that's why we start from -1

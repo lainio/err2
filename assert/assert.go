@@ -34,6 +34,10 @@ var (
 	testers map[int]testing.TB = make(map[int]testing.TB)
 )
 
+const (
+	assertionMsg = "assertion violation"
+)
+
 // PushTester sets the current testing context for default asserter. This must
 // be called at the beginning of every test.
 //
@@ -87,7 +91,7 @@ func ThatNot(term bool, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation"
+		defMsg := assertionMsg
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -100,7 +104,7 @@ func That(term bool, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation"
+		defMsg := assertionMsg
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -112,7 +116,7 @@ func NotNil[T any](p *T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: pointer is nil"
+		defMsg := assertionMsg + ": pointer is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -124,7 +128,7 @@ func INotNil(i any, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: interface is nil"
+		defMsg := assertionMsg + ": interface is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -136,7 +140,7 @@ func SNil[T any](s []T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: slice MUST be nil"
+		defMsg := assertionMsg + ": slice MUST be nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -148,7 +152,7 @@ func SNotNil[T any](s []T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: slice is nil"
+		defMsg := assertionMsg + ": slice is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -160,7 +164,7 @@ func CNotNil[T any](c chan T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: channel is nil"
+		defMsg := assertionMsg + ": channel is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -172,7 +176,7 @@ func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: map is nil"
+		defMsg := assertionMsg + ": map is nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -184,7 +188,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("assertion violation: got %v, want %v", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -196,7 +200,7 @@ func Equal[T comparable](val, want T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("assertion violation: got %v, want %v", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -208,7 +212,7 @@ func DeepEqual(val, want any, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("assertion violation: got %v, want %v", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -224,7 +228,7 @@ func SLen[T any](obj []T, length int, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("assertion violation: got %d, want %d", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -240,7 +244,7 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf("assertion violation: got %d, want %d", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -252,7 +256,7 @@ func NotEmpty(obj string, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: string shouldn't be empty"
+		defMsg := assertionMsg + ": string shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -264,7 +268,7 @@ func Empty(obj string, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: string should be empty"
+		defMsg := assertionMsg + ": string should be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -280,7 +284,7 @@ func SNotEmpty[T any](obj []T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: slice shouldn't be empty"
+		defMsg := assertionMsg + ": slice shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -296,7 +300,7 @@ func MNotEmpty[T comparable, U any](obj map[T]U, length int, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: map shouldn't be empty"
+		defMsg := assertionMsg + ": map shouldn't be empty"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -309,7 +313,7 @@ func NoError(err error, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: " + err.Error()
+		defMsg := assertionMsg + ": " + err.Error()
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -322,7 +326,7 @@ func Error(err error, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "assertion violation: missing error"
+		defMsg := assertionMsg + ": missing error"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }

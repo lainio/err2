@@ -298,7 +298,7 @@ func TestPanicking_Catch(t *testing.T) {
 
 func TestCatch_Error(t *testing.T) {
 	defer err2.Catch(func(err error) {
-		//fmt.Printf("error and defer handling:%s\n", err)
+		// fmt.Printf("error and defer handling:%s\n", err)
 	})
 
 	try.To1(throw())

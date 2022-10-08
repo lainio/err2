@@ -57,3 +57,6 @@ test_cov_out:
 test_cov: test_cov_out
 	go tool cover -html=coverage.txt
 
+lint:
+	@golangci-lint run
+

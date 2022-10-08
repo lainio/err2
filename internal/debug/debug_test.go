@@ -29,7 +29,6 @@ func TestFullName(t *testing.T) {
 				tt.retval)
 		})
 	}
-
 }
 
 func TestIsAnchor(t *testing.T) {
@@ -201,8 +200,8 @@ func TestStackPrint_limit(t *testing.T) {
 			})
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(w.String(), "\n")
-			helper.Require(t, len(ins) > len(outs), tt.FuncName, "len creater")
-			helper.Require(t, tt.output == w.String(), "equal")
+			helper.Require(t, len(ins) > len(outs), "input length should be greater")
+			helper.Require(t, tt.output == w.String(), "not equal")
 		})
 	}
 }
