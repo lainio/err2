@@ -96,6 +96,10 @@ check_build() {
 	go build -o /dev/null "$pkg" &>/dev/null
 }
 
+replace_tracers() {
+	"$location"/replace-perl.sh 'err2\.(StackTraceWriter = )(.*)' 'err2.SetTracers(\2)'
+}
+
 replace_annotate() {
 	# Replace Annotate with Returnf: notice argument order!!
 	"$location"/replace-perl.sh 'err2\.(Annotate\()(.*)(, )(.*)(\)\n)' 'err2.Returnf(\4\3\2\5'
