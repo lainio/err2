@@ -9,10 +9,10 @@ successfully from type variables (see below) to Go generics API.
 This readme will guide you to use auto-migration scripts when ever we deprecate
 functions or make something obsolete.
 
-### `err2.Annotate` is deprecated and will be obsolete in version 0.8.10
+### `err2.Annotate` and `err2.StackTraceWriter` will be obsolete in v 0.8.10
 
 Please follow these guides to automatically replace all obsolete `err2.Annotate`
-functions:
+functions and `err2.StackTraceWriter` variable set with proper API:
 
 1. [Set up migration environment](#set-up-migration-environment)
 2. Execute following command to replace all `err2.Annotate(w)` with proper

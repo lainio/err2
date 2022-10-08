@@ -105,21 +105,22 @@ main.main()
 	/home/.../go/src/github.com/lainio/ic/main.go:77 +0x248
 ```
 
-Just set the `StackTraceWriter` to the stream you want traces to be written:
+Just set the `err2.SetErrorTracer` or `err2.SetPanicTracer` to the stream you
+want traces to be written:
 
 ```go
-err2.StackTraceWriter = os.Stderr // write stack trace to stderr
-  or
-err2.StackTraceWriter = log.Writer() // stack trace to std logger
+err2.SetError(os.Stderr) // write error stack trace to stderr
+  or, for example:
+err2.SetPanicTracer(log.Writer()) // stack panic trace to std logger
 ```
 
-If `StackTraceWriter` is not set no stack tracing is done. This is the default
-because in the most cases proper error messages are enough and panics are
-handled immediately anyhow.
+If no `Tracer` is set no stack tracing is done. This is the default because in
+the most cases proper error messages are enough and panics are handled
+immediately anyhow.
 
 #### Manual Stack Tracing
 
-err2 offers two error catchers for manual stack tracing: `CatchTrace` and
+The `err2` offers two error catchers for manual stack tracing: `CatchTrace` and
 `CatchAll`. The first one lets you handle errors and it will print the stack
 trace to `stderr` for panic and `runtime.Error`. The second is the same but you
 have a separate handler function for panic and `runtime.Error` so you can decide
@@ -181,15 +182,20 @@ For more information see the examples of both functions.
 
 ## Backwards Compatibility Promise for the API
 
-The `err2` package's API will be **backwards Compatible**. Before the version
+The `err2` package's API will be **backwards compatible**. Before the version
 1.0.0 is released the API changes time to time, but we promise to offer
 automatic conversion scripts for your repos to update them for latest API. We
-also mark functions deprecated before they become obsolete. We have tested our
-system with large code base and it works.
+also mark functions deprecated before they become obsolete. Usually one version
+before. We have tested this in our systems with large code base and it works.
 
-#### Auto-migration Deprecated Function Calls
+#### Auto-migration Deprecated Error Check Calls
 
-##### Type Variables Are obsolete
+The current list of deprecated functions and variables in the API:
+1. Type variables are obsolete.
+2. `err2.Annotate` functions are obsolete.
+3. `err2.StackTraceWriter` is obsolete.
+
+##### Type Variables Are Obsolete
 
 The err2 doesn't have type variables anymore. They have been deprecated since
 version 0.8.0. Now they are removed from the repo as obsolete. Similarly
@@ -209,7 +215,7 @@ migrate.sh
 ```
 More information can be found from scripts' [readme file](./scripts/README.md).
 
-##### Type Variables Are obsolete
+##### `err2.Annotate` Are Obsolete
 
 `err2.Annotate()` and `err2.Annotatew()` are deprecated and they must be
 replaced with `err2.Returnf` or `err2.Returnw`.
@@ -220,6 +226,21 @@ cd $GOPATH/src/github.com/lainio/err2/scripts/
 migrate.sh -o
 ```
 More information can be found from scripts' [readme file](./scripts/README.md).
+
+##### `err2.StackTraceWriter` is obsolete.
+
+Use new Tracer API and functions like `err2.SetErrorTracer` and
+`err2.SetPanicTracer`. These functions are thread safe so e.g. automatic race
+detector, `-race` flag, doesn't give false positive results.
+
+To update your repos follow these guidelines:
+```console
+cd $GOPATH/src/github.com/lainio/err2/scripts/
+. ./set-path.sh
+migrate.sh -o
+```
+If you have several migration issues, it's usually enough that you run e.g.
+`migrate.sh -o` once.
 
 ## Assertion (design by contract)
 
