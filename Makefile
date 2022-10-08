@@ -11,7 +11,7 @@ SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 GO := go
 # GO := go1.18beta2
 
-check: test vet gofmt
+check: lint vet gofmt test
 
 test1:
 	$(GO) test $(PKG1)
