@@ -9,7 +9,8 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.49.x
+          version: v1.49
+          args: --timeout=5m
   test:
     runs-on: ubuntu-latest
     steps:
