@@ -15,6 +15,8 @@ The package provides functions for **automatic error propagation**.
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
   - [Auto-migration Deprecated Error Check Calls](#auto-migration-deprecated-error-check-calls)
   - [Type Variables Are Obsolete](#type-variables-are-obsolete)
+  - [`err2.Annotate` Are Obsolete](#err2annotate-are-obsolete)
+  - [`err2.StackTraceWriter` Is Obsolete](#err2stacktracewriter-is-obsolete)
 - [Assertion (design by contract)](#assertion-design-by-contract)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Background](#background)
@@ -184,9 +186,10 @@ For more information see the examples of both functions.
 
 The `err2` package's API will be **backwards compatible**. Before the version
 1.0.0 is released the API changes time to time, but we promise to offer
-automatic conversion scripts for your repos to update them for latest API. We
-also mark functions deprecated before they become obsolete. Usually one version
-before. We have tested this in our systems with large code base and it works.
+automatic conversion scripts for your repos to update them for the latest API.
+We also mark functions deprecated before they become obsolete. Usually one
+released version before. We have tested this in our systems with large code base
+and it works wonderfully.
 
 #### Auto-migration Deprecated Error Check Calls
 
@@ -230,7 +233,7 @@ More information can be found from scripts' [readme file](./scripts/README.md).
 ##### `err2.StackTraceWriter` is obsolete.
 
 Use new Tracer API and functions like `err2.SetErrorTracer` and
-`err2.SetPanicTracer`. These functions are thread safe so e.g. automatic race
+`err2.SetPanicTracer`. These functions are thread-safe, so, e.g., automatic race
 detector, `-race` flag, doesn't give false positive results.
 
 To update your repos follow these guidelines:
@@ -239,7 +242,8 @@ cd $GOPATH/src/github.com/lainio/err2/scripts/
 . ./set-path.sh
 migrate.sh -o
 ```
-If you have several migration issues, it's usually enough that you run e.g.
+
+Tip! If you have several migration issues, it's usually enough that you run e.g.
 `migrate.sh -o` once.
 
 ## Assertion (design by contract)
