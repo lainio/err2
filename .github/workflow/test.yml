@@ -11,6 +11,7 @@ jobs:
         with:
           version: v1.49.x
   test:
+    runs-on: ubuntu-latest
     steps:
       - name: setup
         uses: actions/setup-go@v2
