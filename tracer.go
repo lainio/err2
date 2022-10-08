@@ -48,3 +48,10 @@ func SetErrorTracer(w io.Writer) {
 func SetPanicTracer(w io.Writer) {
 	tracer.Panic.SetTracer(w)
 }
+
+// SetTracers a convenient helper to set a io.Writer for error and panic stack
+// tracing.
+func SetTracers(w io.Writer) {
+	tracer.Error.SetTracer(w)
+	tracer.Panic.SetTracer(w)
+}
