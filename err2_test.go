@@ -3,7 +3,6 @@ package err2_test
 import (
 	"fmt"
 	"io"
-	"os"
 	"testing"
 
 	"github.com/lainio/err2"
@@ -313,31 +312,6 @@ func TestSetErrorTracer(t *testing.T) {
 	err2.SetErrorTracer(w1)
 	w = err2.ErrorTracer()
 	helper.Require(t, w == nil, "error tracer should be nil")
-}
-
-func Example_copyFile() {
-	copyFile := func(src, dst string) (err error) {
-		defer err2.Returnf(&err, "copy %s %s", src, dst)
-
-		// These try.To() checkers are as fast as `if err != nil {}`
-
-		r := try.To1(os.Open(src))
-		defer r.Close()
-
-		w := try.To1(os.Create(dst))
-		defer err2.Handle(&err, func() {
-			os.Remove(dst)
-		})
-		defer w.Close()
-		try.To1(io.Copy(w, r))
-		return nil
-	}
-
-	err := copyFile("/notfound/path/file.go", "/notfound/path/file.bak")
-	if err != nil {
-		fmt.Println(err)
-	}
-	// Output: copy /notfound/path/file.go /notfound/path/file.bak: open /notfound/path/file.go: no such file or directory
 }
 
 func ExampleReturn() {
