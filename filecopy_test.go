@@ -26,9 +26,9 @@ func CopyFile(src, dst string) (err error) {
 	return nil
 }
 
-func ExampleCopyFile() {
+func Example() {
 	// To see how automatic stack tracing works please run this example with:
-	//   go test -v -run=ExampleCopyFile
+	//   go test -v -run='^Example$'
 	err2.SetErrorTracer(os.Stderr)
 
 	err := CopyFile("/notfound/path/file.go", "/notfound/path/file.bak")
