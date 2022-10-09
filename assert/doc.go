@@ -9,7 +9,7 @@ add following two lines at the beginning of your unit tests:
 		defer assert.PopTester()
 
 		alice.Node = root1.Invite(alice.Node, root1.Key, alice.PubKey, 1)
-		assert.Equal(alice.Len(), 1) // assert any thing normally
+		assert.Equal(alice.Len(), 1) // assert anything normally
 
 Especially powerful feature is that even if some assertion violation happens
 during the execution of called functions like above Invite() function instead of

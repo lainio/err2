@@ -1,8 +1,10 @@
 /*
 Package err2 provides three main functionality:
- 1. err2 package includes helper functions for error handling & stack tracing
+ 1. err2 package includes helper functions for error handling & automatic stack
+    tracing
  2. try package is for error checking
- 3. assert package is for design-by-contract and preconditions
+ 3. assert package is for design-by-contract and preconditions both for normal
+    runtime and for testing
 
 The traditional error handling idiom in Go is roughly akin to
 
