@@ -121,6 +121,18 @@ func NotNil[T any](p *T, a ...any) {
 	}
 }
 
+// INil asserts that the value is not nil. If it is it panics/errors (default
+// Asserter) with the given message.
+func INil(i any, a ...any) {
+	if i != nil {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := assertionMsg + ": interface is nil"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
 // INotNil asserts that the value is not nil. If it is it panics/errors (default
 // Asserter) with the given message.
 func INotNil(i any, a ...any) {
@@ -217,6 +229,18 @@ func DeepEqual(val, want any, a ...any) {
 	}
 }
 
+// NotDeepEqual asserts that the (whatever) values are equal. If not it
+// panics/errors (current Asserter) with the given message.
+func NotDeepEqual(val, want any, a ...any) {
+	if reflect.DeepEqual(val, want) {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
 // SLen asserts that the length of the slice is equal to the given. If not it
 // panics/errors (current Asserter) with the given message. Note! This is
 // reasonably fast but not as fast as 'That' because of lacking inlining for the
@@ -293,7 +317,7 @@ func SNotEmpty[T any](obj []T, a ...any) {
 // (current Asserter) with the given message. Note! This is reasonably fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
-func MNotEmpty[T comparable, U any](obj map[T]U, length int, a ...any) {
+func MNotEmpty[T comparable, U any](obj map[T]U, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
