@@ -96,6 +96,25 @@ check_build() {
 	go build -o /dev/null "$pkg" &>/dev/null
 }
 
+add_assert_import() {
+	vlog "add push/pop"
+	"$location"/replace.sh '\"github.com\/stretchr\/testify\/(require|assert)\"' '(^func Test.*$)' '\1\n\tassert.PushTester(t)\n\tdefer assert.PopTester()' 
+	vlog "add push/pop for t.Run"
+	"$location"/replace.sh '\"github.com\/stretchr\/testify\/(require|assert)\"' '(^\s*)(t\.Run\(.*$)' '\1\2\n\1assert.PushTester(t)\n\1defer assert.PopTester()' 
+
+	vlog "Adding assert|require imports"
+	"$location"/replace.sh '\"github.com\/stretchr\/testify\/(require|assert)\"' '\"github.com\/stretchr\/testify\/(require|assert)\"' '\"github.com\/lainio\/err2\/assert\"' 
+}
+
+replace_assert() {
+	"$location"/replace-perl.sh '(assert|require)\.(Len\()(t,)(.*\))' 'assert.SLen(\4'
+	"$location"/replace-perl.sh '(assert|require)\.(NotNil\()(t,)(.*\))' 'assert.INotNil(\4'
+	"$location"/replace-perl.sh '(assert|require)\.(Nil\()(t,)(.*\))' 'assert.SNil(\4'
+	"$location"/replace-perl.sh '(assert|require)\.(False\()(t,)(.*\))' 'assert.ThatNot(\4'
+	"$location"/replace-perl.sh '(assert|require)\.(True\()(t,)(.*\))' 'assert.That(\4'
+	"$location"/replace-perl.sh '(assert|require)\.(\w*\()(t,)(.*\))' 'assert.\2\4'
+}
+
 replace_tracers() {
 	"$location"/replace-perl.sh 'err2\.(StackTraceWriter = )(.*)' 'err2.SetTracers(\2)'
 }
