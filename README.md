@@ -411,3 +411,4 @@ Version history:
 - 0.8.8 Assertion package integrates with Go's testing system. Type variables
         removed.
 - 0.8.9 Bug fixes, deprecations, new Tracer API, preparing `err2` for 1.0
+- 0,8.10 New assertion functions and helpers for tests
