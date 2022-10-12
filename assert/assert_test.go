@@ -190,12 +190,29 @@ func ExampleNotEmpty() {
 	sample := func(b string) (err error) {
 		defer err2.Returnf(&err, "sample")
 
+		assert.Empty(b)
 		assert.NotEmpty(b)
 		return err
 	}
 	err := sample("")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:193 ExampleNotEmpty.func1 assertion violation: string shouldn't be empty
+	// Output: sample: assert_test.go:194 ExampleNotEmpty.func1 assertion violation: string shouldn't be empty
+}
+
+func ExampleMKeyExists() {
+	sample := func(b string) (err error) {
+		defer err2.Returnf(&err, "sample")
+
+		m := map[string]string{
+			"1": "one",
+		}
+		assert.MKeyExists(m, "1")
+		assert.MKeyExists(m, b)
+		return err
+	}
+	err := sample("2")
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:210 ExampleMKeyExists.func1 assertion violation: key '2' doesn't exist
 }
 
 // ifPanicZero in needed that we have argument here! It's like a macro for

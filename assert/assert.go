@@ -121,8 +121,8 @@ func NotNil[T any](p *T, a ...any) {
 	}
 }
 
-// INil asserts that the value is not nil. If it is it panics/errors (default
-// Asserter) with the given message.
+// INil asserts that the interface value IS nil. If it is it panics/errors
+// (default Asserter) with the given message.
 func INil(i any, a ...any) {
 	if i != nil {
 		if DefaultAsserter.isUnitTesting() {
@@ -133,8 +133,8 @@ func INil(i any, a ...any) {
 	}
 }
 
-// INotNil asserts that the value is not nil. If it is it panics/errors (default
-// Asserter) with the given message.
+// INotNil asserts that the interface value is NOT nil. If it is it
+// panics/errors (default Asserter) with the given message.
 func INotNil(i any, a ...any) {
 	if i == nil {
 		if DefaultAsserter.isUnitTesting() {
@@ -230,7 +230,10 @@ func DeepEqual(val, want any, a ...any) {
 }
 
 // NotDeepEqual asserts that the (whatever) values are equal. If not it
-// panics/errors (current Asserter) with the given message.
+// panics/errors (current Asserter) with the given message. NOTE, it uses
+// reflect.DeepEqual which means that also the types must be the same:
+//
+//	assert.DeepEqual(pubKey, ed25519.PublicKey(pubKeyBytes))
 func NotDeepEqual(val, want any, a ...any) {
 	if reflect.DeepEqual(val, want) {
 		if DefaultAsserter.isUnitTesting() {
@@ -269,6 +272,20 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// MKeyExists asserts that the map key exists. If not it panics/errors (current
+// Asserter) with the given message.
+func MKeyExists[T comparable, U any](obj map[T]U, key T, a ...any) {
+	_, ok := obj[key]
+
+	if !ok {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
