@@ -206,8 +206,9 @@ func ExampleMKeyExists() {
 		m := map[string]string{
 			"1": "one",
 		}
-		assert.MKeyExists(m, "1")
-		assert.MKeyExists(m, b)
+		v := assert.MKeyExists(m, "1")
+		v = assert.MKeyExists(m, b)
+		_ = v // this is just a examle of using of the value if we want to
 		return err
 	}
 	err := sample("2")

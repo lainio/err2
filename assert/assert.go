@@ -278,8 +278,9 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 
 // MKeyExists asserts that the map key exists. If not it panics/errors (current
 // Asserter) with the given message.
-func MKeyExists[T comparable, U any](obj map[T]U, key T, a ...any) {
-	_, ok := obj[key]
+func MKeyExists[T comparable, U any](obj map[T]U, key T, a ...any) (val U) {
+	var ok bool
+	val, ok = obj[key]
 
 	if !ok {
 		if DefaultAsserter.isUnitTesting() {
@@ -288,6 +289,7 @@ func MKeyExists[T comparable, U any](obj map[T]U, key T, a ...any) {
 		defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
+	return val
 }
 
 // NotEmpty asserts that the string is not empty. If it is, it panics/errors
