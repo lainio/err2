@@ -207,13 +207,13 @@ func ExampleMKeyExists() {
 			"1": "one",
 		}
 		v := assert.MKeyExists(m, "1")
-		v = assert.MKeyExists(m, b)
-		_ = v // this is just a examle of using of the value if we want to
+		assert.Equal(v, "one")
+		_ = assert.MKeyExists(m, b)
 		return err
 	}
 	err := sample("2")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:210 ExampleMKeyExists.func1 assertion violation: key '2' doesn't exist
+	// Output: sample: assert_test.go:211 ExampleMKeyExists.func1 assertion violation: key '2' doesn't exist
 }
 
 // ifPanicZero in needed that we have argument here! It's like a macro for
