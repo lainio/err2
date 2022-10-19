@@ -321,7 +321,7 @@ func ExampleReturn() {
 	// Output:
 }
 
-func ExampleAnnotate() {
+func ExampleReturnf_empty() {
 	annotated := func() (err error) {
 		defer err2.Returnf(&err, "annotated")
 		try.To1(throw())
@@ -369,7 +369,7 @@ func ExampleThrowf() {
 	// Output: annotated: err2: helper failed at: 78
 }
 
-func ExampleAnnotate_deferStack() {
+func ExampleReturnf_deferStack() {
 	annotated := func() (err error) {
 		defer err2.Returnf(&err, "annotated 2nd")
 		defer err2.Returnf(&err, "annotated 1st")
