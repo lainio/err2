@@ -13,10 +13,6 @@ The package provides functions for **automatic error propagation**.
 - [Error checks](#Error-checks)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
-  - [Auto-migration Deprecated Error Check Calls](#auto-migration-deprecated-error-check-calls)
-  - [Type Variables Are Obsolete](#type-variables-are-obsolete)
-  - [`err2.Annotate` Are Obsolete](#err2annotate-are-obsolete)
-  - [`err2.StackTraceWriter` Is Obsolete](#err2stacktracewriter-is-obsolete)
 - [Assertion (design by contract)](#assertion-design-by-contract)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Background](#background)
@@ -111,7 +107,7 @@ Just set the `err2.SetErrorTracer` or `err2.SetPanicTracer` to the stream you
 want traces to be written:
 
 ```go
-err2.SetError(os.Stderr) // write error stack trace to stderr
+err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
   or, for example:
 err2.SetPanicTracer(log.Writer()) // stack panic trace to std logger
 ```
@@ -191,60 +187,7 @@ We also mark functions deprecated before they become obsolete. Usually one
 released version before. We have tested this in our systems with large code base
 and it works wonderfully.
 
-#### Auto-migration Deprecated Error Check Calls
-
-The current list of deprecated functions and variables in the API:
-1. Type variables are obsolete.
-2. `err2.Annotate` functions are obsolete.
-3. `err2.StackTraceWriter` is obsolete.
-
-##### Type Variables Are Obsolete
-
-The err2 doesn't have type variables anymore. They have been deprecated since
-version 0.8.0. Now they are removed from the repo as obsolete. Similarly
-`err2.Check(err)` is replaced by `try.To(err)`.
-
-You can migrate your `err2` using repos automatically. Just run the
-`./migrate.sh` bash script. It will do it for you. And it's safe. It uses git
-for every step that you stay in control.
-
-Go to your repo's root dir (no sub modules, or see `scripts/README.md` for more
-information) and enter the following command:
-
-```console
-cd $GOPATH/src/github.com/lainio/err2/scripts/
-. ./set-path.sh
-migrate.sh
-```
 More information can be found from scripts' [readme file](./scripts/README.md).
-
-##### `err2.Annotate` Are Obsolete
-
-`err2.Annotate()` and `err2.Annotatew()` are deprecated and they must be
-replaced with `err2.Returnf` or `err2.Returnw`.
-
-```console
-cd $GOPATH/src/github.com/lainio/err2/scripts/
-. ./set-path.sh
-migrate.sh -o
-```
-More information can be found from scripts' [readme file](./scripts/README.md).
-
-##### `err2.StackTraceWriter` is obsolete.
-
-Use new Tracer API and functions like `err2.SetErrorTracer` and
-`err2.SetPanicTracer`. These functions are thread-safe, so, e.g., automatic race
-detector, `-race` flag, doesn't give false positive results.
-
-To update your repos follow these guidelines:
-```console
-cd $GOPATH/src/github.com/lainio/err2/scripts/
-. ./set-path.sh
-migrate.sh -o
-```
-
-Tip! If you have several migration issues, it's usually enough that you run e.g.
-`migrate.sh -o` once.
 
 ## Assertion (design by contract)
 
@@ -411,4 +354,5 @@ Version history:
 - 0.8.8 Assertion package integrates with Go's testing system. Type variables
         removed.
 - 0.8.9 Bug fixes, deprecations, new Tracer API, preparing `err2` for 1.0
-- 0,8.10 New assertion functions and helpers for tests
+- 0.8.10 New assertion functions and helpers for tests
+- 0.8.11 Remove deprecations, new *global* err values and `try.IsXX` functions
