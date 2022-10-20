@@ -41,6 +41,8 @@ package try
 import (
 	"errors"
 	"io"
+
+	"github.com/lainio/err2"
 )
 
 // To is a helper function to call functions which returns (error)
@@ -110,8 +112,53 @@ func IsEOF2[T, U any](v1 T, v2 U, err error) (bool, T, U) {
 
 // IsEOF-function performs a filtered error check for the given argument. It's the
 // same as To-function, but it checks if the error matches the 'io.EOF' before
-// throwing an error. The false return value tells that there are no errors and
-// the true value that the error is the 'io.EOF'.
+// throwing an error. The false return value tells that there are no errors.
+// The true tells that the err's chain includes 'io.EOF'.
 func IsEOF(err error) bool {
 	return Is(err, io.EOF)
+}
+
+// IsNotFound function performs a filtered error check for the given argument.
+// It's the same as To-function, but it checks if the error matches the
+// 'err2.NotFound' before throwing an error. The false return value tells that
+// there are no errors. The true tells that the err's chain includes
+// 'err2.NotFound'.
+func IsNotFound(err error) bool {
+	return Is(err, err2.NotFound)
+}
+
+// IsNotFound1-function performs a filtered error check for the given argument.
+// It's the same as To-function, but it checks if the error matches the
+// 'err2.NotFound' before throwing an error. The false return value tells that
+// there are no errors. The true tell that the err's chain includes
+// 'err2.NotFound'.
+func IsNotFound1[T any](v T, err error) (bool, T) {
+	isFilter := Is(err, err2.NotFound)
+	return isFilter, v
+}
+
+// IsNotExist function performs a filtered error check for the given argument.
+// It's the same as To-function, but it checks if the error matches the
+// 'err2.NotExist' before throwing an error. The false return value tells that
+// there are no errors. The true tells that the err's chain includes
+// 'err2.NotExist'.
+func IsNotExist(err error) bool {
+	return Is(err, err2.NotExist)
+}
+
+// IsExist function performs a filtered error check for the given argument. It's
+// the same as To-function, but it checks if the error matches the 'err2.Exist'
+// before throwing an error. The false return value tells that there are no
+// errors. The true tells that the err's chain includes 'err2.Exist'.
+func IsExist(err error) bool {
+	return Is(err, err2.Exist)
+}
+
+// IsNotAccess function performs a filtered error check for the given argument.
+// It's the same as To-function, but it checks if the error matches the
+// 'err2.NotAccess' before throwing an error. The false return value tells that
+// there are no errors. The true tells that the err's chain includes
+// 'err2.NotAccess'.
+func IsNotAccess(err error) bool {
+	return Is(err, err2.NotAccess)
 }
