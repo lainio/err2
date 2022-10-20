@@ -1,10 +1,22 @@
 package err2
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/lainio/err2/internal/handler"
+)
+
+//nolint:stylecheck
+var (
+	// NotFound is similar no-error like io.EOF who want to write than kind of
+	// code. It's better to have discriminated unions as error values. But if
+	// you insist related helpers are in try package: try.IsNotFound(), ...
+	NotFound  = errors.New("not found")
+	NotExist  = errors.New("not exist")
+	Exist     = errors.New("already exist")
+	NotAccess = errors.New("permission denied")
 )
 
 // Handle is for adding an error handler to a function by deferring. It's for
@@ -167,56 +179,6 @@ func Returnf(err *error, format string, args ...any) {
 		},
 		ErrorHandler: func(e error) {
 			*err = fmt.Errorf(format+": %v", append(args, e)...)
-		},
-	})
-}
-
-// Annotate is for annotating an error. It's similar to Returnf but it takes
-// only two arguments: a prefix string and a pointer to error. It adds ": "
-// between the prefix and the error text automatically.
-//
-// Deprecated: Use Returnf instead and remember to add context information!
-func Annotate(prefix string, err *error) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	handler.Process(handler.Info{
-		Any: r,
-		NilHandler: func() {
-			if *err != nil { // if other handlers call recovery() we still..
-				format := prefix + ": %v"
-				*err = fmt.Errorf(format, (*err))
-			}
-		},
-		ErrorHandler: func(e error) {
-			format := prefix + ": %v"
-			*err = fmt.Errorf(format, e)
-		},
-	})
-}
-
-// Annotatew is for annotating an error. It's similar to Returnf but it takes
-// only two arguments: a prefix string and a pointer to error. It adds ": "
-// between the prefix and the error text automatically.
-//
-// Deprecated: Use Returnf instead and remember to add context information!
-func Annotatew(prefix string, err *error) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	handler.Process(handler.Info{
-		Any: r,
-		NilHandler: func() {
-			if *err != nil { // if other handlers call recovery() we still..
-				format := prefix + ": %w"
-				*err = fmt.Errorf(format, (*err))
-			}
-		},
-		ErrorHandler: func(e error) {
-			format := prefix + ": %w"
-			*err = fmt.Errorf(format, e)
 		},
 	})
 }
