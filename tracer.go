@@ -6,21 +6,8 @@ import (
 	"github.com/lainio/err2/internal/tracer"
 )
 
-// StackTraceWriter allows to set automatic stack tracing.
-//
-//	err2.StackTraceWriter = os.Stderr // write stack trace to stderr
-//	 or
-//	err2.StackTraceWriter = log.Writer() // stack trace to std logger
-//
-// Deprecated: Use SetErrorTracer and SetPanicTracer to set tracers.
-var StackTraceWriter io.Writer
-
 // ErrorTracer returns current io.Writer for automatic error stack tracing.
 func ErrorTracer() io.Writer {
-	// Deprecated: until StackTraceWriter removed
-	if StackTraceWriter != nil {
-		return StackTraceWriter
-	}
 	return tracer.Error.Tracer()
 }
 
@@ -28,10 +15,6 @@ func ErrorTracer() io.Writer {
 // that runtime.Error types which are transported by panics are controlled by
 // this.
 func PanicTracer() io.Writer {
-	// Deprecated: until StackTraceWriter removed
-	if StackTraceWriter != nil {
-		return StackTraceWriter
-	}
 	return tracer.Panic.Tracer()
 }
 
