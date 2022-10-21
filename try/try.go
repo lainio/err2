@@ -78,8 +78,8 @@ func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {
 	return v1, v2, v3
 }
 
-// Is-function performs a filtered error check for the given argument. It's the
-// same as To-function, but it checks if the error matches the filter before
+// Is function performs a filtered error check for the given argument. It's the
+// same as To function, but it checks if the error matches the filter before
 // throwing an error. The false return value tells that there are no errors and
 // the true value that the error is the filter.
 func Is(err, filter error) bool {
@@ -92,8 +92,8 @@ func Is(err, filter error) bool {
 	return false
 }
 
-// IsEOF1-function performs a filtered error check for the given argument. It's the
-// same as To-function, but it checks if the error matches the 'io.EOF' before
+// IsEOF1 function performs a filtered error check for the given argument. It's the
+// same as To function, but it checks if the error matches the 'io.EOF' before
 // throwing an error. The false return value tells that there are no errors and
 // the true value that the error is the 'io.EOF'.
 func IsEOF1[T any](v T, err error) (bool, T) {
@@ -101,8 +101,8 @@ func IsEOF1[T any](v T, err error) (bool, T) {
 	return isFilter, v
 }
 
-// IsEOF2-function performs a filtered error check for the given argument. It's the
-// same as To-function, but it checks if the error matches the 'io.EOF' before
+// IsEOF2 function performs a filtered error check for the given argument. It's the
+// same as To function, but it checks if the error matches the 'io.EOF' before
 // throwing an error. The false return value tells that there are no errors and
 // the true value that the error is the 'io.EOF'.
 func IsEOF2[T, U any](v1 T, v2 U, err error) (bool, T, U) {
@@ -110,8 +110,8 @@ func IsEOF2[T, U any](v1 T, v2 U, err error) (bool, T, U) {
 	return isFilter, v1, v2
 }
 
-// IsEOF-function performs a filtered error check for the given argument. It's the
-// same as To-function, but it checks if the error matches the 'io.EOF' before
+// IsEOF function performs a filtered error check for the given argument. It's the
+// same as To function, but it checks if the error matches the 'io.EOF' before
 // throwing an error. The false return value tells that there are no errors.
 // The true tells that the err's chain includes 'io.EOF'.
 func IsEOF(err error) bool {
@@ -119,7 +119,7 @@ func IsEOF(err error) bool {
 }
 
 // IsNotFound function performs a filtered error check for the given argument.
-// It's the same as To-function, but it checks if the error matches the
+// It's the same as To function, but it checks if the error matches the
 // 'err2.NotFound' before throwing an error. The false return value tells that
 // there are no errors. The true tells that the err's chain includes
 // 'err2.NotFound'.
@@ -127,10 +127,10 @@ func IsNotFound(err error) bool {
 	return Is(err, err2.NotFound)
 }
 
-// IsNotFound1-function performs a filtered error check for the given argument.
-// It's the same as To-function, but it checks if the error matches the
+// IsNotFound1 function performs a filtered error check for the given argument.
+// It's the same as To function, but it checks if the error matches the
 // 'err2.NotFound' before throwing an error. The false return value tells that
-// there are no errors. The true tell that the err's chain includes
+// there are no errors. The true tells that the err's chain includes
 // 'err2.NotFound'.
 func IsNotFound1[T any](v T, err error) (bool, T) {
 	isFilter := Is(err, err2.NotFound)
@@ -138,7 +138,7 @@ func IsNotFound1[T any](v T, err error) (bool, T) {
 }
 
 // IsNotExist function performs a filtered error check for the given argument.
-// It's the same as To-function, but it checks if the error matches the
+// It's the same as To function, but it checks if the error matches the
 // 'err2.NotExist' before throwing an error. The false return value tells that
 // there are no errors. The true tells that the err's chain includes
 // 'err2.NotExist'.
@@ -147,7 +147,7 @@ func IsNotExist(err error) bool {
 }
 
 // IsExist function performs a filtered error check for the given argument. It's
-// the same as To-function, but it checks if the error matches the 'err2.Exist'
+// the same as To function, but it checks if the error matches the 'err2.Exist'
 // before throwing an error. The false return value tells that there are no
 // errors. The true tells that the err's chain includes 'err2.Exist'.
 func IsExist(err error) bool {
@@ -155,7 +155,7 @@ func IsExist(err error) bool {
 }
 
 // IsNotAccess function performs a filtered error check for the given argument.
-// It's the same as To-function, but it checks if the error matches the
+// It's the same as To function, but it checks if the error matches the
 // 'err2.NotAccess' before throwing an error. The false return value tells that
 // there are no errors. The true tells that the err's chain includes
 // 'err2.NotAccess'.
