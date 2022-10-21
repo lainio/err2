@@ -1,3 +1,10 @@
+// Package main includes samples of err2. It works as a playground for users of
+// the err2 package to test how different APIs work. We suggest you take your
+// favorite editor and start to play with the main.go file. The comments in it
+// guide you.
+//
+// Currently we have only one example build over CopyFile function, but with it
+// you can try all the important APIs from err2, try, and assert.
 package main
 
 import (

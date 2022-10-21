@@ -355,4 +355,5 @@ Version history:
         removed.
 - 0.8.9 Bug fixes, deprecations, new Tracer API, preparing `err2` for 1.0
 - 0.8.10 New assertion functions and helpers for tests
-- 0.8.11 Remove deprecations, new *global* err values and `try.IsXX` functions
+- 0.8.11 Remove deprecations, new *global* err values and `try.IsXX` functions,
+         more documentation.

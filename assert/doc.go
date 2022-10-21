@@ -1,7 +1,7 @@
 /*
-Package assert includes runtime assertion helpers both for normal execution  as
-well as a helper packager for Go's testing. What makes solution unique is its
-capable to support both modes at the same time. Only thing you need to do is to
+Package assert includes runtime assertion helpers both for normal execution as
+well as a assertion package for Go's testing. What makes solution unique is its
+capable to support both modes with same API. Only thing you need to do is to
 add following two lines at the beginning of your unit tests:
 
 	func TestInvite(t *testing.T) {
@@ -12,11 +12,14 @@ add following two lines at the beginning of your unit tests:
 		assert.Equal(alice.Len(), 1) // assert anything normally
 
 Especially powerful feature is that even if some assertion violation happens
-during the execution of called functions like above Invite() function instead of
-the actual Test function, it's reported correctly as normal test failure!
+during the execution of called functions like inside of the Invite() function
+instead of the actual Test function, it's reported correctly as normal test
+failure!
 
 Instead of mocking or other mechanisms we can integrate our preconditions and
 raise up quality of our software.
+
+	"Assertsions are active comments"
 
 The package offers a convenient way to set preconditions to code which allow us
 detect programming errors and API violations faster. Still allowing

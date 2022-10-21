@@ -10,9 +10,12 @@ import (
 
 //nolint:stylecheck
 var (
-	// NotFound is similar no-error like io.EOF who want to write than kind of
-	// code. It's better to have discriminated unions as error values. But if
-	// you insist related helpers are in try package: try.IsNotFound(), ...
+	// NotFound is similar *no-error* like io.EOF for those who really want to
+	// use error return values to transport non errors. It's far better to have
+	// discriminated unions as errors for function calls. But if you insist the
+	// related helpers are in they try package: try.IsNotFound(), ... These
+	// 'global' errors and their helper functions in try package are for
+	// experimenting now.
 	NotFound  = errors.New("not found")
 	NotExist  = errors.New("not exist")
 	Exist     = errors.New("already exist")
@@ -53,7 +56,7 @@ func Handle(err *error, handlerFn func()) {
 
 // Catch is a convenient helper to those functions that doesn't return errors.
 // There can be only one deferred Catch function per non error returning
-// function like main(). It doesn't stop panics and runtime errors. If that's
+// function like main(). It doesn't catch panics and runtime errors. If that's
 // important use CatchAll or CatchTrace instead. See Handle for more
 // information.
 func Catch(f func(err error)) {
@@ -73,7 +76,7 @@ func Catch(f func(err error)) {
 // well.
 //
 // Note, if any Tracer is set stack traces are printed automatically. If you
-// want to do it in the handlers of the CatchAll, auto tracers should be nil.
+// want to do it in the handlers by yourself, auto tracers should be nil.
 func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -87,14 +90,14 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 }
 
 // CatchTrace is a helper function to catch and handle all errors. It also
-// recovers a panic and prints its call stack. It and CatchAll are preferred
-// helpers for go-workers on long-running servers because they stop panics as
-// well.
+// recovers a panic and prints its call stack. CatchTrace and CatchAll are
+// preferred helpers for go-workers on long-running servers because they stop
+// panics as well.
 //
-// CatchTrace prints only panic and runtime.Error stack trace if
-// ErrorTracer isn't set. If it's set it prints both. The panic trace is printed
-// to stderr. If you need panic trace to be printed to some other io.Writer than
-// os.Stderr, you should use CatchAll or Catch with tracers.
+// CatchTrace prints only panic and runtime.Error stack trace if ErrorTracer
+// isn't set. If it's set it prints both. The panic trace is printed to stderr.
+// If you need panic trace to be printed to some other io.Writer than os.Stderr,
+// you should use CatchAll or Catch with tracers.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.

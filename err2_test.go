@@ -384,6 +384,9 @@ func ExampleReturnf_deferStack() {
 func ExampleHandle() {
 	doSomething := func(a, b int) (err error) {
 		defer err2.Handle(&err, func() {
+			// Example for just annotating current err. Normally Handle is
+			// used for cleanup. See CopyFile example for more information.
+			// Use err2.Returnf for err annotation.
 			err = fmt.Errorf("error with (%d, %d): %v", a, b, err)
 		})
 		try.To1(throw())
