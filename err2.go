@@ -175,13 +175,10 @@ func Returnf(err *error, format string, args ...any) {
 
 	handler.Process(handler.Info{
 		Any: r,
-		NilHandler: func() {
-			if *err != nil { // if other handlers call recovery() we still..
-				*err = fmt.Errorf(format+": %v", append(args, *err)...)
-			}
-		},
-		ErrorHandler: func(e error) {
-			*err = fmt.Errorf(format+": %v", append(args, e)...)
-		},
+		Err: err,
+		Format: format,
+		Args: args,
+		//NilHandler: handler.NilNoop,
+		//ErrorHandler: handler.ErrorDefault,
 	})
 }

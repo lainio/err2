@@ -31,7 +31,11 @@ func CopyFile(src, dst string) (err error) {
 	r := try.To1(os.Open(src))
 	defer r.Close()
 
-	w := try.To1(os.Create(dst))
+	w, err := os.Create(dst)
+	if err != nil {
+		println("HERE:", err.Error())
+		return fmt.Errorf("TEST: %v", err)
+	}
 	defer err2.Handle(&err, func() {
 		os.Remove(dst)
 	})

@@ -17,7 +17,11 @@ type (
 )
 
 type Info struct {
-	Any         any
+	Any    any    // panic transport object
+	Err    *error // error transport pointer (i.e. in/output)
+	Format string // format string
+	Args   []any  // ags for format string printing
+
 	ErrorTracer io.Writer
 	PanicTracer io.Writer
 
@@ -26,26 +30,47 @@ type Info struct {
 	PanicHandler
 }
 
+func PanicNoop(v any)     {}
+func ErrorNoop(err error) {}
+func NilNoop()            {}
+
+func PanicDefault(v any)     {}
+func ErrorDefault(err error) {}
+
 func (i Info) callNilHandler() {
+	if i.Err != nil {
+		i.checkErrorTracer()
+	}
 	if i.NilHandler != nil {
 		i.NilHandler()
+	} else {
+		i.nilHandler()
 	}
 }
 
-func (i Info) callErrorHandler() {
+func (i Info) checkErrorTracer() {
 	if i.ErrorTracer == nil {
 		i.ErrorTracer = tracer.Error.Tracer()
 	}
 	if i.ErrorTracer != nil {
 		si := stackPrologueError
+		if i.Any == nil {
+			i.Any = *i.Err
+		}
 		printStack(i.ErrorTracer, si, i.Any)
-	}
-	if i.ErrorHandler != nil {
-		i.ErrorHandler(i.Any.(error))
 	}
 }
 
-func (i Info) callPanicHandler() {
+func (i Info) callErrorHandler() {
+	i.checkErrorTracer()
+	if i.ErrorHandler != nil {
+		i.ErrorHandler(i.Any.(error))
+	} else {
+		i.errorHandler()
+	}
+}
+
+func (i Info) checkPanicTracer() {
 	if i.PanicTracer == nil {
 		i.PanicTracer = tracer.Panic.Tracer()
 	}
@@ -53,11 +78,41 @@ func (i Info) callPanicHandler() {
 		si := stackProloguePanic
 		printStack(i.PanicTracer, si, i.Any)
 	}
+}
+
+func (i Info) callPanicHandler() {
+	i.checkPanicTracer()
 	if i.PanicHandler != nil {
 		i.PanicHandler(i.Any)
 	} else {
 		panic(i.Any)
 	}
+}
+
+func (i Info) nilHandler() {
+	err := *i.Err
+	if err == nil {
+		var ok bool
+		err, ok = i.Any.(error)
+		if !ok {
+			return
+		}
+	}
+	if err != nil { // if other handlers call recovery() we still..
+		*i.Err = fmt.Errorf(i.Format+": %v", append(i.Args, err)...)
+	}
+}
+
+func (i Info) errorHandler() {
+	err := *i.Err
+	if err == nil {
+		var ok bool
+		err, ok = i.Any.(error)
+		if !ok {
+			return
+		}
+	}
+	*i.Err = fmt.Errorf(i.Format+": %v", append(i.Args, err)...)
 }
 
 func Process(info Info) {
