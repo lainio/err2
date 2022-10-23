@@ -37,6 +37,7 @@ func Handle(err *error, handlerFn func()) {
 	// stack.
 	handler.Process(handler.Info{
 		Any: r,
+		Err: err,
 		NilHandler: func() {
 			// Defers are in the stack and the first from the stack gets the
 			// opportunity to get panic object's error (below). We still must
@@ -67,6 +68,7 @@ func Catch(f func(err error)) {
 	handler.Process(handler.Info{
 		Any:          r,
 		ErrorHandler: f,
+		NilHandler:   handler.NilNoop,
 	})
 }
 
@@ -86,6 +88,7 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
+		NilHandler:   handler.NilNoop,
 	})
 }
 
@@ -108,6 +111,7 @@ func CatchTrace(errorHandler func(err error)) {
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: func(v any) {}, // suppress panicking
+		NilHandler:   handler.NilNoop,
 	})
 }
 
@@ -141,6 +145,7 @@ func Return(err *error) {
 
 	handler.Process(handler.Info{
 		Any:          r,
+		Err:          err,
 		ErrorHandler: func(e error) { *err = e },
 	})
 }
@@ -154,15 +159,11 @@ func Returnw(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Any: r,
-		NilHandler: func() {
-			if *err != nil { // if other handlers call recovery() we still..
-				*err = fmt.Errorf(format+": %w", append(args, *err)...)
-			}
-		},
-		ErrorHandler: func(e error) {
-			*err = fmt.Errorf(format+": %w", append(args, e)...)
-		},
+		Any:    r,
+		Err:    err,
+		Format: format,
+		Args:   args,
+		Wrap:   true,
 	})
 }
 
@@ -174,11 +175,9 @@ func Returnf(err *error, format string, args ...any) {
 	r := recover()
 
 	handler.Process(handler.Info{
-		Any: r,
-		Err: err,
+		Any:    r,
+		Err:    err,
 		Format: format,
-		Args: args,
-		//NilHandler: handler.NilNoop,
-		//ErrorHandler: handler.ErrorDefault,
+		Args:   args,
 	})
 }

@@ -21,6 +21,7 @@ type Info struct {
 	Err    *error // error transport pointer (i.e. in/output)
 	Format string // format string
 	Args   []any  // ags for format string printing
+	Wrap   bool   // if true error wrapping "%w" is used, default is "%v"
 
 	ErrorTracer io.Writer
 	PanicTracer io.Writer
@@ -30,12 +31,14 @@ type Info struct {
 	PanicHandler
 }
 
+const (
+	wrapAnnot = ": %v"
+	wrapError = ": %w"
+)
+
 func PanicNoop(v any)     {}
 func ErrorNoop(err error) {}
 func NilNoop()            {}
-
-func PanicDefault(v any)     {}
-func ErrorDefault(err error) {}
 
 func (i Info) callNilHandler() {
 	if i.Err != nil {
@@ -97,9 +100,20 @@ func (i Info) nilHandler() {
 		if !ok {
 			return
 		}
+	} else {
+		// error transported thru i.Err not by panic (i.Any)
+		// let's give caller to use ErrorHandler if it's set
+		if i.ErrorHandler != nil {
+			i.ErrorHandler(err)
+			return
+		}
 	}
-	if err != nil { // if other handlers call recovery() we still..
-		*i.Err = fmt.Errorf(i.Format+": %v", append(i.Args, err)...)
+	if err != nil {
+		if i.Format != "" {
+			*i.Err = fmt.Errorf(i.Format+i.WrapStr(), append(i.Args, err)...)
+		} else {
+			*i.Err = err
+		}
 	}
 }
 
@@ -112,7 +126,18 @@ func (i Info) errorHandler() {
 			return
 		}
 	}
-	*i.Err = fmt.Errorf(i.Format+": %v", append(i.Args, err)...)
+	if i.Format != "" {
+		*i.Err = fmt.Errorf(i.Format+i.WrapStr(), append(i.Args, err)...)
+	} else {
+		*i.Err = err
+	}
+}
+
+func (i Info) WrapStr() string {
+	if i.Wrap {
+		return wrapError
+	}
+	return wrapAnnot
 }
 
 func Process(info Info) {

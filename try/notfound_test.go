@@ -9,11 +9,12 @@ import (
 )
 
 func FindObject(key int) (val string, err error) {
-	defer err2.Return(&err)
+	//defer err2.Return(&err)
+	defer err2.Returnw(&err, "")
 
 	// both of the following lines can be used to transport err2.NotFound
 	// you can try by outcommenting err2.Throwf
-	err2.Throwf("panic transport: %w", err2.NotFound)
+	//err2.Throwf("panic transport: %w", err2.NotFound)
 	return "", err2.NotFound
 }
 
@@ -22,6 +23,7 @@ func ExampleIsNotFound1() {
 	// this example with:
 	//   go test -v -run='^ExampleNotFound$'
 	err2.SetErrorTracer(os.Stderr)
+	err2.SetErrorTracer(nil)
 	find := func(key int) string {
 		defer err2.Catch(func(err error) {
 			fmt.Println("ERROR:", err)

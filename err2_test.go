@@ -321,6 +321,27 @@ func ExampleReturn() {
 	// Output:
 }
 
+func ExampleReturn_errThrow() {
+	normalReturn := func() (err error) {
+		defer err2.Return(&err)
+		err2.Throwf("our error")
+		return nil
+	}
+	err := normalReturn()
+	fmt.Printf("%v", err)
+	// Output: our error
+}
+
+func ExampleReturn_errReturn() {
+	normalReturn := func() (err error) {
+		defer err2.Return(&err)
+		return fmt.Errorf("our error")
+	}
+	err := normalReturn()
+	fmt.Printf("%v", err)
+	// Output: our error
+}
+
 func ExampleReturnf_empty() {
 	annotated := func() (err error) {
 		defer err2.Returnf(&err, "annotated")
