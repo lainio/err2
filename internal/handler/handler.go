@@ -41,13 +41,13 @@ const (
 	wrapError = ": %w"
 )
 
-func PanicNoop(v any)     {}
-func NilNoop()            {}
+func PanicNoop(v any) {}
+func NilNoop()        {}
 
 // func ErrorNoop(err error) {}
 
 func (i Info) callNilHandler() {
-	if i.Err != nil && *i.Err != nil {
+	if i.safeErr() != nil {
 		i.checkErrorTracer()
 	}
 	if i.NilHandler != nil {
@@ -64,7 +64,7 @@ func (i Info) checkErrorTracer() {
 	if i.ErrorTracer != nil {
 		si := stackPrologueError
 		if i.Any == nil {
-			i.Any = *i.Err
+			i.Any = i.safeErr()
 		}
 		printStack(i.ErrorTracer, si, i.Any)
 	}
@@ -99,7 +99,7 @@ func (i Info) callPanicHandler() {
 }
 
 func (i Info) nilHandler() {
-	err := *i.Err
+	err := i.safeErr()
 	if err == nil {
 		var ok bool
 		err, ok = i.Any.(error)
@@ -123,8 +123,14 @@ func (i Info) nilHandler() {
 	}
 }
 
+// ErrorHandler is default implementation of handling general errors (not
+// runtime.Error which are treated as panics)
+//
+// Defers are in the stack and the first from the stack gets the opportunity to
+// get panic object's error (below). We still must call handler functions to the
+// rest of the handlers if there is an error.
 func (i Info) errorHandler() {
-	err := *i.Err
+	err := i.safeErr()
 	if err == nil {
 		var ok bool
 		err, ok = i.Any.(error)
@@ -137,6 +143,13 @@ func (i Info) errorHandler() {
 	} else {
 		*i.Err = err
 	}
+}
+
+func (i Info) safeErr() error {
+	if i.Err != nil {
+		return *i.Err
+	}
+	return nil
 }
 
 func (i Info) wrapStr() string {
