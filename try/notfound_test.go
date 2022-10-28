@@ -9,8 +9,7 @@ import (
 )
 
 func FindObject(key int) (val string, err error) {
-	//defer err2.Return(&err)
-	defer err2.Returnw(&err, "")
+	defer err2.Return(&err)
 
 	// both of the following lines can be used to transport err2.NotFound
 	// you can try by outcommenting err2.Throwf
