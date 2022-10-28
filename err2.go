@@ -36,17 +36,9 @@ func Handle(err *error, handlerFn func()) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	handler.Process(handler.Info{
-		Any: r,
-		Err: err,
-		NilHandler: func() {
-			// Defers are in the stack and the first from the stack gets the
-			// opportunity to get panic object's error (below). We still must
-			// call handler functions to the rest of the handlers if there is
-			// an error.
-			if *err != nil {
-				handlerFn()
-			}
-		},
+		Any:        r,
+		Err:        err,
+		NilHandler: handlerFn,
 		ErrorHandler: func(e error) {
 			// We or someone did transport this error thru panic.
 			*err = e
@@ -110,7 +102,7 @@ func CatchTrace(errorHandler func(err error)) {
 		PanicTracer:  os.Stderr,
 		Any:          r,
 		ErrorHandler: errorHandler,
-		PanicHandler: func(v any) {}, // suppress panicking
+		PanicHandler: handler.PanicNoop, // no rethrow
 		NilHandler:   handler.NilNoop,
 	})
 }
