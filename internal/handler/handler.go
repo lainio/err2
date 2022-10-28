@@ -42,8 +42,9 @@ const (
 )
 
 func PanicNoop(v any)     {}
-func ErrorNoop(err error) {}
 func NilNoop()            {}
+
+// func ErrorNoop(err error) {}
 
 func (i Info) callNilHandler() {
 	if i.Err != nil && *i.Err != nil {
