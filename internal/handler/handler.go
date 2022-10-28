@@ -16,19 +16,24 @@ type (
 	NilHandler   func()
 )
 
+// Info tells to Process function how to proceed.
 type Info struct {
 	Any    any    // panic transport object
 	Err    *error // error transport pointer (i.e. in/output)
 	Format string // format string
-	Args   []any  // ags for format string printing
+	Args   []any  // args for format string printing
 	Wrap   bool   // if true error wrapping "%w" is used, default is "%v"
 
-	ErrorTracer io.Writer
-	PanicTracer io.Writer
+	// These are used if handler.Process caller sets them. If they aren't set
+	// handler uses package level variables from tracer.
+	ErrorTracer io.Writer // If nil tracer packages default is used.
+	PanicTracer io.Writer // If nil tracer packages default is used.
 
-	NilHandler
-	ErrorHandler
-	PanicHandler
+	// These are called if handler.Process caller sets it. If they aren't set
+	// default implementations are used.
+	NilHandler   // If nil default implementation is used.
+	ErrorHandler // If nil default implementation is used.
+	PanicHandler // If nil panic() is called.
 }
 
 const (
@@ -41,7 +46,7 @@ func ErrorNoop(err error) {}
 func NilNoop()            {}
 
 func (i Info) callNilHandler() {
-	if i.Err != nil {
+	if i.Err != nil && *i.Err != nil {
 		i.checkErrorTracer()
 	}
 	if i.NilHandler != nil {
@@ -102,7 +107,7 @@ func (i Info) nilHandler() {
 		}
 	} else {
 		// error transported thru i.Err not by panic (i.Any)
-		// let's give caller to use ErrorHandler if it's set
+		// let's allow caller to use ErrorHandler if it's set
 		if i.ErrorHandler != nil {
 			i.ErrorHandler(err)
 			return
@@ -110,7 +115,7 @@ func (i Info) nilHandler() {
 	}
 	if err != nil {
 		if i.Format != "" {
-			*i.Err = fmt.Errorf(i.Format+i.WrapStr(), append(i.Args, err)...)
+			*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, err)...)
 		} else {
 			*i.Err = err
 		}
@@ -127,19 +132,21 @@ func (i Info) errorHandler() {
 		}
 	}
 	if i.Format != "" {
-		*i.Err = fmt.Errorf(i.Format+i.WrapStr(), append(i.Args, err)...)
+		*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, err)...)
 	} else {
 		*i.Err = err
 	}
 }
 
-func (i Info) WrapStr() string {
+func (i Info) wrapStr() string {
 	if i.Wrap {
 		return wrapError
 	}
 	return wrapAnnot
 }
 
+// Process executes error handling logic. Panics and whole defer stack is
+// included.
 func Process(info Info) {
 	switch info.Any.(type) {
 	case nil:
