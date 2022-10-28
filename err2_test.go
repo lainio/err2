@@ -19,44 +19,6 @@ func intStrNoThrow() (int, string, error)           { return 1, "test", nil }
 func boolIntStrNoThrow() (bool, int, string, error) { return true, 1, "test", nil }
 func noThrow() (string, error)                      { return "test", nil }
 
-func recursion(a int) (r int, err error) {
-	defer err2.Return(&err)
-
-	if a == 0 {
-		return 0, nil
-	}
-	s := try.To1(noThrow())
-	_ = s
-	r = try.To1(recursion(a - 1))
-	r += a
-	return r, nil
-}
-
-func cleanRecursion(a int) int {
-	if a == 0 {
-		return 0
-	}
-	s := try.To1(noThrow())
-	_ = s
-	return a + cleanRecursion(a-1)
-}
-
-func recursionWithErrorCheck(a int) (int, error) {
-	if a == 0 {
-		return 0, nil
-	}
-	s, err := noThrow()
-	if err != nil {
-		return 0, err
-	}
-	_ = s
-	v, err := recursionWithErrorCheck(a - 1)
-	if err != nil {
-		return 0, err
-	}
-	return a + v, nil
-}
-
 func noErr() error {
 	return nil
 }
@@ -322,12 +284,12 @@ func ExampleReturn() {
 }
 
 func ExampleReturn_errThrow() {
-	normalReturn := func() (err error) {
+	panicTransportReturn := func() (err error) {
 		defer err2.Return(&err)
 		err2.Throwf("our error")
 		return nil
 	}
-	err := normalReturn()
+	err := panicTransportReturn()
 	fmt.Printf("%v", err)
 	// Output: our error
 }
@@ -446,43 +408,105 @@ func BenchmarkTry_StrStrGenerics(b *testing.B) {
 	}
 }
 
-func BenchmarkCheckInsideCall(b *testing.B) {
+func BenchmarkTryInsideCall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		try.To(noErr())
 	}
 }
 
-func BenchmarkCheckVarCall(b *testing.B) {
+func BenchmarkTryVarCall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		err := noErr()
 		try.To(err)
 	}
 }
 
-func BenchmarkCheck_ErrVar(b *testing.B) {
+func BenchmarkRecursionWithOldErrorCheck(b *testing.B) {
+	var recursionWithErrorCheck func(a int) (int, error)
+	recursionWithErrorCheck = func(a int) (int, error) {
+		if a == 0 {
+			return 0, nil
+		}
+		s, err := noThrow()
+		if err != nil {
+			return 0, err
+		}
+		_ = s
+		v, err := recursionWithErrorCheck(a - 1)
+		if err != nil {
+			return 0, err
+		}
+		return a + v, nil
+	}
+
 	for n := 0; n < b.N; n++ {
-		_, err := noThrow()
-		try.To(err)
+		_, err := recursionWithErrorCheck(100)
+		if err != nil {
+			return
+		}
+	}
+}
+
+func BenchmarkRecursionWithOldErrorCheckAnd_Defer(b *testing.B) {
+	var recursionWithErrorCheckAndDefer func(a int) (_ int, err error)
+	recursionWithErrorCheckAndDefer = func(a int) (_ int, err error) {
+		defer err2.Return(&err)
+
+		if a == 0 {
+			return 0, nil
+		}
+		s, err := noThrow()
+		if err != nil {
+			return 0, err
+		}
+		_ = s
+		v, err := recursionWithErrorCheckAndDefer(a - 1)
+		if err != nil {
+			return 0, err
+		}
+		return a + v, nil
+	}
+
+	for n := 0; n < b.N; n++ {
+		_, err := recursionWithErrorCheckAndDefer(100)
+		if err != nil {
+			return
+		}
 	}
 }
 
 func BenchmarkCleanRecursionWithTryCall(b *testing.B) {
+	var cleanRecursion func(a int) int
+	cleanRecursion = func(a int) int {
+		if a == 0 {
+			return 0
+		}
+		s := try.To1(noThrow())
+		_ = s
+		return a + cleanRecursion(a-1)
+	}
+
 	for n := 0; n < b.N; n++ {
 		_ = cleanRecursion(100)
 	}
 }
 
 func BenchmarkRecursionWithCheckAndDefer(b *testing.B) {
+	var recursion func(a int) (r int, err error)
+	recursion = func(a int) (r int, err error) {
+		defer err2.Return(&err)
+
+		if a == 0 {
+			return 0, nil
+		}
+		s := try.To1(noThrow())
+		_ = s
+		r = try.To1(recursion(a - 1))
+		r += a
+		return r, nil
+	}
+
 	for n := 0; n < b.N; n++ {
 		_, _ = recursion(100)
-	}
-}
-
-func BenchmarkRecursionWithOldErrorCheck(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		_, err := recursionWithErrorCheck(100)
-		if err != nil {
-			return
-		}
 	}
 }
