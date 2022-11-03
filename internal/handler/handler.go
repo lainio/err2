@@ -47,6 +47,10 @@ func NilNoop()        {}
 // func ErrorNoop(err error) {}
 
 func (i Info) callNilHandler() {
+	if !i.workToDo() {
+		return
+	}
+
 	if i.safeErr() != nil {
 		i.checkErrorTracer()
 	}
@@ -58,6 +62,10 @@ func (i Info) callNilHandler() {
 }
 
 func (i Info) checkErrorTracer() {
+	if !i.workToDo() {
+		return
+	}
+
 	if i.ErrorTracer == nil {
 		i.ErrorTracer = tracer.Error.Tracer()
 	}
@@ -71,6 +79,10 @@ func (i Info) checkErrorTracer() {
 }
 
 func (i Info) callErrorHandler() {
+	if !i.workToDo() {
+		return
+	}
+
 	i.checkErrorTracer()
 	if i.ErrorHandler != nil {
 		i.ErrorHandler(i.Any.(error))
@@ -90,6 +102,10 @@ func (i Info) checkPanicTracer() {
 }
 
 func (i Info) callPanicHandler() {
+	if !i.workToDo() {
+		return
+	}
+
 	i.checkPanicTracer()
 	if i.PanicHandler != nil {
 		i.PanicHandler(i.Any)
@@ -143,6 +159,10 @@ func (i Info) errorHandler() {
 	} else {
 		*i.Err = err
 	}
+}
+
+func (i Info) workToDo() bool {
+	return i.Any != nil || i.safeErr() != nil
 }
 
 func (i Info) safeErr() error {
