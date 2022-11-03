@@ -1,4 +1,6 @@
 #!/bin/bash
 
-# al least Go version 1.9.2 still needs this to inline type parametrized functions
-export GOEXPERIMENT=unified
+if [[ $(go env GOVERSION) < "go1.20.0" ]]; then
+	echo setting go epriment flag
+	export GOEXPERIMENT=unified
+fi
