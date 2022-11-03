@@ -26,8 +26,8 @@ type Info struct {
 
 	// These are used if handler.Process caller sets them. If they aren't set
 	// handler uses package level variables from tracer.
-	ErrorTracer io.Writer // If nil tracer packages default is used.
-	PanicTracer io.Writer // If nil tracer packages default is used.
+	ErrorTracer io.Writer // If nil tracer package's default is used.
+	PanicTracer io.Writer // If nil tracer package's default is used.
 
 	// These are called if handler.Process caller sets it. If they aren't set
 	// default implementations are used.
