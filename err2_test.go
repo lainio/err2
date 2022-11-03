@@ -380,6 +380,19 @@ func ExampleHandle() {
 	// Output: error with (1, 2): this is an ERROR
 }
 
+func ExampleHandle_noThrow() {
+	doSomething := func(a, b int) (err error) {
+		defer err2.Handle(&err, func() {
+			err = fmt.Errorf("error with (%d, %d): %v", a, b, err)
+		})
+		try.To1(noThrow())
+		return err
+	}
+	err := doSomething(1, 2)
+	fmt.Printf("%v", err)
+	// Output: <nil>
+}
+
 func BenchmarkOldErrorCheckingWithIfClause(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, err := noThrow()
