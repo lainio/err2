@@ -13,6 +13,8 @@ import (
 func TestProcess(t *testing.T) {
 	type args struct {
 		handler.Info
+	}
+	type want struct {
 		panicCalled bool
 		errorCalled bool
 		nilCalled   bool
@@ -22,6 +24,7 @@ func TestProcess(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
+		want want
 	}{
 		{"all nil and our handlers",
 			args{Info: handler.Info{
@@ -30,7 +33,8 @@ func TestProcess(t *testing.T) {
 				NilHandler:   nilHandler,
 				ErrorHandler: errorHandler,
 				PanicHandler: panicHandler,
-			},
+			}},
+			want{
 				errStr: "error",
 			}},
 		{"error is transported in panic",
@@ -39,7 +43,8 @@ func TestProcess(t *testing.T) {
 				Err:          &nilError,
 				ErrorHandler: errorHandler,
 				PanicHandler: panicHandler,
-			},
+			}},
+			want{
 				panicCalled: false,
 				errorCalled: true,
 				errStr:      "error",
@@ -51,7 +56,8 @@ func TestProcess(t *testing.T) {
 				NilHandler:   nilHandler,
 				ErrorHandler: errorHandler,
 				PanicHandler: panicHandler,
-			},
+			}},
+			want{
 				panicCalled: true,
 				errStr:      "error",
 			}},
@@ -62,7 +68,8 @@ func TestProcess(t *testing.T) {
 				NilHandler:   nilHandler,
 				ErrorHandler: errorHandler,
 				PanicHandler: panicHandler,
-			},
+			}},
+			want{
 				panicCalled: true,
 				errStr:      "error",
 			}},
@@ -73,7 +80,8 @@ func TestProcess(t *testing.T) {
 				Format:       "format %v",
 				Args:         []any{"test"},
 				PanicHandler: panicHandler,
-			},
+			}},
+			want{
 				panicCalled: false,
 				errStr:      "error",
 			}},
@@ -85,7 +93,8 @@ func TestProcess(t *testing.T) {
 				Args:         []any{"test"},
 				ErrorHandler: errorHandlerForAnnotate,
 				PanicHandler: panicHandler,
-			},
+			}},
+			want{
 				panicCalled: false,
 				errorCalled: true,
 				errStr:      "annotate: error",
@@ -96,7 +105,8 @@ func TestProcess(t *testing.T) {
 				Err:          &myErrVal,
 				ErrorHandler: errorHandler,
 				PanicHandler: panicHandler,
-			},
+			}},
+			want{
 				panicCalled: false,
 				errorCalled: true,
 				errStr:      "error",
@@ -106,12 +116,12 @@ func TestProcess(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			handler.Process(&tt.args.Info)
 
-			helper.Requiref(t, tt.args.panicCalled == panicHandlerCalled, "panicHandler: got = %v, want = %v", tt.args.panicCalled, panicHandlerCalled)
-			helper.Requiref(t, tt.args.errorCalled == errorHandlerCalled, "errorHandler: got = %v, want = %v", tt.args.errorCalled, errorHandlerCalled)
-			helper.Requiref(t, tt.args.nilCalled == nilHandlerCalled, "nilHandler: got = %v, want = %v", tt.args.nilCalled, nilHandlerCalled)
+			helper.Requiref(t, tt.want.panicCalled == panicHandlerCalled, "panicHandler: got = %v, want = %v", panicHandlerCalled, tt.want.panicCalled)
+			helper.Requiref(t, tt.want.errorCalled == errorHandlerCalled, "errorHandler: got = %v, want = %v", errorHandlerCalled, tt.want.errorCalled)
+			helper.Requiref(t, tt.want.nilCalled == nilHandlerCalled, "nilHandler: got = %v, want = %v", nilHandlerCalled, tt.want.nilCalled)
 
-			helper.Requiref(t, tt.args.errStr == myErrVal.Error(),
-				"got: %v, want: %v", myErrVal.Error(), tt.args.errStr)
+			helper.Requiref(t, tt.want.errStr == myErrVal.Error(),
+				"got: %v, want: %v", myErrVal.Error(), tt.want.errStr)
 
 			resetCalled()
 		})
