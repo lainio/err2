@@ -460,7 +460,7 @@ func BenchmarkRecursionWithOldErrorCheck(b *testing.B) {
 	}
 }
 
-func BenchmarkRecursionWithOldErrorCheckAnd_Defer(b *testing.B) {
+func BenchmarkRecursionWithOldErrorIfCheckAnd_Defer(b *testing.B) {
 	var recursionWithErrorCheckAndDefer func(a int) (_ int, err error)
 	recursionWithErrorCheckAndDefer = func(a int) (_ int, err error) {
 		defer err2.Return(&err)
@@ -504,7 +504,7 @@ func BenchmarkCleanRecursionWithTryCall(b *testing.B) {
 	}
 }
 
-func BenchmarkRecursionWithCheckAndDefer(b *testing.B) {
+func BenchmarkRecursionWithTryAndDefer(b *testing.B) {
 	var recursion func(a int) (r int, err error)
 	recursion = func(a int) (r int, err error) {
 		defer err2.Return(&err)
