@@ -183,13 +183,9 @@ func WorkToDo(r any, err *error) bool {
 	return (err != nil && *err != nil) || r != nil
 }
 
-func Process(info Info) {
-	ProcessX(&info)
-}
-
 // Process executes error handling logic. Panics and whole defer stack is
 // included.
-func ProcessX(info *Info) {
+func Process(info *Info) {
 	switch info.Any.(type) {
 	case nil:
 		info.callNilHandler()
