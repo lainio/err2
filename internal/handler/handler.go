@@ -47,7 +47,7 @@ func NilNoop()        {}
 // func ErrorNoop(err error) {}
 
 func (i *Info) callNilHandler() {
-	if !i.WorkToDo() {
+	if !i.workToDo() {
 		return
 	}
 
@@ -62,7 +62,7 @@ func (i *Info) callNilHandler() {
 }
 
 func (i *Info) checkErrorTracer() {
-	if !i.WorkToDo() {
+	if !i.workToDo() {
 		return
 	}
 
@@ -79,7 +79,7 @@ func (i *Info) checkErrorTracer() {
 }
 
 func (i *Info) callErrorHandler() {
-	if !i.WorkToDo() {
+	if !i.workToDo() {
 		return
 	}
 
@@ -102,7 +102,7 @@ func (i *Info) checkPanicTracer() {
 }
 
 func (i *Info) callPanicHandler() {
-	if !i.WorkToDo() {
+	if !i.workToDo() {
 		return
 	}
 
@@ -161,7 +161,7 @@ func (i *Info) errorHandler() {
 	}
 }
 
-func (i *Info) WorkToDo() bool {
+func (i *Info) workToDo() bool {
 	return i.safeErr() != nil || i.Any != nil
 }
 
@@ -179,6 +179,10 @@ func (i *Info) wrapStr() string {
 	return wrapAnnot
 }
 
+// WorkToDo returns if there is something to process. This is offered for
+// optimizations. Starting and executing full error handler stack with the
+// tracers and other stuff is heavy. This function offers us a API to make the
+// decision to abort the processing ASAP.
 func WorkToDo(r any, err *error) bool {
 	return (err != nil && *err != nil) || r != nil
 }
