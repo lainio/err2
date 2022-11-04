@@ -35,7 +35,7 @@ func Handle(err *error, handlerFn func()) {
 	// We put real panic objects back and keep only those which are
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
-	handler.Process(handler.Info{
+	handler.Process(&handler.Info{
 		Any:        r,
 		Err:        err,
 		NilHandler: handlerFn,
@@ -57,7 +57,7 @@ func Catch(f func(err error)) {
 	// how it works with defer.
 	r := recover()
 
-	handler.Process(handler.Info{
+	handler.Process(&handler.Info{
 		Any:          r,
 		ErrorHandler: f,
 		NilHandler:   handler.NilNoop,
@@ -76,7 +76,7 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// how it works with defer.
 	r := recover()
 
-	handler.Process(handler.Info{
+	handler.Process(&handler.Info{
 		Any:          r,
 		ErrorHandler: errorHandler,
 		PanicHandler: panicHandler,
@@ -98,7 +98,7 @@ func CatchTrace(errorHandler func(err error)) {
 	// how it works with defer.
 	r := recover()
 
-	handler.Process(handler.Info{
+	handler.Process(&handler.Info{
 		PanicTracer:  os.Stderr,
 		Any:          r,
 		ErrorHandler: errorHandler,
@@ -144,7 +144,7 @@ func Return(err *error) {
 		Err:          err,
 		ErrorHandler: func(e error) { *err = e },
 	}
-	handler.ProcessX(info)
+	handler.Process(info)
 }
 
 // Returnw wraps an error with '%w'. It's similar to fmt.Errorf, but it's called
@@ -155,7 +155,7 @@ func Returnw(err *error, format string, args ...any) {
 	// how it works with defer.
 	r := recover()
 
-	handler.Process(handler.Info{
+	handler.Process(&handler.Info{
 		Any:    r,
 		Err:    err,
 		Format: format,
@@ -171,7 +171,7 @@ func Returnf(err *error, format string, args ...any) {
 	// how it works with defer.
 	r := recover()
 
-	handler.Process(handler.Info{
+	handler.Process(&handler.Info{
 		Any:    r,
 		Err:    err,
 		Format: format,
