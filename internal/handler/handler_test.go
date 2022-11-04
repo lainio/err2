@@ -47,18 +47,18 @@ func TestProcess(t *testing.T) {
 			errStr:      "error",
 		}},
 		{"error in panic and default format print", args{Info: handler.Info{
-			Any:          errors.New("error"),
-			Err:          &myErrNil,
-			Format:       "format %v",
-			Args:         []any{"test"},
-			NilHandler:   nilHandler, // can be here?
+			Any:        errors.New("error"),
+			Err:        &myErrNil,
+			Format:     "format %v",
+			Args:       []any{"test"},
+			NilHandler: nilHandler, // can be here?
 			//ErrorHandler: errorHandler,
 			PanicHandler: panicHandler,
 		},
 			panicCalled: false,
 			//errorCalled: true,
-			nilCalled:   false,
-			errStr:      "error",
+			nilCalled: false,
+			errStr:    "error",
 		}},
 		{"error in error", args{Info: handler.Info{
 			Any: nil,
@@ -87,12 +87,12 @@ func TestProcess(t *testing.T) {
 }
 
 var (
-	ERR_VAL = errors.New("error")
+	errVal = errors.New("error")
 )
 
 var (
 	myErrNil error = nil
-	myErrVal       = ERR_VAL
+	myErrVal       = errVal
 
 	panicHandlerCalled = false
 	errorHandlerCalled = false
@@ -101,7 +101,7 @@ var (
 
 func resetCalleds() {
 	myErrNil = nil
-	myErrVal = ERR_VAL
+	myErrVal = errVal
 	panicHandlerCalled = false
 	errorHandlerCalled = false
 	nilHandlerCalled = false
