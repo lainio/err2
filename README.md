@@ -357,3 +357,4 @@ Version history:
 - 0.8.10 New assertion functions and helpers for tests
 - 0.8.11 Remove deprecations, new *global* err values and `try.IsXX` functions,
          more documentation.
+- 0.8.12 Restructuring internal pkgs, optimizations for deferred handlers, etc.
