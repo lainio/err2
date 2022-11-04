@@ -47,7 +47,7 @@ func NilNoop()        {}
 // func ErrorNoop(err error) {}
 
 func (i Info) callNilHandler() {
-	if !i.workToDo() {
+	if !i.WorkToDo() {
 		return
 	}
 
@@ -62,7 +62,7 @@ func (i Info) callNilHandler() {
 }
 
 func (i Info) checkErrorTracer() {
-	if !i.workToDo() {
+	if !i.WorkToDo() {
 		return
 	}
 
@@ -79,7 +79,7 @@ func (i Info) checkErrorTracer() {
 }
 
 func (i Info) callErrorHandler() {
-	if !i.workToDo() {
+	if !i.WorkToDo() {
 		return
 	}
 
@@ -102,7 +102,7 @@ func (i Info) checkPanicTracer() {
 }
 
 func (i Info) callPanicHandler() {
-	if !i.workToDo() {
+	if !i.WorkToDo() {
 		return
 	}
 
@@ -139,7 +139,7 @@ func (i Info) nilHandler() {
 	}
 }
 
-// ErrorHandler is default implementation of handling general errors (not
+// errorHandler is default implementation of handling general errors (not
 // runtime.Error which are treated as panics)
 //
 // Defers are in the stack and the first from the stack gets the opportunity to
@@ -161,11 +161,11 @@ func (i Info) errorHandler() {
 	}
 }
 
-func (i Info) workToDo() bool {
-	return i.Any != nil || i.safeErr() != nil
+func (i *Info) WorkToDo() bool {
+	return i.safeErr() != nil || i.Any != nil
 }
 
-func (i Info) safeErr() error {
+func (i *Info) safeErr() error {
 	if i.Err != nil {
 		return *i.Err
 	}
@@ -179,9 +179,17 @@ func (i Info) wrapStr() string {
 	return wrapAnnot
 }
 
+func WorkToDo(r any, err *error) bool {
+	return (err != nil && *err != nil) || r != nil
+}
+
+func Process(info Info) {
+	ProcessX(&info)
+}
+
 // Process executes error handling logic. Panics and whole defer stack is
 // included.
-func Process(info Info) {
+func ProcessX(info *Info) {
 	switch info.Any.(type) {
 	case nil:
 		info.callNilHandler()
