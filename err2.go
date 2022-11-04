@@ -32,6 +32,10 @@ func Handle(err *error, handlerFn func()) {
 	// how how it works with defer.
 	r := recover()
 
+	if !handler.WorkToDo(r, err) {
+		return
+	}
+
 	// We put real panic objects back and keep only those which are
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
@@ -57,6 +61,10 @@ func Catch(f func(err error)) {
 	// how it works with defer.
 	r := recover()
 
+	if !handler.WorkToDo(r, nil) {
+		return
+	}
+
 	handler.Process(&handler.Info{
 		Any:          r,
 		ErrorHandler: f,
@@ -75,6 +83,10 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
 	r := recover()
+
+	if !handler.WorkToDo(r, nil) {
+		return
+	}
 
 	handler.Process(&handler.Info{
 		Any:          r,
@@ -97,6 +109,10 @@ func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
 	r := recover()
+
+	if !handler.WorkToDo(r, nil) {
+		return
+	}
 
 	handler.Process(&handler.Info{
 		PanicTracer:  os.Stderr,
@@ -155,6 +171,10 @@ func Returnw(err *error, format string, args ...any) {
 	// how it works with defer.
 	r := recover()
 
+	if !handler.WorkToDo(r, err) {
+		return
+	}
+
 	handler.Process(&handler.Info{
 		Any:    r,
 		Err:    err,
@@ -170,6 +190,10 @@ func Returnf(err *error, format string, args ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
 	r := recover()
+
+	if !handler.WorkToDo(r, err) {
+		return
+	}
 
 	handler.Process(&handler.Info{
 		Any:    r,
