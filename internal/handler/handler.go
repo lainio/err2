@@ -46,7 +46,7 @@ func NilNoop()        {}
 
 // func ErrorNoop(err error) {}
 
-func (i Info) callNilHandler() {
+func (i *Info) callNilHandler() {
 	if !i.WorkToDo() {
 		return
 	}
@@ -61,7 +61,7 @@ func (i Info) callNilHandler() {
 	}
 }
 
-func (i Info) checkErrorTracer() {
+func (i *Info) checkErrorTracer() {
 	if !i.WorkToDo() {
 		return
 	}
@@ -78,7 +78,7 @@ func (i Info) checkErrorTracer() {
 	}
 }
 
-func (i Info) callErrorHandler() {
+func (i *Info) callErrorHandler() {
 	if !i.WorkToDo() {
 		return
 	}
@@ -91,7 +91,7 @@ func (i Info) callErrorHandler() {
 	}
 }
 
-func (i Info) checkPanicTracer() {
+func (i *Info) checkPanicTracer() {
 	if i.PanicTracer == nil {
 		i.PanicTracer = tracer.Panic.Tracer()
 	}
@@ -101,7 +101,7 @@ func (i Info) checkPanicTracer() {
 	}
 }
 
-func (i Info) callPanicHandler() {
+func (i *Info) callPanicHandler() {
 	if !i.WorkToDo() {
 		return
 	}
@@ -114,7 +114,7 @@ func (i Info) callPanicHandler() {
 	}
 }
 
-func (i Info) nilHandler() {
+func (i *Info) nilHandler() {
 	err := i.safeErr()
 	if err == nil {
 		var ok bool
@@ -145,7 +145,7 @@ func (i Info) nilHandler() {
 // Defers are in the stack and the first from the stack gets the opportunity to
 // get panic object's error (below). We still must call handler functions to the
 // rest of the handlers if there is an error.
-func (i Info) errorHandler() {
+func (i *Info) errorHandler() {
 	err := i.safeErr()
 	if err == nil {
 		var ok bool
@@ -172,7 +172,7 @@ func (i *Info) safeErr() error {
 	return nil
 }
 
-func (i Info) wrapStr() string {
+func (i *Info) wrapStr() string {
 	if i.Wrap {
 		return wrapError
 	}
