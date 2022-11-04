@@ -116,9 +116,15 @@ func TestProcess(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			handler.Process(&tt.args.Info)
 
-			helper.Requiref(t, tt.want.panicCalled == panicHandlerCalled, "panicHandler: got = %v, want = %v", panicHandlerCalled, tt.want.panicCalled)
-			helper.Requiref(t, tt.want.errorCalled == errorHandlerCalled, "errorHandler: got = %v, want = %v", errorHandlerCalled, tt.want.errorCalled)
-			helper.Requiref(t, tt.want.nilCalled == nilHandlerCalled, "nilHandler: got = %v, want = %v", nilHandlerCalled, tt.want.nilCalled)
+			helper.Requiref(t, tt.want.panicCalled == panicHandlerCalled,
+				"panicHandler: got = %v, want = %v",
+				panicHandlerCalled, tt.want.panicCalled)
+			helper.Requiref(t, tt.want.errorCalled == errorHandlerCalled,
+				"errorHandler: got = %v, want = %v",
+				errorHandlerCalled, tt.want.errorCalled)
+			helper.Requiref(t, tt.want.nilCalled == nilHandlerCalled,
+				"nilHandler: got = %v, want = %v",
+				nilHandlerCalled, tt.want.nilCalled)
 
 			helper.Requiref(t, tt.want.errStr == myErrVal.Error(),
 				"got: %v, want: %v", myErrVal.Error(), tt.want.errStr)
