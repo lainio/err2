@@ -135,11 +135,16 @@ func Return(err *error) {
 	// how it works with defer.
 	r := recover()
 
-	handler.Process(handler.Info{
+	if !handler.WorkToDo(r, err) {
+		return
+	}
+
+	info := &handler.Info{
 		Any:          r,
 		Err:          err,
 		ErrorHandler: func(e error) { *err = e },
-	})
+	}
+	handler.ProcessX(info)
 }
 
 // Returnw wraps an error with '%w'. It's similar to fmt.Errorf, but it's called
