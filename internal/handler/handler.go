@@ -30,9 +30,14 @@ type Info struct {
 	PanicTracer io.Writer // If nil tracer package's default is used.
 
 	// These are called if handler.Process caller sets it. If they aren't set
-	// default implementations are used.
+	// default implementations are used. NOTE. We have to use both which means
+	// that we get nilHandler call if recovery() is called by any other
+	// handler then we call still ErrorHandler and get the error from Any. It
+	// goes for other way around: we get error but nilHandler is only one to
+	// set, we use that for the error (which is accessed from the closure).
 	NilHandler   // If nil default implementation is used.
 	ErrorHandler // If nil default implementation is used.
+
 	PanicHandler // If nil panic() is called.
 }
 
@@ -153,6 +158,13 @@ func (i *Info) errorHandler() {
 		if !ok {
 			return
 		}
+	} else {
+		// error transported thru i.Err not by panic (i.Any)
+		// let's allow caller to use NilHandler if it's set
+		if i.NilHandler != nil {
+			i.NilHandler()
+			return
+		}
 	}
 	if i.Format != "" {
 		*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, err)...)
@@ -200,6 +212,19 @@ func Process(info *Info) {
 	default:
 		info.callPanicHandler()
 	}
+}
+
+func PreProcess(info *Info, a ...any) {
+	if len(a) > 0 {
+		switch first := a[0].(type) {
+		case string:
+			info.Format = first //a[0].(string)
+			info.Args = a[1:]
+		case ErrorHandler:
+			info.ErrorHandler = first
+		}
+	}
+	Process(info)
 }
 
 func printStack(w io.Writer, si debug.StackInfo, msg any) {
