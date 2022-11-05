@@ -134,6 +134,109 @@ func TestProcess(t *testing.T) {
 	}
 }
 
+func TestPreProcess_debug(t *testing.T) {
+	// this is easier to debug even the same test(s) are in table
+	Info := handler.Info{
+		Any: errors.New("error"),
+		Err: &nilError,
+	}
+	a := []any{nilHandlerForAnnotate}
+
+	handler.PreProcess(&Info, a...)
+	helper.Requiref(t, false == panicHandlerCalled,
+		"panicHandler: got = %v, want = %v",
+		panicHandlerCalled, false)
+	helper.Requiref(t, false == errorHandlerCalled,
+		"errorHandler: got = %v, want = %v",
+		errorHandlerCalled, false)
+	helper.Requiref(t, true == nilHandlerCalled,
+		"nilHandler: got = %v, want = %v",
+		nilHandlerCalled, true)
+
+	const want = "nil annotate: error"
+	helper.Requiref(t, want == myErrVal.Error(),
+		"got: %v, want: %v", myErrVal.Error(), want)
+}
+
+func TestPreProcess(t *testing.T) {
+	type args struct {
+		handler.Info
+		a []any
+	}
+	type want struct {
+		panicCalled bool
+		errorCalled bool
+		nilCalled   bool
+
+		errStr string
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{"error is transported in panic",
+			args{
+				Info: handler.Info{
+					Any: errors.New("error"),
+					Err: &nilError,
+				},
+				a: []any{nilHandlerForAnnotate},
+			},
+			want{
+				nilCalled: true,
+				errStr:    "nil annotate: error",
+			}},
+		{"all nil and our handlers",
+			args{
+				Info: handler.Info{
+					Any:          nil,
+					Err:          &nilError,
+					NilHandler:   nilHandler,
+					ErrorHandler: errorHandlerForAnnotate,
+					PanicHandler: panicHandler,
+				},
+				a: []any{"test"}}, // no affec because
+			want{
+				errStr: "error",
+			}},
+		{"error in panic and only nilHandler is used",
+			args{
+				Info: handler.Info{
+					Any: errors.New("error"),
+					Err: &nilError,
+				},
+				a: []any{nilHandlerForAnnotate},
+			},
+			want{
+				nilCalled: true,
+				errStr:    "nil annotate: error",
+			}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if len(tt.args.a) > 0 {
+				handler.PreProcess(&tt.args.Info, tt.args.a...)
+
+				helper.Requiref(t, tt.want.panicCalled == panicHandlerCalled,
+					"panicHandler: got = %v, want = %v",
+					panicHandlerCalled, tt.want.panicCalled)
+				helper.Requiref(t, tt.want.errorCalled == errorHandlerCalled,
+					"errorHandler: got = %v, want = %v",
+					errorHandlerCalled, tt.want.errorCalled)
+				helper.Requiref(t, tt.want.nilCalled == nilHandlerCalled,
+					"nilHandler: got = %v, want = %v",
+					nilHandlerCalled, tt.want.nilCalled)
+
+				helper.Requiref(t, tt.want.errStr == myErrVal.Error(),
+					"got: %v, want: %v", myErrVal.Error(), tt.want.errStr)
+
+				resetCalled()
+			}
+		})
+	}
+}
+
 type myRuntimeErr struct{}
 
 func (rte myRuntimeErr) RuntimeError() {}
@@ -167,6 +270,12 @@ func resetCalled() {
 
 func panicHandler(_ any) {
 	panicHandlerCalled = true
+}
+
+func nilHandlerForAnnotate() {
+	nilHandlerCalled = true
+	// in real case this is closure and it has access to err val
+	myErrVal = fmt.Errorf("nil annotate: %v", "error")
 }
 
 func errorHandlerForAnnotate(err error) {

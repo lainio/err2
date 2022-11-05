@@ -22,12 +22,35 @@ var (
 	NotAccess = errors.New("permission denied")
 )
 
+// HandleX is for adding an error handler to a function by deferring. It's for
+// functions returning errors themself. For those functions that don't return
+// errors, there is a CatchXxxx functions. The handler is called only when err
+// != nil. There is no limit how many Handle functions can be added to defer
+// stack. They all are called if an error has occurred and they are in deferred.
+func Handle(err *error, a ...any) {
+	// This and others are similar but we need to call `recover` here because
+	// how how it works with defer.
+	r := recover()
+
+	if !handler.WorkToDo(r, err) {
+		return
+	}
+
+	// We put real panic objects back and keep only those which are
+	// carrying our errors. We must also call all of the handlers in defer
+	// stack.
+	handler.PreProcess(&handler.Info{
+		Any: r,
+		Err: err,
+	}, a...)
+}
+
 // Handle is for adding an error handler to a function by deferring. It's for
 // functions returning errors themself. For those functions that don't return
 // errors, there is a CatchXxxx functions. The handler is called only when err
 // != nil. There is no limit how many Handle functions can be added to defer
 // stack. They all are called if an error has occurred and they are in deferred.
-func Handle(err *error, handlerFn func()) {
+func HandleX(err *error, handlerFn func()) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
 	r := recover()
@@ -42,12 +65,7 @@ func Handle(err *error, handlerFn func()) {
 	handler.Process(&handler.Info{
 		Any:        r,
 		Err:        err,
-		NilHandler: handlerFn,
-		ErrorHandler: func(e error) {
-			// We or someone did transport this error thru panic.
-			*err = e
-			handlerFn()
-		},
+		NilHandler: handlerFn, // ErrorHandler is called thru NilHandler
 	})
 }
 

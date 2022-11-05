@@ -11,9 +11,10 @@ import (
 )
 
 type (
-	PanicHandler func(p any)
-	ErrorHandler func(err error)
-	NilHandler   func()
+	// we want these to be type aliases, so they are much nicer to use
+	PanicHandler = func(p any)
+	ErrorHandler = func(err error)
+	NilHandler   = func()
 )
 
 // Info tells to Process function how to proceed.
@@ -62,7 +63,7 @@ func (i *Info) callNilHandler() {
 	if i.NilHandler != nil {
 		i.NilHandler()
 	} else {
-		i.nilHandler()
+		i.defaultNilHandler()
 	}
 }
 
@@ -92,7 +93,7 @@ func (i *Info) callErrorHandler() {
 	if i.ErrorHandler != nil {
 		i.ErrorHandler(i.Any.(error))
 	} else {
-		i.errorHandler()
+		i.defaultErrorHandler()
 	}
 }
 
@@ -119,19 +120,12 @@ func (i *Info) callPanicHandler() {
 	}
 }
 
-func (i *Info) nilHandler() {
+func (i *Info) defaultNilHandler() {
 	err := i.safeErr()
 	if err == nil {
 		var ok bool
 		err, ok = i.Any.(error)
 		if !ok {
-			return
-		}
-	} else {
-		// error transported thru i.Err not by panic (i.Any)
-		// let's allow caller to use ErrorHandler if it's set
-		if i.ErrorHandler != nil {
-			i.ErrorHandler(err)
 			return
 		}
 	}
@@ -142,15 +136,23 @@ func (i *Info) nilHandler() {
 			*i.Err = err
 		}
 	}
+	if i.workToDo() {
+		// error transported thru i.Err not by panic (i.Any)
+		// let's allow caller to use ErrorHandler if it's set
+		if i.ErrorHandler != nil {
+			i.ErrorHandler(err)
+			return
+		}
+	}
 }
 
-// errorHandler is default implementation of handling general errors (not
+// defaultErrorHandler is default implementation of handling general errors (not
 // runtime.Error which are treated as panics)
 //
 // Defers are in the stack and the first from the stack gets the opportunity to
 // get panic object's error (below). We still must call handler functions to the
 // rest of the handlers if there is an error.
-func (i *Info) errorHandler() {
+func (i *Info) defaultErrorHandler() {
 	err := i.safeErr()
 	if err == nil {
 		var ok bool
@@ -158,18 +160,19 @@ func (i *Info) errorHandler() {
 		if !ok {
 			return
 		}
+	}
+	if i.Format != "" {
+		*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, err)...)
 	} else {
+		*i.Err = err
+	}
+	if i.workToDo() {
 		// error transported thru i.Err not by panic (i.Any)
 		// let's allow caller to use NilHandler if it's set
 		if i.NilHandler != nil {
 			i.NilHandler()
 			return
 		}
-	}
-	if i.Format != "" {
-		*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, err)...)
-	} else {
-		*i.Err = err
 	}
 }
 
@@ -218,10 +221,12 @@ func PreProcess(info *Info, a ...any) {
 	if len(a) > 0 {
 		switch first := a[0].(type) {
 		case string:
-			info.Format = first //a[0].(string)
+			info.Format = first
 			info.Args = a[1:]
-		case ErrorHandler:
-			info.ErrorHandler = first
+		case NilHandler:
+			info.NilHandler = first
+		default:
+			println("unknown type")
 		}
 	}
 	Process(info)

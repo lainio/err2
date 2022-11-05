@@ -366,7 +366,7 @@ func ExampleReturnf_deferStack() {
 
 func ExampleHandle() {
 	doSomething := func(a, b int) (err error) {
-		defer err2.Handle(&err, func() {
+		defer err2.HandleX(&err, func() {
 			// Example for just annotating current err. Normally Handle is
 			// used for cleanup. See CopyFile example for more information.
 			// Use err2.Returnf for err annotation.
@@ -507,7 +507,8 @@ func BenchmarkCleanRecursionWithTryCall(b *testing.B) {
 func BenchmarkRecursionWithTryAndDefer(b *testing.B) {
 	var recursion func(a int) (r int, err error)
 	recursion = func(a int) (r int, err error) {
-		defer err2.Return(&err)
+		//defer err2.Return(&err)
+		defer err2.Handle(&err, "test error")
 
 		if a == 0 {
 			return 0, nil
