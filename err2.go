@@ -22,11 +22,19 @@ var (
 	NotAccess = errors.New("permission denied")
 )
 
-// HandleX is for adding an error handler to a function by deferring. It's for
-// functions returning errors themself. For those functions that don't return
-// errors, there is a CatchXxxx functions. The handler is called only when err
-// != nil. There is no limit how many Handle functions can be added to defer
-// stack. They all are called if an error has occurred and they are in deferred.
+// Handle is the general purpose error handling helper. What makes it so
+// convenient is its abability to handle oll error handling cases: a) just
+// return the error value to caller, b) annotate the error value, or c) execute
+// real error handling like cleanup and releasing resources. There is no
+// performance penalty. The handler is called only when err != nil. There is no
+// limit how many Handle functions can be added to defer stack. They all are
+// called if an error has occurred and they are in deferred.
+//
+// The function has an automatic mode where errors are annotated by function
+// name if no annotation arguments or handler function is given:
+//
+//	  func SaveData(...) {
+//			defer err2.Handle(&err) // if err != nil: annotation is "save data:"
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
@@ -45,11 +53,12 @@ func Handle(err *error, a ...any) {
 	}, a...)
 }
 
-// Handle is for adding an error handler to a function by deferring. It's for
+// HandleX is for adding an error handler to a function by deferring. It's for
 // functions returning errors themself. For those functions that don't return
 // errors, there is a CatchXxxx functions. The handler is called only when err
 // != nil. There is no limit how many Handle functions can be added to defer
 // stack. They all are called if an error has occurred and they are in deferred.
+// Debrecated: use Handle instead. This a sample how the old handle was.
 func HandleX(err *error, handlerFn func()) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
