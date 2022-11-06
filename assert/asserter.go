@@ -218,6 +218,7 @@ func (asserter Asserter) callerInfo(msg string) (info string) {
 		ourFmtStr = longFmtStr
 	}
 
+	// TODO: move to helpers
 	fn := runtime.FuncForPC(pc)
 	filename := filepath.Base(file)
 	ext := filepath.Ext(filename)
