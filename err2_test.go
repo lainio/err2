@@ -366,7 +366,7 @@ func ExampleReturnf_deferStack() {
 
 func ExampleHandle() {
 	doSomething := func(a, b int) (err error) {
-		defer err2.HandleX(&err, func() {
+		defer err2.Handle(&err, func() {
 			// Example for just annotating current err. Normally Handle is
 			// used for cleanup. See CopyFile example for more information.
 			// Use err2.Returnf for err annotation.
