@@ -4,9 +4,12 @@ package handler
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/lainio/err2/internal/debug"
+	"github.com/lainio/err2/internal/str"
 	"github.com/lainio/err2/internal/tracer"
 )
 
@@ -228,7 +231,19 @@ func PreProcess(info *Info, a ...any) {
 		default:
 			println("unknown type")
 		}
+	} else {
+		const stackLevel = 1 // we want the function who sets the handler
+		pc, file, _, ok := runtime.Caller(stackLevel)
+		if ok {
+			fn := runtime.FuncForPC(pc)
+			filename := filepath.Base(file)
+			ext := filepath.Ext(filename)
+			trimmedFilename := strings.TrimSuffix(filename, ext) + "."
+			funcName := strings.TrimPrefix(filepath.Base(fn.Name()), trimmedFilename)
+			info.Format = str.Decamel(funcName)
+		}
 	}
+
 	Process(info)
 }
 

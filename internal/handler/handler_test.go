@@ -137,10 +137,11 @@ func TestProcess(t *testing.T) {
 func TestPreProcess_debug(t *testing.T) {
 	// this is easier to debug even the same test(s) are in table
 	Info := handler.Info{
-		Any: errors.New("error"),
-		Err: &nilError,
+		Any: nil,
+		Err: &myErrVal,
 	}
-	a := []any{nilHandlerForAnnotate}
+	//a := []any{nilHandlerForAnnotate}
+	a := []any{}
 
 	handler.PreProcess(&Info, a...)
 	helper.Requiref(t, false == panicHandlerCalled,
@@ -149,13 +150,15 @@ func TestPreProcess_debug(t *testing.T) {
 	helper.Requiref(t, false == errorHandlerCalled,
 		"errorHandler: got = %v, want = %v",
 		errorHandlerCalled, false)
-	helper.Requiref(t, true == nilHandlerCalled,
+	helper.Requiref(t, false == nilHandlerCalled,
 		"nilHandler: got = %v, want = %v",
 		nilHandlerCalled, true)
 
-	const want = "nil annotate: error"
+	const want = "test pre process_debug: error"
 	helper.Requiref(t, want == myErrVal.Error(),
 		"got: %v, want: %v", myErrVal.Error(), want)
+
+	resetCalled()
 }
 
 func TestPreProcess(t *testing.T) {
@@ -211,6 +214,18 @@ func TestPreProcess(t *testing.T) {
 			want{
 				nilCalled: true,
 				errStr:    "nil annotate: error",
+			}},
+		{"error in panic and default annotation",
+			args{
+				Info: handler.Info{
+					Any: nil,
+					Err: &myErrVal,
+				},
+				a: []any{},
+			},
+			want{
+				nilCalled: false,
+				errStr:    "",
 			}},
 	}
 	for _, tt := range tests {
