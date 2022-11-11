@@ -38,6 +38,9 @@ bench:
 bench_go:
 	$(GO) test -bench='BenchmarkTry_StringGenerics' $(PKG1)
 
+bench_arec:
+	$(GO) test -bench='BenchmarkRecursion.*' $(PKG1)
+
 bench_rec:
 	$(GO) test -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG1)
 
