@@ -232,7 +232,7 @@ func PreProcess(info *Info, a ...any) {
 			println("unknown type")
 		}
 	} else {
-		const stackLevel = 1 // we want the function who sets the handler
+		const stackLevel = 2 // we want the function who sets the handler
 		pc, file, _, ok := runtime.Caller(stackLevel)
 		if ok {
 			fn := runtime.FuncForPC(pc)
