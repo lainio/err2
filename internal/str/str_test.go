@@ -36,6 +36,7 @@ func TestDecamel(t *testing.T) {
 		{"our contant", args{camelStr}, "benchmark recursion with old error if check and_ defer"},
 		{"number", args{"CamelString2Testing"}, "camel string2 testing"},
 		{"acronym", args{"ARMCamelString"}, "armcamel string"},
+		{"acronym at end", args{"archIsARM"}, "arch is arm"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
