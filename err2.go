@@ -23,7 +23,7 @@ var (
 )
 
 // Handle is the general purpose error handling helper. What makes it so
-// convenient is its abability to handle oll error handling cases: a) just
+// convenient is its ability to handle all error handling cases: a) just
 // return the error value to caller, b) annotate the error value, or c) execute
 // real error handling like cleanup and releasing resources. There is no
 // performance penalty. The handler is called only when err != nil. There is no
@@ -58,7 +58,7 @@ func Handle(err *error, a ...any) {
 // errors, there is a CatchXxxx functions. The handler is called only when err
 // != nil. There is no limit how many Handle functions can be added to defer
 // stack. They all are called if an error has occurred and they are in deferred.
-// Debrecated: use Handle instead. This a sample how the old handle was.
+// Deprecated: use Handle instead. This a sample how the old handle was.
 func HandleX(err *error, handlerFn func()) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
@@ -173,6 +173,7 @@ func Throwf(format string, args ...any) {
 // annotate their errors. It's still needed to break panicking which is used for
 // error transport in err2. If you want to annotate errors see Returnf and
 // Returnw functions for more information.
+// Deprecated: use Handle instead.
 func Return(err *error) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -191,7 +192,7 @@ func Return(err *error) {
 }
 
 // Returnw wraps an error with '%w'. It's similar to fmt.Errorf, but it's called
-// only if error != nil. If you don't want to wrap the error use Returnf
+// only if error != nil. If you don't want to wrap the error use Handle
 // instead.
 func Returnw(err *error, format string, args ...any) {
 	// This and others are similar but we need to call `recover` here because
@@ -213,6 +214,7 @@ func Returnw(err *error, format string, args ...any) {
 
 // Returnf builds an error. It's similar to fmt.Errorf, but it's called only if
 // error != nil. It uses '%v' to wrap the error not '%w'. Use Returnw for that.
+// Deprecated: use Handle instead.
 func Returnf(err *error, format string, args ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.

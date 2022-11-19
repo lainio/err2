@@ -1,7 +1,7 @@
 /*
 Package err2 provides three main functionality:
- 1. err2 package includes helper functions for error handling & automatic stack
-    tracing
+ 1. err2 package includes helper functions for error handling & automatic error
+    stack tracing
  2. try package is for error checking
  3. assert package is for design-by-contract and preconditions both for normal
     runtime and for testing
@@ -12,7 +12,7 @@ The traditional error handling idiom in Go is roughly akin to
 
 which applied recursively.
 
-The err2 package drives programmers to focus more on error handling rather than
+The err2 package drives programmers to focus on error handling rather than
 checking errors. We think that checks should be so easy that we never forget
 them. The CopyFile example shows how it works:
 
@@ -20,10 +20,12 @@ them. The CopyFile example shows how it works:
 	// returns error value describing the reason.
 	func CopyFile(src, dst string) (err error) {
 	     // Add first error handler just to annotate the error properly.
-	     defer err2.Returnf(&err, "copy %s %s", src, dst)
+	     defer err2.Handle(&err)
 
-	     // Try to open the file. If error occurs now, err will be annotated and
-	     // returned properly thanks to above err2.Returnf.
+		// Try to open the file. If error occurs now, err will be
+		// automatically annotated ('copy file:' prefix calculated from the
+		// function name, no performance penalty) and returned properly thanks
+		// to above err2.Handle.
 	     r := try.To1(os.Open(src))
 	     defer r.Close()
 

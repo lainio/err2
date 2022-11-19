@@ -10,7 +10,7 @@ import (
 )
 
 func CopyFile(src, dst string) (err error) {
-	defer err2.Returnf(&err, "copy file %s->%s", src, dst)
+	defer err2.Handle(&err, "copy file %s->%s", src, dst)
 
 	// These try.To() checkers are as fast as `if err != nil {}`
 

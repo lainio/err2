@@ -7,7 +7,7 @@ The package provides functions for **automatic error propagation**.
 - [Structure](#structure)
 - [Automatic Error Propagation And Stack Tracing](#automatic-error-propagation-and-stack-tracing)
 - [Error handling](#error-handling)
-  - [Automatic And Optimized Stack Tracing](#automatic-and-optimized-stack-tracing)
+  - [Automatic And Optimized Error Stack Tracing](#automatic-and-optimized-error-stack-tracing)
   - [Manual Stack Tracing](#manual-stack-tracing)
   - [Error Handler](#error-handler)
 - [Error checks](#Error-checks)
@@ -34,11 +34,15 @@ The package provides functions for **automatic error propagation**.
 The current version of Go tends to produce too much error checking and too
 little error handling. This package helps us fix that.
 
-1. It helps to declare error handlers with `defer`.
+1. It helps to declare error handlers with `defer`. If you're familiar Zig
+   language you can think `defer err2.Handle(&err,...)` lines exactly similar as
+   Zig's `errdefer`.
 2. It helps to check and transport errors to the nearest (the defer-stack) error
    handler. 
 3. It helps us use design-by-contract type preconditions.
 4. It offers automatic stack tracing for every error, runtime error, or panic.
+   If you are familiar to Zig, the `err2` error traces and functionality is
+   analog with it.
 
 You can use all of them or just the other. However, if you use `try` for error
 checks you must remember use Go's `recover()` by yourself, or your error isn't
@@ -58,17 +62,17 @@ error handler it will catch the error.
 This is the simplest form of `err2` error handler
 
 ```go
-defer err2.Return(&err)
+defer err2.Handle(&err)
 ```
 
-which is the helper handler for cases that don't need to annotate the error. If
-you need to annotate the error you can use `Returnf`. There is a wrapping
-version `Returnw` even you will not need it.
+which is the helper handler for all the cases. See more information from its
+documentation. There still is a wrapping version `Returnw` even you will not
+need it.
 
 Our general guideline is:
 > Do not wrap an error when doing so would expose implementation details.
 
-#### Automatic And Optimized Stack Tracing
+#### Automatic And Optimized Error Stack Tracing
 
 err2 offers optional stack tracing. It's automatic and optimized. Optimized
 means that call stack is processes before output. That means that stack trace
@@ -154,10 +158,10 @@ b := try.To1(ioutil.ReadAll(r))
 ...
 ```
 
-but not without an error handler (`Returnf`, `Handle`) or it just panics your
-app if you don't have a `recovery` call in the current call stack. However, you
-can put your error handlers where ever you want in your call stack. That can be
-handy in the internal packages and certain types of algorithms.
+but not without an error handler (`Handle`) or it just panics your app if you
+don't have a `recovery` call in the current call stack. However, you can put
+your error handlers where ever you want in your call stack. That can be handy in
+the internal packages and certain types of algorithms.
 
 We think that panicking for the errors at the start of the development is far
 better than not checking errors at all.
@@ -209,13 +213,13 @@ func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData
 Previous code block shows the use of the default asserter for developing.
 
 ```go
-assert.DefaultAsserter = AsserterDebug
+assert.DefaultAsserter = assert.AsserterDebug
 ```
 
 If any of the assertion fails, code panics. These type of assertions can be used
 without help of the `err2` package if wanted.
 
-During the software development lifecycle, it isn't crystal clear what
+During the software development life-cycle, it isn't crystal clear what
 preconditions are for a programmer and what should be translated to end-user
 errors as well. The `assert` package uses a concept called `Asserter` to have
 different types of asserter for different phases of a software project.
@@ -225,7 +229,7 @@ to generate proper error messages.
 
 ```go
 func (ac *Cmd) Validate() (err error) {
-	defer err2.Return(&err)
+	defer err2.Handle(&err)
 
 	assert.P.NotEmpty(ac.SubCmd, "sub command needed")
 	assert.P.Truef(ac.SubCmd == "register" || ac.SubCmd == "login",
@@ -317,8 +321,10 @@ than getting unrelated panic somewhere else in the code later. There have also
 been cases when code reports error correctly because the 'upper' handler catches
 it.
 
-- Because the use of `err2.Returnf` is so relatively easy, error messages much
-better and informative.
+- Because the use of `err2.Handle` is so easy, error messages much better and
+informative. When using `err2.Handle`'s automatic annotation your error messages
+are always up-to-date. Even when you refactor your function name error message
+is also updated.
 
 - **When error handling is based on the actual error handlers, code changes have
 been much easier.**
@@ -357,4 +363,6 @@ Version history:
 - 0.8.10 New assertion functions and helpers for tests
 - 0.8.11 Remove deprecations, new *global* err values and `try.IsXX` functions,
          more documentation.
-- 0.8.12 Restructuring internal pkgs, optimizations for deferred handlers, etc.
+- 0.8.12 New super **Handle** for most of the use cases to simplify the API,
+         restructuring internal pkgs, **deferred handlers are 2x faster now**,
+         new documentation and tests, etc.
