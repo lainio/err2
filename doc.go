@@ -22,10 +22,10 @@ them. The CopyFile example shows how it works:
 	     // Add first error handler just to annotate the error properly.
 	     defer err2.Handle(&err)
 
-		// Try to open the file. If error occurs now, err will be
-		// automatically annotated ('copy file:' prefix calculated from the
-		// function name, no performance penalty) and returned properly thanks
-		// to above err2.Handle.
+	     // Try to open the file. If error occurs now, err will be
+	     // automatically annotated ('copy file:' prefix calculated from the
+	     // function name, no performance penalty) and returned properly thanks
+	     // to above err2.Handle.
 	     r := try.To1(os.Open(src))
 	     defer r.Close()
 
