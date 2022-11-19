@@ -1,7 +1,9 @@
 package str
 
 import (
+	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"unicode"
 )
@@ -20,18 +22,38 @@ func CamelRegexp(str string) string {
 
 // Decamel return the given string as space delimeted.
 func Decamel(s string) string {
-	var b strings.Builder
-	splittable, roundUpper, _ := false, false, false
+	var (
+		b                   strings.Builder
+		splittable, isUpper bool
+	)
 	for _, v := range s {
-		roundUpper = unicode.IsUpper(v)
-		if roundUpper {
+		isUpper = unicode.IsUpper(v)
+		if isUpper {
 			v = unicode.ToLower(v)
 			if splittable {
 				b.WriteByte(' ')
 			}
 		}
 		b.WriteRune(v)
-		splittable = !roundUpper || unicode.IsNumber(v)
+		splittable = !isUpper || unicode.IsNumber(v)
 	}
 	return b.String()
+}
+
+// FuncName is similar to runtime.Caller, but instead to return program counter
+// or function name with full path, FuncName returns just function name,
+// separated filename, and line number. If frame cannot be found ok is false.
+//
+// See more information from runtime.Caller. The skip tells how many stack
+// frames are skipped. Note, that FuncName calculates itself to skip frames.
+func FuncName(skip int) (n, fname string, ln int, ok bool) {
+	pc, file, ln, yes := runtime.Caller(skip + 1) // +1 skip ourself
+	if yes {
+		fn := runtime.FuncForPC(pc)
+		fname = filepath.Base(file)
+		ext := filepath.Ext(fname)
+		trimmedFilename := strings.TrimSuffix(fname, ext) + "."
+		n = strings.TrimPrefix(filepath.Base(fn.Name()), trimmedFilename)
+	}
+	return n, fname, ln, yes
 }

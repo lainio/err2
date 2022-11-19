@@ -4,9 +4,7 @@ package handler
 import (
 	"fmt"
 	"io"
-	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/lainio/err2/internal/debug"
 	"github.com/lainio/err2/internal/str"
@@ -232,14 +230,11 @@ func PreProcess(info *Info, a ...any) {
 			println("unknown type")
 		}
 	} else {
-		const stackLevel = 2 // we want the function who sets the handler
-		pc, file, _, ok := runtime.Caller(stackLevel)
+		// We want the function who sets the handler. Because it's the Handle
+		// who calls PreProcess we have only one to skip.
+		const framesToSkip = 1
+		funcName, _, _, ok := str.FuncName(framesToSkip)
 		if ok {
-			fn := runtime.FuncForPC(pc)
-			filename := filepath.Base(file)
-			ext := filepath.Ext(filename)
-			trimmedFilename := strings.TrimSuffix(filename, ext) + "."
-			funcName := strings.TrimPrefix(filepath.Base(fn.Name()), trimmedFilename)
 			info.Format = str.Decamel(funcName)
 		}
 	}

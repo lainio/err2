@@ -3,12 +3,10 @@ package assert
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"reflect"
-	"runtime"
-	"strings"
 
 	"github.com/lainio/err2/internal/debug"
+	"github.com/lainio/err2/internal/str"
 )
 
 // Asserter is type for asserter object guided by its flags.
@@ -207,26 +205,18 @@ Assertion Fault at:
 var shortFmtStr = `%s:%d %s %s`
 
 func (asserter Asserter) callerInfo(msg string) (info string) {
-	const stackLevel = 3
-	pc, file, line, ok := runtime.Caller(stackLevel)
-	if !ok {
-		return msg
-	}
-
 	ourFmtStr := shortFmtStr
 	if asserter.hasFormattedCallerInfo() {
 		ourFmtStr = longFmtStr
 	}
 
-	// TODO: move to helpers
-	fn := runtime.FuncForPC(pc)
-	filename := filepath.Base(file)
-	ext := filepath.Ext(filename)
-	trimmedFilename := strings.TrimSuffix(filename, ext) + "."
-	funcName := strings.TrimPrefix(filepath.Base(fn.Name()), trimmedFilename)
-	info = fmt.Sprintf(ourFmtStr,
-		filename, line,
-		funcName, msg)
+	const framesToSkip = 3 // how many fn calls there is before FuncName call
+	funcName, filename, line, ok := str.FuncName(framesToSkip)
+	if ok {
+		info = fmt.Sprintf(ourFmtStr,
+			filename, line,
+			funcName, msg)
+	}
 
 	return
 }
