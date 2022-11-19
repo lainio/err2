@@ -5,11 +5,11 @@ capable to support both modes with same API. Only thing you need to do is to
 add following two lines at the beginning of your unit tests:
 
 	func TestInvite(t *testing.T) {
-		assert.PushTester(t) // push testing variable t beginning of any test
-		defer assert.PopTester()
+	     assert.PushTester(t) // push testing variable t beginning of any test
+	     defer assert.PopTester()
 
-		alice.Node = root1.Invite(alice.Node, root1.Key, alice.PubKey, 1)
-		assert.Equal(alice.Len(), 1) // assert anything normally
+	     alice.Node = root1.Invite(alice.Node, root1.Key, alice.PubKey, 1)
+	     assert.Equal(alice.Len(), 1) // assert anything normally
 
 Especially powerful feature is that even if some assertion violation happens
 during the execution of called functions like inside of the Invite() function

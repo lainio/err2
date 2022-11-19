@@ -33,8 +33,8 @@ var (
 // The function has an automatic mode where errors are annotated by function
 // name if no annotation arguments or handler function is given:
 //
-//  func SaveData(...) {
-//       defer err2.Handle(&err) // if err != nil: annotation is "save data:"
+//	func SaveData(...) {
+//	     defer err2.Handle(&err) // if err != nil: annotation is "save data:"
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
