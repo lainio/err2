@@ -21,8 +21,12 @@ func ExampleIsNotFound1() {
 	// To see how automatic stack tracing works WITH panic transport please run
 	// this example with:
 	//   go test -v -run='^ExampleNotFound$'
+
+	// pick up your poison: outcomment the nil line to see how error tracing
+	// works.
 	err2.SetErrorTracer(os.Stderr)
 	err2.SetErrorTracer(nil)
+
 	find := func(key int) string {
 		defer err2.Catch(func(err error) {
 			fmt.Println("ERROR:", err)
