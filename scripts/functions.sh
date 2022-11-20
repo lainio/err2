@@ -115,6 +115,18 @@ replace_assert() {
 	"$location"/replace-perl.sh '(assert|require)\.(\w*\()(t,)(.*\))' 'assert.\2\4'
 }
 
+replace_annotate2() {
+	"$location"/replace-perl.sh 'defer err2\.Annotate\(' 'defer err2.Handle('
+
+	"$location"/replace-perl.sh 'defer err2\.Annotatew\(' 'defer err2.Handle('
+}
+
+replace_return() {
+	"$location"/replace-perl.sh 'defer err2\.Return\(' 'defer err2.Handle('
+	"$location"/replace-perl.sh 'defer err2\.Returnf\(' 'defer err2.Handle('
+	"$location"/replace-perl.sh 'defer err2\.Returnw\(' 'defer err2.Handle('
+}
+
 replace_tracers() {
 	"$location"/replace-perl.sh 'err2\.(StackTraceWriter = )(.*)' 'err2.SetTracers(\2)'
 }
