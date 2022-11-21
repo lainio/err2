@@ -32,7 +32,7 @@ func TestTry_noError(t *testing.T) {
 
 func TestDefault_Error(t *testing.T) {
 	var err error
-	defer err2.Return(&err)
+	defer err2.Handle(&err)
 
 	try.To1(throw())
 
@@ -173,7 +173,7 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 	}
 }
 
-func TestPanicking_Return(t *testing.T) {
+func TestPanicking_Handle(t *testing.T) {
 	type args struct {
 		f func()
 	}
@@ -186,7 +186,7 @@ func TestPanicking_Return(t *testing.T) {
 			args{
 				func() {
 					var err error
-					defer err2.Return(&err)
+					defer err2.Handle(&err)
 					panic("panic")
 				},
 			},
@@ -196,7 +196,7 @@ func TestPanicking_Return(t *testing.T) {
 			args{
 				func() {
 					var err error
-					defer err2.Return(&err)
+					defer err2.Handle(&err)
 					var b []byte
 					b[0] = 0
 				},
@@ -276,37 +276,37 @@ func TestSetErrorTracer(t *testing.T) {
 	helper.Require(t, w == nil, "error tracer should be nil")
 }
 
-func ExampleReturn() {
+func ExampleHandle() {
 	var err error
-	defer err2.Return(&err)
+	defer err2.Handle(&err)
 	try.To1(noThrow())
 	// Output:
 }
 
-func ExampleReturn_errThrow() {
-	panicTransportReturn := func() (err error) {
-		defer err2.Return(&err)
+func ExampleHandle_errThrow() {
+	panicTransport := func() (err error) {
+		defer err2.Handle(&err)
 		err2.Throwf("our error")
 		return nil
 	}
-	err := panicTransportReturn()
+	err := panicTransport()
 	fmt.Printf("%v", err)
-	// Output: our error
+	// Output: handle: our error
 }
 
-func ExampleReturn_errReturn() {
+func ExampleHandle_errReturn() {
 	normalReturn := func() (err error) {
-		defer err2.Return(&err)
+		defer err2.Handle(&err)
 		return fmt.Errorf("our error")
 	}
 	err := normalReturn()
 	fmt.Printf("%v", err)
-	// Output: our error
+	// Output: example handle_err return.func1: our error
 }
 
 func ExampleReturnf_empty() {
 	annotated := func() (err error) {
-		defer err2.Returnf(&err, "annotated")
+		defer err2.Handle(&err, "annotated")
 		try.To1(throw())
 		return err
 	}
@@ -315,9 +315,9 @@ func ExampleReturnf_empty() {
 	// Output: annotated: this is an ERROR
 }
 
-func ExampleReturnf() {
+func ExampleHandle_annotate() {
 	annotated := func() (err error) {
-		defer err2.Returnf(&err, "annotated: %s", "err2")
+		defer err2.Handle(&err, "annotated: %s", "err2")
 		try.To1(throw())
 		return err
 	}
@@ -341,7 +341,7 @@ func ExampleThrowf() {
 	}
 
 	annotated := func() (err error) {
-		defer err2.Returnf(&err, "annotated: %s", "err2")
+		defer err2.Handle(&err, "annotated: %s", "err2")
 
 		r := recursion(12) // call recursive algorithm successfully
 		recursion(r)       // call recursive algorithm unsuccessfully
@@ -354,8 +354,8 @@ func ExampleThrowf() {
 
 func ExampleReturnf_deferStack() {
 	annotated := func() (err error) {
-		defer err2.Returnf(&err, "annotated 2nd")
-		defer err2.Returnf(&err, "annotated 1st")
+		defer err2.Handle(&err, "annotated 2nd")
+		defer err2.Handle(&err, "annotated 1st")
 		try.To1(throw())
 		return err
 	}
@@ -364,12 +364,11 @@ func ExampleReturnf_deferStack() {
 	// Output: annotated 2nd: annotated 1st: this is an ERROR
 }
 
-func ExampleHandle() {
+func ExampleHandle_handlerFn() {
 	doSomething := func(a, b int) (err error) {
 		defer err2.Handle(&err, func() {
 			// Example for just annotating current err. Normally Handle is
 			// used for cleanup. See CopyFile example for more information.
-			// Use err2.Returnf for err annotation.
 			err = fmt.Errorf("error with (%d, %d): %v", a, b, err)
 		})
 		try.To1(throw())
@@ -463,8 +462,7 @@ func BenchmarkRecursionWithOldErrorCheck(b *testing.B) {
 func BenchmarkRecursionWithOldErrorIfCheckAnd_Defer(b *testing.B) {
 	var recursionWithErrorCheckAndDefer func(a int) (_ int, err error)
 	recursionWithErrorCheckAndDefer = func(a int) (_ int, err error) {
-		defer err2.Returnf(&err, "test")
-		//defer err2.Handle(&err, "test")
+		defer err2.Handle(&err)
 
 		if a == 0 {
 			return 0, nil
@@ -508,7 +506,6 @@ func BenchmarkRecursionWithTryCall(b *testing.B) {
 func BenchmarkRecursionWithTryAndDefer(b *testing.B) {
 	var recursion func(a int) (r int, err error)
 	recursion = func(a int) (r int, err error) {
-		//defer err2.Returnf(&err, "hello")
 		defer err2.Handle(&err)
 
 		if a == 0 {
