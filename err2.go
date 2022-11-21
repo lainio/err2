@@ -20,6 +20,9 @@ var (
 	NotExist  = errors.New("not exist")
 	Exist     = errors.New("already exist")
 	NotAccess = errors.New("permission denied")
+
+	NotRecoverable = errors.New("cannot recover")
+	Recoverable    = errors.New("recoverable")
 )
 
 // Handle is the general purpose error handling helper. What makes it so
@@ -51,31 +54,6 @@ func Handle(err *error, a ...any) {
 		Any: r,
 		Err: err,
 	}, a...)
-}
-
-// HandleX is for adding an error handler to a function by deferring. It's for
-// functions returning errors themself. For those functions that don't return
-// errors, there is a CatchXxxx functions. The handler is called only when err
-// != nil. There is no limit how many Handle functions can be added to defer
-// stack. They all are called if an error has occurred and they are in deferred.
-// Deprecated: use Handle instead. This a sample how the old handle was.
-func HandleX(err *error, handlerFn func()) {
-	// This and others are similar but we need to call `recover` here because
-	// how how it works with defer.
-	r := recover()
-
-	if !handler.WorkToDo(r, err) {
-		return
-	}
-
-	// We put real panic objects back and keep only those which are
-	// carrying our errors. We must also call all of the handlers in defer
-	// stack.
-	handler.Process(&handler.Info{
-		Any:        r,
-		Err:        err,
-		NilHandler: handlerFn, // ErrorHandler is called thru NilHandler
-	})
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
