@@ -16,7 +16,7 @@ var (
 
 func ExampleIs_errorHappens() {
 	copyStream := func(src string) (s string, err error) {
-		defer err2.Returnf(&err, "copy stream (%s)", src)
+		defer err2.Handle(&err, "copy stream (%s)", src)
 
 		err = errForTesting
 		try.Is(err, io.EOF)
@@ -33,7 +33,7 @@ func ExampleIs_errorHappens() {
 
 func ExampleIs_errorHappensNot() {
 	copyStream := func(src string) (s string, err error) {
-		defer err2.Returnf(&err, "copy stream %s", src)
+		defer err2.Handle(&err, "copy stream %s", src)
 
 		err = fmt.Errorf("something: %w", errForTesting)
 		if try.Is(err, errForTesting) {
@@ -53,7 +53,7 @@ func ExampleIs_errorHappensNot() {
 
 func ExampleIsEOF1() {
 	copyStream := func(src string) (s string, err error) {
-		defer err2.Returnf(&err, "copy stream %s", src)
+		defer err2.Handle(&err, "copy stream %s", src)
 
 		in := bytes.NewBufferString(src)
 		tmp := make([]byte, 4)
@@ -75,7 +75,7 @@ func ExampleIsEOF1() {
 
 func Example_copyFile() {
 	copyFile := func(src, dst string) (err error) {
-		defer err2.Returnf(&err, "copy %s %s", src, dst)
+		defer err2.Handle(&err, "copy %s %s", src, dst)
 
 		// These try package helpers are as fast as Check() calls which is as
 		// fast as `if err != nil {}`
