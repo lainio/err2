@@ -143,7 +143,11 @@ func TestPreProcess_debug(t *testing.T) {
 	//a := []any{nilHandlerForAnnotate}
 	a := []any{}
 
-	handler.PreProcess(&Info, a...)
+	// in real case PreProcess is called from Handle function
+	handle := func() {
+		handler.PreProcess(&Info, a...)
+	}
+	handle()
 	helper.Requiref(t, false == panicHandlerCalled,
 		"panicHandler: got = %v, want = %v",
 		panicHandlerCalled, false)
@@ -154,6 +158,7 @@ func TestPreProcess_debug(t *testing.T) {
 		"nilHandler: got = %v, want = %v",
 		nilHandlerCalled, true)
 
+	// See the name of this test function. Decamel it + error
 	const want = "test pre process_debug: error"
 	helper.Requiref(t, want == myErrVal.Error(),
 		"got: %v, want: %v", myErrVal.Error(), want)

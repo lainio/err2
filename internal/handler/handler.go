@@ -44,7 +44,7 @@ type Info struct {
 }
 
 const (
-	wrapAnnot = ": %v"
+	wrapAnnot = ": %w"
 	wrapError = ": %w"
 )
 
@@ -189,9 +189,9 @@ func (i *Info) safeErr() error {
 }
 
 func (i *Info) wrapStr() string {
-	if i.Wrap {
-		return wrapError
-	}
+	//	if i.Wrap {
+	//		return wrapError
+	//	}
 	return wrapAnnot
 }
 
@@ -232,7 +232,10 @@ func PreProcess(info *Info, a ...any) {
 	} else {
 		// We want the function who sets the handler. Because it's the Handle
 		// who calls PreProcess we have only one to skip.
-		const framesToSkip = 1
+		framesToSkip := 2
+		if info.Any != nil {
+			framesToSkip--
+		}
 		funcName, _, _, ok := str.FuncName(framesToSkip)
 		if ok {
 			info.Format = str.Decamel(funcName)
