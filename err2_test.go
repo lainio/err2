@@ -284,24 +284,24 @@ func ExampleHandle() {
 }
 
 func ExampleHandle_errThrow() {
-	panicTransport := func() (err error) {
+	transport := func() (err error) {
 		defer err2.Handle(&err)
 		err2.Throwf("our error")
 		return nil
 	}
-	err := panicTransport()
+	err := transport()
 	fmt.Printf("%v", err)
-	// Output: handle: our error
+	// Output: run example: our error
 }
 
 func ExampleHandle_errReturn() {
 	normalReturn := func() (err error) {
-		defer err2.Handle(&err)
+		defer err2.Handle(&err, "")
 		return fmt.Errorf("our error")
 	}
 	err := normalReturn()
 	fmt.Printf("%v", err)
-	// Output: example handle_err return.func1: our error
+	// Output: our error
 }
 
 func ExampleReturnf_empty() {
