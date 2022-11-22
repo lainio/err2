@@ -34,6 +34,9 @@ func Decamel(s string) string {
 				b.WriteByte(' ')
 			}
 		}
+		if v == '.' || v == '_' {
+			v = ' '
+		}
 		b.WriteRune(v)
 		splittable = !isUpper || unicode.IsNumber(v)
 	}

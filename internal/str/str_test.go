@@ -33,7 +33,7 @@ func TestDecamel(t *testing.T) {
 		want string
 	}{
 		{"simple", args{"CamelString"}, "camel string"},
-		{"our contant", args{camelStr}, "benchmark recursion with old error if check and_ defer"},
+		{"our contant", args{camelStr}, "benchmark recursion with old error if check and  defer"},
 		{"number", args{"CamelString2Testing"}, "camel string2 testing"},
 		{"acronym", args{"ARMCamelString"}, "armcamel string"},
 		{"acronym at end", args{"archIsARM"}, "arch is arm"},
