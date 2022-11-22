@@ -21,6 +21,7 @@ func TestFullName(t *testing.T) {
 		{"all empty", args{StackInfo{"", "", 0, nil}}, ""},
 		{"namespaces", args{StackInfo{"lainio/err2", "", 0, nil}}, "lainio/err2"},
 		{"both", args{StackInfo{"lainio/err2", "try", 0, nil}}, "lainio/err2.try"},
+		{"short both", args{StackInfo{"err2", "Handle", 0, nil}}, "err2.Handle"},
 		{"func", args{StackInfo{"", "try", 0, nil}}, "try"},
 	}
 	for _, tt := range tests {
@@ -121,6 +122,47 @@ func TestIsFuncAnchor(t *testing.T) {
 	}
 }
 
+func TestFnLNro(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		output int
+	}{
+		{"ext package",
+			"	/Users/harrilainio/go/pkg/mod/github.com/lainio/err2@v0.8.5/internal/handler/handler.go:69 +0xbc",
+			69},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			output := fnLNro(tt.input)
+			helper.Require(t, output == tt.output, output)
+		})
+	}
+}
+
+func Test_fnName(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		output string
+	}{
+		{"panic", "panic({0x102ed30c0, 0x1035910f0})",
+			"panic"},
+		{"our namespace", "github.com/lainio/err2/internal/debug.FprintStack({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
+			"FprintStack"},
+		{"our double namespace", "github.com/lainio/err2/internal/handler.Info.callPanicHandler({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
+			"Info.callPanicHandler"},
+		{"our handler process", "github.com/lainio/err2/internal/handler.Process.Func1({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
+			"Process"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			output := fnName(tt.input)
+			helper.Require(t, output == tt.output, output)
+		})
+	}
+}
+
 func TestStackPrint_noLimits(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -202,6 +244,38 @@ func TestStackPrint_limit(t *testing.T) {
 			outs := strings.Split(w.String(), "\n")
 			helper.Require(t, len(ins) > len(outs), "input length should be greater")
 			helper.Require(t, tt.output == w.String(), "not equal")
+		})
+	}
+}
+
+func TestFuncName(t *testing.T) {
+	type args struct {
+		input string
+		StackInfo
+	}
+	tests := []struct {
+		name string
+		args
+		output string
+		outln  int
+	}{
+		{"basic", args{input2, StackInfo{"", "Handle", 1, nil}}, "ReturnW", 214},
+		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil}}, "ReturnW", 214},
+		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil}}, "ReturnW", 214},
+		//{"Returnw to get panic", args{input2, StackInfo{"", "Returnw", 1, nil}}, "panic", 838},
+		//{"Returnw", args{input1, StackInfo{"", "Returnw", 2, nil}}, "ReturnW", 315},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := strings.NewReader(tt.input)
+			name, ln, ok := funcName(r, StackInfo{
+				PackageName: tt.PackageName,
+				FuncName:    tt.FuncName,
+				Level:       tt.Level,
+			})
+			helper.Require(t, ok, "not found")
+			helper.Requiref(t, tt.output == name, "not equal %v", name)
+			helper.Requiref(t, ln == tt.outln, "ln must be equal %d == %d", ln, tt.outln)
 		})
 	}
 }
@@ -363,7 +437,7 @@ github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)
 	/home/god/go/src/github.com/lainio/err2/err2.go:89 +0x54
 panic({0x12e3e0, 0x188f50})
 	/usr/local/go/src/runtime/panic.go:838 +0x20c
-github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})
+github.com/harri/err2.ReturnW(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})
 	/home/god/go/src/github.com/lainio/err2/err2.go:214 +0x21c
 panic({0x12e3e0, 0x188f50})
 	/usr/local/go/src/runtime/panic.go:838 +0x20c
@@ -378,7 +452,7 @@ github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)
 	/home/god/go/src/github.com/lainio/err2/err2.go:89 +0x54
 panic({0x12e3e0, 0x188f50})
 	/usr/local/go/src/runtime/panic.go:838 +0x20c
-github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})
+github.com/harri/err2.ReturnW(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})
 	/home/god/go/src/github.com/lainio/err2/err2.go:214 +0x21c
 panic({0x12e3e0, 0x188f50})
 	/usr/local/go/src/runtime/panic.go:838 +0x20c

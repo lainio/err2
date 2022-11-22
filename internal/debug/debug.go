@@ -8,7 +8,10 @@ import (
 	"os"
 	"regexp"
 	"runtime/debug"
+	"strconv"
 	"strings"
+
+	"github.com/lainio/err2/internal/helper"
 )
 
 type StackInfo struct {
@@ -27,6 +30,9 @@ var (
 	//   github.com/lainio/err2/try.To1[...](...)
 	//   github.com/lainio/err2/assert.Asserter.True(...)
 	PackageRegexp = regexp.MustCompile(`lainio/err2[a-zA-Z0-9_/.\[\]]*\(`)
+
+	// we want to check that this is not our package
+	packageRegexp = regexp.MustCompile(`^github\.com/lainio/err2[a-zA-Z0-9_/.\[\]]*\(`)
 )
 
 func (si StackInfo) fullName() string {
@@ -63,6 +69,97 @@ func PrintStack(stackLevel int) {
 func FprintStack(w io.Writer, si StackInfo) {
 	stackBuf := bytes.NewBuffer(debug.Stack())
 	stackPrint(stackBuf, w, si)
+}
+
+// FuncName is similar to runtime.Caller, but instead to return program counter
+// or function name with full path, funcName returns just function name,
+// separated filename, and line number. If frame cannot be found ok is false.
+//
+// See more information from runtime.Caller. The StackInfo tells how many stack
+// frames we should go back (Level), and other fields tell how to find the
+// actual line where calculation should be started.
+func FuncName(si StackInfo) (n string, ln int, ok bool) {
+	stackBuf := bytes.NewBuffer(debug.Stack())
+	return funcName(stackBuf, si)
+}
+
+// funcName see Funcname documentation.
+func funcName(r io.Reader, si StackInfo) (n string, ln int, ok bool) {
+	var buf bytes.Buffer
+	stackBuf := io.TeeReader(r, &buf)
+	anchorLine := calcAnchor(stackBuf, si)
+	if anchorLine != nilAnchor {
+		scanner := bufio.NewScanner(&buf)
+		reachAnchor := false
+		for i := -1; scanner.Scan(); i++ {
+			line := scanner.Text()
+
+			// if we have found the the actual line we need to process next
+			// aka this line to get ln
+			if ok {
+				ln = fnLNro(line)
+				return n, ln, ok
+			}
+
+			// we are interested the line before (2 x si.Level) the
+			// anchorLine, AND we want to calc this only once
+			reachAnchor = helper.Whom(reachAnchor, true,
+				i == (anchorLine-2*si.Level))
+
+			if reachAnchor && i%2 == 0 && notOurFunction(line) {
+				n = fnName(line)
+				ok = n != "panic"
+			}
+		}
+	}
+	return n, 0, false
+}
+
+func notOurFunction(line string) bool {
+	return !packageRegexp.MatchString(line)
+}
+
+func fnName(line string) string {
+	i := strings.LastIndex(line, "/")
+	if i == -1 {
+		i = 0
+	} else {
+		i++ // do not include '/'
+	}
+
+	//i2 := strings.LastIndex(line[i:], ".")
+	i2 := strings.IndexRune(line[i:], '.')
+	if i2 == -1 {
+		i2 = i
+	} else {
+		i2 += i + 1
+	}
+
+	j := strings.LastIndex(line[i2:], "(")
+	if j == -1 {
+		j = len(line)
+	} else {
+		j += i2
+	}
+
+	return strings.TrimSuffix(line[i2:j], ".Func1")
+}
+
+func fnLNro(line string) int {
+	i := strings.LastIndex(line, "go:")
+	if i == -1 {
+		i = 0
+	} else {
+		i += 3 // do not include ':'
+	}
+	j := strings.LastIndex(line[i:], " ")
+	if j == -1 {
+		j = len(line)
+	} else {
+		j += i
+	}
+	nro, _ := strconv.Atoi(line[i:j])
+	return nro
 }
 
 // stackPrint prints the stack trace read from reader and to the writer. The
