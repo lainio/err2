@@ -230,13 +230,16 @@ func PreProcess(info *Info, a ...any) {
 			println("unknown type")
 		}
 	} else {
-		// We want the function who sets the handler. Because it's the Handle
-		// who calls PreProcess we have only one to skip.
-		framesToSkip := 2
-		if info.Any != nil {
-			framesToSkip--
-		}
-		funcName, _, _, ok := str.FuncName(framesToSkip)
+		// We want the function who sets the handler, i.e. calls the
+		// err2.Handle function via defer. Because call stack is in reverse
+		// order we need negative, and because the Handle caller is just
+		// previous AND funcName can serach! This is enouhg:
+		const lvl = -1
+		funcName, _, ok := debug.FuncName(debug.StackInfo{
+			PackageName: "",
+			FuncName:    "Handle", // err2.Handle is anchor
+			Level:       lvl,
+		})
 		if ok {
 			info.Format = str.Decamel(funcName)
 		}

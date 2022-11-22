@@ -134,20 +134,23 @@ func TestProcess(t *testing.T) {
 	}
 }
 
-func TestPreProcess_debug(t *testing.T) {
-	// this is easier to debug even the same test(s) are in table
-	Info := handler.Info{
-		Any: nil,
-		Err: &myErrVal,
-	}
-	//a := []any{nilHandlerForAnnotate}
-	a := []any{}
+// this is easier to debug even the same test(s) are in table
+var Info = handler.Info{
+	Any: nil,
+	Err: &myErrVal,
+}
 
-	// in real case PreProcess is called from Handle function
-	handle := func() {
-		handler.PreProcess(&Info, a...)
-	}
-	handle()
+func Handle() {
+	a := []any{}
+	handler.PreProcess(&Info, a...)
+}
+
+func TestPreProcess_debug(t *testing.T) {
+	// in real case PreProcess is called from Handle function. So, we make our
+	// own Handle here. Now our test function name will be the Handle caller
+	// and that's what error stack tracing is all about
+	Handle()
+
 	helper.Requiref(t, false == panicHandlerCalled,
 		"panicHandler: got = %v, want = %v",
 		panicHandlerCalled, false)
@@ -159,7 +162,7 @@ func TestPreProcess_debug(t *testing.T) {
 		nilHandlerCalled, true)
 
 	// See the name of this test function. Decamel it + error
-	const want = "test pre process_debug: error"
+	const want = "t runner: error"
 	helper.Requiref(t, want == myErrVal.Error(),
 		"got: %v, want: %v", myErrVal.Error(), want)
 
