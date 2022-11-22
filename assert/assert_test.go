@@ -11,19 +11,19 @@ import (
 
 func ExampleAsserter_True() {
 	sample := func() (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err)
 
-		assert.P.True(false, "assertion test")
+		assert.That(false, "assertion test")
 		return err
 	}
 	err := sample()
 	fmt.Printf("%v", err)
-	// Output: sample: assertion test
+	// Output: run example: assertion test
 }
 
 func ExampleAsserter_Truef() {
 	sample := func() (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.P.Truef(false, "assertion test %d", 2)
 		return err
@@ -35,7 +35,7 @@ func ExampleAsserter_Truef() {
 
 func ExampleAsserter_Len() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.P.Len(b, 3)
 		return err
@@ -47,7 +47,7 @@ func ExampleAsserter_Len() {
 
 func ExampleAsserter_EqualInt() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.P.EqualInt(len(b), 3)
 		return err
@@ -59,7 +59,7 @@ func ExampleAsserter_EqualInt() {
 
 func ExampleNotNil() {
 	sample := func(b *byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.NotNil(b)
 		return err
@@ -72,7 +72,7 @@ func ExampleNotNil() {
 
 func ExampleMNotNil() {
 	sample := func(b map[string]byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.MNotNil(b)
 		return err
@@ -85,7 +85,7 @@ func ExampleMNotNil() {
 
 func ExampleCNotNil() {
 	sample := func(c chan byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.CNotNil(c)
 		return err
@@ -98,7 +98,7 @@ func ExampleCNotNil() {
 
 func ExampleSNotNil() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.SNotNil(b)
 		return err
@@ -111,7 +111,7 @@ func ExampleSNotNil() {
 
 func ExampleEqual() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.Equal(len(b), 3)
 		return err
@@ -123,7 +123,7 @@ func ExampleEqual() {
 
 func ExampleSLen() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.SLen(b, 3)
 		return err
@@ -135,7 +135,7 @@ func ExampleSLen() {
 
 func ExampleAsserter_Lenf() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.P.Lenf(b, 3, "actual len = %d", len(b))
 		return err
@@ -147,7 +147,7 @@ func ExampleAsserter_Lenf() {
 
 func ExampleAsserter_Empty() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.P.Empty(b)
 		return err
@@ -159,7 +159,7 @@ func ExampleAsserter_Empty() {
 
 func ExampleAsserter_NoImplementation() {
 	sample := func(m int) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		switch m {
 		case 1:
@@ -176,7 +176,7 @@ func ExampleAsserter_NoImplementation() {
 
 func ExampleSNotEmpty() {
 	sample := func(b []byte) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.SNotEmpty(b)
 		return err
@@ -188,7 +188,7 @@ func ExampleSNotEmpty() {
 
 func ExampleNotEmpty() {
 	sample := func(b string) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		assert.Empty(b)
 		assert.NotEmpty(b)
@@ -201,7 +201,7 @@ func ExampleNotEmpty() {
 
 func ExampleMKeyExists() {
 	sample := func(b string) (err error) {
-		defer err2.Returnf(&err, "sample")
+		defer err2.Handle(&err, "sample")
 
 		m := map[string]string{
 			"1": "one",
