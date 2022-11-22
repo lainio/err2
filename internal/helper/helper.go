@@ -17,3 +17,10 @@ func Requiref(tb testing.TB, condition bool, format string, v ...interface{}) {
 		tb.Fatalf(format, v...)
 	}
 }
+
+func Whom[T any](b bool, yes, no T) T {
+	if b {
+		return yes
+	}
+	return no
+}
