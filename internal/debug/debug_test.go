@@ -152,7 +152,7 @@ func Test_fnName(t *testing.T) {
 			"FprintStack"},
 		{"our double namespace", "github.com/lainio/err2/internal/handler.Info.callPanicHandler({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
 			"Info.callPanicHandler"},
-		{"our handler process", "github.com/lainio/err2/internal/handler.Process.Func1({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
+		{"our handler process", "github.com/lainio/err2/internal/handler.Process.func1({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
 			"Process"},
 	}
 	for _, tt := range tests {

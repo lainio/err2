@@ -142,7 +142,7 @@ func fnName(line string) string {
 		j += i2
 	}
 
-	return strings.TrimSuffix(line[i2:j], ".Func1")
+	return strings.TrimSuffix(line[i2:j], ".func1")
 }
 
 func fnLNro(line string) int {
