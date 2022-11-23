@@ -10,15 +10,17 @@ import (
 )
 
 func CopyFile(src, dst string) (err error) {
-	defer err2.Handle(&err, "copy file %s->%s", src, dst)
+	// Automatic error annotation from current function name.
+	defer err2.Handle(&err)
 
-	// These try.To() checkers are as fast as `if err != nil {}`
-
+	// NOTE. These try.To() checkers are as fast as `if err != nil {}`
 	r := try.To1(os.Open(src))
-	defer r.Close()
+	defer r.Close() // deferred resource cleanup is perfect match with err2
 
 	w := try.To1(os.Create(dst))
 	defer err2.Handle(&err, func() {
+		// If error happens during Copy we clean not completed file here
+		// Look how well it suits with other cleanups like Close calls.
 		os.Remove(dst)
 	})
 	defer w.Close()
@@ -35,5 +37,8 @@ func Example() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	// Output: copy file /notfound/path/file.go->/notfound/path/file.bak: open /notfound/path/file.go: no such file or directory
+	// in real word example 'run example' is 'copy file' it comes automatically
+	// from function name that calls `err2.Handle` in deferred.
+
+	// Output: run example: open /notfound/path/file.go: no such file or directory
 }
