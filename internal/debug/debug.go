@@ -115,10 +115,13 @@ func funcName(r io.Reader, si StackInfo) (n string, ln int, ok bool) {
 	return n, 0, false
 }
 
+// notOurFunction returns true if function in call stack line isn't from err2
+// package.
 func notOurFunction(line string) bool {
 	return !packageRegexp.MatchString(line)
 }
 
+// fnName returns cleaned name of the function in the call stack line.
 func fnName(line string) string {
 	i := strings.LastIndex(line, "/")
 	if i == -1 {
@@ -127,7 +130,6 @@ func fnName(line string) string {
 		i++ // do not include '/'
 	}
 
-	//i2 := strings.LastIndex(line[i:], ".")
 	i2 := strings.IndexRune(line[i:], '.')
 	if i2 == -1 {
 		i2 = i
@@ -145,6 +147,7 @@ func fnName(line string) string {
 	return strings.TrimSuffix(line[i2:j], ".func1")
 }
 
+// fnLNro returns line number in the call stack line.
 func fnLNro(line string) int {
 	i := strings.LastIndex(line, "go:")
 	if i == -1 {
