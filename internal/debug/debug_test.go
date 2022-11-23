@@ -140,7 +140,7 @@ func TestFnLNro(t *testing.T) {
 	}
 }
 
-func Test_fnName(t *testing.T) {
+func TestFnName(t *testing.T) {
 	tests := []struct {
 		name   string
 		input  string
@@ -262,8 +262,6 @@ func TestFuncName(t *testing.T) {
 		{"basic", args{input2, StackInfo{"", "Handle", 1, nil}}, "ReturnW", 214},
 		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil}}, "ReturnW", 214},
 		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil}}, "ReturnW", 214},
-		//{"Returnw to get panic", args{input2, StackInfo{"", "Returnw", 1, nil}}, "panic", 838},
-		//{"Returnw", args{input1, StackInfo{"", "Returnw", 2, nil}}, "ReturnW", 315},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
