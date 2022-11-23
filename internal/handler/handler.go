@@ -44,7 +44,7 @@ type Info struct {
 }
 
 const (
-	wrapAnnot = ": %w"
+	wrapAnnot = ": %v"
 	wrapError = ": %w"
 )
 
@@ -189,9 +189,9 @@ func (i *Info) safeErr() error {
 }
 
 func (i *Info) wrapStr() string {
-	//	if i.Wrap {
-	//		return wrapError
-	//	}
+	if i.Wrap {
+		return wrapError
+	}
 	return wrapAnnot
 }
 
