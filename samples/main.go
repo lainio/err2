@@ -21,7 +21,7 @@ import (
 // returns error value describing the reason.
 func CopyFile(src, dst string) (err error) {
 	// You can comment below line out an see what happens...
-	defer err2.Returnf(&err, "copy file %s->%s", src, dst)
+	defer err2.Handle(&err)
 	// ... and you learn that call stacks are for every function level 'catch'
 	// statement like defer err2.Returnf() is.
 
