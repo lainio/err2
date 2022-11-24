@@ -33,7 +33,7 @@ func CopyFile(src, dst string) (err error) {
 
 	w, err := os.Create(dst)
 	if err != nil {
-		return fmt.Errorf("mixing checking: %v", err)
+		return fmt.Errorf("mixing traditional error checking: %v", err)
 	}
 	defer err2.Handle(&err, func() {
 		os.Remove(dst)
