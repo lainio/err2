@@ -53,7 +53,7 @@ func ExampleIs_errorHappensNot() {
 
 func ExampleIsEOF1() {
 	copyStream := func(src string) (s string, err error) {
-		defer err2.Handle(&err, "copy stream %s", src)
+		defer err2.Handle(&err)
 
 		in := bytes.NewBufferString(src)
 		tmp := make([]byte, 4)
