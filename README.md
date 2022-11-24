@@ -321,10 +321,10 @@ than getting unrelated panic somewhere else in the code later. There have also
 been cases when code reports error correctly because the 'upper' handler catches
 it.
 
-- Because the use of `err2.Handle` is so easy, error messages much better and
-informative. When using `err2.Handle`'s automatic annotation your error messages
-are always up-to-date. Even when you refactor your function name error message
-is also updated.
+- Because the use of `err2.Handle` is so easy, error messages much are better
+and informative. When using `err2.Handle`'s automatic annotation your error
+messages are always up-to-date. Even when you refactor your function name error
+message is also updated.
 
 - **When error handling is based on the actual error handlers, code changes have
 been much easier.**
@@ -364,5 +364,5 @@ Version history:
 - 0.8.11 Remove deprecations, new *global* err values and `try.IsXX` functions,
          more documentation.
 - 0.8.12 New super **Handle** for most of the use cases to simplify the API,
-         restructuring internal pkgs, **deferred handlers are 2x faster now**,
-         new documentation and tests, etc.
+         restructuring internal pkgs, **deferred error handlers are 2x faster
+         now**, new documentation and tests, etc.
