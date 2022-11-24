@@ -34,9 +34,10 @@ The package provides functions for **automatic error propagation**.
 The current version of Go tends to produce too much error checking and too
 little error handling. This package helps us fix that.
 
-1. It helps to declare error handlers with `defer`. If you're familiar Zig
-   language you can think `defer err2.Handle(&err,...)` lines exactly similar as
-   Zig's `errdefer`.
+1. It helps to declare error handlers with `defer`. If you're familiar [Zig
+   language](https://ziglang.org/) you can think `defer err2.Handle(&err,...)`
+   lines exactly similar as
+   [Zig's `errdefer`](https://ziglang.org/documentation/master/#errdefer).
 2. It helps to check and transport errors to the nearest (the defer-stack) error
    handler. 
 3. It helps us use design-by-contract type preconditions.
