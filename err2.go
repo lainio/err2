@@ -186,7 +186,6 @@ func Returnw(err *error, format string, args ...any) {
 		Err:    err,
 		Format: format,
 		Args:   args,
-		Wrap:   true,
 	})
 }
 

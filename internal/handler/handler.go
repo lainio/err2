@@ -24,7 +24,6 @@ type Info struct {
 	Err    *error // error transport pointer (i.e. in/output)
 	Format string // format string
 	Args   []any  // args for format string printing
-	Wrap   bool   // if true error wrapping "%w" is used, default is "%v"
 
 	// These are used if handler.Process caller sets them. If they aren't set
 	// handler uses package level variables from tracer.
