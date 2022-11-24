@@ -233,7 +233,7 @@ func PreProcess(info *Info, a ...any) {
 		// We want the function who sets the handler, i.e. calls the
 		// err2.Handle function via defer. Because call stack is in reverse
 		// order we need negative, and because the Handle caller is just
-		// previous AND funcName can serach! This is enouhg:
+		// previous AND funcName can serach! This is enough:
 		const lvl = -1
 		funcName, _, ok := debug.FuncName(debug.StackInfo{
 			PackageName: "",
