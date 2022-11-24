@@ -67,11 +67,7 @@ defer err2.Handle(&err)
 ```
 
 which is the helper handler for all the cases. See more information from its
-documentation. There still is a wrapping version `Returnw` even you will not
-need it.
-
-Our general guideline is:
-> Do not wrap an error when doing so would expose implementation details.
+documentation.
 
 #### Automatic And Optimized Error Stack Tracing
 
