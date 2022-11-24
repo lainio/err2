@@ -44,7 +44,6 @@ type Info struct {
 }
 
 const (
-	wrapAnnot = ": %v"
 	wrapError = ": %w"
 )
 
@@ -188,11 +187,10 @@ func (i *Info) safeErr() error {
 	return nil
 }
 
+// wrapStr returns always wrap string that means we are using "%w" to chain
+// errors to be able to use errors.Is and errors.As functions form Go stl.
 func (i *Info) wrapStr() string {
-	if i.Wrap {
-		return wrapError
-	}
-	return wrapAnnot
+	return wrapError
 }
 
 // WorkToDo returns if there is something to process. This is offered for
