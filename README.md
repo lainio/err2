@@ -1,6 +1,31 @@
 # err2
 
-The package provides functions for **automatic error propagation**.
+The package extends Go's error handling with **fully automatic error
+propagation** similar to other modern programming languages: Zig, Rust, Swift,
+etc.
+
+```go 
+func CopyFile(src, dst string) (err error) {
+	defer err2.Handle(&err)
+
+	assert.NotEmpty(src)
+	assert.NotEmpty(dst)
+
+	r := try.To1(os.Open(src))
+	defer r.Close()
+
+	w, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("mixing traditional error checking: %w", err)
+	}
+	defer err2.Handle(&err, func() {
+		os.Remove(dst)
+	})
+	defer w.Close()
+	try.To1(io.Copy(w, r))
+	return nil
+}
+```
 
 `go get github.com/lainio/err2`
 
@@ -10,7 +35,7 @@ The package provides functions for **automatic error propagation**.
   - [Automatic And Optimized Error Stack Tracing](#automatic-and-optimized-error-stack-tracing)
   - [Manual Stack Tracing](#manual-stack-tracing)
   - [Error Handler](#error-handler)
-- [Error checks](#Error-checks)
+- [Error Checks](#Error-checks)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
 - [Assertion (design by contract)](#assertion-design-by-contract)
@@ -135,7 +160,7 @@ many error handlers per function as you need.
 [Read the package documentation for more
 information](https://pkg.go.dev/github.com/lainio/err2).
 
-## Error checks
+## Error Checks
 
 The `try` package provides convenient helpers to check the errors. Since the Go
 1.18 we have been using generics to have fast and convenient error checking.
