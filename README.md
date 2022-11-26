@@ -143,7 +143,7 @@ The `try` package provides convenient helpers to check the errors. Since the Go
 For example, instead of
 
 ```go
-b, err := ioutil.ReadAll(r)
+b, err := io.ReadAll(r)
 if err != nil {
         return err
 }
@@ -151,7 +151,7 @@ if err != nil {
 ```
 we can call
 ```go
-b := try.To1(ioutil.ReadAll(r))
+b := try.To1(io.ReadAll(r))
 ...
 ```
 
@@ -363,3 +363,8 @@ Version history:
 - 0.8.12 New super **Handle** for most of the use cases to simplify the API,
          restructuring internal pkgs, **deferred error handlers are 2x faster
          now**, new documentation and tests, etc.
+
+Upcoming releases:
+- 0.9.0 Clean API: only `err2.Handle` for error returning functions.
+- 0.9.1 Clean API: `err2.CatchXXX` type assertions or many functions?
+- 0.9.2 Clean API: preparing to release 1.0.0 and freeze the API
