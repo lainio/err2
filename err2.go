@@ -151,7 +151,8 @@ func Throwf(format string, args ...any) {
 // annotate their errors. It's still needed to break panicking which is used for
 // error transport in err2. If you want to annotate errors see Returnf and
 // Returnw functions for more information.
-// Deprecated: use Handle instead.
+//
+// Deprecated: use err2.Handle instead.
 func Return(err *error) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -172,6 +173,8 @@ func Return(err *error) {
 // Returnw wraps an error with '%w'. It's similar to fmt.Errorf, but it's called
 // only if error != nil. If you don't want to wrap the error use Handle
 // instead.
+//
+// Deprecated: use err2.Handle instead.
 func Returnw(err *error, format string, args ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -191,7 +194,8 @@ func Returnw(err *error, format string, args ...any) {
 
 // Returnf builds an error. It's similar to fmt.Errorf, but it's called only if
 // error != nil. It uses '%v' to wrap the error not '%w'. Use Returnw for that.
-// Deprecated: use Handle instead.
+//
+// Deprecated: use err2.Handle instead.
 func Returnf(err *error, format string, args ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
