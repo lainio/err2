@@ -33,7 +33,7 @@ func CopyFile(src, dst string) (err error) {
 
 	w, err := os.Create(dst)
 	if err != nil {
-		return fmt.Errorf("mixing traditional error checking: %v", err)
+		return fmt.Errorf("mixing traditional error checking: %w", err)
 	}
 	defer err2.Handle(&err, func() {
 		os.Remove(dst)
@@ -48,7 +48,7 @@ func main() {
 	err2.SetErrorTracer(os.Stderr)
 
 	defer err2.Catch(func(err error) {
-		fmt.Println("ERROR in copy file:", err)
+		fmt.Println("ERROR:", err)
 	})
 
 	// You can select anyone of the try.To(CopyFile lines to play with and see
