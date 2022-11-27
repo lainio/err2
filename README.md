@@ -33,8 +33,7 @@ func CopyFile(src, dst string) (err error) {
 - [Automatic Error Propagation](#automatic-error-propagation)
 - [Error handling](#error-handling)
   - [Error Stack Tracing](#error-stack-tracing)
-  - [Stack Tracing](#stack-tracing)
-  - [Error Handler](#error-handler)
+  - [Manual Tracing](#manual-tracing)
 - [Error Checks](#Error-checks)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
@@ -100,7 +99,7 @@ This is the simplest form of `err2` automatic error handler:
 
 ```go
 func doSomething() (err error) {
-    // next: if err != nil { return ftm.Errorf("%s: %w", CUR_FUNC_NAME, err) }
+    // below: if err != nil { return ftm.Errorf("%s: %w", CUR_FUNC_NAME, err) }
     defer err2.Handle(&err) 
 ```
 
@@ -115,7 +114,7 @@ means that call stack is processed before output. That means that stack trace
 starts from where the actual error/panic is occurred and not from where the
 error is caught. You don't need to search your self the actual line where the
 pointer was nil or error was received. That line is in the first one you are
-seeing.
+seeing:
 
 ```console
 ---
@@ -172,10 +171,9 @@ b := try.To1(io.ReadAll(r))
 ...
 ```
 
-but not without an error handler (`Handle`) or it just panics your app if you
-don't have a `recovery` call in the current call stack. However, you can put
-your error handlers where ever you want in your call stack. That can be handy in
-the internal packages and certain types of algorithms.
+but not without an error handler (`err2.Handle`). However, you can put your
+error handlers where ever you want in your call stack. That can be handy in the
+internal packages and certain types of algorithms.
 
 We think that panicking for the errors at the start of the development is far
 better than not checking errors at all.
