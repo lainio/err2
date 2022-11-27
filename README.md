@@ -97,14 +97,17 @@ error handler. If there are no error handlers and error occurs the current
 function panics. However, if *any* function above in the call stack has `err2`
 error handler it will catch the error.
 
-This is the simplest form of `err2` error handler
+This is the simplest form of `err2` automatic error handler:
 
 ```go
-defer err2.Handle(&err)
+func doSomething() (err error) {
+    // next: if err != nil { return ftm.Errorf("%s: %w", FUNC_NAME, err) }
+    defer err2.Handle(&err) 
 ```
 
-which is the helper handler for all the cases. See more information from its
-documentation.
+which is the helper handler for all the cases. It also includes lots of
+automation like wrapping and annotating the returned error with the current
+function name. See more information from its documentation.
 
 #### Automatic And Optimized Error Stack Tracing
 
@@ -120,21 +123,6 @@ seeing.
 runtime error: index out of range [0] with length 0
 ---
 goroutine 1 [running]:
-main.test2({0x0, 0x0, 0x40XXXXXf00?}, 0x2?)
-	/home/.../go/src/github.com/lainio/ic/main.go:43 +0x14c
-main.main()
-	/home/.../go/src/github.com/lainio/ic/main.go:77 +0x248
-```
-
-Without optimization call stack would have **at least two** more call stack
-entries:
-
-```console
-goroutine 1 [running]:
-runtime/debug.Stack()
-	/usr/local/go/src/runtime/debug/stack.go:24 +0x68
-panic({0x12e3e0, 0x188f50})
-	/usr/local/go/src/runtime/panic.go:838 +0x20c
 main.test2({0x0, 0x0, 0x40XXXXXf00?}, 0x2?)
 	/home/.../go/src/github.com/lainio/ic/main.go:43 +0x14c
 main.main()
