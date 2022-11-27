@@ -59,13 +59,14 @@ func CopyFile(src, dst string) (err error) {
 The current version of Go tends to produce too much error checking and too
 little error handling. But most importantly it doesn't help developer with
 **automatic** error propagation, which would have same benefits than e.g.
-**automatic** garbage collection, or automatic testing has:
+**automatic** garbage collection, or automatic testing:
 
 > Automation is not just about efficiency but primarily about repeatability and
 > resilience. -- Gregor Hohpe
 
 The automatic error propagation is so important because it makes your code
-tolerant for the change, and it makes it to error safe. 
+tolerant for the change. And of course, it helps to make your code really error
+safe: 
 
 > Don't send human to do machine's job
 
