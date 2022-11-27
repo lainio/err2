@@ -32,8 +32,8 @@ func CopyFile(src, dst string) (err error) {
 - [Structure](#structure)
 - [Automatic Error Propagation](#automatic-error-propagation)
 - [Error handling](#error-handling)
-  - [Automatic And Optimized Error Stack Tracing](#automatic-and-optimized-error-stack-tracing)
-  - [Manual Stack Tracing](#manual-stack-tracing)
+  - [Error Stack Tracing](#error-stack-tracing)
+  - [Stack Tracing](#stack-tracing)
   - [Error Handler](#error-handler)
 - [Error Checks](#Error-checks)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
@@ -73,14 +73,13 @@ The err2 package is your automation buddy:
 
 1. It helps to declare error handlers with `defer`. If you're familiar [Zig
    language](https://ziglang.org/) you can think `defer err2.Handle(&err,...)`
-   lines exactly similar as
+   line exactly similar as
    [Zig's `errdefer`](https://ziglang.org/documentation/master/#errdefer).
 2. It helps to check and transport errors to the nearest (the defer-stack) error
    handler. 
 3. It helps us use design-by-contract type preconditions.
 4. It offers automatic stack tracing for every error, runtime error, or panic.
-   If you are familiar to Zig, the `err2` error traces and functionality is
-   analog with it.
+   If you are familiar to Zig, the `err2` error traces are same as Zig's.
 
 You can use all of them or just the other. However, if you use `try` for error
 checks you must remember use Go's `recover()` by yourself, or your error isn't
@@ -88,7 +87,7 @@ transformed to an `error` return value at any point.
 
 ## Error handling
 
-Package `err2` relies on Go's declarative programming structure `defer`. The
+The `err2` relies on Go's declarative programming structure `defer`. The
 `err2` helps to set deferred functions (error handlers) which are only called if
 `err != nil`.
 
@@ -101,18 +100,18 @@ This is the simplest form of `err2` automatic error handler:
 
 ```go
 func doSomething() (err error) {
-    // next: if err != nil { return ftm.Errorf("%s: %w", FUNC_NAME, err) }
+    // next: if err != nil { return ftm.Errorf("%s: %w", CUR_FUNC_NAME, err) }
     defer err2.Handle(&err) 
 ```
 
-which is the helper handler for all the cases. It also includes lots of
-automation like wrapping and annotating the returned error with the current
-function name. See more information from its documentation.
+See more information from `err2.Handle`'s documentation. It support several
+error handling scenarios. And remember that you can have as many error handlers
+per function as you need.
 
-#### Automatic And Optimized Error Stack Tracing
+#### Error Stack Tracing
 
-err2 offers optional stack tracing. It's automatic and optimized. Optimized
-means that call stack is processes before output. That means that stack trace
+The err2 offers optional stack tracing. It's automatic and optimized. Optimized
+means that call stack is processed before output. That means that stack trace
 starts from where the actual error/panic is occurred and not from where the
 error is caught. You don't need to search your self the actual line where the
 pointer was nil or error was received. That line is in the first one you are
@@ -142,20 +141,13 @@ If no `Tracer` is set no stack tracing is done. This is the default because in
 the most cases proper error messages are enough and panics are handled
 immediately anyhow.
 
-#### Manual Stack Tracing
+#### Manual Tracing
 
 The `err2` offers two error catchers for manual stack tracing: `CatchTrace` and
 `CatchAll`. The first one lets you handle errors and it will print the stack
 trace to `stderr` for panic and `runtime.Error`. The second is the same but you
 have a separate handler function for panic and `runtime.Error` so you can decide
 by yourself where to print them or what to do with them.
-
-#### Error Handler
-
-The `err2.Handle` is a helper function to add actual error handlers which are
-called only if an error has occurred. In most real-world cases, we have multiple
-error checks and only one or just a few error handlers. However, you can have as
-many error handlers per function as you need.
 
 [Read the package documentation for more
 information](https://pkg.go.dev/github.com/lainio/err2).
