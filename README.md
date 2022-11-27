@@ -67,8 +67,7 @@ little error handling. But most importantly, it doesn't help developers with
 Automatic error propagation is so important because it makes your code tolerant
 of the change. And, of course, it helps to make your code error-safe: 
 
-![Never send a human to do a machine's job]
-(https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
+![Never send a human to do a machine's job](https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
 
 The err2 package is your automation buddy:
 
