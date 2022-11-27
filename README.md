@@ -30,7 +30,7 @@ func CopyFile(src, dst string) (err error) {
 `go get github.com/lainio/err2`
 
 - [Structure](#structure)
-- [Automatic Error Propagation And Stack Tracing](#automatic-error-propagation-and-stack-tracing)
+- [Automatic Error Propagation](#automatic-error-propagation-and-stack-tracing)
 - [Error handling](#error-handling)
   - [Automatic And Optimized Error Stack Tracing](#automatic-and-optimized-error-stack-tracing)
   - [Manual Stack Tracing](#manual-stack-tracing)
@@ -54,10 +54,22 @@ func CopyFile(src, dst string) (err error) {
 - The `assert` package implements assertion helpers for **both** unit-testing
   and *design-by-contract*.
 
-## Automatic Error Propagation And Stack Tracing
+## Automatic Error Propagation
 
 The current version of Go tends to produce too much error checking and too
-little error handling. This package helps us fix that.
+little error handling. But most importantly it doesn't help developer with
+**automatic** error propagation, which has exact same benefits than e.g.
+**automatic** garbage collection, or automatic testing has:
+
+> Automation is not just about efficiency but primarily about repeatability and
+> resilience. -- Gregor Hohpe
+
+The automatic error propagation is so important because it makes your code
+tolerate to change, and it makes it to error safe. 
+
+> Don't send human to do machine's job
+
+The err2 package is your automation buddy:
 
 1. It helps to declare error handlers with `defer`. If you're familiar [Zig
    language](https://ziglang.org/) you can think `defer err2.Handle(&err,...)`
