@@ -30,7 +30,7 @@ func CopyFile(src, dst string) (err error) {
 `go get github.com/lainio/err2`
 
 - [Structure](#structure)
-- [Automatic Error Propagation](#automatic-error-propagation-and-stack-tracing)
+- [Automatic Error Propagation](#automatic-error-propagation)
 - [Error handling](#error-handling)
   - [Automatic And Optimized Error Stack Tracing](#automatic-and-optimized-error-stack-tracing)
   - [Manual Stack Tracing](#manual-stack-tracing)
@@ -58,14 +58,14 @@ func CopyFile(src, dst string) (err error) {
 
 The current version of Go tends to produce too much error checking and too
 little error handling. But most importantly it doesn't help developer with
-**automatic** error propagation, which has exact same benefits than e.g.
+**automatic** error propagation, which would have same benefits than e.g.
 **automatic** garbage collection, or automatic testing has:
 
 > Automation is not just about efficiency but primarily about repeatability and
 > resilience. -- Gregor Hohpe
 
 The automatic error propagation is so important because it makes your code
-tolerate to change, and it makes it to error safe. 
+tolerant for the change, and it makes it to error safe. 
 
 > Don't send human to do machine's job
 
