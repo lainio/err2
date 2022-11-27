@@ -57,18 +57,18 @@ func CopyFile(src, dst string) (err error) {
 ## Automatic Error Propagation
 
 The current version of Go tends to produce too much error checking and too
-little error handling. But most importantly it doesn't help developer with
-**automatic** error propagation, which would have same benefits than e.g.
-**automatic** garbage collection, or automatic testing:
+little error handling. But most importantly, it doesn't help developers with
+**automatic** error propagation, which would have the same benefits as, e.g.,
+**automated** garbage collection or automatic testing:
 
 > Automation is not just about efficiency but primarily about repeatability and
 > resilience. -- Gregor Hohpe
 
-The automatic error propagation is so important because it makes your code
-tolerant for the change. And of course, it helps to make your code really error
-safe: 
+Automatic error propagation is so important because it makes your code tolerant
+of the change. And, of course, it helps to make your code error-safe: 
 
-> Don't send human to do machine's job
+![Never send a human to do a machine's job]
+(https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
 
 The err2 package is your automation buddy:
 
