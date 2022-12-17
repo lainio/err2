@@ -130,21 +130,14 @@ func fnName(line string) string {
 		i++ // do not include '/'
 	}
 
-	i2 := strings.IndexRune(line[i:], '.')
-	if i2 == -1 {
-		i2 = i
-	} else {
-		i2 += i + 1
-	}
-
-	j := strings.LastIndex(line[i2:], "(")
+	j := strings.LastIndex(line[i:], "(")
 	if j == -1 {
 		j = len(line)
 	} else {
-		j += i2
+		j += i
 	}
 
-	return strings.TrimSuffix(line[i2:j], ".func1")
+	return strings.TrimSuffix(line[i:j], ".func1")
 }
 
 // fnLNro returns line number in the call stack line.
