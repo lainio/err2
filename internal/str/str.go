@@ -20,22 +20,41 @@ func CamelRegexp(str string) string {
 	return str
 }
 
-// Decamel return the given string as space delimeted.
+// Decamel return the given string as space delimeted. It's optimized to split
+// and decamel function names returned from Go call stacks. For more information
+// see its test cases.
 func Decamel(s string) string {
 	var (
-		b                   strings.Builder
-		splittable, isUpper bool
+		b           strings.Builder
+		splittable  bool
+		isUpper     bool
+		prevSkipped bool
 	)
-	for _, v := range s {
+	for i, v := range s {
+		skip := v == '(' || v == ')' || v == '*'
+		if skip {
+			if !prevSkipped && i != 0 { // first time write space
+				b.WriteRune(' ')
+			}
+			prevSkipped = skip
+			continue
+		}
 		isUpper = unicode.IsUpper(v)
 		if isUpper {
 			v = unicode.ToLower(v)
-			if splittable {
-				b.WriteByte(' ')
+			if !prevSkipped && splittable {
+				b.WriteRune(' ')
+				prevSkipped = true
 			}
 		}
-		if v == '.' || v == '_' {
+		toSpace := v == '.' || v == '_'
+		if prevSkipped && toSpace {
+			continue
+		} else if !prevSkipped && toSpace {
 			v = ' '
+			prevSkipped = true
+		} else {
+			prevSkipped = false
 		}
 		b.WriteRune(v)
 		splittable = !isUpper || unicode.IsNumber(v)
