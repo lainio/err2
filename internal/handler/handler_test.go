@@ -162,7 +162,7 @@ func TestPreProcess_debug(t *testing.T) {
 		nilHandlerCalled, true)
 
 	// See the name of this test function. Decamel it + error
-	const want = "t runner: error"
+	const want = "testing t runner: error"
 	helper.Requiref(t, want == myErrVal.Error(),
 		"got: %v, want: %v", myErrVal.Error(), want)
 

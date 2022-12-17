@@ -291,7 +291,7 @@ func ExampleHandle_errThrow() {
 	}
 	err := transport()
 	fmt.Printf("%v", err)
-	// Output: run example: our error
+	// Output: testing run example: our error
 }
 
 func ExampleHandle_errReturn() {

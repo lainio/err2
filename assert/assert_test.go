@@ -18,7 +18,7 @@ func ExampleAsserter_True() {
 	}
 	err := sample()
 	fmt.Printf("%v", err)
-	// Output: run example: assertion test
+	// Output: testing run example: assertion test
 }
 
 func ExampleAsserter_Truef() {
