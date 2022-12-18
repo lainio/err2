@@ -16,5 +16,9 @@ func SetFormatter(fmter format.Interface) {
 }
 
 func Formatter() format.Interface {
-	return formatter.Load().(format.Interface)
+	fmter, ok := formatter.Load().(format.Interface)
+	if ok {
+		return fmter
+	}
+	return nil
 }

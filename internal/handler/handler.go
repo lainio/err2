@@ -243,7 +243,9 @@ func PreProcess(info *Info, a ...any) {
 		})
 		if ok {
 			fmter := fmtstore.Formatter()
-			info.Format = fmter.Format(funcName)
+			if fmter != nil {
+				info.Format = fmter.Format(funcName)
+			}
 		}
 	}
 
