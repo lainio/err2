@@ -14,6 +14,7 @@ import (
 
 	"github.com/lainio/err2"
 	"github.com/lainio/err2/assert"
+	"github.com/lainio/err2/formatter"
 	"github.com/lainio/err2/try"
 )
 
@@ -46,6 +47,9 @@ func CopyFile(src, dst string) (err error) {
 func main() {
 	// To see how automatic stack tracing works.
 	err2.SetErrorTracer(os.Stderr)
+	// to see how there is two predefined formatters and own can be
+	// implemented.
+	err2.SetFormatter(formatter.Noop) // default is formatter.Decamel
 
 	defer err2.Catch(func(err error) {
 		fmt.Println("ERROR:", err)
