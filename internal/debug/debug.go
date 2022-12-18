@@ -123,6 +123,9 @@ func notOurFunction(line string) bool {
 
 // fnName returns cleaned name of the function in the call stack line.
 func fnName(line string) string {
+	// remove main pkg name from func names because it ruins error msgs.
+	line = strings.TrimPrefix(line, "main.")
+
 	i := strings.LastIndex(line, "/")
 	if i == -1 {
 		i = 0
@@ -137,6 +140,8 @@ func fnName(line string) string {
 		j += i
 	}
 
+	// anonymous functions aren't usefull.
+	// TODO: use count and replace funcs to replace instanses of .func2, ..
 	return strings.TrimSuffix(line[i:j], ".func1")
 }
 
