@@ -9,6 +9,7 @@ import (
 
 	"github.com/lainio/err2/internal/debug"
 	fmtstore "github.com/lainio/err2/internal/formatter"
+	"github.com/lainio/err2/internal/str"
 	"github.com/lainio/err2/internal/tracer"
 )
 
@@ -216,6 +217,7 @@ func Process(info *Info) {
 	}
 }
 
+//nolint:nestif
 func PreProcess(info *Info, a ...any) {
 	if len(a) > 0 {
 		switch first := a[0].(type) {
@@ -243,8 +245,10 @@ func PreProcess(info *Info, a ...any) {
 		})
 		if ok {
 			fmter := fmtstore.Formatter()
-			if fmter != nil {
+			if fmter != nil { // TODO: check the init order!
 				info.Format = fmter.Format(funcName)
+			} else {
+				info.Format = str.Decamel(funcName)
 			}
 		}
 	}
