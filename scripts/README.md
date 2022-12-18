@@ -3,13 +3,17 @@
 The err2 package will offer auto-migration scripts until version 1.0.0 is
 published. That means that you can safely use the package even the API is not
 yet 100% staple. We have used that approach for our production code that uses
-`errw` and it works very well. Over 100 KLOC Go code has been auto-migrated
+`err2` and it works very well. Over 100 KLOC Go code has been auto-migrated
 successfully from type variables (see below) to Go generics API.
 
 This readme will guide you to use auto-migration scripts when ever we deprecate
 functions or make something obsolete.
 
-### `err2.Annotate` and `err2.StackTraceWriter` will be obsolete in v 0.8.10
+### `err2.Return(f/w)` will obsolete in v 0.9.0
+
+Please follow the same steps as the next chapter.
+
+### `err2.Annotate` and `err2.StackTraceWriter` are obsolete in v 0.8.10
 
 Please follow these guides to automatically replace all obsolete `err2.Annotate`
 functions and `err2.StackTraceWriter` variable set with proper API:
@@ -46,6 +50,10 @@ First, to make the use of it more convenient:
    ```console
    cd err2/scripts
    source ./set-path.sh
+   ```
+   or this works as well:
+   ```console
+   source <RELATIVE_PATH_TO>/err2/scripts/set-path.sh
    ```
 
 Second, to update your repo for latest `err2` interface.
