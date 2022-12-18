@@ -272,7 +272,7 @@ var (
 
 var (
 	// Important 'cause our errors are ptrs to error interface
-	nilError error = nil
+	nilError error
 
 	myErrVal = errVal
 	myErrRT  = errRT
