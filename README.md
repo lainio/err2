@@ -378,6 +378,8 @@ Version history:
 - 0.8.12 New super **Handle** for most of the use cases to simplify the API,
          restructuring internal pkgs, **deferred error handlers are 2x faster
          now**, new documentation and tests, etc.
+- 0.8.13 **Bug-fix:** automatic error strings for methods, and added API to set
+         preferred error string *Formatter* or implement own.
 
 Upcoming releases:
 - 0.9.0 Clean API: only `err2.Handle` for error returning functions.
