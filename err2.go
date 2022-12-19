@@ -8,7 +8,7 @@ import (
 	"github.com/lainio/err2/internal/handler"
 )
 
-//nolint
+// nolint
 var (
 	// NotFound is similar *no-error* like io.EOF for those who really want to
 	// use error return values to transport non errors. It's far better to have
