@@ -15,7 +15,7 @@ var (
 
 	// D is a development Asserter that sets panic objects to strings that
 	// doesn't by caught by err2 handlers.
-	D Asserter = AsserterDebug
+	D = AsserterDebug
 
 	// DefaultAsserter is a default asserter used for package-level functions
 	// like assert.That(). It is the same as the production asserter P, which
@@ -31,7 +31,7 @@ var (
 
 var (
 	// testers is must be set if assertion package is used for the unit testing.
-	testers map[int]testing.TB = make(map[int]testing.TB)
+	testers = make(map[int]testing.TB)
 )
 
 const (

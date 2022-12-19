@@ -149,11 +149,17 @@ func TestFnName(t *testing.T) {
 		{"panic", "panic({0x102ed30c0, 0x1035910f0})",
 			"panic"},
 		{"our namespace", "github.com/lainio/err2/internal/debug.FprintStack({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
-			"FprintStack"},
+			"debug.FprintStack"},
+		{"our namespace and func1", "github.com/lainio/err2/internal/debug.FprintStack.func1({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
+			"debug.FprintStack"},
 		{"our double namespace", "github.com/lainio/err2/internal/handler.Info.callPanicHandler({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
-			"Info.callPanicHandler"},
+			"handler.Info.callPanicHandler"},
 		{"our handler process", "github.com/lainio/err2/internal/handler.Process.func1({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
-			"Process"},
+			"handler.Process"},
+		{"our handler process and more anonymous funcs", "github.com/lainio/err2/internal/handler.Process.func1.2({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
+			"handler.Process"},
+		{"method and package name", "github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).AssertWallet(...)",
+			"ssi.(*DIDAgent).AssertWallet"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -259,9 +265,10 @@ func TestFuncName(t *testing.T) {
 		output string
 		outln  int
 	}{
-		{"basic", args{input2, StackInfo{"", "Handle", 1, nil}}, "ReturnW", 214},
-		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil}}, "ReturnW", 214},
-		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil}}, "ReturnW", 214},
+		{"basic", args{input2, StackInfo{"", "Handle", 1, nil}}, "err2.ReturnW", 214},
+		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil}}, "err2.ReturnW", 214},
+		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil}}, "err2.ReturnW", 214},
+		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil}}, "ssi.(*DIDAgent).AssertWallet", 146},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -316,7 +323,7 @@ testing.tRunner.func1()
         /usr/local/go/src/testing/testing.go:1392 +0x380
 panic({0xa8e0e0, 0x40001937d0})
         /usr/local/go/src/runtime/panic.go:838 +0x20c
-github.com/lainio/err2.Catch(0xd14818)
+github.com/lainio/err2.Handle(0xd14818)
         /home/god/go/src/github.com/lainio/err2/err2.go:133 +0xac
 panic({0xa8e0e0, 0x40001937d0})
         /usr/local/go/src/runtime/panic.go:838 +0x20c

@@ -74,6 +74,7 @@ echo "processing..."
 
 replace_tracers
 replace_annotate
+replace_return
 replace_easy1
 replace_2
 

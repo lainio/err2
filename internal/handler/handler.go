@@ -4,9 +4,11 @@ package handler
 import (
 	"fmt"
 	"io"
+	"os"
 	"runtime"
 
 	"github.com/lainio/err2/internal/debug"
+	fmtstore "github.com/lainio/err2/internal/formatter"
 	"github.com/lainio/err2/internal/str"
 	"github.com/lainio/err2/internal/tracer"
 )
@@ -215,6 +217,7 @@ func Process(info *Info) {
 	}
 }
 
+//nolint:nestif
 func PreProcess(info *Info, a ...any) {
 	if len(a) > 0 {
 		switch first := a[0].(type) {
@@ -224,21 +227,29 @@ func PreProcess(info *Info, a ...any) {
 		case NilHandler:
 			info.NilHandler = first
 		default:
-			println("unknown type")
+			// we don't panic because we can already be in recovery, but lets
+			// try to show an error message at least.
+			fmt.Fprintln(os.Stderr, "fatal error: err2.Handle: unsupported type")
 		}
 	} else {
 		// We want the function who sets the handler, i.e. calls the
 		// err2.Handle function via defer. Because call stack is in reverse
 		// order we need negative, and because the Handle caller is just
-		// previous AND funcName can serach! This is enough:
+		// previous AND funcName can search! This is enough:
 		const lvl = -1
+
 		funcName, _, ok := debug.FuncName(debug.StackInfo{
 			PackageName: "",
 			FuncName:    "Handle", // err2.Handle is anchor
 			Level:       lvl,
 		})
 		if ok {
-			info.Format = str.Decamel(funcName)
+			fmter := fmtstore.Formatter()
+			if fmter != nil { // TODO: check the init order!
+				info.Format = fmter.Format(funcName)
+			} else {
+				info.Format = str.Decamel(funcName)
+			}
 		}
 	}
 
