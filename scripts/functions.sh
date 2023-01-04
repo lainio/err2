@@ -122,7 +122,7 @@ replace_annotate2() {
 }
 
 replace_return_blain() {
-	"$location"/replace-perl.sh 'defer err2\.Return\(\&err\)' 'defer err2.Handle(&err, func() {})'
+	"$location"/replace-perl.sh 'defer err2\.Return\(\&err\)' 'defer err2.Handle(&err, nil)'
 	"$location"/replace-perl.sh 'defer err2\.Returnf\(' 'defer err2.Handle('
 	"$location"/replace-perl.sh 'defer err2\.Returnw\(' 'defer err2.Handle('
 }
