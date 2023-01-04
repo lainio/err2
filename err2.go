@@ -47,7 +47,6 @@ var (
 //
 //	func SaveData(...) {
 //	     defer err2.Handle(&err, nil) // nil arg disable automatic annotation.
-//
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
