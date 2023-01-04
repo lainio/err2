@@ -38,6 +38,16 @@ var (
 //
 //	func SaveData(...) {
 //	     defer err2.Handle(&err) // if err != nil: annotation is "save data:"
+//
+// Note. If you are still using sentinel errors you must be careful with the
+// automatic error annotation because it uses wrapping. If you must keep the
+// error value got from error checks: 'try.To(..)', you must disable automatic
+// error annotation, or set the returned error values in the handler function.
+// Disabling can be done by setting second argument nil:
+//
+//	func SaveData(...) {
+//	     defer err2.Handle(&err, nil) // nil arg disable automatic annotation.
+//
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.

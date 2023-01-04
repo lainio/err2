@@ -226,6 +226,8 @@ func PreProcess(info *Info, a ...any) {
 			info.Args = a[1:]
 		case NilHandler:
 			info.NilHandler = first
+		case nil:
+			info.NilHandler = NilNoop
 		default:
 			// we don't panic because we can already be in recovery, but lets
 			// try to show an error message at least.
