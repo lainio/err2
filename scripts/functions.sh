@@ -121,6 +121,12 @@ replace_annotate2() {
 	"$location"/replace-perl.sh 'defer err2\.Annotatew\(' 'defer err2.Handle('
 }
 
+replace_return_blain() {
+	"$location"/replace-perl.sh 'defer err2\.Return\(\&err\)' 'defer err2.Handle(&err, func() {})'
+	"$location"/replace-perl.sh 'defer err2\.Returnf\(' 'defer err2.Handle('
+	"$location"/replace-perl.sh 'defer err2\.Returnw\(' 'defer err2.Handle('
+}
+
 replace_return() {
 	"$location"/replace-perl.sh 'defer err2\.Return\(' 'defer err2.Handle('
 	"$location"/replace-perl.sh 'defer err2\.Returnf\(' 'defer err2.Handle('
