@@ -6,7 +6,7 @@ location=$(dirname "$BASH_SOURCE")
 set -e
 
 # =================== main =====================
-while getopts 'dnvoum:' OPTION; do
+while getopts 'dnvoumh:' OPTION; do
 	case "$OPTION" in
 	n)
 		vlog "no commits"
@@ -32,9 +32,14 @@ while getopts 'dnvoum:' OPTION; do
 		migration_branch="$OPTARG"
 		vlog "migration_branch = $OPTARG"
 		;;
+	h)
+		egrep '^.*\(\) \{' $location/functions.sh | egrep $OPTARG
+		exit 1
+		;;
 	?)
 		echo "usage: $(basename $0) [-n] [-v] [-o] [-u] [-m runmode] [functions...]" >&2
 		echo "       n: no commit" >&2
+		echo "       h: print functions" >&2
 		echo "       d: add debug output" >&2
 		echo "       v: verbose" >&2
 		echo "       o: only simple migrations" >&2
@@ -48,7 +53,9 @@ shift "$(($OPTIND -1))"
 
 migration_branch=${migration_branch:-"err2-auto-update"}
 no_commit=${no_commit:-"1"}
-start_branch=$(git rev-parse --abbrev-ref HEAD)
+if [[ $no_commit != "1" ]]; then
+	start_branch=$(git rev-parse --abbrev-ref HEAD)
+fi
 use_current_branch=${use_current_branch:-""}
 only_simple=${only_simple:-""}
 
