@@ -33,7 +33,7 @@ while getopts 'dnvoumh:' OPTION; do
 		vlog "migration_branch = $OPTARG"
 		;;
 	h)
-		egrep '^.*\(\) \{' $location/functions.sh | egrep $OPTARG
+		egrep '^.*\(\) \{' $location/functions.sh | egrep $OPTARG | sed -E 's/\(\) \{//g'
 		exit 1
 		;;
 	?)
