@@ -10,7 +10,7 @@ filtered_build() {
 
 	if [[ $del != "" ]]; then
 		eval $del
-		dlog "filter prosessing working"
+		dlog "filter processing working"
 		echo "FILTER"
 	else
 		if [[ $res != "" ]]; then
@@ -55,7 +55,7 @@ check_prerequisites() {
 	done
 
 	if [[ $allow_subdir == "" && $(git rev-parse --show-toplevel 2>/dev/null) != "$PWD" ]]; then
-		echo "ERR: your current dir must be repo's rood dir" >&2
+		echo "ERR: your current dir must be repo's root dir" >&2
 		exit 1
 	fi
 
@@ -98,7 +98,7 @@ check_build() {
 
 add_assert_import() {
 	vlog "add push/pop"
-	"$location"/replace.sh '\"github.com\/stretchr\/testify\/(require|assert)\"' '(^func Test.*$)' '\1\n\tassert.PushTester(t)\n\tdefer assert.PopTester()' 
+	"$location"/replace-perl.sh '\"github.com\/stretchr\/testify\/(require|assert)\"' '(^func Test)(?!Main)(.*$)' '\1\2\n\tassert.PushTester(t)\n\tdefer assert.PopTester()' 
 	vlog "add push/pop for t.Run"
 	"$location"/replace.sh '\"github.com\/stretchr\/testify\/(require|assert)\"' '(^\s*)(t\.Run\(.*$)' '\1\2\n\1assert.PushTester(t)\n\1defer assert.PopTester()' 
 
@@ -112,6 +112,7 @@ replace_assert() {
 	"$location"/replace-perl.sh '(assert|require)\.(Nil\()(t,)(.*\))' 'assert.SNil(\4'
 	"$location"/replace-perl.sh '(assert|require)\.(False\()(t,)(.*\))' 'assert.ThatNot(\4'
 	"$location"/replace-perl.sh '(assert|require)\.(True\()(t,)(.*\))' 'assert.That(\4'
+	"$location"/replace-perl.sh '(assert|require)\.(Equal\()(t,)(.*\))' 'assert.DeepEqual(\4'
 	"$location"/replace-perl.sh '(assert|require)\.(\w*\()(t,)(.*\))' 'assert.\2\4'
 }
 
@@ -248,7 +249,7 @@ check_commit() {
 			# revert changes per bad file that we can test builds
 			# this is not perfect because we cannot test 'go builds'
 			# per file but package and if package is large one bad
-			# eg can ruine it.
+			# e.g can ruin it.
 			bads+="${file} "
 			undo_one $file
 		fi
@@ -367,25 +368,25 @@ try_0() {
 }
 
 multiline_3() {
-	dlog "Combine multiline try.To3() calls: $search_3_multi"
+	dlog "Combine multi-line try.To3() calls: $search_3_multi"
 	check_commit "$search_3_multi" '\1\3try.To3(\4)'
 }
 
 multiline_2() {
-	dlog "Combine multiline try.To2() calls"
+	dlog "Combine multi-line try.To2() calls"
 	#check_commit '(^\s*\w*, \w*)(, err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' '\1\3try.To2(\4)'
 	check_commit "$search_2_multi" '\1\3try.To2(\4)'
 }
 
 
 multiline_1() {
-	dlog "Combine multiline try.To1() calls: following lines"
+	dlog "Combine multi-line try.To1() calls: following lines"
 	dlog "$search_1_multi"
 	check_commit "$search_1_multi" '\1\3try.To1(\4)'
 }
 
 multiline_0() {
-	dlog "Combine multiline err = XXXXX()\ntry.To() calls: following lines"
+	dlog "Combine multi-line err = XXXXX()\ntry.To() calls: following lines"
 	check_commit "$search_0_multi" '\1try.To(\4)'
 }
 
@@ -413,4 +414,14 @@ todo2() {
 todo2l() {
 	dlog "Searching lone: try.To(err) and listing files"
 	ag -l  '^\s*try\.To\(err\)$'
+}
+
+lint() {
+	dlog "Linter check for missing defers"
+	ag '^\s*err2\.(Handle|Catch)'
+}
+
+lint_ok_handle() {
+	dlog "Linter check for missing defers"
+	ag '^\s*defer err2\.(Handle|Catch)'
 }
