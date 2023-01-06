@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
+
+	"golang.org/x/exp/constraints"
 )
 
 var (
@@ -109,7 +111,7 @@ func That(term bool, a ...any) {
 	}
 }
 
-// NotNil asserts that the value is not nil. If it is it panics/errors (default
+// NotNil asserts that the value IS NOT nil. If it is it panics/errors (default
 // Asserter) with the given message.
 func NotNil[T any](p *T, a ...any) {
 	if p == nil {
@@ -117,6 +119,18 @@ func NotNil[T any](p *T, a ...any) {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": pointer is nil"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// Nil asserts that the value IS nil. If it is not it panics/errors (default
+// Asserter) with the given message.
+func Nil[T any](p *T, a ...any) {
+	if p != nil {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := assertionMsg + ": pointer is NOT nil"
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -374,6 +388,19 @@ func Error(err error, a ...any) {
 	}
 }
 
+// Zero asserts that the value is 0. If it is not it panics with the given
+// formatting string. Thanks to inlining, the performance penalty is equal to a
+// single 'if-statement' that is almost nothing.
+func Zero[T Number](val T, a ...any) {
+	if val != 0 {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := assertionMsg + ": value isn't zero"
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
 func combineArgs(format string, a []any) []any {
 	args := make([]any, 1, len(a)+1)
 	args[0] = format
@@ -390,4 +417,8 @@ func goid() int {
 		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
 	}
 	return id
+}
+
+type Number interface {
+	constraints.Float | constraints.Integer
 }
