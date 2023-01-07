@@ -111,7 +111,7 @@ func That(term bool, a ...any) {
 	}
 }
 
-// NotNil asserts that the value IS NOT nil. If it is it panics/errors (default
+// NotNil asserts that the pointer IS NOT nil. If it is it panics/errors (default
 // Asserter) with the given message.
 func NotNil[T any](p *T, a ...any) {
 	if p == nil {
@@ -123,7 +123,7 @@ func NotNil[T any](p *T, a ...any) {
 	}
 }
 
-// Nil asserts that the value IS nil. If it is not it panics/errors (default
+// Nil asserts that the pointer IS nil. If it is not it panics/errors (default
 // Asserter) with the given message.
 func Nil[T any](p *T, a ...any) {
 	if p != nil {
