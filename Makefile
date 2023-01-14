@@ -9,8 +9,8 @@ PKGS := $(PKG1) $(PKG2) $(PKG3) $(PKG4) $(PKG5)
 
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
-GO := go
-# GO := go1.18beta2
+GO ?= go
+# GO ?= go1.20rc2
 
 check: lint vet gofmt test
 
