@@ -39,6 +39,7 @@ func CopyFile(src, dst string) (err error) {
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
 - [Assertion (design by contract)](#assertion-design-by-contract)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
+- [Code Snippets](#code-snippets)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
 - [Support](#support)
@@ -288,6 +289,14 @@ during the execution of called functions like above `NewWebOfTrust()` function
 instead of the actual Test function, it's reported as normal test failure. That
 means that we don't need to open our internal preconditions just for testing.
 
+## Code Snippets
+
+Most of the repetitive code blocks are offered as code snippets. They are in
+`./snippets` in VC code format, which is well supported e.g. vim, etc.
+
+The snippets must be installed manually to your preferred IDE/editor. During the
+installation you can modify the according your style or add new ones. We would
+prefer if you could contribute some of the back to the err2 package.
 
 ## Background
 
@@ -380,6 +389,7 @@ Version history:
          now**, new documentation and tests, etc.
 - 0.8.13 **Bug-fix:** automatic error strings for methods, and added API to set
          preferred error string *Formatter* or implement own.
+- 8.8.14 `err2.Handle` supports sentinel errors, code snippets, asserts, etc.
 
 Upcoming releases:
 - 0.9.0 Clean API: only `err2.Handle` for error returning functions.
