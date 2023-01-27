@@ -146,6 +146,10 @@ replace_annotate() {
 	"$location"/replace-perl.sh 'err2\.(Annotatew\()(.*)(, )(.*)(\)\n)' 'err2.Returnw(\4\3\2\5'
 }
 
+replace_catchtrace() {
+	"$location"/replace-perl.sh 'defer err2\.CatchTrace\(' 'defer err2.Catch('
+}
+
 replace_easy1() {
 	vlog "Replacing err2.Check, err2.FilterTry, err2.TryEOF, and type vars"
 

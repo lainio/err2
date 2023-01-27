@@ -89,47 +89,6 @@ func TestPanickingCatchAll(t *testing.T) {
 	}
 }
 
-func TestPanickingCatchTrace(t *testing.T) {
-	type args struct {
-		f func()
-	}
-	tests := []struct {
-		name  string
-		args  args
-		wants error
-	}{
-		{"general panic",
-			args{
-				func() {
-					defer err2.CatchTrace(func(err error) {})
-					panic("panic")
-				},
-			},
-			nil,
-		},
-		{"runtime.error panic",
-			args{
-				func() {
-					defer err2.CatchTrace(func(err error) {})
-					var b []byte
-					b[0] = 0
-				},
-			},
-			nil,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			defer func() {
-				if recover() != nil {
-					t.Error("panics should NOT carry on when tracing")
-				}
-			}()
-			tt.args.f()
-		})
-	}
-}
-
 func TestPanickingCarryOn_Handle(t *testing.T) {
 	type args struct {
 		f func()

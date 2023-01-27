@@ -68,8 +68,7 @@ func Handle(err *error, a ...any) {
 // Catch is a convenient helper to those functions that doesn't return errors.
 // There can be only one deferred Catch function per non error returning
 // function like main(). It doesn't catch panics and runtime errors. If that's
-// important use CatchAll or CatchTrace instead. See Handle for more
-// information.
+// important use CatchAll. See Handle for more information.
 func Catch(f func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -87,9 +86,8 @@ func Catch(f func(err error)) {
 }
 
 // CatchAll is a helper function to catch and write handlers for all errors and
-// all panics thrown in the current go routine. It and CatchTrace are preferred
-// helpers for go workers on long running servers, because they stop panics as
-// well.
+// all panics thrown in the current go routine. It is preferred helper for go
+// workers on long running servers, because they stop panics as well.
 //
 // Note, if any Tracer is set stack traces are printed automatically. If you
 // want to do it in the handlers by yourself, auto tracers should be nil.
@@ -119,6 +117,8 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // isn't set. If it's set it prints both. The panic trace is printed to stderr.
 // If you need panic trace to be printed to some other io.Writer than os.Stderr,
 // you should use CatchAll or Catch with tracers.
+//
+// Deprecated: Use err2.Catch() and err2.SetPanicTracer() together instead.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
