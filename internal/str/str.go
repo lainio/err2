@@ -48,11 +48,13 @@ func Decamel(s string) string {
 			}
 		}
 		toSpace := v == '.' || v == '_'
-		if prevSkipped && toSpace {
-			continue
-		} else if !prevSkipped && toSpace {
-			v = ' '
-			prevSkipped = true
+		if toSpace {
+			if prevSkipped {
+				continue
+			} else {
+				v = ' '
+				prevSkipped = true
+			}
 		} else {
 			prevSkipped = false
 		}
