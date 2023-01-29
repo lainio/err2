@@ -39,14 +39,6 @@ func Decamel(s string) string {
 			prevSkipped = skip
 			continue
 		}
-		isUpper = unicode.IsUpper(v)
-		if isUpper {
-			v = unicode.ToLower(v)
-			if !prevSkipped && splittable {
-				b.WriteRune(' ')
-				prevSkipped = true
-			}
-		}
 		toSpace := v == '.' || v == '_'
 		if toSpace {
 			if prevSkipped {
@@ -56,7 +48,16 @@ func Decamel(s string) string {
 				prevSkipped = true
 			}
 		} else {
-			prevSkipped = false
+			isUpper = unicode.IsUpper(v)
+			if isUpper {
+				v = unicode.ToLower(v)
+				if !prevSkipped && splittable {
+					b.WriteRune(' ')
+					prevSkipped = true
+				}
+			} else {
+				prevSkipped = false
+			}
 		}
 		b.WriteRune(v)
 		splittable = !isUpper || unicode.IsNumber(v)
