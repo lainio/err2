@@ -22,6 +22,10 @@ linters-settings:
       - wrapperFunc
   gocyclo:
     min-complexity: 15
+  nestif:
+    # Minimal complexity of if statements to report.
+    # Default: 5
+    min-complexity: 8
   gomnd:
     settings:
       mnd:
