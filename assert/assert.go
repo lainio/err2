@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"sync"
 	"testing"
 
 	"golang.org/x/exp/constraints"
@@ -33,7 +34,12 @@ var (
 
 var (
 	// testers is must be set if assertion package is used for the unit testing.
-	testers = make(map[int]testing.TB)
+	testers = struct {
+		sync.RWMutex
+		m map[int]testing.TB
+	}{
+		m: make(map[int]testing.TB),
+	}
 )
 
 const (
@@ -57,7 +63,9 @@ func PushTester(t testing.TB) {
 		// it's good to keep the API as simple as possible
 		DefaultAsserter = AsserterUnitTesting
 	}
-	testers[goid()] = t
+	testers.Lock()
+	testers.m[goid()] = t
+	testers.Unlock()
 }
 
 // PopTester pops the testing context reference from the memory. This isn't
@@ -73,11 +81,15 @@ func PushTester(t testing.TB) {
 //		})
 //	}
 func PopTester() {
-	delete(testers, goid())
+	testers.Lock()
+	defer testers.Unlock()
+	delete(testers.m, goid())
 }
 
 func tester() testing.TB {
-	return testers[goid()]
+	testers.RLock()
+	defer testers.RUnlock()
+	return testers.m[goid()]
 }
 
 // NotImplemented always panics with 'not implemented' assertion message.
@@ -214,7 +226,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want different", val)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
@@ -253,7 +265,23 @@ func NotDeepEqual(val, want any, a ...any) {
 		if DefaultAsserter.isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want different", val)
+		DefaultAsserter.reportAssertionFault(defMsg, a...)
+	}
+}
+
+// Len asserts that the length of the string is equal to the given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func Len(obj string, length int, a ...any) {
+	l := len(obj)
+
+	if l != length {
+		if DefaultAsserter.isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
 		DefaultAsserter.reportAssertionFault(defMsg, a...)
 	}
 }
