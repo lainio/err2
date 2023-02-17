@@ -60,8 +60,9 @@ func Handle(err *error, a ...any) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	handler.PreProcess(&handler.Info{
-		Any: r,
-		Err: err,
+		CallerName: "Handle",
+		Any:        r,
+		Err:        err,
 	}, a...)
 }
 
@@ -69,7 +70,7 @@ func Handle(err *error, a ...any) {
 // There can be only one deferred Catch function per non error returning
 // function like main(). It doesn't catch panics and runtime errors. If that's
 // important use CatchAll. See Handle for more information.
-func Catch(f func(err error)) {
+func Catch(a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
 	r := recover()
@@ -78,11 +79,11 @@ func Catch(f func(err error)) {
 		return
 	}
 
-	handler.Process(&handler.Info{
-		Any:          r,
-		ErrorHandler: f,
-		NilHandler:   handler.NilNoop,
-	})
+	handler.PreProcess(&handler.Info{
+		CallerName: "Catch",
+		Any:        r,
+		NilHandler: handler.NilNoop,
+	}, a...)
 }
 
 // CatchAll is a helper function to catch and write handlers for all errors and
@@ -91,6 +92,7 @@ func Catch(f func(err error)) {
 //
 // Note, if any Tracer is set stack traces are printed automatically. If you
 // want to do it in the handlers by yourself, auto tracers should be nil.
+// Deprecated: use Catch for everything
 func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.

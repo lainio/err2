@@ -42,6 +42,8 @@ type Info struct {
 	ErrorHandler // If nil default implementation is used.
 
 	PanicHandler // If nil panic() is called.
+
+	CallerName string
 }
 
 const (
@@ -230,6 +232,8 @@ func PreProcess(info *Info, a ...any) {
 		case string:
 			info.Format = first
 			info.Args = a[1:]
+		case ErrorHandler: // err2.Catch uses this
+			info.ErrorHandler = first
 		case NilHandler:
 			info.NilHandler = first
 		case nil:
@@ -246,9 +250,13 @@ func PreProcess(info *Info, a ...any) {
 		// previous AND funcName can search! This is enough:
 		const lvl = -1
 
+		fnName := "Handle"
+		if info.CallerName != "" {
+			fnName = info.CallerName
+		}
 		funcName, _, ok := debug.FuncName(debug.StackInfo{
 			PackageName: "",
-			FuncName:    "Handle", // err2.Handle is anchor
+			FuncName:    fnName, // err2.Handle is anchor
 			Level:       lvl,
 		})
 		if ok {
