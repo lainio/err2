@@ -204,6 +204,8 @@ func WorkToDo(r any, err *error) bool {
 
 // Process executes error handling logic. Panics and whole defer stack is
 // included.
+//
+// NOTE! That there is an error or a panic to handle i.e. that's taken care.
 func Process(info *Info) {
 	switch info.Any.(type) {
 	case nil:
@@ -217,6 +219,10 @@ func Process(info *Info) {
 	}
 }
 
+// PreProcess is currently used for err2.Handle.
+//
+// NOTE! That there is an error or a panic to handle i.e. that's taken care.
+//
 //nolint:nestif
 func PreProcess(info *Info, a ...any) {
 	if len(a) > 0 {
