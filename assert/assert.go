@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"golang.org/x/exp/constraints"
@@ -19,18 +20,15 @@ var (
 	// D is a development Asserter that sets panic objects to strings that
 	// doesn't by caught by err2 handlers.
 	D = AsserterDebug
-
-	// DefaultAsserter is a default asserter used for package-level functions
-	// like assert.That(). It is the same as the production asserter P, which
-	// treats assert failures as Go errors, but in addition to that, it formats
-	// the assertion message properly. Naturally, only if err2 handlers are
-	// found in the call stack, these errors are caught.
-	//
-	// You are free to set it according to your current preferences. For
-	// example, it might be better to panic about every assertion fault during
-	// the tests. When in other cases, throw an error.
-	DefaultAsserter = AsserterToError | AsserterFormattedCallerInfo
 )
+
+var (
+	defaultAsserter = atomic.Pointer[Asserter]{}
+)
+
+func init() {
+	SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
+}
 
 var (
 	// testers is must be set if assertion package is used for the unit testing.
@@ -58,10 +56,10 @@ const (
 //		})
 //	}
 func PushTester(t testing.TB) {
-	if DefaultAsserter&AsserterUnitTesting == 0 {
+	if DefaultAsserter()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
-		DefaultAsserter = AsserterUnitTesting
+		SetDefaultAsserter(AsserterUnitTesting)
 	}
 	testers.Lock()
 	testers.m[goid()] = t
@@ -102,11 +100,11 @@ func NotImplemented(a ...any) {
 // single 'if-statement' that is almost nothing.
 func ThatNot(term bool, a ...any) {
 	if term {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -115,11 +113,11 @@ func ThatNot(term bool, a ...any) {
 // single 'if-statement' that is almost nothing.
 func That(term bool, a ...any) {
 	if !term {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -127,11 +125,11 @@ func That(term bool, a ...any) {
 // Asserter) with the given message.
 func NotNil[T any](p *T, a ...any) {
 	if p == nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": pointer is nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -139,11 +137,11 @@ func NotNil[T any](p *T, a ...any) {
 // Asserter) with the given message.
 func Nil[T any](p *T, a ...any) {
 	if p != nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": pointer is NOT nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -151,11 +149,11 @@ func Nil[T any](p *T, a ...any) {
 // (default Asserter) with the given message.
 func INil(i any, a ...any) {
 	if i != nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": interface is nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -163,11 +161,11 @@ func INil(i any, a ...any) {
 // panics/errors (default Asserter) with the given message.
 func INotNil(i any, a ...any) {
 	if i == nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": interface is nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -175,11 +173,11 @@ func INotNil(i any, a ...any) {
 // Asserter) with the given message.
 func SNil[T any](s []T, a ...any) {
 	if s != nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": slice MUST be nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -187,11 +185,11 @@ func SNil[T any](s []T, a ...any) {
 // Asserter) with the given message.
 func SNotNil[T any](s []T, a ...any) {
 	if s == nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": slice is nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -199,11 +197,11 @@ func SNotNil[T any](s []T, a ...any) {
 // (default Asserter) with the given message.
 func CNotNil[T any](c chan T, a ...any) {
 	if c == nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": channel is nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -211,11 +209,11 @@ func CNotNil[T any](c chan T, a ...any) {
 // Asserter) with the given message.
 func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 	if m == nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": map is nil"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -223,11 +221,11 @@ func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 // (current Asserter) with the given message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %v, want different", val)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -235,11 +233,11 @@ func NotEqual[T comparable](val, want T, a ...any) {
 // Asserter) with the given message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -247,11 +245,11 @@ func Equal[T comparable](val, want T, a ...any) {
 // panics/errors (current Asserter) with the given message.
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -262,11 +260,11 @@ func DeepEqual(val, want any, a ...any) {
 //	assert.DeepEqual(pubKey, ed25519.PublicKey(pubKeyBytes))
 func NotDeepEqual(val, want any, a ...any) {
 	if reflect.DeepEqual(val, want) {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %v, want different", val)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -278,11 +276,11 @@ func Len(obj string, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -294,11 +292,11 @@ func SLen[T any](obj []T, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -310,11 +308,11 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -325,11 +323,11 @@ func MKeyExists[T comparable, U any](obj map[T]U, key T, a ...any) (val U) {
 	val, ok = obj[key]
 
 	if !ok {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 	return val
 }
@@ -338,11 +336,11 @@ func MKeyExists[T comparable, U any](obj map[T]U, key T, a ...any) (val U) {
 // (current Asserter) with the given message.
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": string shouldn't be empty"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -350,11 +348,11 @@ func NotEmpty(obj string, a ...any) {
 // (current Asserter) with the given message.
 func Empty(obj string, a ...any) {
 	if obj != "" {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": string should be empty"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -366,11 +364,11 @@ func SNotEmpty[T any](obj []T, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": slice shouldn't be empty"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -382,11 +380,11 @@ func MNotEmpty[T comparable, U any](obj map[T]U, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": map shouldn't be empty"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -395,11 +393,11 @@ func MNotEmpty[T comparable, U any](obj map[T]U, a ...any) {
 // single 'if-statement' that is almost nothing.
 func NoError(err error, a ...any) {
 	if err != nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": " + err.Error()
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -408,11 +406,11 @@ func NoError(err error, a ...any) {
 // single 'if-statement' that is almost nothing.
 func Error(err error, a ...any) {
 	if err == nil {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": missing error"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
 
@@ -421,12 +419,44 @@ func Error(err error, a ...any) {
 // single 'if-statement' that is almost nothing.
 func Zero[T Number](val T, a ...any) {
 	if val != 0 {
-		if DefaultAsserter.isUnitTesting() {
+		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
 		defMsg := assertionMsg + ": value isn't zero"
-		DefaultAsserter.reportAssertionFault(defMsg, a...)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
+}
+
+// DefaultAsserter returns a current default asserter used for package-level
+// functions like assert.That(). The package sets the default asserter as
+// follows:
+//
+//	SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
+//
+// Which means that it is treats assert failures as Go errors, but in addition
+// to that, it formats the assertion message properly. Naturally, only if err2
+// handlers are found in the call stack, these errors are caught.
+
+// You are free to set it according to your current preferences with the
+// SetDefaultAsserter function.
+func DefaultAsserter() Asserter {
+	return *defaultAsserter.Load()
+}
+
+// SetDefaultAsserter set the current default asserter for the package. For
+// example, you might set it to panic about every assertion fault, and in other
+// cases, throw an error, and print the call stack immediately when assert
+// occurs. Note, that if you are using tracers you might get two call stacks, so
+// test what's best for your case.
+//
+//	SetDefaultAsserter(AsserterDebug | AsserterStackTrace)
+func SetDefaultAsserter(a Asserter) Asserter {
+	c := defaultAsserter.Load()
+	defaultAsserter.Store(&a)
+	if c == nil {
+		return a
+	}
+	return *c
 }
 
 func combineArgs(format string, a []any) []any {

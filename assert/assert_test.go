@@ -379,7 +379,7 @@ func TestMain(m *testing.M) {
 }
 
 func setUp() {
-	assert.DefaultAsserter = assert.AsserterToError | assert.AsserterCallerInfo
+	assert.SetDefaultAsserter(assert.AsserterToError | assert.AsserterCallerInfo)
 }
 
 func tearDown() {}
