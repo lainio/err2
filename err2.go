@@ -79,10 +79,12 @@ func Catch(a ...any) {
 		return
 	}
 
+	var err error
 	handler.PreProcess(&handler.Info{
 		CallerName: "Catch",
 		Any:        r,
 		NilHandler: handler.NilNoop,
+		Err:        &err,
 	}, a...)
 }
 
