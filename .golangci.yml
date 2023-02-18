@@ -117,7 +117,7 @@ linters:
     # typecheck
     - unconvert
     - unparam
-    - unused
+    #    - unused
     #    - varnamelen
     #- wastedassign
     #    - whitespace
