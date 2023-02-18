@@ -228,21 +228,7 @@ func Process(info *Info) {
 //nolint:nestif
 func PreProcess(info *Info, a ...any) {
 	if len(a) > 0 {
-		switch first := a[0].(type) {
-		case string:
-			info.Format = first
-			info.Args = a[1:]
-		case ErrorHandler: // err2.Catch uses this
-			info.ErrorHandler = first
-		case NilHandler:
-			info.NilHandler = first
-		case nil:
-			info.NilHandler = NilNoop
-		default:
-			// we don't panic because we can already be in recovery, but lets
-			// try to show an error message at least.
-			fmt.Fprintln(os.Stderr, "fatal error: err2.Handle: unsupported type")
-		}
+		subProcess(info, a...)
 	} else {
 		// We want the function who sets the handler, i.e. calls the
 		// err2.Handle function via defer. Because call stack is in reverse
@@ -256,7 +242,7 @@ func PreProcess(info *Info, a ...any) {
 		}
 		funcName, _, ok := debug.FuncName(debug.StackInfo{
 			PackageName: "",
-			FuncName:    fnName, // err2.Handle is anchor
+			FuncName:    fnName,
 			Level:       lvl,
 		})
 		if ok {
@@ -270,6 +256,38 @@ func PreProcess(info *Info, a ...any) {
 	}
 
 	Process(info)
+}
+
+func subProcess(info *Info, a ...any) {
+	switch len(a) {
+	case 2:
+		processArg(info, 0, a...)
+		if _, ok := a[1].(PanicHandler); ok {
+			processArg(info, 1, a...)
+		}
+	default: // more than 2
+		processArg(info, 0, a...)
+	}
+}
+
+func processArg(info *Info, i int, a ...any) {
+	switch first := a[i].(type) {
+	case string:
+		info.Format = first
+		info.Args = a[i+1:]
+	case ErrorHandler: // err2.Catch uses this
+		info.ErrorHandler = first
+	case PanicHandler: // err2.Catch uses this
+		info.PanicHandler = first
+	case NilHandler:
+		info.NilHandler = first
+	case nil:
+		info.NilHandler = NilNoop
+	default:
+		// we don't panic because we can already be in recovery, but lets
+		// try to show an error message at least.
+		fmt.Fprintln(os.Stderr, "fatal error: err2.Handle: unsupported type")
+	}
 }
 
 func printStack(w io.Writer, si debug.StackInfo, msg any) {
