@@ -36,7 +36,7 @@ var (
 // The function has an automatic mode where errors are annotated by function
 // name if no annotation arguments or handler function is given:
 //
-//	func SaveData(...) {
+//	func SaveData(...) (err error) {
 //	     defer err2.Handle(&err) // if err != nil: annotation is "save data:"
 //
 // Note. If you are still using sentinel errors you must be careful with the
@@ -45,8 +45,15 @@ var (
 // error annotation (%w), or set the returned error values in the handler
 // function. Disabling can be done by setting second argument nil:
 //
-//	func SaveData(...) {
+//	func SaveData(...) (err error) {
 //	     defer err2.Handle(&err, nil) // nil arg disable automatic annotation.
+//
+// In case of the actual error handling, the handler function should be given as
+// an second argument:
+//
+//	defer err2.Handle(&err, func() {
+//		os.Remove(dst)
+//	})
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
@@ -68,8 +75,20 @@ func Handle(err *error, a ...any) {
 
 // Catch is a convenient helper to those functions that doesn't return errors.
 // There can be only one deferred Catch function per non error returning
-// function like main(). It doesn't catch panics and runtime errors. If that's
-// important use CatchAll. See Handle for more information.
+// function like main(). There is several ways to make deferred calls to Catch.
+//
+//	defer err2.Catch()
+//
+// This stops errors and panics, and output depends on the current Tracer
+// settings.
+//
+//	defer err2.Catch(func(err error) {})
+//
+// This one calls your error handler. You could have only panic handler, but
+// that's unusual. Only if you are sure that errors are handled you should do
+// that. In most cases if you need to stop panics you should have both:
+//
+//	defer err2.Catch(func(err error) {}, func(p any) {})
 func Catch(a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -86,6 +105,7 @@ func Catch(a ...any) {
 		NilHandler: handler.NilNoop,
 		Err:        &err,
 	}, a...)
+	doTrace(err)
 }
 
 // CatchAll is a helper function to catch and write handlers for all errors and
@@ -225,3 +245,15 @@ func Returnf(err *error, format string, args ...any) {
 		Args:   args,
 	})
 }
+
+func doTrace(err error)  {
+	if err == nil || err.Error() == "" {
+		return
+	}
+	if ErrorTracer() != nil {
+		fmt.Fprint(ErrorTracer(), "===========", err.Error())
+	} else if PanicTracer() != nil {
+		fmt.Fprint(PanicTracer(), err.Error())
+	}
+}
+
