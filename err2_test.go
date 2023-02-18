@@ -60,7 +60,7 @@ func TestPanickingCatchAll(t *testing.T) {
 		{"general panic",
 			args{
 				func() {
-					defer err2.CatchAll(func(err error) {}, func(v any) {})
+					defer err2.Catch(func(err error) {}, func(v any) {})
 					panic("panic")
 				},
 			},
@@ -69,7 +69,7 @@ func TestPanickingCatchAll(t *testing.T) {
 		{"runtime.error panic",
 			args{
 				func() {
-					defer err2.CatchAll(func(err error) {}, func(v any) {})
+					defer err2.Catch(func(err error) {}, func(v any) {})
 					var b []byte
 					b[0] = 0
 				},
@@ -242,6 +242,27 @@ func TestCatch_Error(t *testing.T) {
 	try.To1(throw())
 
 	t.Fail() // If everything works we are newer here
+}
+
+func TestCatch_Panic(t *testing.T) {
+	panicHandled := false
+	defer func() {
+		// when err2.Catch's panic handler works fine, panic is handled
+		if !panicHandled {
+			t.Fail()
+		}
+	}()
+
+	defer err2.Catch(
+		func(err error) {
+			t.Log("it was panic, not an error")
+			t.Fail() // we should not be here
+		},
+		func(v any) {
+			panicHandled = true
+		})
+
+	panic("test panic")
 }
 
 func TestSetErrorTracer(t *testing.T) {
