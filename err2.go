@@ -246,14 +246,13 @@ func Returnf(err *error, format string, args ...any) {
 	})
 }
 
-func doTrace(err error)  {
+func doTrace(err error) {
 	if err == nil || err.Error() == "" {
 		return
 	}
 	if ErrorTracer() != nil {
-		fmt.Fprint(ErrorTracer(), "===========", err.Error())
+		fmt.Fprint(ErrorTracer(), err.Error())
 	} else if PanicTracer() != nil {
 		fmt.Fprint(PanicTracer(), err.Error())
 	}
 }
-
