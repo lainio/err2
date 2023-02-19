@@ -54,6 +54,16 @@ var (
 //	defer err2.Handle(&err, func() {
 //		os.Remove(dst)
 //	})
+//
+// If you need to stop general panics in handler, you can do that by giving a
+// panic handler function:
+//
+//	defer err2.Handle(&err,
+//	   func() {
+//	      os.Remove(dst)
+//	   },
+//	   func(p any) {} // panic handler, it's stops panics, you can re throw
+//	)
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
@@ -74,8 +84,10 @@ func Handle(err *error, a ...any) {
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
-// There can be only one deferred Catch function per non error returning
-// function like main(). There is several ways to make deferred calls to Catch.
+// Note, that Catch always catch the panics. If you don't want to stop the (aka
+// recover) you should add panic handler and countinue panicing there. There can
+// be only one deferred Catch function per non error returning function like
+// main(). There is several ways to make deferred calls to Catch.
 //
 //	defer err2.Catch()
 //
@@ -251,8 +263,8 @@ func doTrace(err error) {
 		return
 	}
 	if ErrorTracer() != nil {
-		fmt.Fprint(ErrorTracer(), err.Error())
+		fmt.Fprintln(ErrorTracer(), err.Error())
 	} else if PanicTracer() != nil {
-		fmt.Fprint(PanicTracer(), err.Error())
+		fmt.Fprintln(PanicTracer(), err.Error())
 	}
 }
