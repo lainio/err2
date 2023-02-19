@@ -20,7 +20,7 @@ func Benchmark_CopyBufferStd(b *testing.B) {
 	dst := bufio.NewWriter(bytes.NewBuffer(make([]byte, 0, len(all))))
 	src := bytes.NewReader(all)
 	for n := 0; n < b.N; n++ {
-		_, _ = io.CopyBuffer(dst, src, buf)
+		try.To1(io.CopyBuffer(dst, src, buf))
 	}
 }
 
@@ -34,7 +34,7 @@ func Benchmark_CopyBufferOur(b *testing.B) {
 	src := bytes.NewReader(all)
 	for n := 0; n < b.N; n++ {
 		for eof, n := try.IsEOF1(src.Read(tmp)); !eof; eof, n = try.IsEOF1(src.Read(tmp)) {
-			_, _ = dst.Write(tmp[:n])
+			try.To1(dst.Write(tmp[:n]))
 		}
 	}
 }
