@@ -54,7 +54,7 @@ func To(err error) {
 	}
 }
 
-// To1 is a helper function to call functions which returns (any, error)
+// To1 is a helper function to call functions which returns (T, error)
 // and check the error value. If an error occurs, it panics the error where err2
 // handlers can catch it if needed.
 func To1[T any](v T, err error) T {
@@ -62,7 +62,7 @@ func To1[T any](v T, err error) T {
 	return v
 }
 
-// To2 is a helper function to call functions which returns (any, any, error)
+// To2 is a helper function to call functions which returns (T, U, error)
 // and check the error value. If an error occurs, it panics the error where err2
 // handlers can catch it if needed.
 func To2[T, U any](v1 T, v2 U, err error) (T, U) {
@@ -70,7 +70,7 @@ func To2[T, U any](v1 T, v2 U, err error) (T, U) {
 	return v1, v2
 }
 
-// To3 is a helper function to call functions which returns (any, any, any, error)
+// To3 is a helper function to call functions which returns (T, U, V, error)
 // and check the error value. If an error occurs, it panics the error where err2
 // handlers can catch it if needed.
 func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {

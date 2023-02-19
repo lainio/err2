@@ -39,22 +39,25 @@ func Decamel(s string) string {
 			prevSkipped = skip
 			continue
 		}
-		isUpper = unicode.IsUpper(v)
-		if isUpper {
-			v = unicode.ToLower(v)
-			if !prevSkipped && splittable {
-				b.WriteRune(' ')
+		toSpace := v == '.' || v == '_'
+		if toSpace {
+			if prevSkipped {
+				continue
+			} else {
+				v = ' '
 				prevSkipped = true
 			}
-		}
-		toSpace := v == '.' || v == '_'
-		if prevSkipped && toSpace {
-			continue
-		} else if !prevSkipped && toSpace {
-			v = ' '
-			prevSkipped = true
 		} else {
-			prevSkipped = false
+			isUpper = unicode.IsUpper(v)
+			if isUpper {
+				v = unicode.ToLower(v)
+				if !prevSkipped && splittable {
+					b.WriteRune(' ')
+					prevSkipped = true
+				}
+			} else {
+				prevSkipped = false
+			}
 		}
 		b.WriteRune(v)
 		splittable = !isUpper || unicode.IsNumber(v)

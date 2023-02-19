@@ -36,8 +36,34 @@ var (
 // The function has an automatic mode where errors are annotated by function
 // name if no annotation arguments or handler function is given:
 //
-//	func SaveData(...) {
+//	func SaveData(...) (err error) {
 //	     defer err2.Handle(&err) // if err != nil: annotation is "save data:"
+//
+// Note. If you are still using sentinel errors you must be careful with the
+// automatic error annotation because it uses wrapping. If you must keep the
+// error value got from error checks: 'try.To(..)', you must disable automatic
+// error annotation (%w), or set the returned error values in the handler
+// function. Disabling can be done by setting second argument nil:
+//
+//	func SaveData(...) (err error) {
+//	     defer err2.Handle(&err, nil) // nil arg disable automatic annotation.
+//
+// In case of the actual error handling, the handler function should be given as
+// an second argument:
+//
+//	defer err2.Handle(&err, func() {
+//		os.Remove(dst)
+//	})
+//
+// If you need to stop general panics in handler, you can do that by giving a
+// panic handler function:
+//
+//	defer err2.Handle(&err,
+//	   func() {
+//	      os.Remove(dst)
+//	   },
+//	   func(p any) {} // panic handler, it's stops panics, you can re throw
+//	)
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how how it works with defer.
@@ -51,17 +77,31 @@ func Handle(err *error, a ...any) {
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
 	handler.PreProcess(&handler.Info{
-		Any: r,
-		Err: err,
+		CallerName: "Handle",
+		Any:        r,
+		Err:        err,
 	}, a...)
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
-// There can be only one deferred Catch function per non error returning
-// function like main(). It doesn't catch panics and runtime errors. If that's
-// important use CatchAll or CatchTrace instead. See Handle for more
-// information.
-func Catch(f func(err error)) {
+// Note, that Catch always catch the panics. If you don't want to stop the (aka
+// recover) you should add panic handler and countinue panicing there. There can
+// be only one deferred Catch function per non error returning function like
+// main(). There is several ways to make deferred calls to Catch.
+//
+//	defer err2.Catch()
+//
+// This stops errors and panics, and output depends on the current Tracer
+// settings.
+//
+//	defer err2.Catch(func(err error) {})
+//
+// This one calls your error handler. You could have only panic handler, but
+// that's unusual. Only if you are sure that errors are handled you should do
+// that. In most cases if you need to stop panics you should have both:
+//
+//	defer err2.Catch(func(err error) {}, func(p any) {})
+func Catch(a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
 	r := recover()
@@ -70,20 +110,23 @@ func Catch(f func(err error)) {
 		return
 	}
 
-	handler.Process(&handler.Info{
-		Any:          r,
-		ErrorHandler: f,
-		NilHandler:   handler.NilNoop,
-	})
+	var err error
+	handler.PreProcess(&handler.Info{
+		CallerName: "Catch",
+		Any:        r,
+		NilHandler: handler.NilNoop,
+		Err:        &err,
+	}, a...)
+	doTrace(err)
 }
 
 // CatchAll is a helper function to catch and write handlers for all errors and
-// all panics thrown in the current go routine. It and CatchTrace are preferred
-// helpers for go workers on long running servers, because they stop panics as
-// well.
+// all panics thrown in the current go routine. It is preferred helper for go
+// workers on long running servers, because they stop panics as well.
 //
 // Note, if any Tracer is set stack traces are printed automatically. If you
 // want to do it in the handlers by yourself, auto tracers should be nil.
+// Deprecated: use Catch for everything
 func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -110,6 +153,8 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // isn't set. If it's set it prints both. The panic trace is printed to stderr.
 // If you need panic trace to be printed to some other io.Writer than os.Stderr,
 // you should use CatchAll or Catch with tracers.
+//
+// Deprecated: Use err2.Catch it stops panics, and tracer if needed.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -211,4 +256,15 @@ func Returnf(err *error, format string, args ...any) {
 		Format: format,
 		Args:   args,
 	})
+}
+
+func doTrace(err error) {
+	if err == nil || err.Error() == "" {
+		return
+	}
+	if ErrorTracer() != nil {
+		fmt.Fprintln(ErrorTracer(), err.Error())
+	} else if PanicTracer() != nil {
+		fmt.Fprintln(PanicTracer(), err.Error())
+	}
 }

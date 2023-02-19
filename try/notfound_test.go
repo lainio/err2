@@ -31,8 +31,8 @@ func ExampleIsNotFound1() {
 		defer err2.Catch(func(err error) {
 			fmt.Println("ERROR:", err)
 		})
-		found, value := try.IsNotFound1(FindObject(key))
-		if found {
+		notFound, value := try.IsNotFound1(FindObject(key))
+		if notFound {
 			return fmt.Sprintf("cannot find key (%d)", key)
 		}
 		return "value for key is:" + value

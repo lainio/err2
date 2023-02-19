@@ -1,0 +1,30 @@
+{
+	".source.go": {
+		"defer err2.Handle": {
+			"prefix": "eha",
+			"body": "defer err2.Handle(&err)\n",
+			"description": "Snippet for err2.Handle(&err)"
+		},
+		"defer err2.Handle nil": {
+			"prefix": "ehan",
+			"body": "defer err2.Handle(&err, nil)\n",
+			"description": "Snippet for err2.Handle(&err, nil)"
+		},
+		"defer err2.Handle func": {
+			"prefix": "ehaf",
+			"body": "defer err2.Handle(&err, func() {\n\t$0\n})\n",
+			"description": "Snippet for err2.Handle(&err, func() {})"
+		},
+		"assert.Push&PopTester()": {
+			"prefix": "aspu",
+			"body": "assert.PushTester(${1:t})\ndefer assert.PopTester()\n",
+			"description": "Snippet for pushing current tester"
+		},
+		"assert.That()": {
+			"prefix": "asth",
+			"body": "assert.That(${1:bool}$2)",
+			"description": "Snippet for pushing current tester"
+		}
+	}
+}
+

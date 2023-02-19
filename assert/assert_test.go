@@ -216,6 +216,19 @@ func ExampleMKeyExists() {
 	// Output: sample: assert_test.go:211 ExampleMKeyExists.func1 assertion violation: key '2' doesn't exist
 }
 
+func ExampleZero() {
+	sample := func(b int8) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.Zero(b)
+		return err
+	}
+	var b int8 = 1 // we want sample to assert the violation.
+	err := sample(b)
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:223 ExampleZero.func1 assertion violation: value isn't zero
+}
+
 // ifPanicZero in needed that we have argument here! It's like a macro for
 // benchmarking. The others aren't needed below. TODO: refactor unneeded
 // helpers.
@@ -226,6 +239,10 @@ func ifPanicZero(i int) {
 }
 
 func assertZero(i int) {
+	assert.Zero(i)
+}
+
+func assertNotZero(i int) {
 	assert.D.True(i != 0)
 }
 
@@ -283,7 +300,13 @@ func BenchmarkNotEmpty(b *testing.B) {
 
 func BenchmarkAsserter_True(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		assertZero(4)
+		assertNotZero(4)
+	}
+}
+
+func BenchmarkZero(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		assertZero(0)
 	}
 }
 
@@ -356,7 +379,7 @@ func TestMain(m *testing.M) {
 }
 
 func setUp() {
-	assert.DefaultAsserter = assert.AsserterToError | assert.AsserterCallerInfo
+	assert.SetDefaultAsserter(assert.AsserterToError | assert.AsserterCallerInfo)
 }
 
 func tearDown() {}

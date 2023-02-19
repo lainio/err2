@@ -46,14 +46,21 @@ func CopyFile(src, dst string) (err error) {
 
 func main() {
 	// To see how automatic stack tracing works.
-	err2.SetErrorTracer(os.Stderr)
+	//err2.SetErrorTracer(os.Stderr)
+	err2.SetPanicTracer(os.Stderr) // for the err2.Catch()
+
 	// to see how there is two predefined formatters and own can be
 	// implemented.
 	err2.SetFormatter(formatter.Noop) // default is formatter.Decamel
 
-	defer err2.Catch(func(err error) {
-		fmt.Println("ERROR:", err)
-	})
+	// even no handlers is given, errors are caught without specific handlers.
+	defer err2.Catch() // thanks to panic tracer error msg is printed!
+
+	// If you don't want to use tracers or you just need proper error handler
+	// here.
+	//	defer err2.Catch(func(err error) {
+	//		fmt.Println("ERROR:", err)
+	//	})
 
 	// You can select anyone of the try.To(CopyFile lines to play with and see
 	// how err2 works. Especially interesting is automatic stack tracing.
