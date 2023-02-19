@@ -190,8 +190,8 @@ For more information see the examples of both functions.
 ## Backwards Compatibility Promise for the API
 
 The `err2` package's API will be **backwards compatible**. Before the version
-1.0.0 is released the API changes time to time, but we promise to offer
-automatic conversion scripts for your repos to update them for the latest API.
+1.0.0 is released the API changes time to time, but **we promise to offer
+automatic conversion scripts for your repos to update them for the latest API.**
 We also mark functions deprecated before they become obsolete. Usually one
 released version before. We have tested this in our systems with large code base
 and it works wonderfully.
