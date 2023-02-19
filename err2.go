@@ -154,7 +154,7 @@ func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
 // If you need panic trace to be printed to some other io.Writer than os.Stderr,
 // you should use CatchAll or Catch with tracers.
 //
-// Deprecated: Use err2.Catch() and err2.SetPanicTracer() together instead.
+// Deprecated: Use err2.Catch it stops panics, and tracer if needed.
 func CatchTrace(errorHandler func(err error)) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
