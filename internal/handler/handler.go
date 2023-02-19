@@ -254,6 +254,9 @@ func PreProcess(info *Info, a ...any) {
 			}
 		}
 	}
+	if info.PanicHandler == nil && info.CallerName == "Catch" {
+		info.PanicHandler = PanicNoop
+	}
 
 	Process(info)
 }
