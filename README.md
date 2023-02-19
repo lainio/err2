@@ -299,17 +299,22 @@ The package does it by using internally `panic/recovery`, which some might think
 isn't perfect. We have run many benchmarks to try to minimise the performance
 penalty this kind of mechanism might bring. We have focused on the _happy path_
 analyses. If the performance of the *error path* is essential, don't use this
-mechanism presented here. But be aware that if your code uses the error path as 
-a part of algorithm itself something is wrong.
+mechanism presented here. But be aware that if your code uses the **error path
+as a part of algorithm itself something is wrong**.
 
 **For happy paths** by using `try.ToX` error check functions **there are no
 performance penalty at all**. However, the mandatory use of the `defer` might
-prevent some code optimisations like function inlining. If you have a
-performance-critical use case, we recommend you to write performance tests to
-measure the effect. As a general guideline for maximum performance we recommend
-to put error handlers as high in the call stack as possible, and use only error
-checking (`try.To()` calls) in the inner loops. And yes, that leads to non-local
-control structures, but it's the most performant solution of all.
+prevent some code optimisations like function inlining. And still, we have cases
+where using the `err2` and `try` package simplify the algorithm so that it's
+faster than the return value if err != nil version. (See the benchmarks for
+`io.Copy` in the repo)
+
+If you have a performance-critical use case, we always recommend you to write
+performance tests to measure the effect. As a general guideline for maximum
+performance we recommend to put error handlers as high in the call stack as
+possible, and use only error checking (`try.To()` calls) in the inner loops. And
+yes, that leads to non-local control structures, but it's the most performant
+solution of all. (The repo has benchmarks for that as well)
 
 The original goal was to make it possible to write similar code that the
 proposed Go2 error handling would allow and do it right now (summer 2019). The
@@ -319,7 +324,9 @@ canceled at its latest form. Nevertheless, we have learned that **using panics**
 for early-stage **error transport isn't bad but the opposite**. It seems to
 help:
 - to draft algorithms much faster,
-- still maintains the readability,
+- huge improvements for the readability,
+- helps to bring a new blood (developers with different programming language
+  background) to projects,
 - and most importantly, **it keeps your code more refactorable** because you
   don't have to repeat yourself.
 
@@ -426,5 +433,5 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 
 ##### 0.9.0 Clean API: only `err2.Handle` for error returning functions.
 ##### 0.9.1 Clean API: `err2.CatchXXX` type assertions or many functions?
-    - done in version 0.8.14
+- done in version 0.8.14
 ##### 0.9.2 Clean API: preparing to release 1.0.0 and freeze the API
