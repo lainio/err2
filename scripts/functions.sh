@@ -128,6 +128,11 @@ replace_return_blain() {
 	"$location"/replace-perl.sh 'defer err2\.Returnw\(' 'defer err2.Handle('
 }
 
+replace_catch() {
+	"$location"/replace-perl.sh 'defer err2\.CatchTrace\(' 'defer err2.Catch('
+	"$location"/replace-perl.sh 'defer err2\.CatchAll\(' 'defer err2.Catch('
+}
+
 replace_return() {
 	"$location"/replace-perl.sh 'defer err2\.Return\(' 'defer err2.Handle('
 	"$location"/replace-perl.sh 'defer err2\.Returnf\(' 'defer err2.Handle('
@@ -138,16 +143,16 @@ replace_tracers() {
 	"$location"/replace-perl.sh 'err2\.(StackTraceWriter = )(.*)' 'err2.SetTracers(\2)'
 }
 
+replace_defasserter() {
+	"$location"/replace-perl.sh 'assert\.(DefaultAsserter = )(.*)' 'assert.SetDefaultAsserter(\2)'
+}
+
 replace_annotate() {
 	# Replace Annotate with Returnf: notice argument order!!
 	"$location"/replace-perl.sh 'err2\.(Annotate\()(.*)(, )(.*)(\)\n)' 'err2.Returnf(\4\3\2\5'
 
 	# Replace Annotatew with Returnf: notice argument order!!
 	"$location"/replace-perl.sh 'err2\.(Annotatew\()(.*)(, )(.*)(\)\n)' 'err2.Returnw(\4\3\2\5'
-}
-
-replace_catchtrace() {
-	"$location"/replace-perl.sh 'defer err2\.CatchTrace\(' 'defer err2.Catch('
 }
 
 replace_easy1() {
