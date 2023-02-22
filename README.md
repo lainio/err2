@@ -428,6 +428,8 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 - **Code snippets** added
 - New assertion functions
 - no direct variables in APIs (race), etc.
+##### 0.8.15
+- `err2.SetPanicTracer(os.Stderr)` must be default 'cause we stop panics now
 
 ### Upcoming releases
 
