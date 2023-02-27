@@ -8,21 +8,23 @@ import (
 	"github.com/lainio/err2/internal/handler"
 )
 
-// nolint
 var (
-	// NotFound is similar *no-error* like io.EOF for those who really want to
+	// ErrNotFound is similar *no-error* like io.EOF for those who really want to
 	// use error return values to transport non errors. It's far better to have
 	// discriminated unions as errors for function calls. But if you insist the
 	// related helpers are in they try package: try.IsNotFound(), ... These
 	// 'global' errors and their helper functions in try package are for
 	// experimenting now.
-	NotFound  = errors.New("not found")
-	NotExist  = errors.New("not exist")
-	Exist     = errors.New("already exist")
-	NotAccess = errors.New("permission denied")
+	ErrNotFound     = errors.New("not found")
+	ErrNotExist     = errors.New("not exist")
+	ErrAlreadyExist = errors.New("already exist")
+	ErrNotAccess    = errors.New("permission denied")
 
-	NotRecoverable = errors.New("cannot recover")
-	Recoverable    = errors.New("recoverable")
+	// Since Go 1.20 wraps multiple errors same time, i.e. wrapped errors
+	// aren't list anymore but tree. This allows mark multiple semantics to
+	// same error. These error are mainly for that purpose.
+	ErrNotRecoverable = errors.New("cannot recover")
+	ErrRecoverable    = errors.New("recoverable")
 )
 
 // Handle is the general purpose error handling helper. What makes it so
@@ -178,7 +180,8 @@ func CatchTrace(errorHandler func(err error)) {
 // return value, it's called only if you want to non-local control structure for
 // error handling, i.e. your current function doesn't have error return value.
 // NOTE, Throwf is rarely needed. We suggest to use error return values instead.
-// Throwf is offered for deep recursive algorithms to help readability.
+// Throwf is offered for deep recursive algorithms to help readability and
+// preformance (see bechmarks) in those cases.
 //
 //	func yourFn() (res any) {
 //	     ...
