@@ -13,8 +13,8 @@ func FindObject(key int) (val string, err error) {
 
 	// both of the following lines can be used to transport err2.NotFound
 	// you can try by outcommenting err2.Throwf
-	//err2.Throwf("panic transport: %w", err2.NotFound)
-	return "", err2.NotFound
+	//err2.Throwf("panic transport: %w", err2.ErrNotFound)
+	return "", err2.ErrNotFound
 }
 
 func ExampleIsNotFound1() {
