@@ -407,12 +407,12 @@ check_if_stop_for_simplex() {
 
 todo() {
 	dlog "Searching err2 references out of catchers"
-	ag -l 'err2\.(Check|Try|Filter)'
+	ag -l 'err2\.(Check|Try|Filter|CatchAll|CatchTrace|Annotate|Return)'
 }
 
 todo_show() {
 	dlog "Searching err2 references out of catchers"
-	ag 'err2\.(Check|Try|Filter)'
+	ag 'err2\.(Check|Try|Filter|CatchAll|CatchTrace|Annotate|Return)'
 }
 
 todo2() {
