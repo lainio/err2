@@ -74,7 +74,8 @@ test_cov_out:
 		./...
 
 test_cov: test_cov_out
-	go tool cover -html=coverage.txt
+	go tool cover -html=coverage.txt -o=coverage.html
+	firefox ./coverage.html 1>&- 2>&-  &
 
 lint:
 	@golangci-lint run
