@@ -314,7 +314,7 @@ performance tests to measure the effect. As a general guideline for maximum
 performance we recommend to put error handlers as high in the call stack as
 possible, and use only error checking (`try.To()` calls) in the inner loops. And
 yes, that leads to non-local control structures, but it's the most performant
-solution of all. (The repo has benchmarks for that as well)
+solution of all. (The repo has benchmarks for that as well.)
 
 The original goal was to make it possible to write similar code that the
 proposed Go2 error handling would allow and do it right now (summer 2019). The
@@ -377,7 +377,8 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 - `assert` package added, and new type helpers
 ##### 0.7.0
 - filter functions for non-errors like `io.EOF`
-##### 0.8.0
+
+#### 0.8.0
 - `try.To()`, **Start to use Go generics**
 - `assert.That()` and other assert functions with the help of the generics
 ##### 0.8.1
@@ -428,12 +429,17 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 - **Code snippets** added
 - New assertion functions
 - no direct variables in APIs (race), etc.
-##### 0.8.15
-- `err2.SetPanicTracer(os.Stderr)` must be default 'cause we stop panics now
+
+#### 0.9.0 Clean API 
+- removigin deprecated functions from API
+    - only `err2.Handle` for error returning functions
+    - only `err2.Catch` for function that doesn't return error
+- `err2.SetPanicTracer(os.Stderr)` is default now
+
 
 ### Upcoming releases
 
-##### 0.9.0 Clean API: only `err2.Handle` for error returning functions.
-##### 0.9.1 Clean API: `err2.CatchXXX` type assertions or many functions?
-- done in version 0.8.14
-##### 0.9.2 Clean API: preparing to release 1.0.0 and freeze the API
+##### 0.9.1 
+- more support for wrapping multiple errors
+##### 0.9.2 
+- more documentation, reparing for some sort of margeting
