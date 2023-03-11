@@ -103,7 +103,7 @@ func ThatNot(term bool, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg
+		defMsg := "ThatNot: "+assertionMsg
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -116,7 +116,7 @@ func That(term bool, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg
+		defMsg := "That: "+assertionMsg
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -128,7 +128,7 @@ func NotNil[T any](p *T, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": pointer is nil"
+		defMsg := assertionMsg + ": pointer shouldn't be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -140,7 +140,7 @@ func Nil[T any](p *T, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": pointer is NOT nil"
+		defMsg := assertionMsg + ": pointer should be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -152,7 +152,7 @@ func INil(i any, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": interface is nil"
+		defMsg := assertionMsg + ": interface should be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -164,7 +164,7 @@ func INotNil(i any, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": interface is nil"
+		defMsg := assertionMsg + ": interface shouldn't be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -176,7 +176,7 @@ func SNil[T any](s []T, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": slice MUST be nil"
+		defMsg := assertionMsg + ": slice should be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -188,7 +188,7 @@ func SNotNil[T any](s []T, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": slice is nil"
+		defMsg := assertionMsg + ": slice shouldn't be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -200,7 +200,7 @@ func CNotNil[T any](c chan T, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": channel is nil"
+		defMsg := assertionMsg + ": channel shouldn't be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -212,7 +212,7 @@ func MNotNil[T comparable, U any](m map[T]U, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": map is nil"
+		defMsg := assertionMsg + ": map shouldn't be nil"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -396,7 +396,7 @@ func NoError(err error, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": " + err.Error()
+		defMsg := "NoError:" + assertionMsg + ": " + err.Error()
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -409,7 +409,7 @@ func Error(err error, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": missing error"
+		defMsg := "Error:" + assertionMsg + ": missing error"
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
