@@ -33,11 +33,10 @@ func CopyFile(src, dst string) (err error) {
 - [Automatic Error Propagation](#automatic-error-propagation)
 - [Error handling](#error-handling)
   - [Error Stack Tracing](#error-stack-tracing)
-  - [Manual Tracing](#manual-tracing)
-- [Error Checks](#Error-checks)
+- [Error Checks](#error-checks)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
-- [Assertion (design by contract)](#assertion-design-by-contract)
+- [Assertion](#assertion)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Code Snippets](#code-snippets)
 - [Background](#background)
@@ -139,7 +138,7 @@ err2.SetPanicTracer(log.Writer()) // stack panic trace to std logger
 
 If no `Tracer` is set no stack tracing is done. This is the default because in
 the most cases proper error messages are enough and panics are handled
-immediately anyhow.
+immediately by a programmer.
 
 [Read the package documentation for more
 information](https://pkg.go.dev/github.com/lainio/err2).
@@ -182,10 +181,10 @@ With these you can write code where error is translated to boolean value:
 notExist := try.Is(r2.err, plugin.ErrNotExist)
 
 // real errors are cought and the returned boolean tells if value
-// dosen't exist returnend as `plugin.ErrNotExist`
+// dosen't exist returned as `plugin.ErrNotExist`
 ```
 
-For more information see the examples of both functions.
+For more information see the examples in the documentation of both functions.
 
 ## Backwards Compatibility Promise for the API
 
@@ -198,14 +197,15 @@ and it works wonderfully.
 
 More information can be found from scripts' [readme file](./scripts/README.md).
 
-## Assertion (design by contract)
+## Assertion
 
 The `assert` package is meant to be used for design-by-contract-type of
 development where you set preconditions for your functions. It's not meant to
 replace normal error checking but speed up incremental hacking cycle. That's the
-reason why default mode (`var D Asserter`) is to panic. By panicking developer
-get immediate and proper feedback which allows cleanup the code and APIs before
-actual production release.
+reason why default mode is to return `error` value that includes formatted and
+detailed assertion violation message. A developer get immediate and proper
+feedback which allows cleanup the code and APIs before actual production
+release.
 
 ```go
 func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData) []byte {
@@ -215,48 +215,19 @@ func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData
 	...
 ```
 
-Previous code block shows the use of the default asserter for developing.
+Previous code block shows the use of the asserter package for developing.
+
+The assert package offers a few pre-build `Asserter`. The asserters are used to
+configure how assert package deals assert violations. The line below is example
+how the default asserter is set.
 
 ```go
-assert.DefaultAsserter = assert.AsserterDebug
+SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
 ```
-
-If any of the assertion fails, code panics. These type of assertions can be used
-without help of the `err2` package if wanted.
-
-During the software development life-cycle, it isn't crystal clear what
-preconditions are for a programmer and what should be translated to end-user
-errors as well. The `assert` package uses a concept called `Asserter` to have
-different types of asserter for different phases of a software project.
-
-The following code block is a sample where the production time asserter is used
-to generate proper error messages.
-
-```go
-func (ac *Cmd) Validate() (err error) {
-	defer err2.Handle(&err)
-
-	assert.P.NotEmpty(ac.SubCmd, "sub command needed")
-	assert.P.Truef(ac.SubCmd == "register" || ac.SubCmd == "login",
-		"wrong sub command: %s: want: register|login", ac.SubCmd)
-	assert.P.NotEmpty(ac.UserName, "user name needed")
-	assert.P.NotEmpty(ac.Url, "connection URL cannot be empty")
-	assert.P.NotEmpty(ac.AAGUID, "authenticator ID needed")
-	assert.P.NotEmpty(ac.Key, "master key needed")
-
-	return nil
-}
-```
-
-When assert statements are used to generate end-user error messages instead of
-immediate panics, `err2` handlers are needed to translate asserts to errors in a
-convenient way. That's why we decided to build `assert` as a sub package of
-`err2` even though there are no actual dependencies between them. See the
-`assert` package's documentation and examples for more information.
 
 #### Assertion Package for Unit Testing
 
-Same asserts can be used during the unit tests:
+The same asserts can be used during the unit tests:
 
 ```go
 func TestWebOfTrustInfo(t *testing.T) {
@@ -266,7 +237,10 @@ func TestWebOfTrustInfo(t *testing.T) {
 	common := dave.CommonChains(eve.Node)
 	assert.SLen(common, 2)
 
-	wot := dave.WebOfTrustInfo(eve.Node)
+	wot := dave.WebOfTrustInfo(eve.Node) //<- this includes asserts as well!!
+    // and if there's violations during the test run they are reported as 
+    // test failures.
+
 	assert.Equal(0, wot.CommonInvider)
 	assert.Equal(1, wot.Hops)
 
@@ -278,8 +252,9 @@ func TestWebOfTrustInfo(t *testing.T) {
 
 Especially powerful feature is that even if some assertion violation happens
 during the execution of called functions like above `NewWebOfTrust()` function
-instead of the actual Test function, it's reported as normal test failure. That
-means that we don't need to open our internal preconditions just for testing.
+instead of the actual Test function, **it's reported as normal test failure.**
+That means that we don't need to open our internal preconditions just for
+testing.
 
 ## Code Snippets
 
