@@ -199,13 +199,35 @@ More information can be found from scripts' [readme file](./scripts/README.md).
 
 ## Assertion
 
-The `assert` package is meant to be used for design-by-contract-type of
-development where you set preconditions for your functions. It's not meant to
-replace normal error checking but speed up incremental hacking cycle. That's the
-reason why default mode is to return `error` value that includes formatted and
-detailed assertion violation message. A developer get immediate and proper
-feedback which allows cleanup the code and APIs before actual production
-release.
+The `assert` package is meant to be used for **design-by-contract-**type of
+development where you set pre- and post-conditions for your functions. It's not
+meant to replace the normal error checking but speed up the incremental hacking
+cycle. The default mode is to return an `error` value that includes formatted
+and detailed assertion violation message. A developer get immediate and proper
+feedback which allows cleanup the code and APIs before actual release.
+
+The assert package offers a few pre-build *asserters*, which are used to
+configure how assert package deals with assert violations. The line below is
+example how the default asserter is set in the package.
+
+```go
+SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
+```
+
+If you want to suppress the caller info (source file name, line number, etc.)
+and get just the plain error messages from the asserts, you should set the
+default asserter with the following line:
+
+```go
+SetDefaultAsserter(AsserterToError) // we offer separated flags for caller info
+```
+
+For certain type programs this is the best way. It allows us to keep all the
+error messages as simple as possible. And by offering option to turn additional
+information on, allows super users and developers get more technical information
+when needed.
+
+Following is example of use of the assert package:
 
 ```go
 func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData) []byte {
@@ -215,15 +237,9 @@ func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData
 	...
 ```
 
-Previous code block shows the use of the asserter package for developing.
-
-The assert package offers a few pre-build `Asserter`. The asserters are used to
-configure how assert package deals assert violations. The line below is example
-how the default asserter is set.
-
-```go
-SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
-```
+We have now described design-by-contract for development and runtime use. What
+makes err2's assertion packages unique and extremely powerful is its use for
+automatic testing as well.
 
 #### Assertion Package for Unit Testing
 
