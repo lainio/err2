@@ -103,7 +103,7 @@ func ThatNot(term bool, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "ThatNot: "+assertionMsg
+		defMsg := "ThatNot: " + assertionMsg
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -116,7 +116,7 @@ func That(term bool, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := "That: "+assertionMsg
+		defMsg := "That: " + assertionMsg
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }

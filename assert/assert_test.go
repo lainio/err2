@@ -67,7 +67,7 @@ func ExampleNotNil() {
 	var b *byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:64 ExampleNotNil.func1 assertion violation: pointer is nil
+	// Output: sample: assert_test.go:64 ExampleNotNil.func1 assertion violation: pointer shouldn't be nil
 }
 
 func ExampleMNotNil() {
@@ -80,7 +80,7 @@ func ExampleMNotNil() {
 	var b map[string]byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:77 ExampleMNotNil.func1 assertion violation: map is nil
+	// Output: sample: assert_test.go:77 ExampleMNotNil.func1 assertion violation: map shouldn't be nil
 }
 
 func ExampleCNotNil() {
@@ -93,7 +93,7 @@ func ExampleCNotNil() {
 	var c chan byte
 	err := sample(c)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:90 ExampleCNotNil.func1 assertion violation: channel is nil
+	// Output: sample: assert_test.go:90 ExampleCNotNil.func1 assertion violation: channel shouldn't be nil
 }
 
 func ExampleSNotNil() {
@@ -106,7 +106,7 @@ func ExampleSNotNil() {
 	var b []byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:103 ExampleSNotNil.func1 assertion violation: slice is nil
+	// Output: sample: assert_test.go:103 ExampleSNotNil.func1 assertion violation: slice shouldn't be nil
 }
 
 func ExampleEqual() {
