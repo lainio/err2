@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/lainio/err2/internal/helper"
+	"github.com/lainio/err2/internal/test"
 	"github.com/lainio/err2/try"
 )
 
@@ -15,8 +15,8 @@ const dataFile = "./try.go"
 
 func Benchmark_CopyBufferStd(b *testing.B) {
 	all, err := os.ReadFile(dataFile)
-	helper.Requiref(b, err == nil, "error: %v", err)
-	helper.Require(b, all != nil)
+	test.Requiref(b, err == nil, "error: %v", err)
+	test.Require(b, all != nil)
 
 	buf := make([]byte, 4)
 	dst := bufio.NewWriter(bytes.NewBuffer(make([]byte, 0, len(all))))
@@ -28,8 +28,8 @@ func Benchmark_CopyBufferStd(b *testing.B) {
 
 func Benchmark_CopyBufferOur(b *testing.B) {
 	all, err := os.ReadFile(dataFile)
-	helper.Requiref(b, err == nil, "error: %v", err)
-	helper.Require(b, all != nil)
+	test.Requiref(b, err == nil, "error: %v", err)
+	test.Require(b, all != nil)
 
 	tmp := make([]byte, 4)
 	dst := bufio.NewWriter(bytes.NewBuffer(make([]byte, 0, len(all))))

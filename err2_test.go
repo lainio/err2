@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
-	"github.com/lainio/err2/internal/helper"
+	"github.com/lainio/err2/internal/test"
 	"github.com/lainio/err2/try"
 )
 
@@ -100,7 +100,7 @@ func TestPanickingCatchAll(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
-				helper.Require(t, recover() == nil, "panics should NOT carry on")
+				test.Require(t, recover() == nil, "panics should NOT carry on")
 			}()
 			tt.args.f()
 		})
@@ -141,7 +141,7 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
-				helper.Require(t, recover() != nil, "panics should went thru when not our errors")
+				test.Require(t, recover() != nil, "panics should went thru when not our errors")
 			}()
 			tt.args.f()
 		})
@@ -245,12 +245,12 @@ func TestPanicking_Handle(t *testing.T) {
 			defer func() {
 				r := recover()
 				if tt.wants == nil {
-					helper.Require(t, r != nil, "wants err, then panic")
+					test.Require(t, r != nil, "wants err, then panic")
 				}
 			}()
 			err := tt.args.f()
 			if err != nil {
-				helper.Requiref(t, err == myErr, "got %p, want %p", err, myErr)
+				test.Requiref(t, err == myErr, "got %p, want %p", err, myErr)
 			}
 		})
 	}
@@ -288,7 +288,7 @@ func TestPanicking_Catch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
-				helper.Require(t, recover() == nil, "panics should NOT carry on")
+				test.Require(t, recover() == nil, "panics should NOT carry on")
 			}()
 			tt.args.f()
 		})
@@ -326,11 +326,11 @@ func TestCatch_Panic(t *testing.T) {
 
 func TestSetErrorTracer(t *testing.T) {
 	w := err2.ErrorTracer()
-	helper.Require(t, w == nil, "error tracer should be nil")
+	test.Require(t, w == nil, "error tracer should be nil")
 	var w1 io.Writer
 	err2.SetErrorTracer(w1)
 	w = err2.ErrorTracer()
-	helper.Require(t, w == nil, "error tracer should be nil")
+	test.Require(t, w == nil, "error tracer should be nil")
 }
 
 func ExampleHandle() {

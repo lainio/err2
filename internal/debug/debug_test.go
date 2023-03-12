@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lainio/err2/internal/helper"
+	"github.com/lainio/err2/internal/test"
 )
 
 func TestFullName(t *testing.T) {
@@ -26,7 +26,7 @@ func TestFullName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			helper.Requiref(t, tt.retval == tt.fullName(), "must be equal: %s",
+			test.Requiref(t, tt.retval == tt.fullName(), "must be equal: %s",
 				tt.retval)
 		})
 	}
@@ -75,7 +75,7 @@ func TestIsAnchor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			helper.Require(t, tt.retval == tt.isAnchor(tt.input), "equal")
+			test.Require(t, tt.retval == tt.isAnchor(tt.input), "equal")
 		})
 	}
 }
@@ -117,7 +117,7 @@ func TestIsFuncAnchor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			helper.Require(t, tt.retval == tt.isFuncAnchor(tt.input), "equal")
+			test.Require(t, tt.retval == tt.isFuncAnchor(tt.input), "equal")
 		})
 	}
 }
@@ -135,7 +135,7 @@ func TestFnLNro(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			output := fnLNro(tt.input)
-			helper.Require(t, output == tt.output, output)
+			test.Require(t, output == tt.output, output)
 		})
 	}
 }
@@ -164,7 +164,7 @@ func TestFnName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			output := fnName(tt.input)
-			helper.Require(t, output == tt.output, output)
+			test.Require(t, output == tt.output, output)
 		})
 	}
 }
@@ -187,7 +187,7 @@ func TestStackPrint_noLimits(t *testing.T) {
 				FuncName:    "",
 				Level:       0,
 			})
-			helper.Require(t, tt.input == w.String(), "")
+			test.Require(t, tt.input == w.String(), "")
 		})
 	}
 }
@@ -215,7 +215,7 @@ func TestCalcAnchor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := strings.NewReader(tt.input)
 			anchor := calcAnchor(r, tt.StackInfo)
-			helper.Require(t, tt.anchor == anchor, "equal")
+			test.Require(t, tt.anchor == anchor, "equal")
 		})
 	}
 }
@@ -248,8 +248,8 @@ func TestStackPrint_limit(t *testing.T) {
 			})
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(w.String(), "\n")
-			helper.Require(t, len(ins) > len(outs), "input length should be greater")
-			helper.Require(t, tt.output == w.String(), "not equal")
+			test.Require(t, len(ins) > len(outs), "input length should be greater")
+			test.Require(t, tt.output == w.String(), "not equal")
 		})
 	}
 }
@@ -278,9 +278,9 @@ func TestFuncName(t *testing.T) {
 				FuncName:    tt.FuncName,
 				Level:       tt.Level,
 			})
-			helper.Require(t, ok, "not found")
-			helper.Requiref(t, tt.output == name, "not equal %v", name)
-			helper.Requiref(t, ln == tt.outln, "ln must be equal %d == %d", ln, tt.outln)
+			test.Require(t, ok, "not found")
+			test.Requiref(t, tt.output == name, "not equal %v", name)
+			test.Requiref(t, ln == tt.outln, "ln must be equal %d == %d", ln, tt.outln)
 		})
 	}
 }

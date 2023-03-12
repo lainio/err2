@@ -3,8 +3,8 @@ package str_test
 import (
 	"testing"
 
-	"github.com/lainio/err2/internal/helper"
 	"github.com/lainio/err2/internal/str"
+	"github.com/lainio/err2/internal/test"
 )
 
 const (
@@ -47,7 +47,7 @@ func TestDecamel(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := str.Decamel(tt.args.s)
-			helper.Requiref(t, got == tt.want, "got: %v, want: %v", got, tt.want)
+			test.Requiref(t, got == tt.want, "got: %v, want: %v", got, tt.want)
 		})
 	}
 }

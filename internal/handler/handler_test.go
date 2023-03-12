@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2/internal/handler"
-	"github.com/lainio/err2/internal/helper"
+	"github.com/lainio/err2/internal/test"
 )
 
 func TestProcess(t *testing.T) {
@@ -116,17 +116,17 @@ func TestProcess(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			handler.Process(&tt.args.Info)
 
-			helper.Requiref(t, tt.want.panicCalled == panicHandlerCalled,
+			test.Requiref(t, tt.want.panicCalled == panicHandlerCalled,
 				"panicHandler: got = %v, want = %v",
 				panicHandlerCalled, tt.want.panicCalled)
-			helper.Requiref(t, tt.want.errorCalled == errorHandlerCalled,
+			test.Requiref(t, tt.want.errorCalled == errorHandlerCalled,
 				"errorHandler: got = %v, want = %v",
 				errorHandlerCalled, tt.want.errorCalled)
-			helper.Requiref(t, tt.want.nilCalled == nilHandlerCalled,
+			test.Requiref(t, tt.want.nilCalled == nilHandlerCalled,
 				"nilHandler: got = %v, want = %v",
 				nilHandlerCalled, tt.want.nilCalled)
 
-			helper.Requiref(t, tt.want.errStr == myErrVal.Error(),
+			test.Requiref(t, tt.want.errStr == myErrVal.Error(),
 				"got: %v, want: %v", myErrVal.Error(), tt.want.errStr)
 
 			resetCalled()
@@ -151,19 +151,19 @@ func TestPreProcess_debug(t *testing.T) {
 	// and that's what error stack tracing is all about
 	Handle()
 
-	helper.Requiref(t, false == panicHandlerCalled,
+	test.Requiref(t, false == panicHandlerCalled,
 		"panicHandler: got = %v, want = %v",
 		panicHandlerCalled, false)
-	helper.Requiref(t, false == errorHandlerCalled,
+	test.Requiref(t, false == errorHandlerCalled,
 		"errorHandler: got = %v, want = %v",
 		errorHandlerCalled, false)
-	helper.Requiref(t, false == nilHandlerCalled,
+	test.Requiref(t, false == nilHandlerCalled,
 		"nilHandler: got = %v, want = %v",
 		nilHandlerCalled, true)
 
 	// See the name of this test function. Decamel it + error
 	const want = "testing t runner: error"
-	helper.Requiref(t, want == myErrVal.Error(),
+	test.Requiref(t, want == myErrVal.Error(),
 		"got: %v, want: %v", myErrVal.Error(), want)
 
 	resetCalled()
@@ -241,17 +241,17 @@ func TestPreProcess(t *testing.T) {
 			if len(tt.args.a) > 0 {
 				handler.PreProcess(&tt.args.Info, tt.args.a...)
 
-				helper.Requiref(t, tt.want.panicCalled == panicHandlerCalled,
+				test.Requiref(t, tt.want.panicCalled == panicHandlerCalled,
 					"panicHandler: got = %v, want = %v",
 					panicHandlerCalled, tt.want.panicCalled)
-				helper.Requiref(t, tt.want.errorCalled == errorHandlerCalled,
+				test.Requiref(t, tt.want.errorCalled == errorHandlerCalled,
 					"errorHandler: got = %v, want = %v",
 					errorHandlerCalled, tt.want.errorCalled)
-				helper.Requiref(t, tt.want.nilCalled == nilHandlerCalled,
+				test.Requiref(t, tt.want.nilCalled == nilHandlerCalled,
 					"nilHandler: got = %v, want = %v",
 					nilHandlerCalled, tt.want.nilCalled)
 
-				helper.Requiref(t, tt.want.errStr == myErrVal.Error(),
+				test.Requiref(t, tt.want.errStr == myErrVal.Error(),
 					"got: %v, want: %v", myErrVal.Error(), tt.want.errStr)
 
 				resetCalled()
