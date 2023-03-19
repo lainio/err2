@@ -26,7 +26,7 @@ var (
 	ErrRecoverable    = errors.New("recoverable")
 )
 
-// Handle is the general purpose error handling test. What makes it so
+// Handle is the general purpose error handling function. What makes it so
 // convenient is its ability to handle all error handling cases: a) just
 // return the error value to caller, b) annotate the error value, or c) execute
 // real error handling like cleanup and releasing resources. There is no
