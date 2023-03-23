@@ -3,6 +3,7 @@ package err2_test
 import (
 	"fmt"
 	"io"
+	"os"
 	"testing"
 
 	"github.com/lainio/err2"
@@ -579,3 +580,16 @@ func BenchmarkRecursionWithTryAndDefer(b *testing.B) {
 		_, _ = recursion(100)
 	}
 }
+
+func TestMain(m *testing.M) {
+	setUp()
+	code := m.Run()
+	tearDown()
+	os.Exit(code)
+}
+
+func setUp() {
+	err2.SetPanicTracer(nil)
+}
+
+func tearDown() {}
