@@ -43,10 +43,9 @@ func Decamel(s string) string {
 		if toSpace {
 			if prevSkipped {
 				continue
-			} else {
-				v = ' '
-				prevSkipped = true
 			}
+			v = ' '
+			prevSkipped = true
 		} else {
 			isUpper = unicode.IsUpper(v)
 			if isUpper {

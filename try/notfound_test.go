@@ -8,7 +8,7 @@ import (
 	"github.com/lainio/err2/try"
 )
 
-func FindObject(key int) (val string, err error) {
+func FindObject(_ int) (val string, err error) {
 	defer err2.Handle(&err)
 
 	// both of the following lines can be used to transport err2.NotFound

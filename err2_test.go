@@ -23,7 +23,7 @@ func noErr() error {
 	return nil
 }
 
-func TestTry_noError(t *testing.T) {
+func TestTry_noError(_ *testing.T) {
 	try.To1(noThrow())
 	try.To2(twoStrNoThrow())
 	try.To2(intStrNoThrow())
