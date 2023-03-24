@@ -27,6 +27,8 @@ func CopyFile(src, dst string) (err error) {
 }
 ```
 
+[![test](https://github.com/lainio/err2/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/lainio/err2/actions/workflows/test.yml)
+
 `go get github.com/lainio/err2`
 
 - [Structure](#structure)
@@ -446,7 +448,7 @@ GitHub Discussions. Naturally, any issues are welcome as well!
     - Only `err2.Handle` for error returning functions
     - Only `err2.Catch` for function that doesn't return error
     - Please see `scripts/README.md' for *Auto-migration for your repos*
-- `err2.SetPanicTracer(os.Stderr)` is default now
+- Default `err2.SetPanicTracer(os.Stderr)` allows `defer err2.Catch()`
 
 
 ### Upcoming releases
