@@ -355,82 +355,105 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 ### Version history
 
 ##### 0.1
-- first draft (Summer 2019)
+- First draft (Summer 2019)
+
 ##### 0.2
-- code generation for type helpers
+- Code generation for type helpers
+
 ##### 0.3
 - `Returnf` added, not use own transport type anymore but just `error`
+
 ##### 0.4
 - Documentation update
+
 ##### 0.5
 - Go modules are in use
+
 ##### 0.6.1
 - `assert` package added, and new type helpers
+
 ##### 0.7.0
-- filter functions for non-errors like `io.EOF`
+- Filter functions for non-errors like `io.EOF`
 
 #### 0.8.0
 - `try.To()`, **Start to use Go generics**
 - `assert.That()` and other assert functions with the help of the generics
+
 ##### 0.8.1
 - **bug-fix**: `runtime.Error` types are treated as `panics` now (Issue #1)
+
 ##### 0.8.3
 - `try.IsXX()` bug fix
 - Lots of new docs
 - **Automatic Stack Tracing!**
+
 ##### 0.8.4
 - **Optimized** Stack Tracing
 - Documentation
 - Benchmarks, other tests
+
 ##### 0.8.5
 - Typo in `StackTraceWriter` fixed
+
 ##### 0.8.6
 - Stack Tracing bug fixed
 - URL helper restored until migration tool
+
 ##### 0.8.7
 - **Auto-migration tool** to convert deprecated API usage for your repos
 - `err2.Throwf` added
+
 ##### 0.8.8
 - **Assertion package integrates with Go's testing system**
 - Type variables removed
+
 ##### 0.8.9
-- Bug fixes
-- deprecations
-- new Tracer API
-- preparing `err2` API for 1.0
+- bug fixes
+- Deprecations
+- New Tracer API
+- Preparing `err2` API for 1.0
+
 ##### 0.8.10
 - New assertion functions and helpers for tests
+
 ##### 0.8.11
-- Remove deprecations
-- new *global* err values and `try.IsXX` functions
-- more documentation
+- remove deprecations
+- New *global* err values and `try.IsXX` functions
+- More documentation
+
 ##### 0.8.12
 - New super **Handle** for most of the use cases to simplify the API
-- **deferred error handlers are 2x faster now**
-- restructuring internal pkgs
-- new documentation and tests, etc.
+- **Deferred error handlers are 2x faster now**
+- Restructuring internal pkgs
+- New documentation and tests, etc.
+
 ##### 0.8.13
 - **Bug-fix:** automatic error strings for methods
-- added API to set preferred error string *Formatter* or implement own
+- Added API to set preferred error string *Formatter* or implement own
+
 ##### 0.8.14
 - `err2.Handle` supports sentinel errors, can now stop panics
 - `err2.Catch` has one generic API and it stops panics as default
-- deprecated `CatchTrace` and CatchAll` which merged with `Catch`
+- Deprecated `CatchTrace` and `CatchAll` which merged with `Catch`
 - Auto-migration offered (similar to `go fix`)
 - **Code snippets** added
 - New assertion functions
-- no direct variables in APIs (race), etc.
+- No direct variables in APIs (race), etc.
 
-#### 0.9.0 Clean API 
-- removigin deprecated functions from API
-    - only `err2.Handle` for error returning functions
-    - only `err2.Catch` for function that doesn't return error
+#### 0.9.0
+- **Clean and simple API** 
+- Removing deprecated functions:
+    - Only `err2.Handle` for error returning functions
+    - Only `err2.Catch` for function that doesn't return error
+    - Please see `scripts/README.md' for *Auto-migration for your repos*
 - `err2.SetPanicTracer(os.Stderr)` is default now
 
 
 ### Upcoming releases
 
-##### 0.9.1 
-- more support for wrapping multiple errors
+##### 0.9.1
+- More support for `assert` package for tests
+- More support for wrapping multiple errors
+
 ##### 0.9.2 
-- more documentation, reparing for some sort of margeting
+- More documentation, reparing for some sort of margeting
