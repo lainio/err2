@@ -92,6 +92,9 @@ func tester() testing.TB {
 
 // NotImplemented always panics with 'not implemented' assertion message.
 func NotImplemented(a ...any) {
+	if DefaultAsserter().isUnitTesting() {
+		tester().Helper()
+	}
 	DefaultAsserter().reportAssertionFault("not implemented", a...)
 }
 
@@ -224,7 +227,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want different", val)
+		defMsg := fmt.Sprintf(assertionMsg+": got %v want (!= %v)", val, want)
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -263,7 +266,7 @@ func NotDeepEqual(val, want any, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want different", val)
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want (!= %v)", val, want)
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -422,7 +425,20 @@ func Zero[T Number](val T, a ...any) {
 		if DefaultAsserter().isUnitTesting() {
 			tester().Helper()
 		}
-		defMsg := assertionMsg + ": value isn't zero"
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want (== 0)", val)
+		DefaultAsserter().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// NotZero asserts that the value != 0. If it is not it panics with the given
+// formatting string. Thanks to inlining, the performance penalty is equal to a
+// single 'if-statement' that is almost nothing.
+func NotZero[T Number](val T, a ...any) {
+	if val == 0 {
+		if DefaultAsserter().isUnitTesting() {
+			tester().Helper()
+		}
+		defMsg := fmt.Sprintf(assertionMsg+": got %v, want (!= 0)", val)
 		DefaultAsserter().reportAssertionFault(defMsg, a...)
 	}
 }
