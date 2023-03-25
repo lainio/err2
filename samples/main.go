@@ -53,9 +53,9 @@ func callRecur(d int) (err error) {
 func doRecur(d int) (err error) {
 	d--
 	if d >= 0 {
-		if d == 0 {
-			assert.NotImplemented()
-		}
+		// keep below to show how asserts work
+		assert.NotZero(d)
+		// comment out above assert-statement to simulate runtime-error
 		fmt.Println(10 / d)
 		return doRecur(d)
 	}
@@ -63,9 +63,14 @@ func doRecur(d int) (err error) {
 }
 
 func main() {
+	// keep here that you can play without changing imports
+	assert.That(true)
+
 	// if asserts are treated as panics instead of errors you get stack trace.
 	// you can try that by taking next line out of the comment:
 	//assert.SetDefaultAsserter(assert.AsserterFormattedCallerInfo|assert.AsserterDebug)
+	// same thing but one line assert msg
+	//assert.SetDefaultAsserter(assert.AsserterCallerInfo|assert.AsserterDebug)
 
 	// To see how automatic stack tracing works.
 	//err2.SetErrorTracer(os.Stderr)
@@ -96,7 +101,6 @@ func doMain() (err error) {
 	// how err2 works. Especially interesting is automatic stack tracing.
 	//
 	// source file exist, but destination not in high probability
-	//try.To(callRecur(1))
 	try.To(CopyFile("main.go", "/notfound/path/file.bak"))
 	//
 	// both source and destination doesn't exist
@@ -104,6 +108,10 @@ func doMain() (err error) {
 	//
 	// first argument is empty
 	//try.To(CopyFile("main.go", ""))
+
+	// Next fn demonstrates how error and panic traces work, comment out all
+	// above CopyFile calls to play withit:
+	try.To(callRecur(1))
 
 	println("=== you cannot see this ===")
 	return nil
