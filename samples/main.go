@@ -22,10 +22,6 @@ import (
 func CopyFile(src, dst string) (err error) {
 	defer err2.Handle(&err) // automatic error message: see err2.Formatter
 
-	// the next line is example how to enrich error message when starting with
-	// automatic.
-	//defer err2.Handle(&err, "(%v, %v)", src, dst)
-
 	// You can comment above handler line(s) out an see what happens.
 	// You'll learn that call stacks are for every function level 'catch'
 	// statement like defer err2.Handle() is.
@@ -51,19 +47,26 @@ func CopyFile(src, dst string) (err error) {
 func callRecur(d int) (err error) {
 	defer err2.Handle(&err)
 
-	return recur(d)
+	return doRecur(d)
 }
 
-func recur(d int) (err error) {
+func doRecur(d int) (err error) {
 	d--
 	if d >= 0 {
+		if d == 0 {
+			assert.NotImplemented()
+		}
 		fmt.Println(10 / d)
-		return recur(d)
+		return doRecur(d)
 	}
 	return fmt.Errorf("root error")
 }
 
 func main() {
+	// if asserts are treated as panics instead of errors you get stack trace.
+	// you can try that by taking next line out of the comment:
+	//assert.SetDefaultAsserter(assert.AsserterFormattedCallerInfo|assert.AsserterDebug)
+
 	// To see how automatic stack tracing works.
 	//err2.SetErrorTracer(os.Stderr)
 	//err2.SetPanicTracer(os.Stderr) // this is the default
