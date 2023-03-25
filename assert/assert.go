@@ -92,7 +92,7 @@ func tester() testing.TB {
 
 // NotImplemented always panics with 'not implemented' assertion message.
 func NotImplemented(a ...any) {
-	D.reportAssertionFault("not implemented", a...)
+	DefaultAsserter().reportAssertionFault("not implemented", a...)
 }
 
 // ThatNot asserts that the term is NOT true. If is it panics with the given
