@@ -76,19 +76,19 @@ of the change. And, of course, it helps to make your code error-safe:
 
 The err2 package is your automation buddy:
 
-1. It helps to declare error handlers with `defer`. If you're familiar [Zig
-   language](https://ziglang.org/) you can think `defer err2.Handle(&err,...)`
+1. It helps to declare error handlers with `defer`. If you're familiar with [Zig
+   language](https://ziglang.org/), you can think `defer err2.Handle(&err,...)`
    line exactly similar as
    [Zig's `errdefer`](https://ziglang.org/documentation/master/#errdefer).
 2. It helps to check and transport errors to the nearest (the defer-stack) error
    handler. 
 3. It helps us use design-by-contract type preconditions.
 4. It offers automatic stack tracing for every error, runtime error, or panic.
-   If you are familiar to Zig, the `err2` error traces are same as Zig's.
+   If you are familiar with Zig, the `err2` error traces are same as Zig's.
 
 You can use all of them or just the other. However, if you use `try` for error
-checks you must remember use Go's `recover()` by yourself, or your error isn't
-transformed to an `error` return value at any point.
+checks, you must remember to use Go's `recover()` by yourself, or your error
+isn't transformed to an `error` return value at any point.
 
 ## Error handling
 
@@ -96,10 +96,10 @@ The `err2` relies on Go's declarative programming structure `defer`. The
 `err2` helps to set deferred functions (error handlers) which are only called if
 `err != nil`.
 
-In every function which uses err2 for error-checking should have at least one
-error handler. If there are no error handlers and error occurs the current
-function panics. However, if *any* function above in the call stack has `err2`
-error handler it will catch the error.
+Every function which uses err2 for error-checking should have at least one error
+handler. The current function panics if there are no error handlers and an error
+occurs. However, if *any* function above in the call stack has an err2 error
+handler, it will catch the error.
 
 This is the simplest form of `err2` automatic error handler:
 
@@ -109,18 +109,17 @@ func doSomething() (err error) {
     defer err2.Handle(&err) 
 ```
 
-See more information from `err2.Handle`'s documentation. It support several
-error handling scenarios. And remember that you can have as many error handlers
+See more information from `err2.Handle`'s documentation. It supports several
+error-handling scenarios. And remember that you can have as many error handlers
 per function as you need.
 
 #### Error Stack Tracing
 
 The err2 offers optional stack tracing. It's automatic and optimized. Optimized
-means that call stack is processed before output. That means that stack trace
-starts from where the actual error/panic is occurred and not from where the
-error is caught. You don't need to search your self the actual line where the
-pointer was nil or error was received. That line is in the first one you are
-seeing:
+means that the call stack is processed before output. That means that stack
+trace starts from where the actual error/panic is occurred, not where the error
+is caught. You don't need to search for the line where the pointer was nil or
+received an error. That line is in the first one you are see:
 
 ```console
 ---
@@ -194,27 +193,27 @@ For more information see the examples in the documentation of both functions.
 
 ## Backwards Compatibility Promise for the API
 
-The `err2` package's API will be **backwards compatible**. Before the version
-1.0.0 is released the API changes time to time, but **we promise to offer
+The `err2` package's API will be **backward compatible**. Before version
+1.0.0 is released, the API changes occasionally, but **we promise to offer
 automatic conversion scripts for your repos to update them for the latest API.**
-We also mark functions deprecated before they become obsolete. Usually one
-released version before. We have tested this in our systems with large code base
-and it works wonderfully.
+We also mark functions deprecated before they become obsolete. Usually, one
+released version before. We have tested this with a large code base in our
+systems, and it works wonderfully.
 
-More information can be found from scripts' [readme file](./scripts/README.md).
+More information can be found in the scripts' [readme file](./scripts/README.md).
 
 ## Assertion
 
 The `assert` package is meant to be used for *design-by-contract-* type of
 development where you set pre- and post-conditions for your functions. It's not
 meant to replace the normal error checking but speed up the incremental hacking
-cycle. The default mode is to return an `error` value that includes formatted
-and detailed assertion violation message. A developer get immediate and proper
-feedback which allows cleanup the code and APIs before actual release.
+cycle. The default mode is to return an `error` value that includes a formatted
+and detailed assertion violation message. A developer gets immediate and proper
+feedback, allowing cleanup of the code and APIs before the release.
 
 The assert package offers a few pre-build *asserters*, which are used to
-configure how assert package deals with assert violations. The line below is
-example how the default asserter is set in the package.
+configure how the assert package deals with assert violations. The line below
+exemplifies how the default asserter is set in the package.
 
 ```go
 SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
@@ -274,17 +273,17 @@ func TestWebOfTrustInfo(t *testing.T) {
 	...
 ```
 
-Especially powerful feature is that even if some assertion violation happens
-during the execution of called functions like above `NewWebOfTrust()` function
-instead of the actual Test function, **it's reported as normal test failure.**
-That means that we don't need to open our internal pre- and post-conditions just
-for testing. **We can share the same assertions between runtime and test
+A compelling feature is that even if some assertion violation happens during the
+execution of called functions like the above `NewWebOfTrust()` function instead
+of the actual Test function, **it's reported as a standard test failure.** That
+means we don't need to open our internal pre- and post-conditions just for
+testing. **We can share the same assertions between runtime and test
 execution.**
 
-Only minus is that test coverage figures are too conservatives. The code that
+The only minus is that test coverage figures are too conservative. The code that
 uses design-by-contract assertions is typically much more robust what the actual
-test coverage results tell you. However, this's well know problem with test
-coverage metric in generally.
+test coverage results tell you. However, this's a well-known problem with test
+coverage metric in general.
 
 ## Code Snippets
 
@@ -352,7 +351,9 @@ messages are always up-to-date. Even when you refactor your function name error
 message is also updated.
 
 - **When error handling is based on the actual error handlers, code changes have
-been much easier.**
+been much easier.** There is an excellent [blog post](https://jesseduffield.com/Gos-Shortcomings-1/)
+about the issues you are facing with Go's error handling without the help of
+the err2 package.
 
 - You don't seem to need '%w' wrapping. See the Go's official blog post what are
 [cons](https://go.dev/blog/go1.13-errors) for that.
