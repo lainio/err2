@@ -43,6 +43,7 @@ func CopyFile(src, dst string) (err error) {
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
 - [Assertion](#assertion)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
+  - [Assertion Package for Runtime Use](#assertion-package-for-runtime-use)
 - [Code Snippets](#code-snippets)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
@@ -204,7 +205,7 @@ More information can be found from scripts' [readme file](./scripts/README.md).
 
 ## Assertion
 
-The `assert` package is meant to be used for **design-by-contract-**type of
+The `assert` package is meant to be used for *design-by-contract-* type of
 development where you set pre- and post-conditions for your functions. It's not
 meant to replace the normal error checking but speed up the incremental hacking
 cycle. The default mode is to return an `error` value that includes formatted
@@ -231,6 +232,8 @@ For certain type programs this is the best way. It allows us to keep all the
 error messages as simple as possible. And by offering option to turn additional
 information on, allows super users and developers get more technical information
 when needed.
+
+#### Assertion Package for Runtime Use
 
 Following is example of use of the assert package:
 
@@ -259,8 +262,8 @@ func TestWebOfTrustInfo(t *testing.T) {
 	assert.SLen(common, 2)
 
 	wot := dave.WebOfTrustInfo(eve.Node) //<- this includes asserts as well!!
-    // and if there's violations during the test run they are reported as 
-    // test failures.
+	// And if there's violations during the test run they are reported as 
+	// test failures for this TestWebOfTrustInfo -test.
 
 	assert.Equal(0, wot.CommonInvider)
 	assert.Equal(1, wot.Hops)
@@ -274,8 +277,12 @@ func TestWebOfTrustInfo(t *testing.T) {
 Especially powerful feature is that even if some assertion violation happens
 during the execution of called functions like above `NewWebOfTrust()` function
 instead of the actual Test function, **it's reported as normal test failure.**
-That means that we don't need to open our internal preconditions just for
-testing.
+That means that we don't need to open our internal pre- and post-conditions just
+for testing.
+
+Only minus is that test coverage figures are too conservatives. The code that
+uses design-by-contract assertions is typically much more robust what the actual
+test coverage results tell you.
 
 ## Code Snippets
 
@@ -457,8 +464,8 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 ### Upcoming releases
 
 ##### 0.9.1
-- More support for `assert` package for tests
+- More support for `assert` package for tests: plugins like nvim-go
 - More support for wrapping multiple errors
 
 ##### 0.9.2 
-- More documentation, reparing for some sort of margeting
+- More documentation, reparing for some sort of marketing
