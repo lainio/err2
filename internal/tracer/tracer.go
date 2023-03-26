@@ -3,6 +3,7 @@ package tracer
 
 import (
 	"io"
+	"os"
 	"sync/atomic"
 )
 
@@ -21,7 +22,8 @@ var (
 
 func init() {
 	Error.SetTracer(nil)
-	Panic.SetTracer(nil)
+	// Because we stop panics as default, we need to output as default
+	Panic.SetTracer(os.Stderr)
 }
 
 func (v *value) Tracer() io.Writer {

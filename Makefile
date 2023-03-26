@@ -42,7 +42,7 @@ bench_arec:
 	$(GO) test -bench='BenchmarkRecursion.*' $(PKG1)
 
 bench_copy:
-	$(GO) test -bench='Benchmark_CopyBuffer' $(PKG1)
+	$(GO) test -bench='Benchmark_CopyBuffer' $(PKG3)
 
 bench_rec:
 	$(GO) test -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG1)
@@ -74,7 +74,8 @@ test_cov_out:
 		./...
 
 test_cov: test_cov_out
-	go tool cover -html=coverage.txt
+	go tool cover -html=coverage.txt -o=coverage.html
+	firefox ./coverage.html 1>&- 2>&-  &
 
 lint:
 	@golangci-lint run

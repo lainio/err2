@@ -3,29 +3,30 @@ package err2
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/lainio/err2/internal/handler"
 )
 
-// nolint
 var (
-	// NotFound is similar *no-error* like io.EOF for those who really want to
+	// ErrNotFound is similar *no-error* like io.EOF for those who really want to
 	// use error return values to transport non errors. It's far better to have
 	// discriminated unions as errors for function calls. But if you insist the
 	// related helpers are in they try package: try.IsNotFound(), ... These
 	// 'global' errors and their helper functions in try package are for
 	// experimenting now.
-	NotFound  = errors.New("not found")
-	NotExist  = errors.New("not exist")
-	Exist     = errors.New("already exist")
-	NotAccess = errors.New("permission denied")
+	ErrNotFound     = errors.New("not found")
+	ErrNotExist     = errors.New("not exist")
+	ErrAlreadyExist = errors.New("already exist")
+	ErrNotAccess    = errors.New("permission denied")
 
-	NotRecoverable = errors.New("cannot recover")
-	Recoverable    = errors.New("recoverable")
+	// Since Go 1.20 wraps multiple errors same time, i.e. wrapped errors
+	// aren't list anymore but tree. This allows mark multiple semantics to
+	// same error. These error are mainly for that purpose.
+	ErrNotRecoverable = errors.New("cannot recover")
+	ErrRecoverable    = errors.New("recoverable")
 )
 
-// Handle is the general purpose error handling helper. What makes it so
+// Handle is the general purpose error handling function. What makes it so
 // convenient is its ability to handle all error handling cases: a) just
 // return the error value to caller, b) annotate the error value, or c) execute
 // real error handling like cleanup and releasing resources. There is no
@@ -120,65 +121,13 @@ func Catch(a ...any) {
 	doTrace(err)
 }
 
-// CatchAll is a helper function to catch and write handlers for all errors and
-// all panics thrown in the current go routine. It is preferred helper for go
-// workers on long running servers, because they stop panics as well.
-//
-// Note, if any Tracer is set stack traces are printed automatically. If you
-// want to do it in the handlers by yourself, auto tracers should be nil.
-// Deprecated: use Catch for everything
-func CatchAll(errorHandler func(err error), panicHandler func(v any)) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	if !handler.WorkToDo(r, nil) {
-		return
-	}
-
-	handler.Process(&handler.Info{
-		Any:          r,
-		ErrorHandler: errorHandler,
-		PanicHandler: panicHandler,
-		NilHandler:   handler.NilNoop,
-	})
-}
-
-// CatchTrace is a helper function to catch and handle all errors. It also
-// recovers a panic and prints its call stack. CatchTrace and CatchAll are
-// preferred helpers for go-workers on long-running servers because they stop
-// panics as well.
-//
-// CatchTrace prints only panic and runtime.Error stack trace if ErrorTracer
-// isn't set. If it's set it prints both. The panic trace is printed to stderr.
-// If you need panic trace to be printed to some other io.Writer than os.Stderr,
-// you should use CatchAll or Catch with tracers.
-//
-// Deprecated: Use err2.Catch it stops panics, and tracer if needed.
-func CatchTrace(errorHandler func(err error)) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	if !handler.WorkToDo(r, nil) {
-		return
-	}
-
-	handler.Process(&handler.Info{
-		PanicTracer:  os.Stderr,
-		Any:          r,
-		ErrorHandler: errorHandler,
-		PanicHandler: handler.PanicNoop, // no rethrow
-		NilHandler:   handler.NilNoop,
-	})
-}
-
 // Throwf builds and throws (panics) an error. For creation it's similar to
 // fmt.Errorf. Because panic is used to transport the error instead of error
 // return value, it's called only if you want to non-local control structure for
 // error handling, i.e. your current function doesn't have error return value.
 // NOTE, Throwf is rarely needed. We suggest to use error return values instead.
-// Throwf is offered for deep recursive algorithms to help readability.
+// Throwf is offered for deep recursive algorithms to help readability and
+// preformance (see bechmarks) in those cases.
 //
 //	func yourFn() (res any) {
 //	     ...
@@ -190,72 +139,6 @@ func CatchTrace(errorHandler func(err error)) {
 func Throwf(format string, args ...any) {
 	err := fmt.Errorf(format, args...)
 	panic(err)
-}
-
-// Return is the same as Handle but it's for functions that don't wrap or
-// annotate their errors. It's still needed to break panicking which is used for
-// error transport in err2. If you want to annotate errors see Returnf and
-// Returnw functions for more information.
-//
-// Deprecated: use err2.Handle instead.
-func Return(err *error) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	if !handler.WorkToDo(r, err) {
-		return
-	}
-
-	info := &handler.Info{
-		Any:          r,
-		Err:          err,
-		ErrorHandler: func(e error) { *err = e },
-	}
-	handler.Process(info)
-}
-
-// Returnw wraps an error with '%w'. It's similar to fmt.Errorf, but it's called
-// only if error != nil. If you don't want to wrap the error use Handle
-// instead.
-//
-// Deprecated: use err2.Handle instead.
-func Returnw(err *error, format string, args ...any) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	if !handler.WorkToDo(r, err) {
-		return
-	}
-
-	handler.Process(&handler.Info{
-		Any:    r,
-		Err:    err,
-		Format: format,
-		Args:   args,
-	})
-}
-
-// Returnf builds an error. It's similar to fmt.Errorf, but it's called only if
-// error != nil. It uses '%v' to wrap the error not '%w'. Use Returnw for that.
-//
-// Deprecated: use err2.Handle instead.
-func Returnf(err *error, format string, args ...any) {
-	// This and others are similar but we need to call `recover` here because
-	// how it works with defer.
-	r := recover()
-
-	if !handler.WorkToDo(r, err) {
-		return
-	}
-
-	handler.Process(&handler.Info{
-		Any:    r,
-		Err:    err,
-		Format: format,
-		Args:   args,
-	})
 }
 
 func doTrace(err error) {

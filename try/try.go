@@ -124,7 +124,7 @@ func IsEOF(err error) bool {
 // there are no errors. The true tells that the err's chain includes
 // 'err2.NotFound'.
 func IsNotFound(err error) bool {
-	return Is(err, err2.NotFound)
+	return Is(err, err2.ErrNotFound)
 }
 
 // IsNotFound1 function performs a filtered error check for the given argument.
@@ -133,7 +133,7 @@ func IsNotFound(err error) bool {
 // there are no errors. The true tells that the err's chain includes
 // 'err2.NotFound'.
 func IsNotFound1[T any](v T, err error) (bool, T) {
-	isFilter := Is(err, err2.NotFound)
+	isFilter := Is(err, err2.ErrNotFound)
 	return isFilter, v
 }
 
@@ -143,15 +143,15 @@ func IsNotFound1[T any](v T, err error) (bool, T) {
 // there are no errors. The true tells that the err's chain includes
 // 'err2.NotExist'.
 func IsNotExist(err error) bool {
-	return Is(err, err2.NotExist)
+	return Is(err, err2.ErrNotExist)
 }
 
 // IsExist function performs a filtered error check for the given argument. It's
 // the same as To function, but it checks if the error matches the 'err2.Exist'
 // before throwing an error. The false return value tells that there are no
 // errors. The true tells that the err's chain includes 'err2.Exist'.
-func IsExist(err error) bool {
-	return Is(err, err2.Exist)
+func IsAlreadyExist(err error) bool {
+	return Is(err, err2.ErrAlreadyExist)
 }
 
 // IsNotAccess function performs a filtered error check for the given argument.
@@ -160,5 +160,23 @@ func IsExist(err error) bool {
 // there are no errors. The true tells that the err's chain includes
 // 'err2.NotAccess'.
 func IsNotAccess(err error) bool {
-	return Is(err, err2.NotAccess)
+	return Is(err, err2.ErrNotAccess)
+}
+
+// IsRecoverable function performs a filtered error check for the given argument.
+// It's the same as To function, but it checks if the error matches the
+// 'err2.ErrRecoverable' before throwing an error. The false return value tells that
+// there are no errors. The true tells that the err's chain includes
+// 'err2.ErrRecoverable'.
+func IsRecoverable(err error) bool {
+	return Is(err, err2.ErrRecoverable)
+}
+
+// IsNotRecoverable function performs a filtered error check for the given argument.
+// It's the same as To function, but it checks if the error matches the
+// 'err2.ErrNotRecoverable' before throwing an error. The false return value tells that
+// there are no errors. The true tells that the err's chain includes
+// 'err2.ErrNotRecoverable'.
+func IsNotRecoverable(err error) bool {
+	return Is(err, err2.ErrNotRecoverable)
 }

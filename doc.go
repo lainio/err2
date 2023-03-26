@@ -68,11 +68,18 @@ the try package documentation for more information about the error checks.
 # Automatic Stack Tracing
 
 err2 offers optional stack tracing. And yes, it's fully automatic. Just set the
-tracers to the stream you want traces to be written:
+tracers at the beginning your app, e.g. main function, to the stream you want
+traces to be written:
 
 	err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
 	 or
 	err2.SetPanicTracer(log.Writer()) // panic stack trace to std logger
+
+Note. Since err2.Catch's default mode is to catch panics, the panic tracer's
+default values is os.Stderr. The default error tracer is nil.
+
+	err2.SetPanicTracer(os.Stderr) // panic stack tracer's default is stderr
+	err2.SetErrorTracer(nil) // error stack tracer's default is nil
 
 # Error handling
 

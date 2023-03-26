@@ -50,7 +50,7 @@ const (
 	wrapError = ": %w"
 )
 
-func PanicNoop(v any) {}
+func PanicNoop(_ any) {}
 func NilNoop()        {}
 
 // func ErrorNoop(err error) {}

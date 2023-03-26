@@ -60,9 +60,9 @@ check_prerequisites() {
 	fi
 
 	local go_version=$(go mod edit -json | jq -r '."Go"')
-	if [[ $go_version < 1.18 ]]; then
+	if [[ $go_version < 1.19 ]]; then
 		echo "ERROR:  Go version number ($go_version) is too low" >&2
-		echo "Sample: go mod edit -go=1.18 # sets the minimal version" >&2
+		echo "Sample: go mod edit -go=1.19 # sets the minimal version" >&2
 		exit 1
 	fi
 
@@ -153,6 +153,15 @@ replace_annotate() {
 
 	# Replace Annotatew with Returnf: notice argument order!!
 	"$location"/replace-perl.sh 'err2\.(Annotatew\()(.*)(, )(.*)(\)\n)' 'err2.Returnw(\4\3\2\5'
+}
+
+replace_err_values() {
+	"$location"/replace.sh 'err2\.NotFound' 'err2.ErrNotFound'
+	"$location"/replace.sh 'err2\.NotExist' 'err2.ErrNotExist'
+	"$location"/replace.sh 'err2\.AlreadyExist' 'err2.ErrAlreadyExist'
+	"$location"/replace.sh 'err2\.NotAccess' 'err2.ErrNotAccess'
+	"$location"/replace.sh 'err2\.NotRecoverable' 'err2.ErrNotRecoverable'
+	"$location"/replace.sh 'err2\.Recoverable' 'err2.ErrRecoverable'
 }
 
 replace_easy1() {
@@ -407,12 +416,12 @@ check_if_stop_for_simplex() {
 
 todo() {
 	dlog "Searching err2 references out of catchers"
-	ag -l 'err2\.(Check|Try|Filter)'
+	ag -l 'err2\.(Check|Try|Filter|CatchAll|CatchTrace|Annotate|Return)'
 }
 
 todo_show() {
 	dlog "Searching err2 references out of catchers"
-	ag 'err2\.(Check|Try|Filter)'
+	ag 'err2\.(Check|Try|Filter|CatchAll|CatchTrace|Annotate|Return)'
 }
 
 todo2() {

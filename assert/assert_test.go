@@ -67,7 +67,7 @@ func ExampleNotNil() {
 	var b *byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:64 ExampleNotNil.func1 assertion violation: pointer is nil
+	// Output: sample: assert_test.go:64 ExampleNotNil.func1(): assertion violation: pointer shouldn't be nil
 }
 
 func ExampleMNotNil() {
@@ -80,7 +80,7 @@ func ExampleMNotNil() {
 	var b map[string]byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:77 ExampleMNotNil.func1 assertion violation: map is nil
+	// Output: sample: assert_test.go:77 ExampleMNotNil.func1(): assertion violation: map shouldn't be nil
 }
 
 func ExampleCNotNil() {
@@ -93,7 +93,7 @@ func ExampleCNotNil() {
 	var c chan byte
 	err := sample(c)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:90 ExampleCNotNil.func1 assertion violation: channel is nil
+	// Output: sample: assert_test.go:90 ExampleCNotNil.func1(): assertion violation: channel shouldn't be nil
 }
 
 func ExampleSNotNil() {
@@ -106,7 +106,7 @@ func ExampleSNotNil() {
 	var b []byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:103 ExampleSNotNil.func1 assertion violation: slice is nil
+	// Output: sample: assert_test.go:103 ExampleSNotNil.func1(): assertion violation: slice shouldn't be nil
 }
 
 func ExampleEqual() {
@@ -118,7 +118,7 @@ func ExampleEqual() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:116 ExampleEqual.func1 assertion violation: got 2, want 3
+	// Output: sample: assert_test.go:116 ExampleEqual.func1(): assertion violation: got 2, want 3
 }
 
 func ExampleSLen() {
@@ -130,7 +130,7 @@ func ExampleSLen() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:128 ExampleSLen.func1 assertion violation: got 2, want 3
+	// Output: sample: assert_test.go:128 ExampleSLen.func1(): assertion violation: got 2, want 3
 }
 
 func ExampleAsserter_Lenf() {
@@ -183,7 +183,7 @@ func ExampleSNotEmpty() {
 	}
 	err := sample([]byte{})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:181 ExampleSNotEmpty.func1 assertion violation: slice shouldn't be empty
+	// Output: sample: assert_test.go:181 ExampleSNotEmpty.func1(): assertion violation: slice shouldn't be empty
 }
 
 func ExampleNotEmpty() {
@@ -196,7 +196,7 @@ func ExampleNotEmpty() {
 	}
 	err := sample("")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:194 ExampleNotEmpty.func1 assertion violation: string shouldn't be empty
+	// Output: sample: assert_test.go:194 ExampleNotEmpty.func1(): assertion violation: string shouldn't be empty
 }
 
 func ExampleMKeyExists() {
@@ -213,7 +213,7 @@ func ExampleMKeyExists() {
 	}
 	err := sample("2")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:211 ExampleMKeyExists.func1 assertion violation: key '2' doesn't exist
+	// Output: sample: assert_test.go:211 ExampleMKeyExists.func1(): assertion violation: key '2' doesn't exist
 }
 
 func ExampleZero() {
@@ -226,7 +226,7 @@ func ExampleZero() {
 	var b int8 = 1 // we want sample to assert the violation.
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:223 ExampleZero.func1 assertion violation: value isn't zero
+	// Output: sample: assert_test.go:223 ExampleZero.func1(): assertion violation: got 1, want (== 0)
 }
 
 // ifPanicZero in needed that we have argument here! It's like a macro for

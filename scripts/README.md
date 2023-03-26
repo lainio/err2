@@ -9,11 +9,19 @@ successfully from type variables (see below) to Go generics API.
 This readme will guide you to use auto-migration scripts when ever we deprecate
 functions or make something obsolete.
 
-### `err2.Return(f/w)` will obsolete in v 0.9.0
+### `err2.NotFound`, `err2.NotExist` and other sentinels are renamed in v0.9.0
+
+Their names follow Go idiom even the `err` part is two times here:
+`err2.ErrNotFound`.
+
+Please follow the same steps presented for v0.8.10 below to automatically
+refactor all references to these error values in your repos.
+
+### `err2.Return(f/w)` will obsolete in v0.9.0
 
 Please follow the same steps as the next chapter.
 
-### `err2.Annotate` and `err2.StackTraceWriter` are obsolete in v 0.8.10
+### `err2.Annotate` and `err2.StackTraceWriter` are obsolete in v0.8.10
 
 Please follow these guides to automatically replace all obsolete `err2.Annotate`
 functions and `err2.StackTraceWriter` variable set with proper API:

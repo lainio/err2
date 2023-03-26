@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lainio/err2/internal/helper"
+	"github.com/lainio/err2/internal/x"
 )
 
 type StackInfo struct {
@@ -103,7 +103,7 @@ func funcName(r io.Reader, si StackInfo) (n string, ln int, ok bool) {
 
 			// we are interested the line before (2 x si.Level) the
 			// anchorLine, AND we want to calc this only once
-			reachAnchor = helper.Whom(reachAnchor, true,
+			reachAnchor = x.Whom(reachAnchor, true,
 				i == (anchorLine-2*si.Level))
 
 			if reachAnchor && i%2 == 0 && notOurFunction(line) {

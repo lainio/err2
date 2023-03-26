@@ -197,12 +197,12 @@ func (asserter Asserter) reportPanic(s string) {
 var longFmtStr = `
 --------------------------------
 Assertion Fault at:
-%s:%d %s
+%s:%d %s():
 %s
 --------------------------------
 `
 
-var shortFmtStr = `%s:%d %s %s`
+var shortFmtStr = `%s:%d %s(): %s`
 
 func (asserter Asserter) callerInfo(msg string) (info string) {
 	ourFmtStr := shortFmtStr

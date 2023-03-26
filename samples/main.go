@@ -14,17 +14,17 @@ import (
 
 	"github.com/lainio/err2"
 	"github.com/lainio/err2/assert"
-	"github.com/lainio/err2/formatter"
 	"github.com/lainio/err2/try"
 )
 
 // CopyFile copies source file to the given destination. If any error occurs it
 // returns error value describing the reason.
 func CopyFile(src, dst string) (err error) {
-	// You can comment below line out an see what happens...
-	defer err2.Handle(&err)
-	// ... and you learn that call stacks are for every function level 'catch'
-	// statement like defer err2.Returnf() is.
+	defer err2.Handle(&err) // automatic error message: see err2.Formatter
+
+	// You can comment above handler line(s) out an see what happens.
+	// You'll learn that call stacks are for every function level 'catch'
+	// statement like defer err2.Handle() is.
 
 	assert.NotEmpty(src)
 	assert.NotEmpty(dst)
@@ -44,23 +44,58 @@ func CopyFile(src, dst string) (err error) {
 	return nil
 }
 
+func callRecur(d int) (err error) {
+	defer err2.Handle(&err)
+
+	return doRecur(d)
+}
+
+func doRecur(d int) (err error) {
+	d--
+	if d >= 0 {
+		// keep below to show how asserts work
+		assert.NotZero(d)
+		// comment out above assert-statement to simulate runtime-error
+		fmt.Println(10 / d)
+		return doRecur(d)
+	}
+	return fmt.Errorf("root error")
+}
+
 func main() {
+	// keep here that you can play without changing imports
+	assert.That(true)
+
+	// if asserts are treated as panics instead of errors you get stack trace.
+	// you can try that by taking next line out of the comment:
+	//assert.SetDefaultAsserter(assert.AsserterFormattedCallerInfo|assert.AsserterDebug)
+	// same thing but one line assert msg
+	//assert.SetDefaultAsserter(assert.AsserterCallerInfo|assert.AsserterDebug)
+
 	// To see how automatic stack tracing works.
 	//err2.SetErrorTracer(os.Stderr)
-	err2.SetPanicTracer(os.Stderr) // for the err2.Catch()
+	//err2.SetPanicTracer(os.Stderr) // this is the default
 
 	// to see how there is two predefined formatters and own can be
 	// implemented.
-	err2.SetFormatter(formatter.Noop) // default is formatter.Decamel
+	//err2.SetFormatter(formatter.Noop) // default is formatter.Decamel
 
 	// even no handlers is given, errors are caught without specific handlers.
-	defer err2.Catch() // thanks to panic tracer error msg is printed!
+	defer err2.Catch()
 
 	// If you don't want to use tracers or you just need proper error handler
 	// here.
 	//	defer err2.Catch(func(err error) {
 	//		fmt.Println("ERROR:", err)
 	//	})
+
+	try.To(doMain())
+
+	println("______===")
+}
+
+func doMain() (err error) {
+	defer err2.Handle(&err)
 
 	// You can select anyone of the try.To(CopyFile lines to play with and see
 	// how err2 works. Especially interesting is automatic stack tracing.
@@ -73,4 +108,11 @@ func main() {
 	//
 	// first argument is empty
 	//try.To(CopyFile("main.go", ""))
+
+	// Next fn demonstrates how error and panic traces work, comment out all
+	// above CopyFile calls to play withit:
+	try.To(callRecur(1))
+
+	println("=== you cannot see this ===")
+	return nil
 }

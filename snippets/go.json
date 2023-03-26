@@ -23,7 +23,27 @@
 		"assert.That()": {
 			"prefix": "asth",
 			"body": "assert.That(${1:bool}$2)",
-			"description": "Snippet for pushing current tester"
+			"description": "Snippet for generic That assert"
+		},
+		"assert.Equal()": {
+			"prefix": "aseq",
+			"body": "assert.Equal(${1:got}, ${2:want}$3)",
+			"description": "Snippet for Equal assert"
+		},
+		"assert.NotImplemented()": {
+			"prefix": "asni",
+			"body": "assert.NotImplemented($1)",
+			"description": "Snippet for not implemented assert"
+		},
+		"assert.NotNil()": {
+			"prefix": "asnn",
+			"body": "assert.NotNil(${1:ptr}$2)",
+			"description": "Snippet for NotNil assert"
+		},
+		"assert.INotNil()": {
+			"prefix": "asinn",
+			"body": "assert.INotNil(${1:interface}$2)",
+			"description": "Snippet for INotNil assert"
 		}
 	}
 }

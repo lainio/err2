@@ -3,10 +3,11 @@ package err2_test
 import (
 	"fmt"
 	"io"
+	"os"
 	"testing"
 
 	"github.com/lainio/err2"
-	"github.com/lainio/err2/internal/helper"
+	"github.com/lainio/err2/internal/test"
 	"github.com/lainio/err2/try"
 )
 
@@ -23,7 +24,7 @@ func noErr() error {
 	return nil
 }
 
-func TestTry_noError(t *testing.T) {
+func TestTry_noError(_ *testing.T) {
 	try.To1(noThrow())
 	try.To2(twoStrNoThrow())
 	try.To2(intStrNoThrow())
@@ -100,7 +101,7 @@ func TestPanickingCatchAll(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
-				helper.Require(t, recover() == nil, "panics should NOT carry on")
+				test.Require(t, recover() == nil, "panics should NOT carry on")
 			}()
 			tt.args.f()
 		})
@@ -141,7 +142,7 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
-				helper.Require(t, recover() != nil, "panics should went thru when not our errors")
+				test.Require(t, recover() != nil, "panics should went thru when not our errors")
 			}()
 			tt.args.f()
 		})
@@ -245,12 +246,12 @@ func TestPanicking_Handle(t *testing.T) {
 			defer func() {
 				r := recover()
 				if tt.wants == nil {
-					helper.Require(t, r != nil, "wants err, then panic")
+					test.Require(t, r != nil, "wants err, then panic")
 				}
 			}()
 			err := tt.args.f()
 			if err != nil {
-				helper.Requiref(t, err == myErr, "got %p, want %p", err, myErr)
+				test.Requiref(t, err == myErr, "got %p, want %p", err, myErr)
 			}
 		})
 	}
@@ -288,7 +289,7 @@ func TestPanicking_Catch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
-				helper.Require(t, recover() == nil, "panics should NOT carry on")
+				test.Require(t, recover() == nil, "panics should NOT carry on")
 			}()
 			tt.args.f()
 		})
@@ -326,11 +327,11 @@ func TestCatch_Panic(t *testing.T) {
 
 func TestSetErrorTracer(t *testing.T) {
 	w := err2.ErrorTracer()
-	helper.Require(t, w == nil, "error tracer should be nil")
+	test.Require(t, w == nil, "error tracer should be nil")
 	var w1 io.Writer
 	err2.SetErrorTracer(w1)
 	w = err2.ErrorTracer()
-	helper.Require(t, w == nil, "error tracer should be nil")
+	test.Require(t, w == nil, "error tracer should be nil")
 }
 
 func ExampleHandle() {
@@ -361,7 +362,7 @@ func ExampleHandle_errReturn() {
 	// Output: our error
 }
 
-func ExampleReturnf_empty() {
+func ExampleHandle_empty() {
 	annotated := func() (err error) {
 		defer err2.Handle(&err, "annotated")
 		try.To1(throw())
@@ -409,7 +410,7 @@ func ExampleThrowf() {
 	// Output: annotated: err2: helper failed at: 78
 }
 
-func ExampleReturnf_deferStack() {
+func ExampleHandle_deferStack() {
 	annotated := func() (err error) {
 		defer err2.Handle(&err, "annotated 2nd")
 		defer err2.Handle(&err, "annotated 1st")
@@ -579,3 +580,16 @@ func BenchmarkRecursionWithTryAndDefer(b *testing.B) {
 		_, _ = recursion(100)
 	}
 }
+
+func TestMain(m *testing.M) {
+	setUp()
+	code := m.Run()
+	tearDown()
+	os.Exit(code)
+}
+
+func setUp() {
+	err2.SetPanicTracer(nil)
+}
+
+func tearDown() {}

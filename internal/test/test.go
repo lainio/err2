@@ -1,4 +1,4 @@
-package helper
+package test
 
 import "testing"
 
@@ -16,13 +16,4 @@ func Requiref(tb testing.TB, condition bool, format string, v ...interface{}) {
 	if !condition {
 		tb.Fatalf(format, v...)
 	}
-}
-
-// Whom is exactly same as C/C++ ternary operator. In Go it's implemented with
-// generics.
-func Whom[T any](b bool, yes, no T) T {
-	if b {
-		return yes
-	}
-	return no
 }
