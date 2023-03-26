@@ -72,6 +72,7 @@ commit "commit deps"
 echo "====== basic err2 refactoring ===="
 echo "processing..."
 
+replace_err_values
 replace_catch
 replace_tracers
 replace_defasserter

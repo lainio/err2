@@ -155,6 +155,15 @@ replace_annotate() {
 	"$location"/replace-perl.sh 'err2\.(Annotatew\()(.*)(, )(.*)(\)\n)' 'err2.Returnw(\4\3\2\5'
 }
 
+replace_err_values() {
+	"$location"/replace.sh 'err2\.NotFound' 'err2.ErrNotFound'
+	"$location"/replace.sh 'err2\.NotExist' 'err2.ErrNotExist'
+	"$location"/replace.sh 'err2\.AlreadyExist' 'err2.ErrAlreadyExist'
+	"$location"/replace.sh 'err2\.NotAccess' 'err2.ErrNotAccess'
+	"$location"/replace.sh 'err2\.NotRecoverable' 'err2.ErrNotRecoverable'
+	"$location"/replace.sh 'err2\.Recoverable' 'err2.ErrRecoverable'
+}
+
 replace_easy1() {
 	vlog "Replacing err2.Check, err2.FilterTry, err2.TryEOF, and type vars"
 
