@@ -228,10 +228,10 @@ default asserter with the following line:
 SetDefaultAsserter(AsserterToError) // we offer separated flags for caller info
 ```
 
-For certain type programs this is the best way. It allows us to keep all the
+For certain type of programs this is the best way. It allows us to keep all the
 error messages as simple as possible. And by offering option to turn additional
-information on, allows super users and developers get more technical information
-when needed.
+information on, which allows super users and developers get more technical
+information when needed.
 
 #### Assertion Package for Runtime Use
 
@@ -246,12 +246,12 @@ func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData
 ```
 
 We have now described design-by-contract for development and runtime use. What
-makes err2's assertion packages unique and extremely powerful is its use for
+makes err2's assertion packages unique, and extremely powerful, is its use for
 automatic testing as well.
 
 #### Assertion Package for Unit Testing
 
-The same asserts can be used during the unit tests:
+The same asserts can be used **and shared** during the unit tests:
 
 ```go
 func TestWebOfTrustInfo(t *testing.T) {
@@ -278,11 +278,13 @@ Especially powerful feature is that even if some assertion violation happens
 during the execution of called functions like above `NewWebOfTrust()` function
 instead of the actual Test function, **it's reported as normal test failure.**
 That means that we don't need to open our internal pre- and post-conditions just
-for testing.
+for testing. **We can share the same assertions between runtime and test
+execution.**
 
 Only minus is that test coverage figures are too conservatives. The code that
 uses design-by-contract assertions is typically much more robust what the actual
-test coverage results tell you.
+test coverage results tell you. However, this's well know problem with test
+coverage metric in generally.
 
 ## Code Snippets
 
@@ -344,7 +346,7 @@ than getting unrelated panic somewhere else in the code later. There have also
 been cases when code reports error correctly because the 'upper' handler catches
 it.
 
-- Because the use of `err2.Handle` is so easy, error messages much are better
+- Because the use of `err2.Handle` is so easy, error messages are much better
 and informative. When using `err2.Handle`'s automatic annotation your error
 messages are always up-to-date. Even when you refactor your function name error
 message is also updated.
