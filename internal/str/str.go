@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"strings"
 	"unicode"
+
+	"github.com/lainio/err2/internal/x"
 )
 
 var (
@@ -70,7 +72,7 @@ func Decamel(s string) string {
 //
 // See more information from runtime.Caller. The skip tells how many stack
 // frames are skipped. Note, that FuncName calculates itself to skip frames.
-func FuncName(skip int) (n, fname string, ln int, ok bool) {
+func FuncName(skip int, long bool) (n, fname string, ln int, ok bool) {
 	pc, file, ln, yes := runtime.Caller(skip + 1) // +1 skip ourself
 	if yes {
 		fn := runtime.FuncForPC(pc)
@@ -79,5 +81,6 @@ func FuncName(skip int) (n, fname string, ln int, ok bool) {
 		trimmedFilename := strings.TrimSuffix(fname, ext) + "."
 		n = strings.TrimPrefix(filepath.Base(fn.Name()), trimmedFilename)
 	}
+	fname = x.Whom(long, file, fname)
 	return n, fname, ln, yes
 }
