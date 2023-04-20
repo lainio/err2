@@ -434,6 +434,13 @@ todo2l() {
 	ag -l  '^\s*try\.To\(err\)$'
 }
 
+todo_assert() {
+	# TODO: idea, study how to send arguments to these functions when
+	# calling them outside of the scripts
+	dlog "Searching lone: assert.D/P, no automatic replace yet.."
+	ag 'assert\.[DP]+\.'
+}
+
 lint() {
 	dlog "Linter check for missing defers"
 	ag '^\s*err2\.(Handle|Catch)'
