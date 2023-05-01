@@ -43,6 +43,7 @@ func TestDecamel(t *testing.T) {
 		{"simple method and anonym", args{"(*DIDAgent).AssertWallet.Func1"}, "didagent assert wallet func1"},
 		{"complex method and anonym", args{"(**DIDAgent).AssertWallet.Func1"}, "didagent assert wallet func1"},
 		{"unnatural method and anonym", args{"(**DIDAgent)...AssertWallet...Func1"}, "didagent assert wallet func1"},
+		{"from spf13 cobra", args{"bot.glob..func5"}, "bot glob func5"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
