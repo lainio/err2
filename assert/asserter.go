@@ -3,6 +3,7 @@ package assert
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/lainio/err2/internal/debug"
@@ -184,7 +185,11 @@ func getLen(x any) (ok bool, length int) {
 }
 
 func (asserter Asserter) reportPanic(s string) {
-	if asserter.isUnitTesting() {
+	if asserter.isUnitTesting() && asserter.hasCallerInfo() {
+		tester().Helper()
+		fmt.Fprintln(os.Stderr, "    "+s)
+		tester().FailNow()
+	} else if asserter.isUnitTesting() {
 		tester().Helper()
 		tester().Fatal(s)
 	}
@@ -202,7 +207,7 @@ Assertion Fault at:
 --------------------------------
 `
 
-var shortFmtStr = `%s:%d %s(): %s`
+var shortFmtStr = `%s:%d: %s(): %s`
 
 func (asserter Asserter) callerInfo(msg string) (info string) {
 	ourFmtStr := shortFmtStr
@@ -211,7 +216,8 @@ func (asserter Asserter) callerInfo(msg string) (info string) {
 	}
 
 	const framesToSkip = 3 // how many fn calls there is before FuncName call
-	funcName, filename, line, ok := str.FuncName(framesToSkip)
+	includePath := asserter.isUnitTesting()
+	funcName, filename, line, ok := str.FuncName(framesToSkip, includePath)
 	if ok {
 		info = fmt.Sprintf(ourFmtStr,
 			filename, line,
