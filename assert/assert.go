@@ -55,7 +55,7 @@ const (
 //			assert.That(something, "test won't work")
 //		})
 //	}
-func PushTester(t testing.TB) {
+func PushTester(t testing.TB) { // TODO: add argument (def asserter for the test)
 	if DefaultAsserter()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
