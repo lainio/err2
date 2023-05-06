@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
-	"sync"
 	"sync/atomic"
 	"testing"
 
+	"github.com/lainio/err2/internal/x"
 	"golang.org/x/exp/constraints"
 )
 
@@ -20,6 +20,8 @@ var (
 	// D is a development Asserter that sets panic objects to strings that
 	// doesn't by caught by err2 handlers.
 	D = AsserterDebug
+
+	// TODO: add DT or something for certain type testing
 )
 
 var (
@@ -30,14 +32,11 @@ func init() {
 	SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
 }
 
+type testersMap = x.TMap[int, testing.TB]
+
 var (
 	// testers is must be set if assertion package is used for the unit testing.
-	testers = struct {
-		sync.RWMutex
-		m map[int]testing.TB
-	}{
-		m: make(map[int]testing.TB),
-	}
+	testers = x.NewRWMap[int, testing.TB]()
 )
 
 const (
@@ -55,15 +54,18 @@ const (
 //			assert.That(something, "test won't work")
 //		})
 //	}
+//
+// TODO: return the PopTester function, so we can have one liner like the
+// defer PushTester(t)()
 func PushTester(t testing.TB) { // TODO: add argument (def asserter for the test)
 	if DefaultAsserter()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
 		SetDefaultAsserter(AsserterUnitTesting)
 	}
-	testers.Lock()
-	testers.m[goid()] = t
-	testers.Unlock()
+	x.Tx(testers, func(m testersMap) {
+		m[goid()] = t
+	})
 }
 
 // PopTester pops the testing context reference from the memory. This isn't
@@ -79,15 +81,13 @@ func PushTester(t testing.TB) { // TODO: add argument (def asserter for the test
 //		})
 //	}
 func PopTester() {
-	testers.Lock()
-	defer testers.Unlock()
-	delete(testers.m, goid())
+	x.Tx(testers, func(m testersMap) {
+		delete(m, goid())
+	})
 }
 
-func tester() testing.TB {
-	testers.RLock()
-	defer testers.RUnlock()
-	return testers.m[goid()]
+func tester() (t testing.TB) {
+	return x.Get(testers, goid())
 }
 
 // NotImplemented always panics with 'not implemented' assertion message.
