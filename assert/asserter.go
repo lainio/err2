@@ -158,7 +158,13 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 		tester().Helper()
 	}
 	if asserter.hasStackTrace() {
-		debug.PrintStack(2)
+		if asserter.isUnitTesting() {
+			const stackLvl = 4
+			debug.PrintStackForTest(os.Stderr, stackLvl)
+		} else {
+			const stackLvl = 2
+			debug.PrintStack(stackLvl)
+		}
 	}
 	if asserter.hasCallerInfo() {
 		defaultMsg = asserter.callerInfo(defaultMsg)
