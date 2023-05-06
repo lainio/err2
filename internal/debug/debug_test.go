@@ -192,6 +192,31 @@ func TestStackPrint_noLimits(t *testing.T) {
 	}
 }
 
+func TestStackPrintForTest(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		output string
+		lvl    int
+	}{
+		//{"short", input, outputForTest, 0},
+		{"short", input, outputForTestLvl2, 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := strings.NewReader(tt.input)
+			w := new(bytes.Buffer)
+			printStackForTest(r, w, tt.lvl)
+			a, b := len(tt.output), len(w.String())
+			// print(tt.output)
+			// println("------")
+			// print(w.String())
+			test.Requiref(t, a == b, "%d %d", a, b)
+			test.Require(t, tt.output == w.String(), w.String())
+		})
+	}
+}
+
 func TestCalcAnchor(t *testing.T) {
 	type args struct {
 		input string
@@ -206,6 +231,7 @@ func TestCalcAnchor(t *testing.T) {
 		{"short", args{input, StackInfo{"", "panic(", 0, nil}}, 6},
 		{"short error stack", args{inputByError, StackInfo{"", "panic(", 0, PackageRegexp}}, 4},
 		{"short and nolimit", args{input, StackInfo{"", "", 0, nil}}, nilAnchor},
+		{"short and only lvl LIMIT is 2", args{input, StackInfo{"", "", 2, nil}}, 2},
 		{"medium", args{input1, StackInfo{"", "panic(", 0, nil}}, 10},
 		{"from test using panic", args{inputFromTest, StackInfo{"", "panic(", 0, nil}}, 8},
 		{"from test", args{inputFromTest, StackInfo{"", "panic(", 0, PackageRegexp}}, 14},
@@ -215,7 +241,8 @@ func TestCalcAnchor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := strings.NewReader(tt.input)
 			anchor := calcAnchor(r, tt.StackInfo)
-			test.Require(t, tt.anchor == anchor, "equal")
+			test.Requiref(t, tt.anchor == anchor, "not equal: %d != %d, got",
+				tt.anchor, anchor)
 		})
 	}
 }
@@ -230,9 +257,11 @@ func TestStackPrint_limit(t *testing.T) {
 		args
 		output string
 	}{
+		{"only level 4", args{input1, StackInfo{"", "", 4, nil}}, output1},
 		{"short", args{input, StackInfo{"err2", "Returnw(", 0, nil}}, output},
 		{"medium", args{input1, StackInfo{"err2", "Returnw(", 0, nil}}, output1},
 		{"medium level 2", args{input1, StackInfo{"err2", "Returnw(", 2, nil}}, output12},
+		{"medium level 0", args{input1, StackInfo{"err2", "Returnw(", 0, nil}}, output1},
 		{"medium panic", args{input1, StackInfo{"", "panic(", 0, nil}}, output1panic},
 		{"long", args{input2, StackInfo{"err2", "Handle(", 0, nil}}, output2},
 		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3, nil}}, output23},
@@ -241,15 +270,13 @@ func TestStackPrint_limit(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := strings.NewReader(tt.input)
 			w := new(bytes.Buffer)
-			stackPrint(r, w, StackInfo{
-				PackageName: tt.PackageName,
-				FuncName:    tt.FuncName,
-				Level:       tt.Level,
-			})
+			stackPrint(r, w, tt.StackInfo)
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(w.String(), "\n")
-			test.Require(t, len(ins) > len(outs), "input length should be greater")
-			test.Require(t, tt.output == w.String(), "not equal")
+			test.Requiref(t, len(ins) > len(outs),
+				"input length:%d should be greater:%d", len(ins), len(outs))
+			a, b := tt.output, w.String()
+			test.Requiref(t, a == b, "a: %v != b: %v", a, b)
 		})
 	}
 }
@@ -371,6 +398,23 @@ main.test0()
 	/home/god/go/src/github.com/lainio/ic/main.go:18 +0x64
 main.main()
 	/home/god/go/src/github.com/lainio/ic/main.go:74 +0x1d0
+`
+
+	// outputForTest is printStackForTest targetted result. Note that test0 and main
+	// functions don't have package name `main` in them!! That's how func name is
+	// calculated in our debug pkg.
+	outputForTest = `    /home/god/go/src/github.com/lainio/err2/err2.go:107: err2.Handle
+    /usr/local/go/src/runtime/panic.go:838: panic
+    /home/god/go/src/github.com/lainio/err2/err2.go:214: err2.Returnw
+    /usr/local/go/src/runtime/panic.go:838: panic
+    /home/god/go/src/github.com/lainio/ic/main.go:18: test0
+    /home/god/go/src/github.com/lainio/ic/main.go:74: main
+`
+
+	outputForTestLvl2 = `    /home/god/go/src/github.com/lainio/err2/err2.go:214: err2.Returnw
+    /usr/local/go/src/runtime/panic.go:838: panic
+    /home/god/go/src/github.com/lainio/ic/main.go:18: test0
+    /home/god/go/src/github.com/lainio/ic/main.go:74: main
 `
 
 	output = `goroutine 1 [running]:

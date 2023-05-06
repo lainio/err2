@@ -58,6 +58,58 @@ func (si StackInfo) isFuncAnchor(s string) bool {
 	return strings.Contains(s, si.fullName())
 }
 
+func (si StackInfo) needToCalcFnNameAnchor() bool {
+	return si.FuncName != "" && si.Regexp != nil
+}
+
+// isLvlOnly return true if all fields are nil and Level != 0 that should be
+// used then.
+func (si StackInfo) isLvlOnly() bool {
+	return si.Level != 0 && si.Regexp == nil && si.PackageName == "" && si.FuncName == ""
+}
+
+func (si StackInfo) canPrint(anchorLine, i int) bool {
+	if si.isLvlOnly() {
+		// we don't need it now because only Lvl is used to decide what's
+		// printed from call stack.
+		anchorLine = 0
+	}
+	return i >= 2*si.Level+anchorLine
+}
+
+// PrintStackForTest prints to io.Writer the stack trace returned by
+// runtime.Stack and processed to proper format to be shown in test output by
+// starting from stackLevel.
+func PrintStackForTest(w io.Writer, stackLevel int) {
+	stackBuf := bytes.NewBuffer(debug.Stack())
+	printStackForTest(stackBuf, w, stackLevel)
+}
+
+// printStackForTest prints to io.Writer the stack trace returned by
+// runtime.Stack and processed to proper format to be shown in test output by
+// starting from stackLevel.
+func printStackForTest(r io.Reader, w io.Writer, stackLevel int) {
+	buf := new(bytes.Buffer)
+	stackPrint(r, buf, StackInfo{Level: stackLevel})
+	scanner := bufio.NewScanner(buf)
+	funcName := ""
+	for i := -1; scanner.Scan(); i++ {
+		line := scanner.Text()
+		if i == -1 {
+			continue
+		}
+		if i%2 == 0 {
+			funcName = fnName(line)
+		} else {
+			line = strings.TrimPrefix(line, "\t")
+			s := strings.Split(line, " ")
+			out := fmt.Sprintf("    %s: %s\n", s[0], funcName)
+			//print(out)
+			fmt.Fprint(w, out)
+		}
+	}
+}
+
 // PrintStack prints to standard error the stack trace returned by runtime.Stack
 // by starting from stackLevel.
 func PrintStack(stackLevel int) {
@@ -182,7 +234,7 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 		if !canPrint {
 			// we can print a line when it's a caption OR the line (pair) is
 			// greater than anchorLine
-			canPrint = i == -1 || i >= 2*si.Level+anchorLine
+			canPrint = i == -1 || si.canPrint(anchorLine, i)
 		}
 
 		if canPrint {
@@ -194,6 +246,12 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 // calcAnchor calculates the optimal anchor line. Optimal is the shortest but
 // including all the needed information.
 func calcAnchor(r io.Reader, si StackInfo) int {
+	if si.isLvlOnly() {
+		// these are buffers, there's no error, but because we use TeeReader
+		// we need to read all before return, otherwise caller gets nothing.
+		_, _ = io.ReadAll(r)
+		return si.Level
+	}
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
 
@@ -201,8 +259,7 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 		return si.isAnchor(s)
 	})
 
-	needToCalcFnNameAnchor := si.FuncName != "" && si.Regexp != nil
-	if needToCalcFnNameAnchor {
+	if si.needToCalcFnNameAnchor() {
 		fnNameAnchor := calc(&buf, func(s string) bool {
 			return si.isFuncAnchor(s)
 		})
