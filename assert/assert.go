@@ -12,6 +12,8 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+// TODO: how about combine these to static (private) array and use only index to
+// that for defaultAsserter. maybe get rid of performance penalty?
 var (
 	// P is a production Asserter that sets panic objects to errors which
 	// allows err2 handlers to catch them.
@@ -21,7 +23,7 @@ var (
 	// doesn't by caught by err2 handlers.
 	D = AsserterDebug
 
-	// TODO: add DT or something for certain type testing
+	T = AsserterUnitTesting | AsserterStackTrace | AsserterCallerInfo
 )
 
 var (
@@ -32,7 +34,10 @@ func init() {
 	SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
 }
 
-type testersMap = x.TMap[int, testing.TB]
+type (
+	testersMap = x.TMap[int, testing.TB]
+	function = func()
+)
 
 var (
 	// testers is must be set if assertion package is used for the unit testing.
@@ -55,17 +60,14 @@ const (
 //		})
 //	}
 //
-// TODO: return the PopTester function, so we can have one liner like the
-// defer PushTester(t)()
-func PushTester(t testing.TB) { // TODO: add argument (def asserter for the test)
+func PushTester(t testing.TB) function { // TODO: add argument (def asserter for the test)
 	if DefaultAsserter()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
 		SetDefaultAsserter(AsserterUnitTesting)
 	}
-	x.Tx(testers, func(m testersMap) {
-		m[goid()] = t
-	})
+	x.Set(testers, goid(), t)
+	return PopTester
 }
 
 // PopTester pops the testing context reference from the memory. This isn't
@@ -81,6 +83,7 @@ func PushTester(t testing.TB) { // TODO: add argument (def asserter for the test
 //		})
 //	}
 func PopTester() {
+
 	x.Tx(testers, func(m testersMap) {
 		delete(m, goid())
 	})
