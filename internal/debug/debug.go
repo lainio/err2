@@ -127,8 +127,7 @@ func printStackForTest(r io.Reader, w io.Writer, stackLevel int) {
 		} else {
 			line = strings.TrimPrefix(line, "\t")
 			s := strings.Split(line, " ")
-			out := fmt.Sprintf("    %s: %s\n", s[0], funcName)
-			//print(out)
+			out := fmt.Sprintf("    %s: STACK: %s\n", s[0], funcName)
 			fmt.Fprint(w, out)
 		}
 	}
