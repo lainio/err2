@@ -18,11 +18,11 @@ func TestFullName(t *testing.T) {
 		args
 		retval string
 	}{
-		{"all empty", args{StackInfo{"", "", 0, nil}}, ""},
-		{"namespaces", args{StackInfo{"lainio/err2", "", 0, nil}}, "lainio/err2"},
-		{"both", args{StackInfo{"lainio/err2", "try", 0, nil}}, "lainio/err2.try"},
-		{"short both", args{StackInfo{"err2", "Handle", 0, nil}}, "err2.Handle"},
-		{"func", args{StackInfo{"", "try", 0, nil}}, "try"},
+		{"all empty", args{StackInfo{"", "", 0, nil, nil}}, ""},
+		{"namespaces", args{StackInfo{"lainio/err2", "", 0, nil, nil}}, "lainio/err2"},
+		{"both", args{StackInfo{"lainio/err2", "try", 0, nil, nil}}, "lainio/err2.try"},
+		{"short both", args{StackInfo{"err2", "Handle", 0, nil, nil}}, "err2.Handle"},
+		{"func", args{StackInfo{"", "try", 0, nil, nil}}, "try"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -44,34 +44,34 @@ func TestIsAnchor(t *testing.T) {
 	}{
 		{"panic func and short regexp", args{
 			"github.com/lainio/err2.Return(0x14001c1ee20)",
-			StackInfo{"", "panic(", 0, PackageRegexp}}, true},
+			StackInfo{"", "panic(", 0, PackageRegexp, nil}}, true},
 		{"func hit and regexp on", args{
 			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "printStackIf(", 0, noHitRegexp}}, false},
+			StackInfo{"", "printStackIf(", 0, noHitRegexp, nil}}, false},
 		{"short regexp no match", args{
 			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, noHitRegexp}}, false},
+			StackInfo{"", "", 0, noHitRegexp, nil}}, false},
 		{"short regexp", args{
 			"github.com/lainio/err2/assert.That({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, PackageRegexp}}, true},
+			StackInfo{"", "", 0, PackageRegexp, nil}}, true},
 		{"short", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, nil}}, true},
+			StackInfo{"", "", 0, nil, nil}}, true},
 		{"short-but-false", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"err2", "Handle", 0, nil}}, false},
+			StackInfo{"err2", "Handle", 0, nil, nil}}, false},
 		{"medium", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Returnw", 0, nil}}, true},
+			StackInfo{"err2", "Returnw", 0, nil, nil}}, true},
 		{"medium-but-false", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Return(", 0, nil}}, false},
+			StackInfo{"err2", "Return(", 0, nil, nil}}, false},
 		{"long", args{
 			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
-			StackInfo{"err2", "Handle", 0, nil}}, true},
+			StackInfo{"err2", "Handle", 0, nil, nil}}, true},
 		{"package name only", args{
 			"github.com/lainio/err2/try.To1[...](...)",
-			StackInfo{"lainio/err2", "", 0, nil}}, true},
+			StackInfo{"lainio/err2", "", 0, nil, nil}}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -92,28 +92,28 @@ func TestIsFuncAnchor(t *testing.T) {
 	}{
 		{"func hit and regexp on", args{
 			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "printStackIf(", 0, noHitRegexp}}, true},
+			StackInfo{"", "printStackIf(", 0, noHitRegexp, nil}}, true},
 		{"short regexp", args{
 			"github.com/lainio/err2/assert.That({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, PackageRegexp}}, true},
+			StackInfo{"", "", 0, PackageRegexp, nil}}, true},
 		{"short", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, nil}}, true},
+			StackInfo{"", "", 0, nil, nil}}, true},
 		{"short-but-false", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"err2", "Handle", 0, nil}}, false},
+			StackInfo{"err2", "Handle", 0, nil, nil}}, false},
 		{"medium", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Returnw", 0, nil}}, true},
+			StackInfo{"err2", "Returnw", 0, nil, nil}}, true},
 		{"medium-but-false", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Return(", 0, nil}}, false},
+			StackInfo{"err2", "Return(", 0, nil, nil}}, false},
 		{"long", args{
 			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
-			StackInfo{"err2", "Handle", 0, nil}}, true},
+			StackInfo{"err2", "Handle", 0, nil, nil}}, true},
 		{"package name only", args{
 			"github.com/lainio/err2/try.To1[...](...)",
-			StackInfo{"lainio/err2", "", 0, nil}}, true},
+			StackInfo{"lainio/err2", "", 0, nil, nil}}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -201,6 +201,7 @@ func TestStackPrintForTest(t *testing.T) {
 	}{
 		//{"short", input, outputForTest, 0},
 		{"short", input, outputForTestLvl2, 2},
+		//{"real test trace", inputFromTest, outputFromTest, 4},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -227,15 +228,15 @@ func TestCalcAnchor(t *testing.T) {
 		args
 		anchor int
 	}{
-		{"macOS from test using regexp", args{inputFromMac, StackInfo{"", "panic(", 1, PackageRegexp}}, 12},
-		{"short", args{input, StackInfo{"", "panic(", 0, nil}}, 6},
-		{"short error stack", args{inputByError, StackInfo{"", "panic(", 0, PackageRegexp}}, 4},
-		{"short and nolimit", args{input, StackInfo{"", "", 0, nil}}, nilAnchor},
-		{"short and only lvl LIMIT is 2", args{input, StackInfo{"", "", 2, nil}}, 2},
-		{"medium", args{input1, StackInfo{"", "panic(", 0, nil}}, 10},
-		{"from test using panic", args{inputFromTest, StackInfo{"", "panic(", 0, nil}}, 8},
-		{"from test", args{inputFromTest, StackInfo{"", "panic(", 0, PackageRegexp}}, 14},
-		{"macOS from test using panic", args{inputFromMac, StackInfo{"", "panic(", 0, nil}}, 12},
+		{"macOS from test using regexp", args{inputFromMac, StackInfo{"", "panic(", 1, PackageRegexp, nil}}, 12},
+		{"short", args{input, StackInfo{"", "panic(", 0, nil, nil}}, 6},
+		{"short error stack", args{inputByError, StackInfo{"", "panic(", 0, PackageRegexp, nil}}, 4},
+		{"short and nolimit", args{input, StackInfo{"", "", 0, nil, nil}}, nilAnchor},
+		{"short and only LVL is 2", args{input, StackInfo{"", "", 2, nil, nil}}, 2},
+		{"medium", args{input1, StackInfo{"", "panic(", 0, nil, nil}}, 10},
+		{"from test using panic", args{inputFromTest, StackInfo{"", "panic(", 0, nil, nil}}, 8},
+		{"from test", args{inputFromTest, StackInfo{"", "panic(", 0, PackageRegexp, nil}}, 14},
+		{"macOS from test using panic", args{inputFromMac, StackInfo{"", "panic(", 0, nil, nil}}, 12},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -257,14 +258,15 @@ func TestStackPrint_limit(t *testing.T) {
 		args
 		output string
 	}{
-		{"only level 4", args{input1, StackInfo{"", "", 4, nil}}, output1},
-		{"short", args{input, StackInfo{"err2", "Returnw(", 0, nil}}, output},
-		{"medium", args{input1, StackInfo{"err2", "Returnw(", 0, nil}}, output1},
-		{"medium level 2", args{input1, StackInfo{"err2", "Returnw(", 2, nil}}, output12},
-		{"medium level 0", args{input1, StackInfo{"err2", "Returnw(", 0, nil}}, output1},
-		{"medium panic", args{input1, StackInfo{"", "panic(", 0, nil}}, output1panic},
-		{"long", args{input2, StackInfo{"err2", "Handle(", 0, nil}}, output2},
-		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3, nil}}, output23},
+		{"real test trace", args{inputFromTest, StackInfo{"", "", 8, nil, exludeRegexps}}, outputFromTest},
+		{"only level 4", args{input1, StackInfo{"", "", 4, nil, nil}}, output1},
+		{"short", args{input, StackInfo{"err2", "Returnw(", 0, nil, nil}}, output},
+		{"medium", args{input1, StackInfo{"err2", "Returnw(", 0, nil, nil}}, output1},
+		{"medium level 2", args{input1, StackInfo{"err2", "Returnw(", 2, nil, nil}}, output12},
+		{"medium level 0", args{input1, StackInfo{"err2", "Returnw(", 0, nil, nil}}, output1},
+		{"medium panic", args{input1, StackInfo{"", "panic(", 0, nil, nil}}, output1panic},
+		{"long", args{input2, StackInfo{"err2", "Handle(", 0, nil, nil}}, output2},
+		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3, nil, nil}}, output23},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -292,10 +294,10 @@ func TestFuncName(t *testing.T) {
 		output string
 		outln  int
 	}{
-		{"basic", args{input2, StackInfo{"", "Handle", 1, nil}}, "err2.ReturnW", 214},
-		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil}}, "err2.ReturnW", 214},
-		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil}}, "err2.ReturnW", 214},
-		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil}}, "ssi.(*DIDAgent).AssertWallet", 146},
+		{"basic", args{input2, StackInfo{"", "Handle", 1, nil, nil}}, "err2.ReturnW", 214},
+		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil, nil}}, "err2.ReturnW", 214},
+		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil, nil}}, "err2.ReturnW", 214},
+		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil, nil}}, "ssi.(*DIDAgent).AssertWallet", 146},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -370,6 +372,17 @@ github.com/findy-network/findy-agent/agent/sec_test.TestPipe_packPeer(0x4000106d
         /home/god/go/src/github.com/findy-network/findy-agent/agent/sec/pipe_test.go:355 +0x1b8
 testing.tRunner(0x4000106d00, 0xd14820)
         /usr/local/go/src/testing/testing.go:1439 +0x110
+`
+
+	outputFromTest = `goroutine 31 [running]:
+github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).AssertWallet(...)
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/ssi/agent.go:146
+github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).myCreateDID(0x40003f92c0?, {0x0?, 0x0?})
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/ssi/agent.go:274 +0x78
+github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).NewDID(0x40003f92c0?, 0x40000449a0?, {0x0?, 0x0?})
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/ssi/agent.go:230 +0x60
+github.com/findy-network/findy-agent/agent/sec_test.TestPipe_packPeer(0x4000106d00?)
+        /home/god/go/src/github.com/findy-network/findy-agent/agent/sec/pipe_test.go:355 +0x1b8
 `
 
 	inputByError = `goroutine 1 [running]:
