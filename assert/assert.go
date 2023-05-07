@@ -49,10 +49,15 @@ const (
 )
 
 // PushTester sets the current testing context for default asserter. This must
-// be called at the beginning of every test.
+// be called at the beginning of every test. There is two way of doing it:
 //
 //	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
+//		t.Run(tt.name, func(t *testing.T) { // Shorter way, litle magic
+//			defer assert.PushTester(t)() // <- IMPORTANT! NOTE! (t)()
+//			...
+//			assert.That(something, "test won't work")
+//		})
+//		t.Run(tt.name, func(t *testing.T) { // Longer, explicit way, 2 lines
 //			assert.PushTester(t) // <- IMPORTANT!
 //			defer assert.PopTester()
 //			...
@@ -60,6 +65,8 @@ const (
 //		})
 //	}
 //
+// Because PushTester returns PopTester it allows us to merge these two calls to
+// one line. See the first t.Run call.
 func PushTester(t testing.TB) function { // TODO: add argument (def asserter for the test)
 	if DefaultAsserter()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it

@@ -22,11 +22,15 @@ const (
 	// type for panics.
 	AsserterToError Asserter = 1 << iota
 
-	// AsserterStackTrace is Asserter flag to print call stack to stdout.
+	// AsserterStackTrace is Asserter flag to print call stack to stdout OR if
+	// in AsserterUnitTesting mode the call stack is printed to test result
+	// output if there is any assertion failures.
 	AsserterStackTrace
 
 	// AsserterCallerInfo is an asserter flag to add info of the function
 	// asserting. It includes filename, line number and function name.
+	// This is especially powerful with AsserterUnitTesting where it allows get
+	// information where the assertion violation happens even over modules!
 	AsserterCallerInfo
 
 	// AsserterFormattedCallerInfo is an asserter flag to add info of the function
@@ -34,7 +38,9 @@ const (
 	// multi-line formatted string output.
 	AsserterFormattedCallerInfo
 
-	// AsserterUnitTesting is an asserter only for unit testing. It's exclusive.
+	// AsserterUnitTesting is an asserter only for unit testing. It can be
+	// compined with AsserterCallerInfo and/or AsserterStackTrace. There is
+	// variable T which have all of these three asserters.
 	AsserterUnitTesting
 )
 
