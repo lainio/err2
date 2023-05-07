@@ -36,7 +36,7 @@ func init() {
 
 type (
 	testersMap = x.TMap[int, testing.TB]
-	function = func()
+	function   = func()
 )
 
 var (
