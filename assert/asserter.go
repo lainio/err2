@@ -159,9 +159,13 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 	}
 	if asserter.hasStackTrace() {
 		if asserter.isUnitTesting() {
-			const stackLvl = 4
+			// Note. that the assert in the test function is printed in
+			// reportPanic below
+			const stackLvl = 5 // amount of functions before we're here
 			debug.PrintStackForTest(os.Stderr, stackLvl)
 		} else {
+			// amount of functions before we're here, which is different
+			// between runtime (this) and test-run (above)
 			const stackLvl = 2
 			debug.PrintStack(stackLvl)
 		}
