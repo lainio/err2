@@ -113,6 +113,7 @@ func PrintStackForTest(w io.Writer, stackLevel int) {
 // runtime.Stack and processed to proper format to be shown in test output by
 // starting from stackLevel.
 func printStackForTest(r io.Reader, w io.Writer, stackLevel int) {
+	build := make([]string,0, 24)
 	buf := new(bytes.Buffer)
 	stackPrint(r, buf, StackInfo{Level: stackLevel, ExlRegexp: exludeRegexps})
 	scanner := bufio.NewScanner(buf)
@@ -128,8 +129,12 @@ func printStackForTest(r io.Reader, w io.Writer, stackLevel int) {
 			line = strings.TrimPrefix(line, "\t")
 			s := strings.Split(line, " ")
 			out := fmt.Sprintf("    %s: STACK: %s\n", s[0], funcName)
-			fmt.Fprint(w, out)
+			build = append(build, out)
 		}
+	}
+	buildReverse := x.SReverse(build)
+	for _, line := range buildReverse {
+		fmt.Fprint(w, line)
 	}
 }
 
