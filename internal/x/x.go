@@ -8,3 +8,11 @@ func Whom[T any](b bool, yes, no T) T {
 	}
 	return no
 }
+
+// GetAndSet gets value to the *ptr and returns the old one, after setting new.
+func GetAndSet[T any](ptr *T, new T) (old T) {
+	old = *ptr
+	*ptr = new
+	return old
+}
+// TODO: Swap, Max, ...
