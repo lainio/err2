@@ -41,6 +41,9 @@ bench_go:
 bench_arec:
 	$(GO) test -bench='BenchmarkRecursion.*' $(PKG1)
 
+bench_that:
+	$(GO) test -bench='BenchmarkThat.*' $(PKG2)
+
 bench_copy:
 	$(GO) test -bench='Benchmark_CopyBuffer' $(PKG3)
 
