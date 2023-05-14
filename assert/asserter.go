@@ -259,6 +259,8 @@ func (asserter Asserter) hasFormattedCallerInfo() bool {
 	return asserter&AsserterFormattedCallerInfo != 0
 }
 
+// isUnitTesting is expensive because it calls tester(). think carefully where
+// to use it
 func (asserter Asserter) isUnitTesting() bool {
 	return asserter&AsserterUnitTesting != 0 && tester() != nil
 }
