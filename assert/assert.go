@@ -27,6 +27,9 @@ var (
 )
 
 var (
+	// TODO: if this would be index, should whe then need any sync mech?
+	// default value for index could be zero, OR we can initialize it and it
+	// won't mesh race dedection.
 	defaultAsserter = atomic.Pointer[Asserter]{}
 )
 
