@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"testing"
 
@@ -12,22 +13,35 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+type defInd = uint32
+
+const (
+	Prod defInd = 0 + iota
+	Dev
+	Test
+	Trace
+)
+
 // TODO: how about combine these to static (private) array and use only index to
 // that for defaultAsserter. maybe get rid of performance penalty?
 var (
 	// P is a production Asserter that sets panic objects to errors which
 	// allows err2 handlers to catch them.
-	P = AsserterToError
+	P = AsserterToError | AsserterCallerInfo
 
-	// D is a development Asserter that sets panic objects to strings that
-	// doesn't by caught by err2 handlers.
-	D = AsserterDebug
+	B = AsserterDebug | AsserterFormattedCallerInfo
 
 	T = AsserterUnitTesting | AsserterStackTrace | AsserterCallerInfo
 
-	defAsserter = []Asserter{P, D, T}
+	// D is a development Asserter that sets panic objects to strings that
+	// doesn't by caught by err2 handlers.
+	D = AsserterDebug // Trace
 
-	def int8
+	defAsserter = []Asserter{P, B, T, D}
+
+	def defInd
+	//def atomic.Uint32
+	mu sync.Mutex
 )
 
 var (
@@ -38,7 +52,7 @@ var (
 )
 
 func init() {
-	SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
+	SetDefaultAsserter(Prod)
 }
 
 type (
@@ -78,7 +92,7 @@ func PushTester(t testing.TB) function { // TODO: add argument (def asserter for
 	if DefaultAsserter()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
-		SetDefaultAsserter(AsserterUnitTesting)
+		SetDefaultAsserter(Test)
 	}
 	x.Set(testers, goid(), t)
 	return PopTester
@@ -392,7 +406,7 @@ func NotZero[T Number](val T, a ...any) {
 // You are free to set it according to your current preferences with the
 // SetDefaultAsserter function.
 func DefaultAsserter() Asserter {
-	return *defaultAsserter.Load()
+	return defAsserter[def]
 }
 
 // SetDefaultAsserter set the current default asserter for the package. For
@@ -402,13 +416,11 @@ func DefaultAsserter() Asserter {
 // test what's best for your case.
 //
 //	SetDefaultAsserter(AsserterDebug | AsserterStackTrace)
-func SetDefaultAsserter(a Asserter) Asserter {
-	c := defaultAsserter.Load()
-	defaultAsserter.Store(&a)
-	if c == nil {
-		return a
-	}
-	return *c
+func SetDefaultAsserter(i defInd) Asserter {
+	mu.Lock()
+	defer mu.Unlock()
+	def = i
+	return defAsserter[i]
 }
 
 func combineArgs(format string, a []any) []any {
