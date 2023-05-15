@@ -424,10 +424,10 @@ main.main()
     /home/god/go/src/github.com/lainio/ic/main.go:74: main
 `
 
-	outputForTestLvl2 = `    /home/god/go/src/github.com/lainio/ic/main.go:74: STACK: main
-    /home/god/go/src/github.com/lainio/ic/main.go:18: STACK: test0
-    /usr/local/go/src/runtime/panic.go:838: STACK: panic
-    /home/god/go/src/github.com/lainio/err2/err2.go:214: STACK: err2.Returnw
+	outputForTestLvl2 = `    /home/god/go/src/github.com/lainio/ic/main.go:74: main
+    /home/god/go/src/github.com/lainio/ic/main.go:18: test0 STACK
+    /usr/local/go/src/runtime/panic.go:838: panic STACK
+    /home/god/go/src/github.com/lainio/err2/err2.go:214: err2.Returnw STACK
 `
 
 	output = `goroutine 1 [running]:

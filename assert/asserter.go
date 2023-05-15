@@ -44,6 +44,9 @@ const (
 	AsserterUnitTesting
 )
 
+// every test log or result output has 4 spaces in them
+const officialTestOutputPrefix = "    "
+
 // NoImplementation always fails with no implementation.
 func (asserter Asserter) NoImplementation(a ...any) {
 	if asserter.isUnitTesting() {
@@ -203,16 +206,30 @@ func getLen(x any) (ok bool, length int) {
 func (asserter Asserter) reportPanic(s string) {
 	if asserter.isUnitTesting() && asserter.hasCallerInfo() {
 		tester().Helper()
-		fmt.Fprintln(os.Stderr, "    "+s)
+		fmt.Fprintln(os.Stderr, officialTestOutputPrefix+s)
 		tester().FailNow()
 	} else if asserter.isUnitTesting() {
 		tester().Helper()
-		tester().Fatal(s)
+		fatal(s)
 	}
 	if asserter.hasToError() {
 		panic(errors.New(s))
 	}
 	panic(s)
+}
+
+func fatal(s string) {
+	const shortFmtStr = `%s:%d: %s`
+	const framesToSkip = 4 // how many fn calls there is before FuncName call
+	includePath := false
+	_, filename, line, ok := str.FuncName(framesToSkip, includePath)
+	info := s
+	if ok {
+		info = fmt.Sprintf(shortFmtStr, filename, line, s)
+	}
+	// test output goes thru stderr, no need for t.Log(), test Fail needs it.
+	fmt.Fprintln(os.Stderr, officialTestOutputPrefix+info)
+	tester().FailNow()
 }
 
 var longFmtStr = `
