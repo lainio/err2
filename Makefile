@@ -5,7 +5,8 @@ PKG2 := github.com/lainio/err2/assert
 PKG3 := github.com/lainio/err2/try
 PKG4 := github.com/lainio/err2/internal/debug
 PKG5 := github.com/lainio/err2/internal/str
-PKGS := $(PKG1) $(PKG2) $(PKG3) $(PKG4) $(PKG5)
+PKG6 := github.com/lainio/err2/internal/x
+PKGS := $(PKG1) $(PKG2) $(PKG3) $(PKG4) $(PKG5) $(PKG6)
 
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
@@ -28,6 +29,9 @@ test4:
 
 test5:
 	$(GO) test $(PKG5)
+
+test6:
+	$(GO) test $(PKG6)
 
 test:
 	$(GO) test $(PKGS)
@@ -58,6 +62,9 @@ bench2:
 
 bench5:
 	$(GO) test -bench=. $(PKG5)
+
+bench6:
+	$(GO) test -bench=. $(PKG6)
 
 vet: | test
 	$(GO) vet $(PKGS)
