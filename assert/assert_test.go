@@ -165,28 +165,12 @@ func assertZero(i int) {
 	assert.Zero(i)
 }
 
-func assertNotZero(i int) {
-	assert.D.True(i != 0)
-}
-
 func assertZeroGen(i int) {
 	assert.Equal(i, 0)
 }
 
-func assertLen(b []byte) {
-	assert.D.Len(b, 2)
-}
-
-func assertLenf(b []byte, l int) {
-	assert.D.Lenf(b, l, "")
-}
-
 func assertMLen(b map[byte]byte, l int) {
 	assert.MLen(b, l)
-}
-
-func assertEqualInt(b []byte) {
-	assert.D.EqualInt(len(b), 2)
 }
 
 func assertEqualInt2(b int) {
@@ -221,12 +205,6 @@ func BenchmarkNotEmpty(b *testing.B) {
 	}
 }
 
-func BenchmarkAsserter_True(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		assertNotZero(4)
-	}
-}
-
 func BenchmarkZero(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		assertZero(0)
@@ -242,20 +220,6 @@ func BenchmarkEqual(b *testing.B) {
 func BenchmarkAsserter_TrueIfVersion(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ifPanicZero(4)
-	}
-}
-
-func BenchmarkAsserter_Len(b *testing.B) {
-	d := []byte{1, 2}
-	for n := 0; n < b.N; n++ {
-		assertLen(d)
-	}
-}
-
-func BenchmarkAsserter_Lenf(b *testing.B) {
-	d := []byte{1, 2}
-	for n := 0; n < b.N; n++ {
-		assertLenf(d, 2)
 	}
 }
 
@@ -280,13 +244,6 @@ func BenchmarkSLen_thatVersion(b *testing.B) {
 	}
 }
 
-func BenchmarkAsserter_EqualInt(b *testing.B) {
-	d := []byte{1, 2}
-	for n := 0; n < b.N; n++ {
-		assertEqualInt(d)
-	}
-}
-
 func BenchmarkEqualInt(b *testing.B) {
 	const d = 2
 	for n := 0; n < b.N; n++ {
@@ -302,7 +259,7 @@ func TestMain(m *testing.M) {
 }
 
 func setUp() {
-	assert.SetDefaultAsserter(assert.Prod)
+	assert.SetDefault(assert.Production)
 }
 
 func tearDown() {}
