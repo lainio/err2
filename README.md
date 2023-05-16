@@ -195,6 +195,12 @@ notExist := try.Is(r2.err, plugin.ErrNotExist)
 // real errors are cought and the returned boolean tells if value
 // dosen't exist returned as `plugin.ErrNotExist`
 ```
+**Note.** Any other err than `plugin.ErrNotExist` is treated as an real error:
+1. `try.Is` function first check `if err == nil`, and if yes, it just returns.
+2. Then it checks if `errors.Is` == `plugin.ErrNotExist` and if yes, it return
+   `true`.
+3. Finally, it calls `try.To` for the non nil error, and we already know what
+   happens then: nearest `err2.Handle` gets it.
 
 For more information see the examples in the documentation of both functions.
 
