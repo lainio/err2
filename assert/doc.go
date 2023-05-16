@@ -5,8 +5,7 @@ capable to support both modes with same API. Only thing you need to do is to
 add following two lines at the beginning of your unit tests:
 
 	func TestInvite(t *testing.T) {
-	     assert.PushTester(t) // push testing variable t beginning of any test
-	     defer assert.PopTester()
+	     defer assert.PushTester(t)() // push testing variable t beginning of any test
 
 	     alice.Node = root1.Invite(alice.Node, root1.Key, alice.PubKey, 1)
 	     assert.Equal(alice.Len(), 1) // assert anything normally
@@ -20,6 +19,21 @@ the actual Test function, TestInvite, it's still reported correctly as normal
 test failure when TestInvite is executed. It doesn't matter how deep the
 recursion is, or if parallel test runs are performed. It works just as you
 hoped.
+
+## Call Stack Traversal During tests
+
+The asserter package has super powerfull feature. It allows us track assertation
+violations over package and even module boundaries. When using err2 assert
+package for runtime Asserts and assert violation happens in what ever package
+and module, the whole call stack is brougth to unit test logs. Naturally this is
+optinal. Only thing you need to do is set proper asserter and call PushTester.
+
+	// use unit testing asserter
+	assert.SetDefault(assert.Production)
+
+With large multi repo environment this has proven to be valuable.
+
+# Why Runtime Asserts Are So Important?
 
 Instead of mocking or other mechanisms we can integrate our preconditions and
 raise up quality of our software.
@@ -38,10 +52,11 @@ error messages and diagnostic they need.
 
 Please see the code examples for more information.
 
-Note. assert.That's performance has been (<go 1.20) equal to the if-statement.
-Most of the generics-based versions are almost as fast. If your algorithm is
+Note. assert.That's performance is equal to the if-statement. Most of the
+generics-based versions are almost as fast. If your algorithm is
 performance-critical please run `make bench` in the err2 repo and decide case by
-case.
+case. Also you can make an issue or even PR if you would like to have something
+similar like glog.V() function.
 
 Note. Format string functions need to be own instances because of Go's vet and
 test tool integration.
