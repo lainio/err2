@@ -76,6 +76,8 @@ replace_err_values
 replace_catch
 replace_tracers
 replace_defasserter
+replace_defasserter_test2
+replace_defasserter_prod2
 replace_annotate
 replace_return
 replace_easy1

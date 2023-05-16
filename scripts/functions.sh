@@ -147,6 +147,16 @@ replace_defasserter() {
 	"$location"/replace-perl.sh 'assert\.(DefaultAsserter = )(.*)' 'assert.SetDefaultAsserter(\2)'
 }
 
+replace_defasserter_prod2() {
+	vlog '--- exectuing asserter prod change'
+	"$location"/replace-perl.sh 'assert\.SetDefaultAsserter.*\)' 'assert.SetDefault(assert.Production)'
+}
+
+replace_defasserter_test2() {
+	vlog '--- exectuing asserter Test change'
+	"$location"/replace-perl.sh 'func.*testing\.' 'assert\.SetDefaultAsserter.*\)' 'assert.SetDefault(assert.TestFull)'
+}
+
 replace_annotate() {
 	# Replace Annotate with Returnf: notice argument order!!
 	"$location"/replace-perl.sh 'err2\.(Annotate\()(.*)(, )(.*)(\)\n)' 'err2.Returnf(\4\3\2\5'
