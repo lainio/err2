@@ -34,7 +34,7 @@ developer, operator and every-day user share the exact same binary but get the
 error messages and diagnostic they need.
 
 	// add formatted caller info for normal errors coming from assertions
-	assert.SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
+	assert.SetDefault(assert.Production)
 
 Please see the code examples for more information.
 
