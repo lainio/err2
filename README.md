@@ -5,9 +5,13 @@
 
 # err2
 
-The package extends Go's error handling with **fully automatic error
-propagation** similar to other modern programming languages: Zig, Rust, Swift,
-etc.
+The package extends Go's error handling with **fully automatic error checking and
+propagation** similar to other modern programming languages: **Zig**, Rust, Swift,
+etc. `err2` isn't an exception handling library, but fully orthogonal package
+with Go's existing error handling mechanism by extending some missing features:
+- automatic error traces 
+- declarative error-handling
+- all key functions are inlined -- no performance penalty
 
 ```go 
 func CopyFile(src, dst string) (err error) {
@@ -58,6 +62,9 @@ func CopyFile(src, dst string) (err error) {
 - The `try` package offers error checking functions.
 - The `assert` package implements assertion helpers for **both** unit-testing
   and *design-by-contract*.
+
+All of this **without any performance penalty**. (You are welcome to run
+`benchmarks` in the project repo.)
 
 ## Automatic Error Propagation
 
@@ -279,9 +286,19 @@ means we don't need to open our internal pre- and post-conditions just for
 testing. **We can share the same assertions between runtime and test
 execution.**
 
+The err2 `assert` package integration to Go testing package is completed at the
+cross module level. If package A is using package B, and both of them are using
+err2 `assert` package both for testing and runtime-checks. The output `assert`
+package produces allows us to have full call stack traversal over module
+boundaries. Naturally, everything is configurable.
+
+**This means that where ever assertion violation happens during the test
+execution, we will find it and can even move thru every step in the call
+stack.**
+
 The only minus is that test coverage figures are too conservative. The code that
 uses design-by-contract assertions is typically much more robust what the actual
-test coverage results tell you. However, this's a well-known problem with test
+test coverage results tell you. However, this is a well-known problem with test
 coverage metric in general.
 
 ## Code Snippets
@@ -305,12 +322,12 @@ analyses. If the performance of the *error path* is essential, don't use this
 mechanism presented here. But be aware that if your code uses the **error path
 as a part of algorithm itself something is wrong**.
 
-**For happy paths** by using `try.ToX` error check functions **there are no
-performance penalty at all**. However, the mandatory use of the `defer` might
-prevent some code optimisations like function inlining. And still, we have cases
-where using the `err2` and `try` package simplify the algorithm so that it's
-faster than the return value if err != nil version. (See the benchmarks for
-`io.Copy` in the repo)
+**For happy paths** by using `try.ToX` or `assert.That` error check functions
+**there are no performance penalty at all**. However, the mandatory use of the
+`defer` might prevent some code optimisations like function inlining. And still,
+we have cases where using the `err2` and `try` package simplify the algorithm so
+that it's faster than the return value if err != nil version. (**See the 
+benchmarks for `io.Copy` in the repo.**)
 
 If you have a performance-critical use case, we always recommend you to write
 performance tests to measure the effect. As a general guideline for maximum
@@ -462,12 +479,19 @@ GitHub Discussions. Naturally, any issues are welcome as well!
     - Please see `scripts/README.md' for *Auto-migration for your repos*
 - Default `err2.SetPanicTracer(os.Stderr)` allows `defer err2.Catch()`
 
+#### 0.9.1
+- **Beformance boost for assert pkg** 
+- More support for `assert` package for tests: support for cross module asserts
+  during the tests.
+- using `assert` pkg for tests allow us to have traversable call stack
+  during unit tests -- cross module boundaries.
+- simplified `assert` pkg `testing` pkg intergration, and especially
+  performance.
 
 ### Upcoming releases
 
-##### 0.9.1
-- More support for `assert` package for tests: plugins like nvim-go
-- More support for wrapping multiple errors
-
 ##### 0.9.2 
 - More documentation, reparing for some sort of marketing
+
+##### 0.9.3 
+- Recruite someone to try test result processing for unit-tests
