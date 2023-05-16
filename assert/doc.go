@@ -20,7 +20,7 @@ test failure when TestInvite is executed. It doesn't matter how deep the
 recursion is, or if parallel test runs are performed. It works just as you
 hoped.
 
-## Call Stack Traversal During tests
+# Call Stack Traversal During tests
 
 The asserter package has super powerfull feature. It allows us track assertation
 violations over package and even module boundaries. When using err2 assert
