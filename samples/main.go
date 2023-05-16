@@ -68,9 +68,9 @@ func main() {
 
 	// if asserts are treated as panics instead of errors you get stack trace.
 	// you can try that by taking next line out of the comment:
-	//assert.SetDefaultAsserter(assert.AsserterFormattedCallerInfo|assert.AsserterDebug)
+	// assert.SetDefaultAsserter(assert.Development)
 	// same thing but one line assert msg
-	//assert.SetDefaultAsserter(assert.AsserterCallerInfo|assert.AsserterDebug)
+	// assert.SetDefaultAsserter(assert.Produdction)
 
 	// To see how automatic stack tracing works.
 	//err2.SetErrorTracer(os.Stderr)
