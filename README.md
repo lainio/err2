@@ -286,20 +286,19 @@ means we don't need to open our internal pre- and post-conditions just for
 testing. **We can share the same assertions between runtime and test
 execution.**
 
-The err2 `assert` package integration to Go testing package is completed at the
-cross module level. If package A is using package B, and both of them are using
-err2 `assert` package both for testing and runtime-checks. The output `assert`
-package produces allows us to have full call stack traversal over module
-boundaries. Naturally, everything is configurable.
+The err2 `assert` package integration to the Go testing package is completed at
+the cross-module level. Suppose package A uses package B for testing and runtime
+checks. The output `assert` package produces allows full call stack traversal over
+module boundaries. Naturally, everything is configurable.
 
 **This means that where ever assertion violation happens during the test
 execution, we will find it and can even move thru every step in the call
 stack.**
 
 The only minus is that test coverage figures are too conservative. The code that
-uses design-by-contract assertions is typically much more robust what the actual
-test coverage results tell you. However, this is a well-known problem with test
-coverage metric in general.
+uses design-by-contract assertions is typically much more robust than what the
+actual test coverage results tell you. However, this is a well-known problem
+with test coverage metrics in general.
 
 ## Code Snippets
 
