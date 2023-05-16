@@ -216,15 +216,15 @@ configure how the assert package deals with assert violations. The line below
 exemplifies how the default asserter is set in the package.
 
 ```go
-SetDefaultAsserter(AsserterToError | AsserterFormattedCallerInfo)
+assert.SetDefault(assert.Production)
 ```
 
 If you want to suppress the caller info (source file name, line number, etc.)
-and get just the plain error messages from the asserts, you should set the
+and get just the plain panics from the asserts, you should set the
 default asserter with the following line:
 
 ```go
-SetDefaultAsserter(AsserterToError) // we offer separated flags for caller info
+assert.SetDefault(assert.Debug) // we offer separated flags for caller info
 ```
 
 For certain type of programs this is the best way. It allows us to keep all the
@@ -254,8 +254,7 @@ The same asserts can be used **and shared** during the unit tests:
 
 ```go
 func TestWebOfTrustInfo(t *testing.T) {
-	assert.PushTester(t)
-	defer assert.PopTester()
+	defer assert.PushTester(t)()
 
 	common := dave.CommonChains(eve.Node)
 	assert.SLen(common, 2)
