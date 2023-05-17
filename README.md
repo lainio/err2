@@ -294,13 +294,12 @@ testing.
 
 **We can share the same assertions between runtime and test execution.**
 
-The err2 `assert` package integration to the Go testing package is completed at
-the cross-module level. Suppose package A uses package B. They can be in
-seprated modules. If package B includes runtime asserts in any function which 
-package A calls during testing and some of the B's asserts fail, the A's current
-test fails as well. There is no loss of information and even the stack trace is
-parsed to test logs for easy traversal. And as said, packages A and B can be
-same or different modules.
+The err2 `assert` package integration to the Go `testing` package is completed at
+the cross-module level. Suppose package A uses package B. If package B includes
+runtime asserts in any function that A calls during testing and some of B's
+asserts fail, A's current test also fails. There is no loss of information, and
+even the stack trace is parsed to test logs for easy traversal. Packages A and B
+can be the same or different modules.
 
 **This means that where ever assertion violation happens during the test
 execution, we will find it and can even move thru every step in the call
