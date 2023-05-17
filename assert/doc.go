@@ -29,7 +29,7 @@ and module, the whole call stack is brougth to unit test logs. Naturally this is
 optinal. Only thing you need to do is set proper asserter and call PushTester.
 
 	// use unit testing asserter
-	assert.SetDefault(assert.Production)
+	assert.SetDefault(assert.TestFull)
 
 With large multi repo environment this has proven to be valuable.
 
