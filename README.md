@@ -5,13 +5,10 @@
 
 # err2
 
-The package extends Go's error handling with **fully automatic error checking and
-propagation** similar to other modern programming languages: **Zig**, Rust, Swift,
-etc. `err2` isn't an exception handling library, but fully orthogonal package
-with Go's existing error handling mechanism by extending some missing features:
-- automatic error traces 
-- declarative error-handling
-- all key functions are inlined -- no performance penalty
+The package extends Go's error handling with **fully automatic error checking
+and propagation** like other modern programming languages: **Zig**, Rust, Swift,
+etc. `err2` isn't an exception handling library, but an entirely orthogonal
+package with Go's existing error handling mechanism.
 
 ```go 
 func CopyFile(src, dst string) (err error) {
@@ -76,7 +73,7 @@ little error handling. But most importantly, it doesn't help developers with
 > Automation is not just about efficiency but primarily about repeatability and
 > resilience. -- Gregor Hohpe
 
-Automatic error propagation is so important because it makes your code tolerant
+Automatic error propagation is crucial because it makes your code tolerant
 of the change. And, of course, it helps to make your code error-safe: 
 
 ![Never send a human to do a machine's job](https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
@@ -144,7 +141,7 @@ want traces to be written:
 
 ```go
 err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
-  or, for example:
+// or, for example:
 err2.SetPanicTracer(log.Writer()) // stack panic trace to std logger
 ```
 
