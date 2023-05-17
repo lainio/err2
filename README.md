@@ -290,22 +290,21 @@ A compelling feature is that even if some assertion violation happens during the
 execution of called functions like the above `NewWebOfTrust()` function instead
 of the actual Test function, **it's reported as a standard test failure.** That
 means we don't need to open our internal pre- and post-conditions just for
-testing. **We can share the same assertions between runtime and test
-execution.**
+testing.
+
+**We can share the same assertions between runtime and test execution.**
 
 The err2 `assert` package integration to the Go testing package is completed at
-the cross-module level. Suppose package A uses package B for testing and runtime
-checks. The output `assert` package produces allows full call stack traversal over
-module boundaries. Naturally, everything is configurable.
+the cross-module level. Suppose package A uses package B. They can be in
+seprated modules. If package B includes runtime asserts in any function which 
+package A calls during testing and some of the B's asserts fail, the A's current
+test fails as well. There is no loss of information and even the stack trace is
+parsed to test logs for easy traversal. And as said, packages A and B can be
+same or different modules.
 
 **This means that where ever assertion violation happens during the test
 execution, we will find it and can even move thru every step in the call
 stack.**
-
-The only minus is that test coverage figures are too conservative. The code that
-uses design-by-contract assertions is typically much more robust than what the
-actual test coverage results tell you. However, this is a well-known problem
-with test coverage metrics in general.
 
 ## Code Snippets
 
