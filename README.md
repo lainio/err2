@@ -43,8 +43,8 @@ func CopyFile(src, dst string) (err error) {
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
 - [Assertion](#assertion)
-  - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
   - [Assertion Package for Runtime Use](#assertion-package-for-runtime-use)
+  - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Code Snippets](#code-snippets)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
@@ -487,10 +487,10 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 - **Beformance boost for assert pkg** 
 - More support for `assert` package for tests: support for cross module asserts
   during the tests.
-- using `assert` pkg for tests allow us to have traversable call stack
+- Using `assert` pkg for tests allow us to have traversable call stack
   during unit tests -- cross module boundaries.
-- simplified `assert` pkg `testing` pkg intergration, and especially
-  performance.
+- Implementation: simplified `assert` pkg to `testing` pkg intergration, and
+  especially performance.
 
 ### Upcoming releases
 
