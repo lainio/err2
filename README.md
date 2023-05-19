@@ -238,7 +238,7 @@ and get just the plain panics from the asserts, you should set the
 default asserter with the following line:
 
 ```go
-assert.SetDefault(assert.Debug) // we offer separated flags for caller info
+assert.SetDefault(assert.Debug)
 ```
 
 For certain type of programs this is the best way. It allows us to keep all the
