@@ -40,9 +40,18 @@ var (
 )
 
 var (
+	// These two are our indexing system for default asserter. Note also the
+	// mutex blew. All of this is done to keep client package race detector
+	// cool.
 	defAsserter = []Asserter{P, B, T, TF, D}
-
 	def defInd
+	
+	// mu is package lvl Mutex that is used to cool down race detector of
+	// client pkgs, i.e. packages that use us can use -race flag in their test
+	// runs where they change asserter. With the mutex we can at least allow
+	// the setters run at one of the time. AND when that's combined with the
+	// indexing system we are using for default asserter (above) we are pretty
+	// much theard safe.
 	mu  sync.Mutex
 )
 
@@ -56,7 +65,7 @@ type (
 )
 
 var (
-	// testers is must be set if assertion package is used for the unit testing.
+	// testers must be set if assertion package is used for the unit testing.
 	testers = x.NewRWMap[int, testing.TB]()
 )
 
@@ -109,7 +118,6 @@ func PushTester(t testing.TB) function { // TODO: add argument (def asserter for
 //		})
 //	}
 func PopTester() { // maybe need another version if we are going to cacth errors
-
 	x.Tx(testers, func(m testersMap) {
 		delete(m, goid())
 	})
