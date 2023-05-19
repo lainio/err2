@@ -1,5 +1,5 @@
 [![test](https://github.com/lainio/err2/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/lainio/err2/actions/workflows/test.yml)
-![Go Version](https://img.shields.io/badge/go%20version-%3E=1.19-61CFDD.svg?style=flat-square)
+![Go Version](https://img.shields.io/badge/go%20version-%3E=1.18-61CFDD.svg?style=flat-square)
 [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/lainio/err2)](https://pkg.go.dev/mod/github.com/lainio/err2)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lainio/err2?style=flat-square)](https://goreportcard.com/report/github.com/lainio/err2)
 
@@ -485,6 +485,7 @@ GitHub Discussions. Naturally, any issues are welcome as well!
 
 #### 0.9.1
 - **Beformance boost for assert pkg** 
+- go verseion 1.18 is new minimum (was 1.19)
 - More support for `assert` package for tests: support for cross module asserts
   during the tests.
 - Using `assert` pkg for tests allow us to have traversable call stack
