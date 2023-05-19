@@ -22,7 +22,7 @@ const (
 	Debug
 )
 
-// TODO: get rid of exported asserters when API is fully ready
+// Deprecated: use e.g. assert.That(), only default asserter is used.
 var (
 	// P is a production Asserter that sets panic objects to errors which
 	// allows err2 handlers to catch them.
@@ -35,8 +35,11 @@ var (
 
 	// D is a development Asserter that sets panic objects to strings that
 	// doesn't by caught by err2 handlers.
+	// Deprecated: use e.g. assert.That(), only default asserter is used.
 	D = AsserterDebug
+)
 
+var (
 	defAsserter = []Asserter{P, B, T, TF, D}
 
 	def defInd
