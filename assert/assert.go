@@ -44,15 +44,15 @@ var (
 	// mutex blew. All of this is done to keep client package race detector
 	// cool.
 	defAsserter = []Asserter{P, B, T, TF, D}
-	def defInd
-	
+	def         defInd
+
 	// mu is package lvl Mutex that is used to cool down race detector of
 	// client pkgs, i.e. packages that use us can use -race flag in their test
 	// runs where they change asserter. With the mutex we can at least allow
 	// the setters run at one of the time. AND when that's combined with the
 	// indexing system we are using for default asserter (above) we are pretty
 	// much theard safe.
-	mu  sync.Mutex
+	mu sync.Mutex
 )
 
 func init() {
@@ -415,16 +415,22 @@ func Default() Asserter {
 	return defAsserter[def]
 }
 
-// SetDefault set the current default asserter for the package. For
-// example, you might set it to panic about every assertion fault, and in other
-// cases, throw an error, and print the call stack immediately when assert
-// occurs. Note, that if you are using tracers you might get two call stacks, so
-// test what's best for your case.
+// SetDefault set the current default asserter for the package. For example, you
+// might set it to panic about every assertion fault, and in other cases, throw
+// an error, and print the call stack immediately when assert occurs. Note, that
+// if you are using tracers you might get two call stacks, so test what's best
+// for your case. Tip. If our own packages (client packages for assert) have
+// lots of parallel testing and race detection, please try to use same asserter
+// for allo foot hem and do it only one in TestMain, or in init.
 //
-//	SetDefault(AsserterDebug | AsserterStackTrace)
+//	SetDefault(assert.TestFull)
 func SetDefault(i defInd) Asserter {
+	// pkg lvl lock to allow only one pkg client call this at the time
 	mu.Lock()
 	defer mu.Unlock()
+
+	// to make this fully thread safe the def var should be atomic, BUT it
+	// would be owerkill. We need only defaults to be set at once.
 	def = i
 	return defAsserter[i]
 }
