@@ -48,7 +48,7 @@ func CopyFile(src, dst string) (err error) {
 - [Code Snippets](#code-snippets)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
-- [Support](#support)
+- [Support And Contributions](#support-and-contributions)
 - [Roadmap](#roadmap)
 
 
@@ -323,8 +323,8 @@ The package does it by using internally `panic/recovery`, which some might think
 isn't perfect. We have run many benchmarks to try to minimise the performance
 penalty this kind of mechanism might bring. We have focused on the _happy path_
 analyses. If the performance of the *error path* is essential, don't use this
-mechanism presented here. But be aware that if your code uses the **error path
-as a part of algorithm itself something is wrong**.
+mechanism presented here. **But be aware that something is wrong if your code
+uses the error path as part of the algorithm itself.**
 
 **For happy paths** by using `try.ToX` or `assert.That` error check functions
 **there are no performance penalty at all**. However, the mandatory use of the
@@ -375,15 +375,11 @@ been much easier.** There is an excellent [blog post](https://jesseduffield.com/
 about the issues you are facing with Go's error handling without the help of
 the err2 package.
 
-- You don't seem to need '%w' wrapping. See the Go's official blog post what are
-[cons](https://go.dev/blog/go1.13-errors) for that.
-  > Do not wrap an error when doing so would expose implementation details.
-
-## Support
+## Support And Contributions
 
 The package has been in experimental mode quite long time. Since the Go generics
 we are transiting towards more official mode. Currently we offer support by
-GitHub Discussions. Naturally, any issues are welcome as well!
+GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 
 ## Roadmap
 
