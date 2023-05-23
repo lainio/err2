@@ -10,22 +10,26 @@ import (
 )
 
 func TestFullName(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		StackInfo
 	}
-	tests := []struct {
+	type ttest struct {
 		name string
 		args
 		retval string
-	}{
+	}
+	tests := []ttest{
 		{"all empty", args{StackInfo{"", "", 0, nil, nil}}, ""},
 		{"namespaces", args{StackInfo{"lainio/err2", "", 0, nil, nil}}, "lainio/err2"},
 		{"both", args{StackInfo{"lainio/err2", "try", 0, nil, nil}}, "lainio/err2.try"},
 		{"short both", args{StackInfo{"err2", "Handle", 0, nil, nil}}, "err2.Handle"},
 		{"func", args{StackInfo{"", "try", 0, nil, nil}}, "try"},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			test.Requiref(t, tt.retval == tt.fullName(), "must be equal: %s",
 				tt.retval)
 		})
@@ -37,11 +41,12 @@ func TestIsAnchor(t *testing.T) {
 		input string
 		StackInfo
 	}
-	tests := []struct {
+	type ttest struct {
 		name string
 		args
 		retval bool
-	}{
+	}
+	tests := []ttest{
 		{"panic func and short regexp", args{
 			"github.com/lainio/err2.Return(0x14001c1ee20)",
 			StackInfo{"", "panic(", 0, PackageRegexp, nil}}, true},
@@ -81,15 +86,17 @@ func TestIsAnchor(t *testing.T) {
 }
 
 func TestIsFuncAnchor(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		input string
 		StackInfo
 	}
-	tests := []struct {
+	type ttest struct {
 		name string
 		args
 		retval bool
-	}{
+	}
+	tests := []ttest{
 		{"func hit and regexp on", args{
 			"github.com/lainioxx/err2_printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
 			StackInfo{"", "printStackIf(", 0, noHitRegexp, nil}}, true},
@@ -115,8 +122,10 @@ func TestIsFuncAnchor(t *testing.T) {
 			"github.com/lainio/err2/try.To1[...](...)",
 			StackInfo{"lainio/err2", "", 0, nil, nil}}, true},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			test.Require(t, tt.retval == tt.isFuncAnchor(tt.input), "equal")
 		})
 	}
@@ -141,11 +150,13 @@ func TestFnLNro(t *testing.T) {
 }
 
 func TestFnName(t *testing.T) {
-	tests := []struct {
+	t.Parallel()
+	type ttest struct {
 		name   string
 		input  string
 		output string
-	}{
+	}
+	tests := []ttest{
 		{"panic", "panic({0x102ed30c0, 0x1035910f0})",
 			"panic"},
 		{"our namespace", "github.com/lainio/err2/internal/debug.FprintStack({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
@@ -161,8 +172,10 @@ func TestFnName(t *testing.T) {
 		{"method and package name", "github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).AssertWallet(...)",
 			"ssi.(*DIDAgent).AssertWallet"},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			output := fnName(tt.input)
 			test.Require(t, output == tt.output, output)
 		})
@@ -170,16 +183,20 @@ func TestFnName(t *testing.T) {
 }
 
 func TestStackPrint_noLimits(t *testing.T) {
-	tests := []struct {
+	t.Parallel()
+	type ttest struct {
 		name  string
 		input string
-	}{
+	}
+	tests := []ttest{
 		{"short", input},
 		{"medium", input1},
 		{"long", input2},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			r := strings.NewReader(tt.input)
 			w := new(bytes.Buffer)
 			stackPrint(r, w, StackInfo{
@@ -219,15 +236,17 @@ func TestStackPrintForTest(t *testing.T) {
 }
 
 func TestCalcAnchor(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		input string
 		StackInfo
 	}
-	tests := []struct {
+	type ttest struct {
 		name string
 		args
 		anchor int
-	}{
+	}
+	tests := []ttest{
 		{"macOS from test using regexp", args{inputFromMac, StackInfo{"", "panic(", 1, PackageRegexp, nil}}, 12},
 		{"short", args{input, StackInfo{"", "panic(", 0, nil, nil}}, 6},
 		{"short error stack", args{inputByError, StackInfo{"", "panic(", 0, PackageRegexp, nil}}, 4},
@@ -238,8 +257,10 @@ func TestCalcAnchor(t *testing.T) {
 		{"from test", args{inputFromTest, StackInfo{"", "panic(", 0, PackageRegexp, nil}}, 14},
 		{"macOS from test using panic", args{inputFromMac, StackInfo{"", "panic(", 0, nil, nil}}, 12},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			r := strings.NewReader(tt.input)
 			anchor := calcAnchor(r, tt.StackInfo)
 			test.Requiref(t, tt.anchor == anchor, "not equal: %d != %d, got",
@@ -249,15 +270,17 @@ func TestCalcAnchor(t *testing.T) {
 }
 
 func TestStackPrint_limit(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		input string
 		StackInfo
 	}
-	tests := []struct {
+	type ttest struct {
 		name string
 		args
 		output string
-	}{
+	}
+	tests := []ttest{
 		{"real test trace", args{inputFromTest, StackInfo{"", "", 8, nil, exludeRegexps}}, outputFromTest},
 		{"only level 4", args{input1, StackInfo{"", "", 4, nil, nil}}, output1},
 		{"short", args{input, StackInfo{"err2", "Returnw(", 0, nil, nil}}, output},
@@ -268,8 +291,10 @@ func TestStackPrint_limit(t *testing.T) {
 		{"long", args{input2, StackInfo{"err2", "Handle(", 0, nil, nil}}, output2},
 		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3, nil, nil}}, output23},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			r := strings.NewReader(tt.input)
 			w := new(bytes.Buffer)
 			stackPrint(r, w, tt.StackInfo)
@@ -284,23 +309,27 @@ func TestStackPrint_limit(t *testing.T) {
 }
 
 func TestFuncName(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		input string
 		StackInfo
 	}
-	tests := []struct {
+	type ttest struct {
 		name string
 		args
 		output string
 		outln  int
-	}{
+	}
+	tests := []ttest{
 		{"basic", args{input2, StackInfo{"", "Handle", 1, nil, nil}}, "err2.ReturnW", 214},
 		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil, nil}}, "err2.ReturnW", 214},
 		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil, nil}}, "err2.ReturnW", 214},
 		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil, nil}}, "ssi.(*DIDAgent).AssertWallet", 146},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			r := strings.NewReader(tt.input)
 			name, ln, ok := funcName(r, StackInfo{
 				PackageName: tt.PackageName,

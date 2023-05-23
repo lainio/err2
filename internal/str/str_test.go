@@ -24,6 +24,7 @@ func BenchmarkDecamel(b *testing.B) {
 }
 
 func TestDecamel(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		s string
 	}
@@ -46,9 +47,12 @@ func TestDecamel(t *testing.T) {
 		{"from spf13 cobra", args{"bot.glob..func5"}, "bot glob func5"},
 	}
 	for _, tt := range tests {
+		s := tt.args.s
+		want := tt.want
 		t.Run(tt.name, func(t *testing.T) {
-			got := str.Decamel(tt.args.s)
-			test.Requiref(t, got == tt.want, "got: %v, want: %v", got, tt.want)
+			t.Parallel()
+			got := str.Decamel(s)
+			test.Requiref(t, got == want, "got: %v, want: %v", got, want)
 		})
 	}
 }
