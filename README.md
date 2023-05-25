@@ -36,6 +36,7 @@ func CopyFile(src, dst string) (err error) {
 `go get github.com/lainio/err2`
 
 - [Structure](#structure)
+- [Performance](#performance)
 - [Automatic Error Propagation](#automatic-error-propagation)
 - [Error handling](#error-handling)
   - [Error Stack Tracing](#error-stack-tracing)
@@ -60,8 +61,15 @@ func CopyFile(src, dst string) (err error) {
 - The `assert` package implements assertion helpers for **both** unit-testing
   and *design-by-contract*.
 
-All of this **without any performance penalty**. (You are welcome to run
-`benchmarks` in the project repo.)
+### Performance
+
+All of the listed above **without any performance penalty**! You are welcome to
+run `benchmarks` in the project repo and see yourself.
+
+**Please note** that there are many benchmarks that run 'too fast' according the
+normal Go benchmarking rules, i.e. compiler optimisations are worked so well
+that there are no meaningful results. But for this type of package where we are
+competing if-statements, that's exactly what we are hoping to achieve.
 
 ## Automatic Error Propagation
 
@@ -480,14 +488,14 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 - Default `err2.SetPanicTracer(os.Stderr)` allows `defer err2.Catch()`
 
 #### 0.9.1
-- **Beformance boost for assert pkg** 
+- **Beformance boost for assert pkg:** `assert.That(boolVal)` == `if boolVal`
 - go verseion 1.18 is new minimum (was 1.19)
 - More support for `assert` package for tests: support for cross module asserts
-  during the tests.
+  during the tests
 - Using `assert` pkg for tests allow us to have traversable call stack
-  during unit tests -- cross module boundaries.
+  during unit tests -- cross module boundaries
 - Implementation: simplified `assert` pkg to `testing` pkg intergration, and
-  especially performance.
+  especially performance
 
 ### Upcoming releases
 
