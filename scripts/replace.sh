@@ -16,6 +16,9 @@ process_args() {
 		second="$1"
 		third="$2"
 	fi
+	if [ "$third" == "EMPTY_THIS_LINE" ]; then
+		third=""
+	fi
 	if [ -z $use_perl ]; then
 		sr="s/$second/$third/g"
 	else

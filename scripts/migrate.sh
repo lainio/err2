@@ -79,6 +79,7 @@ replace_defasserter
 replace_defasserter_test2
 replace_defasserter_prod2
 replace_annotate
+replace_asserters_calls
 replace_return
 replace_easy1
 replace_2
