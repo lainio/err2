@@ -489,7 +489,8 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 
 #### 0.9.1
 - **Beformance boost for assert pkg:** `assert.That(boolVal)` == `if boolVal`
-- go verseion 1.18 is new minimum (was 1.19)
+- Go verseion 1.18 is a new minimum (was 1.19)
+- Generic functions support type aliases
 - More support for `assert` package for tests: support for cross module asserts
   during the tests
 - Using `assert` pkg for tests allow us to have traversable call stack

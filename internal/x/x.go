@@ -19,7 +19,7 @@ func SReverse[S ~[]E, E any](s S) S {
 	return s
 }
 
-// SSReverse reverse slice order. Doesn't clone slice. This is Fastest of these.
+// SSReverse reverse slice order. Doesn't clone slice. This is a Sample.
 func SSReverse[S ~[]E, E any](s S) S {
 	for begin, end := 0, len(s)-1; begin < end; begin, end = begin+1, end-1 {
 		s[begin], s[end] = s[end], s[begin]
