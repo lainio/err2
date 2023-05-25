@@ -1,5 +1,6 @@
 # Original from github.com/pkg/errors
 
+# TODO: start to use package name instead of number?
 PKG1 := github.com/lainio/err2
 PKG2 := github.com/lainio/err2/assert
 PKG3 := github.com/lainio/err2/try
