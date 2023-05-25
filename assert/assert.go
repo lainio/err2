@@ -60,13 +60,13 @@ func init() {
 }
 
 type (
-	testersMap = x.TMap[int, testing.TB]
+	testersMap = map[int]testing.TB
 	function   = func()
 )
 
 var (
 	// testers must be set if assertion package is used for the unit testing.
-	testers = x.NewRWMap[int, testing.TB]()
+	testers = x.NewRWMap[map[int]testing.TB]()
 )
 
 const (
