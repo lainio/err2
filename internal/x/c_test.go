@@ -13,7 +13,32 @@ var (
 	reverseLengths = []int{134217728, 16777216, 4194304, 524288, 65536, 8192, 1024, 128, 16, 2}
 )
 
+func TestSwap(t *testing.T) {
+	t.Parallel()
+	{
+		var (
+			lhs, rhs = 1, 2 // these are ints as default
+		)
+		test.Require(t, lhs == 1)
+		test.Require(t, rhs == 2)
+		Swap(&lhs, &rhs)
+		test.Require(t, lhs == 2)
+		test.Require(t, rhs == 1)
+	}
+	{
+		var (
+			lhs, rhs float64 = 1, 2
+		)
+		test.Require(t, lhs == 1)
+		test.Require(t, rhs == 2)
+		Swap(&lhs, &rhs)
+		test.Require(t, lhs == 2)
+		test.Require(t, rhs == 1)
+	}
+}
+
 func TestSReverse(t *testing.T) {
+	t.Parallel()
 	SReverse(lengths)
 	test.Require(t, reflect.DeepEqual(lengths, reverseLengths))
 	SReverse(lengths) // it's reverse now turn it to original
