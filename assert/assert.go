@@ -92,13 +92,17 @@ const (
 //
 // Because PushTester returns PopTester it allows us to merge these two calls to
 // one line. See the first t.Run call.
-func PushTester(t testing.TB) function { // TODO: add argument (def asserter for the test)
-	if Default()&AsserterUnitTesting == 0 {
+func PushTester(t testing.TB, a ...defInd) function {
+	if len(a) > 0 {
+		SetDefault(a[0])
+	} else if Default()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
-		SetDefault(TestFull)
+		// TODO: still testing Test/TestFull? Test is minimum, no supprises?
+		SetDefault(Test)
 		// TODO: should we just demand that correct assert is in us? But this
-		// is the only place for it?
+		// is the only place for it? **NO**, too difficult to set, all
+		// projects don't have TestMain
 		// TODO: parallel testing is something we should test.
 	}
 	x.Set(testers, goid(), t)
@@ -154,7 +158,7 @@ func That(term bool, a ...any) {
 
 // NotNil asserts that the pointer IS NOT nil. If it is it panics/errors (default
 // Asserter) with the given message.
-func NotNil[T any](p *T, a ...any) {
+func NotNil[P ~*T, T any](p P, a ...any) {
 	if p == nil {
 		defMsg := assertionMsg + ": pointer shouldn't be nil"
 		Default().reportAssertionFault(defMsg, a...)
@@ -190,7 +194,7 @@ func INotNil(i any, a ...any) {
 
 // SNil asserts that the slice IS nil. If it is it panics/errors (default
 // Asserter) with the given message.
-func SNil[T any](s []T, a ...any) {
+func SNil[S ~[]T, T any](s S, a ...any) {
 	if s != nil {
 		defMsg := assertionMsg + ": slice should be nil"
 		Default().reportAssertionFault(defMsg, a...)
@@ -199,7 +203,7 @@ func SNil[T any](s []T, a ...any) {
 
 // SNotNil asserts that the slice is not nil. If it is it panics/errors (default
 // Asserter) with the given message.
-func SNotNil[T any](s []T, a ...any) {
+func SNotNil[S ~[]T, T any](s S, a ...any) {
 	if s == nil {
 		defMsg := assertionMsg + ": slice shouldn't be nil"
 		Default().reportAssertionFault(defMsg, a...)
@@ -208,7 +212,7 @@ func SNotNil[T any](s []T, a ...any) {
 
 // CNotNil asserts that the channel is not nil. If it is it panics/errors
 // (default Asserter) with the given message.
-func CNotNil[T any](c chan T, a ...any) {
+func CNotNil[C ~chan T, T any](c C, a ...any) {
 	if c == nil {
 		defMsg := assertionMsg + ": channel shouldn't be nil"
 		Default().reportAssertionFault(defMsg, a...)
@@ -217,7 +221,7 @@ func CNotNil[T any](c chan T, a ...any) {
 
 // MNotNil asserts that the map is not nil. If it is it panics/errors (default
 // Asserter) with the given message.
-func MNotNil[T comparable, U any](m map[T]U, a ...any) {
+func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 	if m == nil {
 		defMsg := assertionMsg + ": map shouldn't be nil"
 		Default().reportAssertionFault(defMsg, a...)
@@ -280,7 +284,7 @@ func Len(obj string, length int, a ...any) {
 // panics/errors (current Asserter) with the given message. Note! This is
 // reasonably fast but not as fast as 'That' because of lacking inlining for the
 // current implementation of Go's type parametric functions.
-func SLen[T any](obj []T, length int, a ...any) {
+func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
@@ -293,7 +297,7 @@ func SLen[T any](obj []T, length int, a ...any) {
 // panics/errors (current Asserter) with the given message. Note! This is
 // reasonably fast but not as fast as 'That' because of lacking inlining for the
 // current implementation of Go's type parametric functions.
-func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
+func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
@@ -304,7 +308,7 @@ func MLen[T comparable, U any](obj map[T]U, length int, a ...any) {
 
 // MKeyExists asserts that the map key exists. If not it panics/errors (current
 // Asserter) with the given message.
-func MKeyExists[T comparable, U any](obj map[T]U, key T, a ...any) (val U) {
+func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U) {
 	var ok bool
 	val, ok = obj[key]
 
@@ -337,7 +341,7 @@ func Empty(obj string, a ...any) {
 // (current Asserter) with the given message. Note! This is reasonably fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
-func SNotEmpty[T any](obj []T, a ...any) {
+func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
@@ -350,7 +354,7 @@ func SNotEmpty[T any](obj []T, a ...any) {
 // (current Asserter) with the given message. Note! This is reasonably fast but
 // not as fast as 'That' because of lacking inlining for the current
 // implementation of Go's type parametric functions.
-func MNotEmpty[T comparable, U any](obj map[T]U, a ...any) {
+func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
