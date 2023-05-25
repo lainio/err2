@@ -34,4 +34,12 @@ func GetAndSet[T any](ptr *T, val T) (old T) {
 	return old
 }
 
-// TODO: Swap, Max, ...
+// Swap two values, which must be given as ptr. Returns new lhs, aka rhs.
+func Swap[T any](lhs, rhs *T) (nlhs T) {
+	swap := *lhs
+	*lhs = *rhs
+	*rhs = swap
+	return *lhs
+}
+
+// TODO: , Max, ...
