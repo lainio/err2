@@ -9,13 +9,29 @@ successfully from type variables (see below) to Go generics API.
 This readme will guide you to use auto-migration scripts when ever we deprecate
 functions or make something obsolete.
 
+### `assert.SetDefaultAsserter` -> `assert.SetDefault` and others in v0.9.1
+
+Because direct renaming causes braking changes remember add -x flag to your
+migration command but other follow the instructions below:
+
+Example of -x flag:
+```shell
+migrate.sh -x
+```
+
+Use the following commands because 
 ### `err2.NotFound`, `err2.NotExist` and other sentinels are renamed in v0.9.0
 
 Their names follow Go idiom even the `err` part is two times here:
 `err2.ErrNotFound`.
 
 Please follow the same steps presented for v0.8.10 below to automatically
-refactor all references to these error values in your repos.
+refactor all references to these error values in your repos. **But add the flag
+-x to call**. Example:
+
+```shell
+migrate.sh -x
+```
 
 ### `err2.Return(f/w)` will obsolete in v0.9.0
 
