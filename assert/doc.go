@@ -22,7 +22,7 @@ hoped.
 
 # Call Stack Traversal During tests
 
-The asserter package has super powerfull feature. It allows us track assertation
+The asserter package has super powerful feature. It allows us track assertion
 violations over package and even module boundaries. When using err2 assert
 package for runtime Asserts and assert violation happens in what ever package
 and module, the whole call stack is brougth to unit test logs. Naturally this is

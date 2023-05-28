@@ -442,7 +442,7 @@ main.main()
 	/home/god/go/src/github.com/lainio/ic/main.go:74 +0x1d0
 `
 
-	// outputForTest is printStackForTest targetted result. Note that test0 and main
+	// outputForTest is printStackForTest targeted result. Note that test0 and main
 	// functions don't have package name `main` in them!! That's how func name is
 	// calculated in our debug pkg.
 	outputForTest = `    /home/god/go/src/github.com/lainio/err2/err2.go:107: err2.Handle

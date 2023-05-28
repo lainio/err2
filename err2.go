@@ -127,7 +127,7 @@ func Catch(a ...any) {
 // error handling, i.e. your current function doesn't have error return value.
 // NOTE, Throwf is rarely needed. We suggest to use error return values instead.
 // Throwf is offered for deep recursive algorithms to help readability and
-// preformance (see bechmarks) in those cases.
+// performance (see bechmarks) in those cases.
 //
 //	func yourFn() (res any) {
 //	     ...

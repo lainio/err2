@@ -3,7 +3,7 @@ package x
 import "sync"
 
 // RWMap is a type for a thread-safe Go map. It tries to be short and simple.
-// Tip: It's usefull to create a type alias (it allows it):
+// Tip: It's useful to create a type alias (it allows it):
 //
 //	testersMap = map[int]testing.TB
 //
