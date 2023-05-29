@@ -14,12 +14,18 @@ import (
 	"github.com/lainio/err2/internal/x"
 )
 
+// StackInfo has two parts. The first part is for anchor line, i.e., line in the call
+// stack that we want to include, and where output starts. The second part is
+// ExlRegexps that are used to filter out lines from final output.
 type StackInfo struct {
 	PackageName string
 	FuncName    string
 	Level       int
 
 	*regexp.Regexp
+
+	// these are used to filter out specific lines from output
+	ExlRegexp []*regexp.Regexp
 }
 
 var (
@@ -33,6 +39,12 @@ var (
 
 	// we want to check that this is not our package
 	packageRegexp = regexp.MustCompile(`^github\.com/lainio/err2[a-zA-Z0-9_/.\[\]]*\(`)
+
+	// testing package exluding regexps:
+	testingPkgRegexp  = regexp.MustCompile(`^testing\.`)
+	testingFileRegexp = regexp.MustCompile(`^.*\/src\/testing\/testing\.go`)
+
+	exludeRegexps = []*regexp.Regexp{testingPkgRegexp, testingFileRegexp}
 )
 
 func (si StackInfo) fullName() string {
@@ -56,6 +68,74 @@ func (si StackInfo) isFuncAnchor(s string) bool {
 		return true // cannot calculate anchor, calling algorithm set it zero
 	}
 	return strings.Contains(s, si.fullName())
+}
+
+func (si StackInfo) needToCalcFnNameAnchor() bool {
+	return si.FuncName != "" && si.Regexp != nil
+}
+
+// isLvlOnly return true if all fields are nil and Level != 0 that should be
+// used then.
+func (si StackInfo) isLvlOnly() bool {
+	return si.Level != 0 && si.Regexp == nil && si.PackageName == "" && si.FuncName == ""
+}
+
+func (si StackInfo) canPrint(s string, anchorLine, i int) (ok bool) {
+	if si.isLvlOnly() {
+		// we don't need it now because only Lvl is used to decide what's
+		// printed from call stack.
+		anchorLine = 0
+	}
+	ok = i >= 2*si.Level+anchorLine
+
+	if si.ExlRegexp == nil {
+		return ok
+	}
+
+	// if any of the ExlRegexp match we don't print
+	for _, reg := range si.ExlRegexp {
+		if reg.MatchString(s) {
+			return false
+		}
+	}
+	return ok
+}
+
+// PrintStackForTest prints to io.Writer the stack trace returned by
+// runtime.Stack and processed to proper format to be shown in test output by
+// starting from stackLevel.
+func PrintStackForTest(w io.Writer, stackLevel int) {
+	stackBuf := bytes.NewBuffer(debug.Stack())
+	printStackForTest(stackBuf, w, stackLevel)
+}
+
+// printStackForTest prints to io.Writer the stack trace returned by
+// runtime.Stack and processed to proper format to be shown in test output by
+// starting from stackLevel.
+func printStackForTest(r io.Reader, w io.Writer, stackLevel int) {
+	build := make([]string, 0, 24)
+	buf := new(bytes.Buffer)
+	stackPrint(r, buf, StackInfo{Level: stackLevel, ExlRegexp: exludeRegexps})
+	scanner := bufio.NewScanner(buf)
+	funcName := ""
+	for i := -1; scanner.Scan(); i++ {
+		line := scanner.Text()
+		if i == -1 {
+			continue
+		}
+		if i%2 == 0 {
+			funcName = fnName(line)
+		} else {
+			line = strings.TrimPrefix(line, "\t")
+			s := strings.Split(line, " ")
+			out := fmt.Sprintf("    %s: %s", s[0], funcName)
+			build = append(build, out)
+		}
+	}
+	buildReverse := x.SReverse(build)
+	for i, line := range buildReverse {
+		fmt.Fprint(w, line+x.Whom(i > 0, " STACK\n", "\n"))
+	}
 }
 
 // PrintStack prints to standard error the stack trace returned by runtime.Stack
@@ -169,20 +249,20 @@ func fnLNro(line string) int {
 func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
-	anchorLine := calcAnchor(r, si)
+	anchorLine := calcAnchor(r, si) // the line we want to start show stack
 
 	scanner := bufio.NewScanner(&buf)
 	for i := -1; scanner.Scan(); i++ {
 		line := scanner.Text()
 
 		// we can print a line if we didn't find anything, i.e. anchorLine is
-		// nilAnchor
+		// nilAnchor, which means that our start is not limited by then anchor
 		canPrint := anchorLine == nilAnchor
 		// if it's not nilAnchor we need to check it more carefully
 		if !canPrint {
 			// we can print a line when it's a caption OR the line (pair) is
 			// greater than anchorLine
-			canPrint = i == -1 || i >= 2*si.Level+anchorLine
+			canPrint = i == -1 || si.canPrint(line, anchorLine, i)
 		}
 
 		if canPrint {
@@ -194,6 +274,12 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 // calcAnchor calculates the optimal anchor line. Optimal is the shortest but
 // including all the needed information.
 func calcAnchor(r io.Reader, si StackInfo) int {
+	if si.isLvlOnly() {
+		// these are buffers, there's no error, but because we use TeeReader
+		// we need to read all before return, otherwise caller gets nothing.
+		_, _ = io.ReadAll(r)
+		return si.Level
+	}
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
 
@@ -201,8 +287,7 @@ func calcAnchor(r io.Reader, si StackInfo) int {
 		return si.isAnchor(s)
 	})
 
-	needToCalcFnNameAnchor := si.FuncName != "" && si.Regexp != nil
-	if needToCalcFnNameAnchor {
+	if si.needToCalcFnNameAnchor() {
 		fnNameAnchor := calc(&buf, func(s string) bool {
 			return si.isFuncAnchor(s)
 		})

@@ -163,20 +163,29 @@ func IsNotAccess(err error) bool {
 	return Is(err, err2.ErrNotAccess)
 }
 
-// IsRecoverable function performs a filtered error check for the given argument.
-// It's the same as To function, but it checks if the error matches the
-// 'err2.ErrRecoverable' before throwing an error. The false return value tells that
-// there are no errors. The true tells that the err's chain includes
+// IsRecoverable function performs a filtered error check for the given
+// argument. It's the same as To function, but it checks if the error matches
+// the 'err2.ErrRecoverable' before throwing an error. The false return value
+// tells that there are no errors. The true tells that the err's chain includes
 // 'err2.ErrRecoverable'.
 func IsRecoverable(err error) bool {
 	return Is(err, err2.ErrRecoverable)
 }
 
-// IsNotRecoverable function performs a filtered error check for the given argument.
-// It's the same as To function, but it checks if the error matches the
-// 'err2.ErrNotRecoverable' before throwing an error. The false return value tells that
-// there are no errors. The true tells that the err's chain includes
+// IsNotRecoverable function performs a filtered error check for the given
+// argument. It's the same as To function, but it checks if the error matches
+// the 'err2.ErrNotRecoverable' before throwing an error. The false return value
+// tells that there are no errors. The true tells that the err's chain includes
 // 'err2.ErrNotRecoverable'.
 func IsNotRecoverable(err error) bool {
 	return Is(err, err2.ErrNotRecoverable)
+}
+
+// InNotEnabled function performs a filtered error check for the given argument.
+// It's the same as To function, but it checks if the error matches the
+// 'err2.ErrNotEnabled' before throwing an error. The false return value tells
+// that there are no errors. The true tells that the err's chain includes
+// 'err2.ErrNotEnabled'.
+func InNotEnabled(err error) bool {
+	return Is(err, err2.ErrNotEnabled)
 }

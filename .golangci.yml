@@ -92,7 +92,7 @@ linters:
     #    - ireturn
     #    - lll
     - makezero
-    #    - misspell
+    - misspell
     - nakedret
     - nestif
     - nilerr

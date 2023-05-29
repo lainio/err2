@@ -18,6 +18,7 @@ var (
 	ErrNotExist     = errors.New("not exist")
 	ErrAlreadyExist = errors.New("already exist")
 	ErrNotAccess    = errors.New("permission denied")
+	ErrNotEnabled   = errors.New("not enabled")
 
 	// Since Go 1.20 wraps multiple errors same time, i.e. wrapped errors
 	// aren't list anymore but tree. This allows mark multiple semantics to
@@ -127,7 +128,7 @@ func Catch(a ...any) {
 // error handling, i.e. your current function doesn't have error return value.
 // NOTE, Throwf is rarely needed. We suggest to use error return values instead.
 // Throwf is offered for deep recursive algorithms to help readability and
-// preformance (see bechmarks) in those cases.
+// performance (see bechmarks) in those cases.
 //
 //	func yourFn() (res any) {
 //	     ...

@@ -7,7 +7,7 @@ location=$(dirname "$BASH_SOURCE")
 set -e
 
 # =================== main =====================
-while getopts 'dvoushm:' OPTION; do
+while getopts 'dvouxshm:' OPTION; do
 	case "$OPTION" in
 	d)
 		echo "set verbose/debug mode"
@@ -33,6 +33,10 @@ while getopts 'dvoushm:' OPTION; do
 		allow_subdir=1
 		vlog "Allowing subdir processing"
 		;;
+	x)
+		no_build_check_after_pkg_update=1
+		vlog "No build check after err2 update"
+		;;
 	h|?)
 		echo "usage: $(basename $0) [-d] [-v] [-o] [-u] [-m runmode] [migration_branch]" >&2
 		echo "       d: add debug output" >&2
@@ -40,6 +44,7 @@ while getopts 'dvoushm:' OPTION; do
 		echo "       o: only simple migrations" >&2
 		echo "       u: using current branch" >&2
 		echo "       s: allow subdir processing" >&2
+		echo "       x: ho build check after err2 update" >&2
 		echo "       m: reserved" >&2
 		exit 1
 		;;
@@ -66,8 +71,10 @@ check_prerequisites
 vlog "update err2 package to latest version"
 setup_repo
 deps
-check_build ./...
-commit "commit deps"
+if [[ "$no_build_check_after_pkg_update" == "" ]]; then
+	check_build ./...
+	commit "commit deps"
+fi
 
 echo "====== basic err2 refactoring ===="
 echo "processing..."
@@ -76,7 +83,10 @@ replace_err_values
 replace_catch
 replace_tracers
 replace_defasserter
+replace_defasserter_test2
+replace_defasserter_prod2
 replace_annotate
+replace_asserters_calls
 replace_return
 replace_easy1
 replace_2

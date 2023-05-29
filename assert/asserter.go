@@ -3,6 +3,7 @@ package assert
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/lainio/err2/internal/debug"
@@ -21,11 +22,15 @@ const (
 	// type for panics.
 	AsserterToError Asserter = 1 << iota
 
-	// AsserterStackTrace is Asserter flag to print call stack to stdout.
+	// AsserterStackTrace is Asserter flag to print call stack to stdout OR if
+	// in AsserterUnitTesting mode the call stack is printed to test result
+	// output if there is any assertion failures.
 	AsserterStackTrace
 
 	// AsserterCallerInfo is an asserter flag to add info of the function
 	// asserting. It includes filename, line number and function name.
+	// This is especially powerful with AsserterUnitTesting where it allows get
+	// information where the assertion violation happens even over modules!
 	AsserterCallerInfo
 
 	// AsserterFormattedCallerInfo is an asserter flag to add info of the function
@@ -33,15 +38,17 @@ const (
 	// multi-line formatted string output.
 	AsserterFormattedCallerInfo
 
-	// AsserterUnitTesting is an asserter only for unit testing. It's exclusive.
+	// AsserterUnitTesting is an asserter only for unit testing. It can be
+	// compined with AsserterCallerInfo and/or AsserterStackTrace. There is
+	// variable T which have all of these three asserters.
 	AsserterUnitTesting
 )
 
+// every test log or result output has 4 spaces in them
+const officialTestOutputPrefix = "    "
+
 // NoImplementation always fails with no implementation.
 func (asserter Asserter) NoImplementation(a ...any) {
-	if asserter.isUnitTesting() {
-		tester().Helper()
-	}
 	asserter.reportAssertionFault("not implemented", a...)
 }
 
@@ -50,9 +57,6 @@ func (asserter Asserter) NoImplementation(a ...any) {
 // functions.
 func (asserter Asserter) True(term bool, a ...any) {
 	if !term {
-		if asserter.isUnitTesting() {
-			tester().Helper()
-		}
 		asserter.reportAssertionFault("assertion fault", a...)
 	}
 }
@@ -61,9 +65,6 @@ func (asserter Asserter) True(term bool, a ...any) {
 // string.
 func (asserter Asserter) Truef(term bool, format string, a ...any) {
 	if !term {
-		if asserter.isUnitTesting() {
-			tester().Helper()
-		}
 		if asserter.hasStackTrace() {
 			debug.PrintStack(1)
 		}
@@ -82,9 +83,6 @@ func (asserter Asserter) Len(obj any, length int, a ...any) {
 	}
 
 	if l != length {
-		if asserter.isUnitTesting() {
-			tester().Helper()
-		}
 		defMsg := fmt.Sprintf("got %d, want %d", l, length)
 		asserter.reportAssertionFault(defMsg, a...)
 	}
@@ -94,9 +92,6 @@ func (asserter Asserter) Len(obj any, length int, a ...any) {
 // Asserter) with the given msg.
 func (asserter Asserter) EqualInt(val, want int, a ...any) {
 	if want != val {
-		if asserter.isUnitTesting() {
-			tester().Helper()
-		}
 		defMsg := fmt.Sprintf("got %d, want %d", val, want)
 		asserter.reportAssertionFault(defMsg, a...)
 	}
@@ -120,9 +115,6 @@ func (asserter Asserter) Empty(obj any, msg ...any) {
 	}
 
 	if l != 0 {
-		if asserter.isUnitTesting() {
-			tester().Helper()
-		}
 		defMsg := fmt.Sprintf("got %d, want == 0", l)
 		asserter.reportAssertionFault(defMsg, msg...)
 	}
@@ -144,20 +136,24 @@ func (asserter Asserter) NotEmpty(obj any, msg ...any) {
 	}
 
 	if l == 0 {
-		if asserter.isUnitTesting() {
-			tester().Helper()
-		}
 		defMsg := fmt.Sprintf("got %d, want > 0", l)
 		asserter.reportAssertionFault(defMsg, msg...)
 	}
 }
 
 func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
-	if asserter.isUnitTesting() {
-		tester().Helper()
-	}
 	if asserter.hasStackTrace() {
-		debug.PrintStack(2)
+		if asserter.isUnitTesting() {
+			// Note. that the assert in the test function is printed in
+			// reportPanic below
+			const stackLvl = 5 // amount of functions before we're here
+			debug.PrintStackForTest(os.Stderr, stackLvl)
+		} else {
+			// amount of functions before we're here, which is different
+			// between runtime (this) and test-run (above)
+			const stackLvl = 2
+			debug.PrintStack(stackLvl)
+		}
 	}
 	if asserter.hasCallerInfo() {
 		defaultMsg = asserter.callerInfo(defaultMsg)
@@ -184,14 +180,30 @@ func getLen(x any) (ok bool, length int) {
 }
 
 func (asserter Asserter) reportPanic(s string) {
-	if asserter.isUnitTesting() {
-		tester().Helper()
-		tester().Fatal(s)
+	if asserter.isUnitTesting() && asserter.hasCallerInfo() {
+		fmt.Fprintln(os.Stderr, officialTestOutputPrefix+s)
+		tester().FailNow()
+	} else if asserter.isUnitTesting() {
+		fatal(s)
 	}
 	if asserter.hasToError() {
 		panic(errors.New(s))
 	}
 	panic(s)
+}
+
+func fatal(s string) {
+	const shortFmtStr = `%s:%d: %s`
+	const framesToSkip = 4 // how many fn calls there is before FuncName call
+	includePath := false
+	_, filename, line, ok := str.FuncName(framesToSkip, includePath)
+	info := s
+	if ok {
+		info = fmt.Sprintf(shortFmtStr, filename, line, s)
+	}
+	// test output goes thru stderr, no need for t.Log(), test Fail needs it.
+	fmt.Fprintln(os.Stderr, officialTestOutputPrefix+info)
+	tester().FailNow()
 }
 
 var longFmtStr = `
@@ -202,7 +214,7 @@ Assertion Fault at:
 --------------------------------
 `
 
-var shortFmtStr = `%s:%d %s(): %s`
+var shortFmtStr = `%s:%d: %s(): %s`
 
 func (asserter Asserter) callerInfo(msg string) (info string) {
 	ourFmtStr := shortFmtStr
@@ -211,7 +223,8 @@ func (asserter Asserter) callerInfo(msg string) (info string) {
 	}
 
 	const framesToSkip = 3 // how many fn calls there is before FuncName call
-	funcName, filename, line, ok := str.FuncName(framesToSkip)
+	includePath := asserter.isUnitTesting()
+	funcName, filename, line, ok := str.FuncName(framesToSkip, includePath)
 	if ok {
 		info = fmt.Sprintf(ourFmtStr,
 			filename, line,
@@ -237,6 +250,8 @@ func (asserter Asserter) hasFormattedCallerInfo() bool {
 	return asserter&AsserterFormattedCallerInfo != 0
 }
 
+// isUnitTesting is expensive because it calls tester(). think carefully where
+// to use it
 func (asserter Asserter) isUnitTesting() bool {
 	return asserter&AsserterUnitTesting != 0 && tester() != nil
 }

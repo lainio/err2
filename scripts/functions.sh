@@ -147,6 +147,25 @@ replace_defasserter() {
 	"$location"/replace-perl.sh 'assert\.(DefaultAsserter = )(.*)' 'assert.SetDefaultAsserter(\2)'
 }
 
+replace_defasserter_prod2() {
+	vlog '--- exectuing asserter prod change'
+	"$location"/replace-perl.sh 'assert\.SetDefaultAsserter.*\)' 'assert.SetDefault(assert.Production)'
+}
+
+replace_defasserter_test2() {
+	vlog '--- exectuing asserter Test change'
+	"$location"/replace-perl.sh 'func.*testing\.' 'assert\.SetDefaultAsserter.*\)' 'assert.SetDefault(assert.TestFull)'
+}
+
+replace_asserters_calls() {
+	vlog '--- exectuing asserter.D/P calls'
+	"$location"/replace-perl.sh 'assert\.([DP]+\.)' 'assert.' 
+	"$location"/replace-perl.sh 'assert\.True' 'assert.That' 
+	"$location"/replace-perl.sh 'assert\.Truef' 'assert.That' 
+	"$location"/replace-perl.sh 'assert\.NoImplementation' 'assert.NotImplemented' 
+	"$location"/replace-perl.sh 'assert\.[DP]+' '(^\s*)(assert\.[DP]+\ \=.*$)' 'EMPTY_THIS_LINE' 
+}
+
 replace_annotate() {
 	# Replace Annotate with Returnf: notice argument order!!
 	"$location"/replace-perl.sh 'err2\.(Annotate\()(.*)(, )(.*)(\)\n)' 'err2.Returnf(\4\3\2\5'
@@ -432,6 +451,13 @@ todo2() {
 todo2l() {
 	dlog "Searching lone: try.To(err) and listing files"
 	ag -l  '^\s*try\.To\(err\)$'
+}
+
+todo_assert() {
+	# TODO: idea, study how to send arguments to these functions when
+	# calling them outside of the scripts
+	dlog "Searching lone: assert.D/P, no automatic replace yet.."
+	ag 'assert\.[DP]+\.'
 }
 
 lint() {
