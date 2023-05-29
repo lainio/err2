@@ -33,7 +33,7 @@ refactor all references to these error values in your repos. **But add the flag
 migrate.sh -x
 ```
 
-### `err2.Return(f/w)` will obsolete in v0.9.0
+### `err2.Return[f/w]` will obsolete in v0.9.0
 
 Please follow the same steps as the next chapter.
 
