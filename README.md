@@ -61,15 +61,15 @@ func CopyFile(src, dst string) (err error) {
 - The `assert` package implements assertion helpers for **both** unit-testing
   and *design-by-contract*.
 
-### Performance
+## Performance
 
 All of the listed above **without any performance penalty**! You are welcome to
 run `benchmarks` in the project repo and see yourself.
 
-**Please note** that there are many benchmarks that run 'too fast' according the
-normal Go benchmarking rules, i.e. compiler optimisations are worked so well
-that there are no meaningful results. But for this type of package where we are
-competing if-statements, that's exactly what we are hoping to achieve.
+**Please note** that there are many benchmarks that run *'too fast'* according
+the normal Go benchmarking rules, i.e. compiler optimisations are working so
+well that there are no meaningful results. But for this type of package where we
+are competing if-statements, that's exactly what we are hoping to achieve.
 
 ## Automatic Error Propagation
 
