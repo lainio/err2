@@ -18,6 +18,7 @@ var (
 	ErrNotExist     = errors.New("not exist")
 	ErrAlreadyExist = errors.New("already exist")
 	ErrNotAccess    = errors.New("permission denied")
+	ErrNotEnabled   = errors.New("not enabled")
 
 	// Since Go 1.20 wraps multiple errors same time, i.e. wrapped errors
 	// aren't list anymore but tree. This allows mark multiple semantics to
