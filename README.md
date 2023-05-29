@@ -414,7 +414,7 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 ##### 0.7.0
 - Filter functions for non-errors like `io.EOF`
 
-#### 0.8.0
+##### 0.8.0
 - `try.To()`, **Start to use Go generics**
 - `assert.That()` and other assert functions with the help of the generics
 
@@ -479,29 +479,31 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 - New assertion functions
 - No direct variables in APIs (race), etc.
 
-#### 0.9.0
+##### 0.9.0
 - **Clean and simple API** 
 - Removing deprecated functions:
     - Only `err2.Handle` for error returning functions
     - Only `err2.Catch` for function that doesn't return error
-    - Please see `scripts/README.md' for *Auto-migration for your repos*
+    - Please see `scripts/README.md` for *Auto-migration for your repos*
 - Default `err2.SetPanicTracer(os.Stderr)` allows `defer err2.Catch()`
 
-#### 0.9.1
-- **Beformance boost for assert pkg:** `assert.That(boolVal)` == `if boolVal`
-- Go verseion 1.18 is a new minimum (was 1.19)
+##### 0.9.1
+- **Performance boost for assert pkg**: `assert.That(boolVal)` == `if boolVal`
+- Go version 1.18 is a new minimum (was 1.19, use of `atomic.Pointer`)
 - Generic functions support type aliases
 - More support for `assert` package for tests: support for cross module asserts
   during the tests
-- Using `assert` pkg for tests allow us to have traversable call stack
-  during unit tests -- cross module boundaries
-- Implementation: simplified `assert` pkg to `testing` pkg intergration, and
+- Using `assert` pkg for tests allow us to have **traversable call stack
+  during unit tests** -- cross module boundaries solved
+- Implementation: simplified `assert` pkg to `testing` pkg integration, and
   especially performance
 
 ### Upcoming releases
 
 ##### 0.9.2 
-- More documentation, reparing for some sort of marketing
+- Continue removing unused parts from `assert` pkg
+- More documentation, repairing for some sort of marketing
 
 ##### 0.9.3 
-- Recruite someone to try test result processing for unit-tests
+- Recruit someone to try test result processing for unit-tests and bring support
+  for IDEs like VC
