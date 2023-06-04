@@ -19,6 +19,7 @@ fi
 if [[ -z "$(git status --porcelain)" ]]; then
 	git tag -a "$version" -m "v. $version"
 	git push origin "$cur_branch" --tags
+	GOPROXY=proxy.golang.org go list -m github.com/lainio/err2@"$version"
 else
 	echo 'ERROR: working dir is not clean'
 fi
