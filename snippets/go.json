@@ -26,8 +26,8 @@
 			"description": "Snippet for err2.Handle(&err, func() {})"
 		},
 		"defer assert.PushTester(t)()": {
-			"prefix": "aspu",
-			"body": "defer assert.PopTester(${1:t})\n",
+			"prefix": "aspa",
+			"body": "defer assert.PushTester(${1:t})()\n",
 			"description": "Snippet for 1-liner pushing AND poping current tester"
 		},
 		"assert.Push&PopTester()": {
