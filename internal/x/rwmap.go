@@ -39,7 +39,7 @@ func (m *RWMap[M, T, U]) Tx(f func(m M)) {
 	f(m.m)
 }
 
-// Set sets a key value pair to the map.
+// Set sets a key value pair to the map with Go's normal map semantics.
 func (m *RWMap[M, T, U]) Set(key T, val U) U {
 	m.Lock()
 	defer m.Unlock()
@@ -47,7 +47,9 @@ func (m *RWMap[M, T, U]) Set(key T, val U) U {
 	return val
 }
 
-// Del deletes a key value pair from the map.
+// Del deletes a key value pair from the map. It checks that key exists. It
+// doesn't panic if key doesn't exist. The return value is valid only if key
+// exists other is Go's default init value for the type.
 func (m *RWMap[M, T, U]) Del(key T) U {
 	m.Lock()
 	defer m.Unlock()
@@ -58,12 +60,18 @@ func (m *RWMap[M, T, U]) Del(key T) U {
 	return val
 }
 
+// Rx executes a read-only critical section during the function given as an
+// argument. This critical section allows the map be read only. If you only need
+// to write the map please use the Tx function that's for a read-write critical
+// section.
 func (m *RWMap[M, T, U]) Rx(f func(m M)) {
 	m.RLock()
 	defer m.RUnlock()
 	f(m.m)
 }
 
+// Get returns value for the key. If key doesn't exist it panics as normal map
+// access without ok idiom does.
 func (m *RWMap[M, T, U]) Get(key T) U {
 	m.RLock()
 	defer m.RUnlock()

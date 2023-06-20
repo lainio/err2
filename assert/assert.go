@@ -105,7 +105,7 @@ func PushTester(t testing.TB, a ...defInd) function {
 		// projects don't have TestMain
 		// TODO: parallel testing is something we should test.
 	}
-	x.Set(testers, goid(), t)
+	testers.Set(goid(), t)
 	return PopTester
 }
 
@@ -122,13 +122,13 @@ func PushTester(t testing.TB, a ...defInd) function {
 //		})
 //	}
 func PopTester() { // maybe need another version if we are going to cacth errors
-	x.Tx(testers, func(m testersMap) {
+	testers.Tx(func(m testersMap) {
 		delete(m, goid())
 	})
 }
 
 func tester() (t testing.TB) {
-	return x.Get(testers, goid())
+	return testers.Get(goid())
 }
 
 // NotImplemented always panics with 'not implemented' assertion message.
