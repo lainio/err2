@@ -40,6 +40,9 @@ test:
 bench:
 	$(GO) test -bench=. $(PKGS)
 
+bench_goid:
+	$(GO) test -bench='BenchmarkGoid' $(PKG2)
+
 bench_go:
 	$(GO) test -bench='BenchmarkTry_StringGenerics' $(PKG1)
 
