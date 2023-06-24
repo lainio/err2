@@ -37,7 +37,7 @@ func TestDefault_Error(t *testing.T) {
 
 	try.To1(throw())
 
-	t.Fail() // If everything works we are newer here
+	t.Fail() // If everything works we are never here
 }
 
 func TestTry_Error(t *testing.T) {
@@ -46,7 +46,7 @@ func TestTry_Error(t *testing.T) {
 
 	try.To1(throw())
 
-	t.Fail() // If everything works we are newer here
+	t.Fail() // If everything works we are never here
 }
 
 func TestPanickingCatchAll(t *testing.T) {
@@ -301,7 +301,24 @@ func TestCatch_Error(t *testing.T) {
 
 	try.To1(throw())
 
-	t.Fail() // If everything works we are newer here
+	t.Fail() // If everything works we are never here
+}
+
+func Test_TryOutError(t *testing.T) {
+	defer err2.Catch(func(err error) {
+		test.Require(t, err.Error() == "Fails: this is an ERROR",
+			"we should catch right error here")
+	})
+
+	var retVal string
+
+	// let's test try.Out1() and it's throw capabilities here, even try.To1()
+	// is the preferred way.
+	retVal = try.Out1(noThrow()).Throwf("Fails").Val1
+	test.Require(t, retVal == "test", "if no error happens, we get value")
+
+	_ = try.Out1(throw()).Throwf("Fails").Val1
+	t.Fail() // If everything works in Throwf we are never here.
 }
 
 func TestCatch_Panic(t *testing.T) {
