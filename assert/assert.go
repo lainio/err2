@@ -1,7 +1,6 @@
 package assert
 
 import (
-	"bytes"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -105,7 +104,13 @@ func PushTester(t testing.TB, a ...defInd) function {
 		// projects don't have TestMain
 		// TODO: parallel testing is something we should test.
 	}
-	testers.Set(goid(), t)
+	testers.Tx(func(m testersMap) {
+		rid := goid()
+		if _, ok := m[rid]; ok {
+			panic("PushTester is already called")
+		}
+		m[rid] = t
+	})
 	return PopTester
 }
 
@@ -449,12 +454,26 @@ func combineArgs(format string, a []any) []any {
 func goid() int {
 	var buf [64]byte
 	runtime.Stack(buf[:], false)
-	var id int
-	_, err := fmt.Fscanf(bytes.NewReader(buf[:]), "goroutine %d", &id)
-	if err != nil {
-		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
+	return myByteToInt(buf[10:])
+}
+
+func Goid(b []byte) int {
+	return myByteToInt(b[10:])
+}
+
+func myByteToInt(b []byte) int {
+	n := 0
+	for _, ch := range b {
+		if ch == ' ' {
+			break
+		}
+		ch -= '0'
+		if ch > 9 {
+			panic("cannot get goroutine")
+		}
+		n = n*10 + int(ch)
 	}
-	return id
+	return n
 }
 
 type Number interface {
