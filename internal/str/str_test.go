@@ -52,7 +52,7 @@ func TestDecamel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := str.Decamel(s)
-			test.Requiref(t, got == want, "got: %v, want: %v", got, want)
+			test.RequireEqual(t, got, want)
 		})
 	}
 }

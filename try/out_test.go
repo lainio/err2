@@ -86,6 +86,6 @@ func TestResult2_Logf(t *testing.T) {
 	}
 	num1, num2 := countSomething("1", "err")
 	fmt.Printf("results: %d, %d\n", num1, num2)
-	test.Requiref(t, num1 == 3, "wrong number: got %d, want: 3", num1)
-	test.Requiref(t, num2 == 2, "wrong number: got %d, want: 2", num2)
+	test.RequireEqual(t, num1, 3)
+	test.RequireEqual(t, num2, 2)
 }
