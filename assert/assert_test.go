@@ -177,16 +177,6 @@ func assertEqualInt2(b int) {
 	assert.Equal(b, 2)
 }
 
-func TestGoid(t *testing.T) {
-	camelStr := []byte(`goroutine 518 [running]:
-`)
-
-	id := assert.Goid(camelStr)
-	if id != 518 {
-		t.Fail()
-	}
-}
-
 func BenchmarkSNotNil(b *testing.B) {
 	bs := []byte{0}
 	for n := 0; n < b.N; n++ {
@@ -258,15 +248,6 @@ func BenchmarkEqualInt(b *testing.B) {
 	const d = 2
 	for n := 0; n < b.N; n++ {
 		assertEqualInt2(d)
-	}
-}
-
-func BenchmarkGoid(b *testing.B) {
-	camelStr := []byte(`goroutine 518 [running]:
-`)
-
-	for n := 0; n < b.N; n++ {
-		_ = assert.Goid(camelStr)
 	}
 }
 

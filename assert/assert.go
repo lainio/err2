@@ -457,10 +457,6 @@ func goid() int {
 	return myByteToInt(buf[10:])
 }
 
-func Goid(b []byte) int {
-	return myByteToInt(b[10:])
-}
-
 func myByteToInt(b []byte) int {
 	n := 0
 	for _, ch := range b {
