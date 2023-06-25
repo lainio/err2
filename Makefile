@@ -1,74 +1,75 @@
 # Original from github.com/pkg/errors
 
-# TODO: start to use package name instead of number?
-PKG1 := github.com/lainio/err2
-PKG2 := github.com/lainio/err2/assert
-PKG3 := github.com/lainio/err2/try
-PKG4 := github.com/lainio/err2/internal/debug
-PKG5 := github.com/lainio/err2/internal/str
-PKG6 := github.com/lainio/err2/internal/x
-PKGS := $(PKG1) $(PKG2) $(PKG3) $(PKG4) $(PKG5) $(PKG6)
+PKG_ERR2 := github.com/lainio/err2
+PKG_ASSERT := github.com/lainio/err2/assert
+PKG_TRY := github.com/lainio/err2/try
+PKG_DEBUG := github.com/lainio/err2/internal/debug
+PKG_STR := github.com/lainio/err2/internal/str
+PKG_X := github.com/lainio/err2/internal/x
+PKGS := $(PKG_ERR2) $(PKG_ASSERT) $(PKG_TRY) $(PKG_DEBUG) $(PKG_STR) $(PKG_X)
 
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
 GO ?= go
+TEST_ARGS ?= 
+
 # GO ?= go1.20rc2
 
 check: lint vet gofmt test
 
-test1:
-	$(GO) test $(PKG1)
+test_err2:
+	$(GO) test $(TEST_ARGS) $(PKG_ERR2)
 
-test2:
-	$(GO) test $(PKG2)
+test_assert:
+	$(GO) test $(TEST_ARGS) $(PKG_ASSERT)
 
-test3:
-	$(GO) test $(PKG3)
+test_try:
+	$(GO) test $(TEST_ARGS) $(PKG_TRY)
 
-test4:
-	$(GO) test $(PKG4)
+test_debug:
+	$(GO) test $(TEST_ARGS) $(PKG_DEBUG)
 
-test5:
-	$(GO) test $(PKG5)
+test_str:
+	$(GO) test $(TEST_ARGS) $(PKG_STR)
 
-test6:
-	$(GO) test $(PKG6)
+test_x:
+	$(GO) test $(TEST_ARGS) $(PKG_X)
 
 test:
-	$(GO) test $(PKGS)
+	$(GO) test $(TEST_ARGS) $(PKGS)
 
 bench:
 	$(GO) test -bench=. $(PKGS)
 
 bench_goid:
-	$(GO) test -bench='BenchmarkGoid' $(PKG2)
+	$(GO) test -bench='BenchmarkGoid' $(PKG_ASSERT)
 
 bench_go:
-	$(GO) test -bench='BenchmarkTry_StringGenerics' $(PKG1)
+	$(GO) test -bench='BenchmarkTry_StringGenerics' $(PKG_ERR2)
 
 bench_arec:
-	$(GO) test -bench='BenchmarkRecursion.*' $(PKG1)
+	$(GO) test -bench='BenchmarkRecursion.*' $(PKG_ERR2)
 
 bench_that:
-	$(GO) test -bench='BenchmarkThat.*' $(PKG2)
+	$(GO) test -bench='BenchmarkThat.*' $(PKG_ASSERT)
 
 bench_copy:
-	$(GO) test -bench='Benchmark_CopyBuffer' $(PKG3)
+	$(GO) test -bench='Benchmark_CopyBuffer' $(PKG_TRY)
 
 bench_rec:
-	$(GO) test -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG1)
+	$(GO) test -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG_ERR2)
 
 bench1:
-	$(GO) test -bench=. $(PKG1)
+	$(GO) test -bench=. $(PKG_ERR2)
 
 bench2:
-	$(GO) test -bench=. $(PKG2)
+	$(GO) test -bench=. $(PKG_ASSERT)
 
 bench5:
-	$(GO) test -bench=. $(PKG5)
+	$(GO) test -bench=. $(PKG_STR)
 
 bench6:
-	$(GO) test -bench=. $(PKG6)
+	$(GO) test -bench=. $(PKG_X)
 
 vet: | test
 	$(GO) vet $(PKGS)
@@ -82,7 +83,7 @@ godoc:
 
 test_cov_out:
 	go test -p 1 -failfast \
-		-coverpkg=$(PKG1)/... \
+		-coverpkg=$(PKG_ERR2)/... \
 		-coverprofile=coverage.txt  \
 		-covermode=atomic \
 		./...
