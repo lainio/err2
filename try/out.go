@@ -21,71 +21,117 @@ type (
 		IsThrowf(err error, f string, a ...any) handler // op
 	}
 
+	Result struct {
+		Err error
+	}
+
 	Result1[T any] struct {
 		Val1 T
-		err  error
+		Result
 	}
 
 	Result2[T any, U any] struct {
-		Val1 T
 		Val2 U
-		err  error
+		Result1[T]
 	}
 )
 
-func (o *Result1[T]) Logf(f string, a ...any) *Result1[T] {
-	if o.err == nil {
+func (o *Result) Logf(f string, a ...any) *Result {
+	if o.Err == nil {
 		return o
 	}
-	w := tracer.Error.Tracer()
-	if w != nil {
-		fmt.Fprintf(w, f+": %v\n", append(a, o.err)...)
+	w := tracer.Log.Tracer()
+	if w != nil && f != "" {
+		fmt.Fprintf(w, f+": %v\n", append(a, o.Err)...)
 	}
 	return o
 }
 
-func (o *Result1[T]) Throwf(f string, a ...any) *Result1[T] {
-	if o.err == nil {
-		return o
-	}
-	o.err = fmt.Errorf(f+wrapStr(), append(a, o.err)...)
-	panic(o.err)
+func (o *Result1[T]) Logf(f string, a ...any) *Result1[T] {
+	o.Result.Logf(f, a...)
+	return o
 }
 
-// TODO: is this really nessessary? should we rename isDo and offer only it?
-func (o *Result1[T]) Is(err error) (T, bool) {
-	if err == nil || o.err == nil {
-		return o.Val1, err == nil && o.err == nil
+func (o *Result2[T, U]) Logf(f string, a ...any) *Result2[T, U] {
+	o.Result.Logf(f, a...)
+	return o
+}
+
+func (o *Result) Throwf(f string, a ...any) *Result {
+	if o.Err == nil {
+		return o
 	}
-	return o.Val1, Is(o.err, err)
+	o.Err = fmt.Errorf(f+wrapStr(), append(a, o.Err)...)
+	panic(o.Err)
+}
+
+func (o *Result1[T]) Throwf(f string, a ...any) *Result1[T] {
+	o.Result.Throwf(f, a...)
+	panic(o.Err)
+}
+
+func (o *Result2[T, U]) Throwf(f string, a ...any) *Result2[T, U] {
+	o.Result.Throwf(f, a...)
+	panic(o.Err)
 }
 
 func (o *Result1[T]) Def1(v T) *Result1[T] {
-	if o.err == nil {
+	if o.Err == nil {
 		return o
 	}
 	o.Val1 = v
 	return o
 }
 
-func (o *Result1[T]) IsDo(err error, f ErrFn) *Result1[T] {
-	if o.err == nil {
+func (o *Result2[T, U]) Def2(v T, v2 U) *Result2[T, U] {
+	if o.Err == nil {
 		return o
 	}
-	if errors.Is(o.err, err) {
-		o.err = f(o.err)
+	o.Val1 = v
+	o.Val2 = v2
+	return o
+}
+
+func (o *Result) Is(err error, f ErrFn) *Result {
+	if o.Err == nil {
+		return o
+	}
+	if errors.Is(o.Err, err) {
+		o.Err = f(o.Err)
+	}
+	return o
+}
+
+func (o *Result1[T]) Is(err error, f ErrFn) *Result1[T] {
+	o.Result.Is(err, f)
+	return o
+}
+
+func (o *Result2[T, U]) Is(err error, f ErrFn) *Result2[T, U] {
+	o.Result.Is(err, f)
+	return o
+}
+
+// We could have Catch that don't panic even the err != nil still
+func (o *Result) Handle(f ErrFn) *Result {
+	if f != nil {
+		o.Err = f(o.Err)
+		if o.Err != nil {
+			panic(o.Err)
+		}
 	}
 	return o
 }
 
 // We could have Catch that don't panic even the err != nil still
 func (o *Result1[T]) Handle(f ErrFn) *Result1[T] {
-	if f != nil {
-		o.err = f(o.err)
-		if o.err != nil {
-			panic(o.err)
-		}
-	}
+	o.Result.Handle(f)
+	return o
+}
+
+// We could have Catch that don't panic even the err != nil still
+func (o *Result2[T, U]) Handle(f ErrFn) *Result2[T, U] {
+	o.Result.Handle(f)
 	return o
 }
 
@@ -99,11 +145,11 @@ func (o *Result1[T]) Handle(f ErrFn) *Result1[T] {
 //
 //	number := try.Out1(strconv.Atoi(str)).Def1(100).Val1
 func Out1[T any](v T, err error) *Result1[T] {
-	return &Result1[T]{Val1: v, err: err}
+	return &Result1[T]{Val1: v, Result: Result{Err: err}}
 }
 
 func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
-	return &Result2[T, U]{Val1: v1, Val2: v2, err: err}
+	return &Result2[T, U]{Val2: v2, Result1: Result1[T]{Val1: v1, Result: Result{Err: err}}}
 }
 
 func wrapStr() string {
