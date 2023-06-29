@@ -25,7 +25,7 @@ func Requiref(tb testing.TB, condition bool, format string, v ...interface{}) {
 func RequireEqual[T comparable](tb testing.TB, val, want T, a ...any) {
 	tb.Helper()
 	if want != val {
-		defMsg := fmt.Sprintf("got %v, want %v ", val, want)
+		defMsg := fmt.Sprintf("got '%v', want '%v' ", val, want)
 		if len(a) == 0 {
 			tb.Fatal(defMsg)
 		}
