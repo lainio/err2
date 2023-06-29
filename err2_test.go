@@ -306,18 +306,18 @@ func TestCatch_Error(t *testing.T) {
 
 func Test_TryOutError(t *testing.T) {
 	defer err2.Catch(func(err error) {
-		test.Require(t, err.Error() == "Fails: this is an ERROR",
-			"we should catch right error here")
+		test.RequireEqual(t, err.Error(), "fails: test: this is an ERROR",
+			"=> we should catch right error str here")
 	})
 
 	var retVal string
 
 	// let's test try.Out1() and it's throw capabilities here, even try.To1()
 	// is the preferred way.
-	retVal = try.Out1(noThrow()).Throwf("Fails").Val1
+	retVal = try.Out1(noThrow()).Throwf().Val1
 	test.Require(t, retVal == "test", "if no error happens, we get value")
 
-	_ = try.Out1(throw()).Throwf("Fails").Val1
+	_ = try.Out1(throw()).Throwf("fails: %v", retVal).Val1
 	t.Fail() // If everything works in Throwf we are never here.
 }
 
