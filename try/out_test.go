@@ -23,11 +23,17 @@ func ExampleOut1_copyFile() {
 
 		// If you prefer immediate error handling for some reason.
 		_ = try.Out1(io.Copy(w, r)).
+			Is(io.EOF, func(err error) error {
+				fmt.Println("err == io.EOF")
+				return nil // by returning nil we can reset the error
+				// return err // fallthru to next check if err != nil
+			}).
 			Handle(func(err error) error {
-				w.Close()
-				os.Remove(dst)
+				try.Out(w.Close()).Logf()
+				try.Out(os.Remove(dst)).Logf()
 				return err
-			}).Val1
+			}).
+			Val1
 
 		w.Close()
 		return nil
