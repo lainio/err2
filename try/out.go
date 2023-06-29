@@ -17,8 +17,7 @@ type (
 		Is(err error) bool
 		Handle()
 		Catch()
-		Throwf(f string, a ...any) handler              // op
-		IsThrowf(err error, f string, a ...any) handler // op
+		Throwf(f string, a ...any) handler // op
 	}
 
 	Result struct {
@@ -36,43 +35,52 @@ type (
 	}
 )
 
-func (o *Result) Logf(f string, a ...any) *Result {
-	if o.Err == nil {
+func (o *Result) Logf(a ...any) *Result {
+	if o.Err == nil || len(a) == 0 {
 		return o
 	}
 	w := tracer.Log.Tracer()
-	if w != nil && f != "" {
-		fmt.Fprintf(w, f+": %v\n", append(a, o.Err)...)
+	if w != nil {
+		f, isFormat := a[0].(string)
+		if isFormat {
+			fmt.Fprintf(w, f+": %v\n", append(a[1:], o.Err)...)
+		}
 	}
 	return o
 }
 
-func (o *Result1[T]) Logf(f string, a ...any) *Result1[T] {
-	o.Result.Logf(f, a...)
+func (o *Result1[T]) Logf(a ...any) *Result1[T] {
+	o.Result.Logf(a...)
 	return o
 }
 
-func (o *Result2[T, U]) Logf(f string, a ...any) *Result2[T, U] {
-	o.Result.Logf(f, a...)
+func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
+	o.Result.Logf(a...)
 	return o
 }
 
-func (o *Result) Throwf(f string, a ...any) *Result {
+func (o *Result) Throwf(a ...any) *Result {
 	if o.Err == nil {
 		return o
 	}
-	o.Err = fmt.Errorf(f+wrapStr(), append(a, o.Err)...)
+	if len(a) == 0 {
+		panic(o.Err)
+	}
+	f, isFormat := a[0].(string)
+	if isFormat {
+		o.Err = fmt.Errorf(f+wrapStr(), append(a[1:], o.Err)...)
+	}
 	panic(o.Err)
 }
 
-func (o *Result1[T]) Throwf(f string, a ...any) *Result1[T] {
-	o.Result.Throwf(f, a...)
-	panic(o.Err)
+func (o *Result1[T]) Throwf(a ...any) *Result1[T] {
+	o.Result.Throwf(a...)
+	return o
 }
 
-func (o *Result2[T, U]) Throwf(f string, a ...any) *Result2[T, U] {
-	o.Result.Throwf(f, a...)
-	panic(o.Err)
+func (o *Result2[T, U]) Throwf(a ...any) *Result2[T, U] {
+	o.Result.Throwf(a...)
+	return o
 }
 
 func (o *Result1[T]) Def1(v T) *Result1[T] {
@@ -135,19 +143,43 @@ func (o *Result2[T, U]) Handle(f ErrFn) *Result2[T, U] {
 	return o
 }
 
-// Out1 is a helper function to call functions which returns (T, error) and
-// start error handlint with DSL. For instance, to implement try.To1() you could
+// Out is a helper function to call functions which returns Result and start
+// error handlin with DSL. For instance, to implement same as try.To(), you
+// could do the following:
+//
+//	d := try.Out(json.Unmarshal(b, &v).Throwf()
+func Out(err error) *Result {
+	return &Result{Err: err}
+}
+
+// Out1 is a helper function to call functions which returns (T, error). That
+// allows you to use Result1, which makes possible to
+// start error handling with DSL. For instance, instead of try.To1() you could
 // do the following:
 //
-//	d := try.Out1(os.ReadFile(filname).Throwf().Val1
+//	d := try.Out1(os.ReadFile(filename).Throwf().Val1
 //
-// or in some other cases this would be desired action:
+// or in some other cases some of these would be desired action:
 //
-//	number := try.Out1(strconv.Atoi(str)).Def1(100).Val1
+//		number := try.Out1(strconv.Atoi(str)).Def1(100).Val1
+//		try.Out(os.Remove(dst)).Logf("remove")
+//	  try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Def2(1, 2)
+//	  try.Out1(strconv.Atoi(s)).Logf("not number").Def1(100).Val1
 func Out1[T any](v T, err error) *Result1[T] {
 	return &Result1[T]{Val1: v, Result: Result{Err: err}}
 }
 
+// Out2 is a helper function to call functions which returns (T, error). That
+// allows you to use Result2, which makes possible to
+// start error handling with DSL. For instance, instead of try.To2() you could
+// do the following:
+//
+//	d := try.Out2(os.ReadFile(filename).Throwf().Val2
+//
+// or in some other cases some of these would be desired action:
+//
+//	try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Def2(1, 2)
+//	try.Out2(convTwoStr(s1, s2)).Throwf().Val2
 func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
 	return &Result2[T, U]{Val2: v2, Result1: Result1[T]{Val1: v1, Result: Result{Err: err}}}
 }
