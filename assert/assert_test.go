@@ -82,7 +82,7 @@ func ExampleEqual() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:80: ExampleEqual.func1(): assertion violation: got 2, want 3
+	// Output: sample: assert_test.go:80: ExampleEqual.func1(): assertion violation: got '2', want '3'
 }
 
 func ExampleSLen() {
@@ -94,7 +94,7 @@ func ExampleSLen() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:92: ExampleSLen.func1(): assertion violation: got 2, want 3
+	// Output: sample: assert_test.go:92: ExampleSLen.func1(): assertion violation: got '2', want '3'
 }
 
 func ExampleSNotEmpty() {
@@ -149,7 +149,7 @@ func ExampleZero() {
 	var b int8 = 1 // we want sample to assert the violation.
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:146: ExampleZero.func1(): assertion violation: got 1, want (== 0)
+	// Output: sample: assert_test.go:146: ExampleZero.func1(): assertion violation: got '1', want (== '0')
 }
 
 // ifPanicZero in needed that we have argument here! It's like a macro for
