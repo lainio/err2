@@ -237,7 +237,7 @@ func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 // (current Asserter) with the given message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
-		defMsg := fmt.Sprintf(assertionMsg+": got %v want (!= %v)", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v' want (!= '%v')", val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -246,7 +246,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 // Asserter) with the given message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want '%v'", val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -255,7 +255,7 @@ func Equal[T comparable](val, want T, a ...any) {
 // panics/errors (current Asserter) with the given message.
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want %v", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want '%v'", val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -267,7 +267,7 @@ func DeepEqual(val, want any, a ...any) {
 //	assert.DeepEqual(pubKey, ed25519.PublicKey(pubKeyBytes))
 func NotDeepEqual(val, want any, a ...any) {
 	if reflect.DeepEqual(val, want) {
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want (!= %v)", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= '%v')", val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -280,7 +280,7 @@ func Len(obj string, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -293,7 +293,7 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -306,7 +306,7 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got %d, want %d", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -393,7 +393,7 @@ func Error(err error, a ...any) {
 // single 'if-statement' that is almost nothing.
 func Zero[T Number](val T, a ...any) {
 	if val != 0 {
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want (== 0)", val)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -403,7 +403,7 @@ func Zero[T Number](val T, a ...any) {
 // single 'if-statement' that is almost nothing.
 func NotZero[T Number](val T, a ...any) {
 	if val == 0 {
-		defMsg := fmt.Sprintf(assertionMsg+": got %v, want (!= 0)", val)
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= 0)", val)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
