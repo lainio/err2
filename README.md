@@ -498,9 +498,14 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 - Implementation: simplified `assert` pkg to `testing` pkg integration, and
   especially performance
 
+##### 0.9.2
+- **Performance boost for assert pkg**: `defer assert.PushTester(t)()`
+- New API for immediate error handling: `try out f() handle err`
+  `val := try.Out1(strconv.Atoi(s)).Def1(10).Val1`
+
 ### Upcoming releases
 
-##### 0.9.2 
+##### 0.9.3 
 - Continue removing unused parts from `assert` pkg
 - More documentation, repairing for some sort of marketing
 
