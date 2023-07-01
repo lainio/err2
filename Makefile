@@ -44,6 +44,9 @@ bench:
 bench_goid:
 	$(GO) test -bench='BenchmarkGoid' $(PKG_ASSERT)
 
+bench_out:
+	$(GO) test -bench='BenchmarkTryOut_.*' $(PKG_ERR2)
+
 bench_go:
 	$(GO) test -bench='BenchmarkTry_StringGenerics' $(PKG_ERR2)
 
