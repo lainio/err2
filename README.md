@@ -66,13 +66,13 @@ func CopyFile(src, dst string) (err error) {
 All of the listed above **without any performance penalty**! You are welcome to
 run `benchmarks` in the project repo and see yourself.
 
-**Please note** that there are many benchmarks that run *'too fast'* according
-the normal Go benchmarking rules, i.e. compiler optimisations
+Please note that many benchmarks run 'too fast' according to the common Go
+benchmarking rules, i.e., compiler optimizations
 ([inlining](https://en.wikipedia.org/wiki/Inline_expansion)) are working so well
-that there are no meaningful results. But for this type of package where **we
-are competing if-statements, that's exactly what we are hoping to achieve.** The
-whole package is written towards that goal. Especially with generics it's been
-quite the effort.
+that there are no meaningful results. But for this type of package, where **we
+compete with if-statements, that's precisely what we hope to achieve.** The
+whole package is written toward that goal. Especially with parametric
+polymorphism, it's been quite the effort.
 
 ## Automatic Error Propagation
 
@@ -187,23 +187,23 @@ but not without an error handler (`err2.Handle`). However, you can put your
 error handlers where ever you want in your call stack. That can be handy in the
 internal packages and certain types of algorithms.
 
-In cases where you want to handle the error immediately after function call
-return you can use Go's default `if` statement of course. However, we courage
-you to use `errdefer` concept aka `defer err2.Handle(&err)` for all of your
-error handling.
+In cases where you want to handle the error immediately after the function call
+return you can use Go's default `if` statement. However, we encourage you to use
+the `errdefer` concept, `defer err2.Handle(&err)` for all of your error
+handling.
 
 Nevertheless, there might be cases where you might want to:
 1. Suppress the error and use some default value.
-1. Just write a log line and continue without break.
+1. Just write a logline and continue without a break.
 1. Annotate the specific error value even when you have a general error handler.
-1. You just want to handle the specific error value, let's say, at the same line
+1. You want to handle the specific error value, let's say, at the same line
    or statement.
 
-The `err2/try` package offers other helpers that are based on DSL concept where
-the DSL's domain is error-handling. It's based on functions `try.Out`,
-`try.Out1`, `try.Out2` that return instances of types `Result`, `Result1`,
-`Result2`. The `try.Result` is similar from other programming languages, i.e.,
-discriminated union. Please see more from it's documentation.
+The `err2/try` package offers other helpers based on the DSL concept
+where the DSL's domain is error-handling. It's based on functions `try.Out`,
+`try.Out1`, and `try.Out2`, which return instances of types `Result`, `Result1`,
+and `Result2`. The `try.Result` is similar to other programming languages,
+i.e., discriminated union. Please see more from its documentation.
 
 Now we could have the following:
 
@@ -213,10 +213,10 @@ b := try.Out1(strconv.Atoi(s)).Logf("using default value = 100").Def1(100).Val1
 ```
 
 The previous statement tries to convert incoming string value `s`, but if it
-doesn't succeed, it writes warning to logs and uses default value (100). The
-logging result includes the original error message as well.
+doesn't succeed, it writes a warning to logs and uses the default value (100).
+The logging result includes the original error message as well.
 
-It's easy to see that panicking for the errors at the start of the development
+It's easy to see that panicking about the errors at the start of the development
 is far better than not checking errors at all. But most importantly, `err2/try`
 **keeps the code readable.**
 
