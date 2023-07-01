@@ -51,6 +51,33 @@ func ExampleIs_errorHappensNot() {
 	// Output: wrapping works
 }
 
+func ExampleOut_errorHappensNot() {
+	var is bool
+	var errFn = func(_ error) (err error) { //nolint:unparam
+		is = true
+		return
+	}
+	copyStream := func(src string) (s string, err error) {
+		defer err2.Handle(&err, "copy stream %s", src)
+
+		err = fmt.Errorf("something: %w", errForTesting)
+
+		try.Out(err).Handle(errForTesting, errFn)
+		if is {
+			return "wrapping works", nil
+		}
+
+		return src, nil
+	}
+
+	str, err := copyStream("testing string")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+	// Output: wrapping works
+}
+
 func ExampleIsEOF1() {
 	copyStream := func(src string) (s string, err error) {
 		defer err2.Handle(&err)
