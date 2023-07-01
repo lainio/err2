@@ -28,12 +28,14 @@ var (
 )
 
 // Handle is the general purpose error handling function. What makes it so
-// convenient is its ability to handle all error handling cases: a) just
-// return the error value to caller, b) annotate the error value, or c) execute
-// real error handling like cleanup and releasing resources. There is no
-// performance penalty. The handler is called only when err != nil. There is no
-// limit how many Handle functions can be added to defer stack. They all are
-// called if an error has occurred and they are in deferred.
+// convenient is its ability to handle all error handling cases:
+//   - just return the error value to caller
+//   - annotate the error value
+//   - execute real error handling like cleanup and releasing resources.
+//
+// There is no performance penalty. The handler is called only when err != nil.
+// There is no limit how many Handle functions can be added to defer stack. They
+// all are called if an error has occurred and they are in deferred.
 //
 // The function has an automatic mode where errors are annotated by function
 // name if no annotation arguments or handler function is given:
