@@ -484,11 +484,9 @@ func BenchmarkTry_ErrVar(b *testing.B) {
 }
 
 func BenchmarkTryOut_ErrVar(b *testing.B) {
-	var r try.Result
 	for n := 0; n < b.N; n++ {
-		_, r.Err = noThrow()
-		//try.Out(err).Handle()
-		r.Handle()
+		_, err := noThrow()
+		try.Out(err).Handle()
 	}
 }
 
