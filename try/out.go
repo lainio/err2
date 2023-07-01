@@ -9,7 +9,7 @@ import (
 
 type (
 	// ErrFn is function type for try.OutX handlers.
-	ErrFn func(err error) error
+	ErrFn = func(err error) error
 
 	// Result is the base of our error handling DSL for try.Out functions.
 	Result struct {
@@ -59,36 +59,55 @@ func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
 	return o
 }
 
-// Throwf annotates and throws an error immediately i.e. terminates error handling
-// DSL chain if Result.Err != nil. Throwf supports error annotation similarly as
+// Handle annotates and throws an error immediately i.e. terminates error handling
+// DSL chain if Result.Err != nil. Handle supports error annotation similarly as
 // fmt.Errorf.
-func (o *Result) Throwf(a ...any) *Result {
+func (o *Result) Handle(a ...any) *Result {
 	if o.Err == nil {
 		return o
 	}
 	if len(a) == 0 {
 		panic(o.Err)
 	}
-	f, isFormat := a[0].(string)
-	if isFormat {
-		o.Err = fmt.Errorf(f+wrapStr(), append(a[1:], o.Err)...)
-	}
-	panic(o.Err)
-}
 
-// Throwf annotates and throws an error immediately i.e. terminates error handling
-// DSL chain if Result.Err != nil. Throwf supports error annotation similarly as
-// fmt.Errorf.
-func (o *Result1[T]) Throwf(a ...any) *Result1[T] {
-	o.Result.Throwf(a...)
+	switch f := a[0].(type) {
+	case string:
+		o.Err = fmt.Errorf(f+wrapStr(), append(a[1:], o.Err)...)
+	case ErrFn:
+		o.Err = f(o.Err)
+		if o.Err != nil {
+			panic(o.Err)
+		}
+	case error:
+		if len(a) == 2 {
+			a1 := a[1]
+			hfn, haveHandlerFn := a1.(ErrFn)
+			if haveHandlerFn {
+				if errors.Is(o.Err, f) {
+					o.Err = hfn(o.Err)
+				}
+			}
+		}
+	}
+	if o.Err != nil {
+		panic(o.Err)
+	}
 	return o
 }
 
-// Throwf annotates and throws an error immediately i.e. terminates error handling
-// DSL chain if Result.Err != nil. Throwf supports error annotation similarly as
+// Handle annotates and throws an error immediately i.e. terminates error handling
+// DSL chain if Result.Err != nil. Handle supports error annotation similarly as
 // fmt.Errorf.
-func (o *Result2[T, U]) Throwf(a ...any) *Result2[T, U] {
-	o.Result.Throwf(a...)
+func (o *Result1[T]) Handle(a ...any) *Result1[T] {
+	o.Result.Handle(a...)
+	return o
+}
+
+// Handle annotates and throws an error immediately i.e. terminates error handling
+// DSL chain if Result.Err != nil. Handle supports error annotation similarly as
+// fmt.Errorf.
+func (o *Result2[T, U]) Handle(a ...any) *Result2[T, U] {
+	o.Result.Handle(a...)
 	return o
 }
 
@@ -118,7 +137,7 @@ func (o *Result2[T, U]) Def2(v T, v2 U) *Result2[T, U] {
 // value, error handling will terminate and no error is thrown. The handler
 // function f can process the incoming error how it wants and returning error
 // value is used after the Is call.
-func (o *Result) Is(err error, f ErrFn) *Result {
+func (o *Result) IsX(err error, f ErrFn) *Result {
 	if o.Err == nil {
 		return o
 	}
@@ -133,8 +152,8 @@ func (o *Result) Is(err error, f ErrFn) *Result {
 // value, error handling will terminate and no error is thrown. The handler
 // function f can process the incoming error how it wants and returning error
 // value is used after the Is call.
-func (o *Result1[T]) Is(err error, f ErrFn) *Result1[T] {
-	o.Result.Is(err, f)
+func (o *Result1[T]) IsX(err error, f ErrFn) *Result1[T] {
+	o.Result.IsX(err, f)
 	return o
 }
 
@@ -143,8 +162,8 @@ func (o *Result1[T]) Is(err error, f ErrFn) *Result1[T] {
 // value, error handling will terminate and no error is thrown. The handler
 // function f can process the incoming error how it wants and returning error
 // value is used after the Is call.
-func (o *Result2[T, U]) Is(err error, f ErrFn) *Result2[T, U] {
-	o.Result.Is(err, f)
+func (o *Result2[T, U]) IsX(err error, f ErrFn) *Result2[T, U] {
+	o.Result.IsX(err, f)
 	return o
 }
 
@@ -153,7 +172,7 @@ func (o *Result2[T, U]) Is(err error, f ErrFn) *Result2[T, U] {
 // error value, error handling will terminate and no error is thrown. The
 // handler function f can process and annotate the incoming error how it wants
 // and returning error value decides if error is thrown immediately.
-func (o *Result) Handle(f ErrFn) *Result {
+func (o *Result) HandleX(f ErrFn) *Result {
 	if o.Err == nil {
 		return o
 	}
@@ -171,8 +190,8 @@ func (o *Result) Handle(f ErrFn) *Result {
 // error value, error handling will terminate and no error is thrown. The
 // handler function f can process and annotate the incoming error how it wants
 // and returning error value decides if error is thrown immediately.
-func (o *Result1[T]) Handle(f ErrFn) *Result1[T] {
-	o.Result.Handle(f)
+func (o *Result1[T]) HandleX(f ErrFn) *Result1[T] {
+	o.Result.HandleX(f)
 	return o
 }
 
@@ -181,8 +200,8 @@ func (o *Result1[T]) Handle(f ErrFn) *Result1[T] {
 // error value, error handling will terminate and no error is thrown. The
 // handler function f can process and annotate the incoming error how it wants
 // and returning error value decides if error is thrown immediately.
-func (o *Result2[T, U]) Handle(f ErrFn) *Result2[T, U] {
-	o.Result.Handle(f)
+func (o *Result2[T, U]) HandleX(f ErrFn) *Result2[T, U] {
+	o.Result.HandleX(f)
 	return o
 }
 
@@ -190,7 +209,7 @@ func (o *Result2[T, U]) Handle(f ErrFn) *Result2[T, U] {
 // error handling with DSL. For instance, to implement same as try.To(), you
 // could do the following:
 //
-//	d := try.Out(json.Unmarshal(b, &v).Throwf()
+//	d := try.Out(json.Unmarshal(b, &v).Handle()
 //
 // or in some other cases some of these would be desired action:
 //
@@ -204,7 +223,7 @@ func Out(err error) *Result {
 // start error handling with DSL. For instance, instead of try.To1() you could
 // do the following:
 //
-//	d := try.Out1(os.ReadFile(filename).Throwf().Val1
+//	d := try.Out1(os.ReadFile(filename).Handle().Val1
 //
 // or in some other cases, some of these would be desired action:
 //
@@ -221,12 +240,12 @@ func Out1[T any](v T, err error) *Result1[T] {
 // start error handling with DSL. For instance, instead of try.To2() you could
 // do the following:
 //
-//	token := try.Out2(p.ParseUnverified(tokenStr, &customClaims{})).Throwf().Val1
+//	token := try.Out2(p.ParseUnverified(tokenStr, &customClaims{})).Handle().Val1
 //
 // or in some other cases, some of these would be desired action:
 //
 //	try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Def2(1, 2)
-//	try.Out2(convTwoStr(s1, s2)).Throwf().Val2
+//	try.Out2(convTwoStr(s1, s2)).Handle().Val2
 func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
 	return &Result2[T, U]{Val2: v2, Result1: Result1[T]{Val1: v1, Result: Result{Err: err}}}
 }
