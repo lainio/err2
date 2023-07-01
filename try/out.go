@@ -8,33 +8,29 @@ import (
 )
 
 type (
+	// ErrFn is function type for try.OutX handlers.
 	ErrFn func(err error) error
 
-	// TODO: this is not needed this for my notes at the moment.
-	handler interface {
-		Logf(f string, a ...any) handler
-		IsDo(err error, f ErrFn) handler
-		Is(err error) bool
-		Handle()
-		Catch()
-		Throwf(f string, a ...any) handler // op
-	}
-
+	// Result is the base of our error handling DSL for try.Out functions.
 	Result struct {
 		Err error
 	}
 
+	// Result1 is the base of our error handling DSL for try.Out1 functions.
 	Result1[T any] struct {
 		Val1 T
 		Result
 	}
 
+	// Result2 is the base of our error handling DSL for try.Out2 functions.
 	Result2[T any, U any] struct {
 		Val2 U
 		Result1[T]
 	}
 )
 
+// Logf prints a log line to pre-set logging stream (if set err2.SetLogWriter)
+// if the current Result.Err != nil.
 func (o *Result) Logf(a ...any) *Result {
 	if o.Err == nil || len(a) == 0 {
 		return o
@@ -49,16 +45,23 @@ func (o *Result) Logf(a ...any) *Result {
 	return o
 }
 
+// Logf prints a log line to pre-set logging stream (if set err2.SetLogWriter)
+// if the current Result.Err != nil.
 func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 	o.Result.Logf(a...)
 	return o
 }
 
+// Logf prints a log line to pre-set logging stream (if set err2.SetLogWriter)
+// if the current Result.Err != nil.
 func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
 	o.Result.Logf(a...)
 	return o
 }
 
+// Throwf annotates and throws an error immediately i.e. terminates error handling
+// DSL chain if Result.Err != nil. Throwf supports error annotation similarly as
+// fmt.Errorf.
 func (o *Result) Throwf(a ...any) *Result {
 	if o.Err == nil {
 		return o
@@ -73,16 +76,24 @@ func (o *Result) Throwf(a ...any) *Result {
 	panic(o.Err)
 }
 
+// Throwf annotates and throws an error immediately i.e. terminates error handling
+// DSL chain if Result.Err != nil. Throwf supports error annotation similarly as
+// fmt.Errorf.
 func (o *Result1[T]) Throwf(a ...any) *Result1[T] {
 	o.Result.Throwf(a...)
 	return o
 }
 
+// Throwf annotates and throws an error immediately i.e. terminates error handling
+// DSL chain if Result.Err != nil. Throwf supports error annotation similarly as
+// fmt.Errorf.
 func (o *Result2[T, U]) Throwf(a ...any) *Result2[T, U] {
 	o.Result.Throwf(a...)
 	return o
 }
 
+// Def1 sets default value for Result.Val1. The value is returned in case of
+// Result.Err != nil.
 func (o *Result1[T]) Def1(v T) *Result1[T] {
 	if o.Err == nil {
 		return o
@@ -91,6 +102,8 @@ func (o *Result1[T]) Def1(v T) *Result1[T] {
 	return o
 }
 
+// Def2 sets default value for Result.Val2. The value is returned in case of
+// Result.Err != nil.
 func (o *Result2[T, U]) Def2(v T, v2 U) *Result2[T, U] {
 	if o.Err == nil {
 		return o
@@ -100,6 +113,11 @@ func (o *Result2[T, U]) Def2(v T, v2 U) *Result2[T, U] {
 	return o
 }
 
+// Is allows you to add error.Is handler to try.OutX handler chain. Internally
+// Is calls errors.Is and if that returns true, it calls f. If f returns nil error
+// value, error handling will terminate and no error is thrown. The handler
+// function f can process the incoming error how it wants and returning error
+// value is used after the Is call.
 func (o *Result) Is(err error, f ErrFn) *Result {
 	if o.Err == nil {
 		return o
@@ -110,18 +128,35 @@ func (o *Result) Is(err error, f ErrFn) *Result {
 	return o
 }
 
+// Is allows you to add error.Is handler to try.OutX handler chain. Internally
+// Is calls errors.Is and if that returns true, it calls f. If f returns nil error
+// value, error handling will terminate and no error is thrown. The handler
+// function f can process the incoming error how it wants and returning error
+// value is used after the Is call.
 func (o *Result1[T]) Is(err error, f ErrFn) *Result1[T] {
 	o.Result.Is(err, f)
 	return o
 }
 
+// Is allows you to add error.Is handler to try.OutX handler chain. Internally
+// Is calls errors.Is and if that returns true, it calls f. If f returns nil error
+// value, error handling will terminate and no error is thrown. The handler
+// function f can process the incoming error how it wants and returning error
+// value is used after the Is call.
 func (o *Result2[T, U]) Is(err error, f ErrFn) *Result2[T, U] {
 	o.Result.Is(err, f)
 	return o
 }
 
-// We could have Catch that don't panic even the err != nil still
+// Handle allows you to add an error handler to try.OutX handler chain.
+// Internally Handle calls f if Result.Err != nil. If a handler f returns nil
+// error value, error handling will terminate and no error is thrown. The
+// handler function f can process and annotate the incoming error how it wants
+// and returning error value decides if error is thrown immediately.
 func (o *Result) Handle(f ErrFn) *Result {
+	if o.Err == nil {
+		return o
+	}
 	if f != nil {
 		o.Err = f(o.Err)
 		if o.Err != nil {
@@ -131,23 +166,35 @@ func (o *Result) Handle(f ErrFn) *Result {
 	return o
 }
 
-// We could have Catch that don't panic even the err != nil still
+// Handle allows you to add an error handler to try.OutX handler chain.
+// Internally Handle calls f if Result.Err != nil. If a handler f returns nil
+// error value, error handling will terminate and no error is thrown. The
+// handler function f can process and annotate the incoming error how it wants
+// and returning error value decides if error is thrown immediately.
 func (o *Result1[T]) Handle(f ErrFn) *Result1[T] {
 	o.Result.Handle(f)
 	return o
 }
 
-// We could have Catch that don't panic even the err != nil still
+// Handle allows you to add an error handler to try.OutX handler chain.
+// Internally Handle calls f if Result.Err != nil. If a handler f returns nil
+// error value, error handling will terminate and no error is thrown. The
+// handler function f can process and annotate the incoming error how it wants
+// and returning error value decides if error is thrown immediately.
 func (o *Result2[T, U]) Handle(f ErrFn) *Result2[T, U] {
 	o.Result.Handle(f)
 	return o
 }
 
-// Out is a helper function to call functions which returns Result and start
-// error handlin with DSL. For instance, to implement same as try.To(), you
+// Out is a helper function to call functions which returns (error) and start
+// error handling with DSL. For instance, to implement same as try.To(), you
 // could do the following:
 //
 //	d := try.Out(json.Unmarshal(b, &v).Throwf()
+//
+// or in some other cases some of these would be desired action:
+//
+//	try.Out(os.Remove(dst)).Logf("file cleanup fail")
 func Out(err error) *Result {
 	return &Result{Err: err}
 }
@@ -159,12 +206,12 @@ func Out(err error) *Result {
 //
 //	d := try.Out1(os.ReadFile(filename).Throwf().Val1
 //
-// or in some other cases some of these would be desired action:
+// or in some other cases, some of these would be desired action:
 //
-//		number := try.Out1(strconv.Atoi(str)).Def1(100).Val1
-//		try.Out(os.Remove(dst)).Logf("remove")
-//	  try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Def2(1, 2)
-//	  try.Out1(strconv.Atoi(s)).Logf("not number").Def1(100).Val1
+//	number := try.Out1(strconv.Atoi(str)).Def1(100).Val1
+//	try.Out(os.Remove(dst)).Logf("remove")
+//	try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Def2(1, 2)
+//	try.Out1(strconv.Atoi(s)).Logf("not number").Def1(100).Val1
 func Out1[T any](v T, err error) *Result1[T] {
 	return &Result1[T]{Val1: v, Result: Result{Err: err}}
 }
@@ -174,9 +221,9 @@ func Out1[T any](v T, err error) *Result1[T] {
 // start error handling with DSL. For instance, instead of try.To2() you could
 // do the following:
 //
-//	d := try.Out2(os.ReadFile(filename).Throwf().Val2
+//	token := try.Out2(p.ParseUnverified(tokenStr, &customClaims{})).Throwf().Val1
 //
-// or in some other cases some of these would be desired action:
+// or in some other cases, some of these would be desired action:
 //
 //	try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Def2(1, 2)
 //	try.Out2(convTwoStr(s1, s2)).Throwf().Val2
