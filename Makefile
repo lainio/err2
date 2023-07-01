@@ -59,16 +59,16 @@ bench_copy:
 bench_rec:
 	$(GO) test -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG_ERR2)
 
-bench1:
+bench_err2:
 	$(GO) test -bench=. $(PKG_ERR2)
 
-bench2:
+bench_assert:
 	$(GO) test -bench=. $(PKG_ASSERT)
 
-bench5:
+bench_str:
 	$(GO) test -bench=. $(PKG_STR)
 
-bench6:
+bench_x:
 	$(GO) test -bench=. $(PKG_X)
 
 vet: | test
