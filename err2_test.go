@@ -314,11 +314,11 @@ func Test_TryOutError(t *testing.T) {
 
 	// let's test try.Out1() and it's throw capabilities here, even try.To1()
 	// is the preferred way.
-	retVal = try.Out1(noThrow()).Throwf().Val1
+	retVal = try.Out1(noThrow()).Handle().Val1
 	test.Require(t, retVal == "test", "if no error happens, we get value")
 
-	_ = try.Out1(throw()).Throwf("fails: %v", retVal).Val1
-	t.Fail() // If everything works in Throwf we are never here.
+	_ = try.Out1(throw()).Handle("fails: %v", retVal).Val1
+	t.Fail() // If everything works in Handle we are never here.
 }
 
 func TestCatch_Panic(t *testing.T) {
@@ -483,9 +483,24 @@ func BenchmarkTry_ErrVar(b *testing.B) {
 	}
 }
 
+func BenchmarkTryOut_ErrVar(b *testing.B) {
+	var r try.Result
+	for n := 0; n < b.N; n++ {
+		_, r.Err = noThrow()
+		//try.Out(err).Handle()
+		r.Handle()
+	}
+}
+
 func BenchmarkTry_StringGenerics(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = try.To1(noThrow())
+	}
+}
+
+func BenchmarkTryOut_StringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.Out1(noThrow()).Handle()
 	}
 }
 
