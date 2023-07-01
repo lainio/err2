@@ -17,7 +17,9 @@ about err2 and try packager roles can be seen in the FileCopy example:
 	return nil
 	...
 
-All of the try package functions are as fast as the simple 'if err != nil {'
+# try.To — Fast Checking
+
+All of the try.To functions are as fast as the simple 'if err != nil {'
 statement, thanks to the compiler inlining and optimization.
 
 Note that try.ToX function names end to a number (x) because:
@@ -35,6 +37,25 @@ tuples are the correct input to try.To1. However, if you have a function that
 returns (type1, type2, error), you must use try.To2 function to check the error.
 Currently the try.To3 takes (3 + 1) return values which is the greatest amount.
 If more is needed, let us know.
+
+# try.Out — Error Handling Language
+
+The try package offers an error handling DSL. It's for cases where you want to
+do something specific after error returing function call. For example, you might
+want to ignore the specific error and use a default value. That's possible with
+the following code:
+
+	number := try.Out1(strconv.Atoi(str)).Def1(100).Val1
+
+Or you might want to ignore an error but write a log if something happens:
+
+	try.Out(os.Remove(dst)).Logf("file cleanup fail")
+
+Or you might just want to change it later to error return:
+
+	try.Out(os.Remove(dst)).Handle("file cleanup fail")
+
+Please see the documentation and examples of ResultX types and their methods.
 */
 package try
 
