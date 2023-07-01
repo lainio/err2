@@ -59,14 +59,29 @@ func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
 	return o
 }
 
-// Handle annotates and throws an error immediately i.e. terminates error handling
-// DSL chain if Result.Err != nil. Handle supports error annotation similarly as
-// fmt.Errorf.
+// Handle allows you to add an error handler to try.OutX handler chain.
+// Handle is the general purpose error handling function. What makes it so
+// convenient is its ability to handle several error handling cases:
+//   - if no argument is given && .Err != nil, it throws an error value immediately
+//   - if two arguments (errTarget, ErrFn) && Is(.Err, errTarget) ErrFn is called
+//   - if first argument is (string) and .Err != nil the error value is annotated and thrown
+//   - if first argument is (ErrFn) && .Err != nil, it calls ErrFn
+//
+// The handler function (ErrFn) can process and annotate the incoming error how
+// it wants and returning error value decides if error is thrown immediately.
+// Handle annotates and throws an error immediately i.e. terminates error
+// handling DSL chain if Result.Err != nil. Handle supports error annotation
+// similarly as fmt.Errorf.
+//
+// For instance, to implement same as try.To(), you could do the following:
+//
+//	d := try.Out(json.Unmarshal(b, &v)).Handle()
 func (o *Result) Handle(a ...any) *Result {
 	if o.Err == nil {
 		return o
 	}
-	if len(a) == 0 {
+	noArguments := len(a) == 0
+	if noArguments {
 		panic(o.Err)
 	}
 
@@ -75,13 +90,10 @@ func (o *Result) Handle(a ...any) *Result {
 		o.Err = fmt.Errorf(f+wrapStr(), append(a[1:], o.Err)...)
 	case ErrFn:
 		o.Err = f(o.Err)
-		if o.Err != nil {
-			panic(o.Err)
-		}
+		panic(o.Err)
 	case error:
 		if len(a) == 2 {
-			a1 := a[1]
-			hfn, haveHandlerFn := a1.(ErrFn)
+			hfn, haveHandlerFn := a[1].(ErrFn)
 			if haveHandlerFn {
 				if errors.Is(o.Err, f) {
 					o.Err = hfn(o.Err)
@@ -89,23 +101,52 @@ func (o *Result) Handle(a ...any) *Result {
 			}
 		}
 	}
+	// someone of the handler functions might reset the error value.
 	if o.Err != nil {
 		panic(o.Err)
 	}
 	return o
 }
 
-// Handle annotates and throws an error immediately i.e. terminates error handling
-// DSL chain if Result.Err != nil. Handle supports error annotation similarly as
-// fmt.Errorf.
+// Handle allows you to add an error handler to try.OutX handler chain.
+// Handle is the general purpose error handling function. What makes it so
+// convenient is its ability to handle several error handling cases:
+//   - if no argument is given && .Err != nil, it throws an error value immediately
+//   - if two arguments (errTarget, ErrFn) && Is(.Err, errTarget) ErrFn is called
+//   - if first argument is (string) and .Err != nil the error value is annotated and thrown
+//   - if first argument is (ErrFn) && .Err != nil, it calls ErrFn
+//
+// The handler function (ErrFn) can process and annotate the incoming error how
+// it wants and returning error value decides if error is thrown immediately.
+// Handle annotates and throws an error immediately i.e. terminates error
+// handling DSL chain if Result.Err != nil. Handle supports error annotation
+// similarly as fmt.Errorf.
+//
+// For instance, to implement same as try.To(), you could do the following:
+//
+//	d := try.Out(json.Unmarshal(b, &v)).Handle()
 func (o *Result1[T]) Handle(a ...any) *Result1[T] {
 	o.Result.Handle(a...)
 	return o
 }
 
-// Handle annotates and throws an error immediately i.e. terminates error handling
-// DSL chain if Result.Err != nil. Handle supports error annotation similarly as
-// fmt.Errorf.
+// Handle allows you to add an error handler to try.OutX handler chain.
+// Handle is the general purpose error handling function. What makes it so
+// convenient is its ability to handle several error handling cases:
+//   - if no argument is given && .Err != nil, it throws an error value immediately
+//   - if two arguments (errTarget, ErrFn) && Is(.Err, errTarget) ErrFn is called
+//   - if first argument is (string) and .Err != nil the error value is annotated and thrown
+//   - if first argument is (ErrFn) && .Err != nil, it calls ErrFn
+//
+// The handler function (ErrFn) can process and annotate the incoming error how
+// it wants and returning error value decides if error is thrown immediately.
+// Handle annotates and throws an error immediately i.e. terminates error
+// handling DSL chain if Result.Err != nil. Handle supports error annotation
+// similarly as fmt.Errorf.
+//
+// For instance, to implement same as try.To(), you could do the following:
+//
+//	d := try.Out(json.Unmarshal(b, &v)).Handle()
 func (o *Result2[T, U]) Handle(a ...any) *Result2[T, U] {
 	o.Result.Handle(a...)
 	return o
@@ -209,7 +250,7 @@ func (o *Result2[T, U]) HandleX(f ErrFn) *Result2[T, U] {
 // error handling with DSL. For instance, to implement same as try.To(), you
 // could do the following:
 //
-//	d := try.Out(json.Unmarshal(b, &v).Handle()
+//	d := try.Out(json.Unmarshal(b, &v)).Handle()
 //
 // or in some other cases some of these would be desired action:
 //
