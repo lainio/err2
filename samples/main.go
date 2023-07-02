@@ -3,7 +3,7 @@
 // favorite editor and start to play with the main.go file. The comments on it
 // guide you.
 //
-// Currently, we have only few examples built over the CopyFile and callRecur 
+// Currently, we have only few examples built over the CopyFile and callRecur
 // functions, but
 // with them you can try all the important APIs from err2, try, and assert. Just
 // follow the comments and try suggested things :-)
