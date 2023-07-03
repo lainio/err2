@@ -15,7 +15,8 @@ func (db *Database) MoneyTransfer(from, to *Account, amount int) (err error) {
 	tx := try.To1(db.BeginTransaction())
 	defer err2.Handle(&err, func() {
 		if errRoll := tx.Rollback(); errRoll != nil {
-			err = fmt.Errorf("%w: ROLLBACK ERROR: %w", err, errRoll)
+			// with go 1.20: err = fmt.Errorf("%w: ROLLBACK ERROR: %w", err, errRoll)
+			err = fmt.Errorf("%v: ROLLBACK ERROR: %w", err, errRoll)
 		}
 	})
 
