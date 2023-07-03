@@ -32,7 +32,7 @@ func (db *Database) MoneyTransfer(from, to *Account, amount int) (err error) {
 	return nil
 }
 
-func doDbMain() {
+func doDBMain() {
 	err2.SetTracers(os.Stderr)
 	err2.SetTracers(nil) // <- out-comment/rm to get automatic error traces
 	defer err2.Catch(func(err error) {
@@ -85,7 +85,7 @@ var (
 	err         = errors.New("")
 )
 
-func (a *Account) Withdraw(tx *Tx, amount int) (err error) {
+func (a *Account) Withdraw(_ *Tx, amount int) (err error) {
 	defer err2.Handle(&err)
 	if a.errWithdraw == errWithdraw {
 		return errWithdraw
@@ -95,7 +95,7 @@ func (a *Account) Withdraw(tx *Tx, amount int) (err error) {
 	return nil
 }
 
-func (a *Account) Deposit(tx *Tx, amount int) (err error) {
+func (a *Account) Deposit(_ *Tx, amount int) (err error) {
 	defer err2.Handle(&err)
 	if a.errDeposit == errDeposit {
 		return errDeposit
@@ -121,7 +121,7 @@ func (t *Tx) Rollback() (err error) {
 	return nil
 }
 
-func (a *Account) ReserveBalance(tx *Tx, amount int) (err error) {
+func (a *Account) ReserveBalance(_ *Tx, amount int) (err error) {
 	defer err2.Handle(&err, nil)
 
 	total := a.balance - a.reserved

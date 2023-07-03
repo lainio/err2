@@ -12,12 +12,12 @@ var (
 
 func main() {
 	defer err2.Catch()
-	
+
 	flag.Parse()
 
 	switch *mode {
 	case "db":
-		doDbMain()
+		doDBMain()
 	case "play":
 		doPlayMain()
 	default:
