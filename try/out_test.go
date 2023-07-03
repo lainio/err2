@@ -1,6 +1,7 @@
 package try_test
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -94,4 +95,40 @@ func TestResult2_Logf(t *testing.T) {
 	fmt.Printf("results: %d, %d\n", num1, num2)
 	test.RequireEqual(t, num1, 3)
 	test.RequireEqual(t, num2, 2)
+}
+
+func ExampleResult1_Handle() {
+	// try out f() |err| handle to show power of error handling language, EHL
+	callRead := func(in io.Reader, b []byte) (eof bool, n int) {
+		// normally we would use try.To1, but this is sample for Handle
+		n = try.Out1(in.Read(b)).
+			Handle(io.EOF, func(err error) error {
+				eof = true
+				return nil
+			}).       // our errors.Is == true, handler to get eof status
+			Handle(). // rest of the error just throw
+			Val1      // fnally read value read bytes
+		return
+	}
+	// simple function to copy stream with io.Reader
+	copyStream := func(src string) (s string, err error) {
+		defer err2.Handle(&err)
+
+		in := bytes.NewBufferString(src)
+		tmp := make([]byte, 4)
+		var out bytes.Buffer
+
+		for eof, n := callRead(in, tmp); !eof; eof, n = callRead(in, tmp) {
+			out.Write(tmp[:n])
+		}
+
+		return out.String(), nil
+	}
+
+	str, err := copyStream("testing string")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+	// Output: testing string
 }
