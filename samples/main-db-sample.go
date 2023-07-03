@@ -95,7 +95,7 @@ func (a *Account) Withdraw(_ *Tx, amount int) (err error) {
 	return nil
 }
 
-func (a *Account) Deposit(_ *Tx, amount int) (err error) {
+func (a *Account) Deposit(_ *Tx, _ int) (err error) {
 	defer err2.Handle(&err)
 	if a.errDeposit == errDeposit {
 		return errDeposit
