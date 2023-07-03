@@ -134,7 +134,7 @@ The err2 offers optional stack tracing. It's automatic and optimized. Optimized
 means that the call stack is processed before output. That means that stack
 trace starts from where the actual error/panic is occurred, not where the error
 is caught. You don't need to search for the line where the pointer was nil or
-received an error. That line is in the first one you are see:
+received an error. That line is in the first one you are seeing:
 
 ```console
 ---
@@ -532,13 +532,15 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
   especially performance
 
 ##### 0.9.2
-- **Performance boost for assert pkg**: `defer assert.PushTester(t)()`
 - New API for immediate error handling: `try out f() handle err`
   `val := try.Out1(strconv.Atoi(s)).Def1(10).Val1`
+- Our API has now all the same features Zig's error handling has
+- **Performance boost for assert pkg**: `defer assert.PushTester(t)()`
 
 ### Upcoming releases
 
 ##### 0.9.3 
+- std flag pkg integration
 - Continue removing unused parts from `assert` pkg
 - More documentation, repairing for some sort of marketing
 
