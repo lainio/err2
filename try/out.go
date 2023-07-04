@@ -30,7 +30,15 @@ type (
 )
 
 // Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
-// if the current Result.Err != nil.
+// if the current Result.Err != nil. Logf follows Printf formatting logic. The
+// current error value will be added at the end of the logline with ": %v\n",
+// err. For example, the line:
+//
+//	try.Out(server.Send(status)).Logf("error sending response")
+//
+// would print the logline:
+//
+//	error sending response: UDP not listening
 func (o *Result) Logf(a ...any) *Result {
 	if o.Err == nil || len(a) == 0 {
 		return o
@@ -46,14 +54,30 @@ func (o *Result) Logf(a ...any) *Result {
 }
 
 // Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
-// if the current Result.Err != nil.
+// if the current Result.Err != nil. Logf follows Printf formatting logic. The
+// current error value will be added at the end of the logline with ": %v\n",
+// err. For example, the line:
+//
+//	try.Out(server.Send(status)).Logf("error sending response")
+//
+// would print the logline:
+//
+//	error sending response: UDP not listening
 func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 	o.Result.Logf(a...)
 	return o
 }
 
 // Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
-// if the current Result.Err != nil.
+// if the current Result.Err != nil. Logf follows Printf formatting logic. The
+// current error value will be added at the end of the logline with ": %v\n",
+// err. For example, the line:
+//
+//	try.Out(server.Send(status)).Logf("error sending response")
+//
+// would print the logline:
+//
+//	error sending response: UDP not listening
 func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
 	o.Result.Logf(a...)
 	return o
