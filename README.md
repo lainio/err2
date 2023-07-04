@@ -531,8 +531,8 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 - Implementation: simplified `assert` pkg to `testing` pkg integration, and
   especially performance
 
-##### 0.9.2
-- New API for immediate error handling: `try out f() handle err`
+##### 0.9.29
+- **New API for immediate error handling**: `try out f() handle err`
   `val := try.Out1(strconv.Atoi(s)).Def1(10).Val1`
 - Our API has now all the same features Zig's error handling has
 - **Performance boost for assert pkg**: `defer assert.PushTester(t)()`
