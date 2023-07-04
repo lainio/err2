@@ -29,7 +29,7 @@ type (
 	}
 )
 
-// Logf prints a log line to pre-set logging stream (if set err2.SetLogWriter)
+// Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
 // if the current Result.Err != nil.
 func (o *Result) Logf(a ...any) *Result {
 	if o.Err == nil || len(a) == 0 {
@@ -45,33 +45,33 @@ func (o *Result) Logf(a ...any) *Result {
 	return o
 }
 
-// Logf prints a log line to pre-set logging stream (if set err2.SetLogWriter)
+// Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
 // if the current Result.Err != nil.
 func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 	o.Result.Logf(a...)
 	return o
 }
 
-// Logf prints a log line to pre-set logging stream (if set err2.SetLogWriter)
+// Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
 // if the current Result.Err != nil.
 func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
 	o.Result.Logf(a...)
 	return o
 }
 
-// Handle allows you to add an error handler to try.OutX handler chain.
-// Handle is the general purpose error handling function. What makes it so
-// convenient is its ability to handle several error handling cases:
-//   - if no argument is given && .Err != nil, it throws an error value immediately
-//   - if two arguments (errTarget, ErrFn) && Is(.Err, errTarget) ErrFn is called
+// Handle allows you to add an error handler to try.Out handler chain. Handle
+// is a general purpose error handling function. It can handle several error
+// handling cases:
+//   - if no argument is given and .Err != nil, it throws an error value immediately
+//   - if two arguments (errTarget, ErrFn) and Is(.Err, errTarget) ErrFn is called
 //   - if first argument is (string) and .Err != nil the error value is annotated and thrown
-//   - if first argument is (ErrFn) && .Err != nil, it calls ErrFn
+//   - if first argument is (ErrFn) and .Err != nil, it calls ErrFn
 //
 // The handler function (ErrFn) can process and annotate the incoming error how
-// it wants and returning error value decides if error is thrown immediately.
-// Handle annotates and throws an error immediately i.e. terminates error
-// handling DSL chain if Result.Err != nil. Handle supports error annotation
-// similarly as fmt.Errorf.
+// it wants and returning error value decides if error is thrown. Handle
+// annotates and throws an error immediately i.e. terminates error handling DSL
+// chain if Result.Err != nil. Handle supports error annotation similarly as
+// fmt.Errorf.
 //
 // For instance, to implement same as try.To(), you could do the following:
 //
@@ -108,19 +108,19 @@ func (o *Result) Handle(a ...any) *Result {
 	return o
 }
 
-// Handle allows you to add an error handler to try.OutX handler chain.
-// Handle is the general purpose error handling function. What makes it so
-// convenient is its ability to handle several error handling cases:
-//   - if no argument is given && .Err != nil, it throws an error value immediately
-//   - if two arguments (errTarget, ErrFn) && Is(.Err, errTarget) ErrFn is called
+// Handle allows you to add an error handler to try.Out handler chain. Handle
+// is a general purpose error handling function. It can handle several error
+// handling cases:
+//   - if no argument is given and .Err != nil, it throws an error value immediately
+//   - if two arguments (errTarget, ErrFn) and Is(.Err, errTarget) ErrFn is called
 //   - if first argument is (string) and .Err != nil the error value is annotated and thrown
-//   - if first argument is (ErrFn) && .Err != nil, it calls ErrFn
+//   - if first argument is (ErrFn) and .Err != nil, it calls ErrFn
 //
 // The handler function (ErrFn) can process and annotate the incoming error how
-// it wants and returning error value decides if error is thrown immediately.
-// Handle annotates and throws an error immediately i.e. terminates error
-// handling DSL chain if Result.Err != nil. Handle supports error annotation
-// similarly as fmt.Errorf.
+// it wants and returning error value decides if error is thrown. Handle
+// annotates and throws an error immediately i.e. terminates error handling DSL
+// chain if Result.Err != nil. Handle supports error annotation similarly as
+// fmt.Errorf.
 //
 // For instance, to implement same as try.To(), you could do the following:
 //
@@ -130,19 +130,19 @@ func (o *Result1[T]) Handle(a ...any) *Result1[T] {
 	return o
 }
 
-// Handle allows you to add an error handler to try.OutX handler chain.
-// Handle is the general purpose error handling function. What makes it so
-// convenient is its ability to handle several error handling cases:
-//   - if no argument is given && .Err != nil, it throws an error value immediately
-//   - if two arguments (errTarget, ErrFn) && Is(.Err, errTarget) ErrFn is called
+// Handle allows you to add an error handler to try.Out handler chain. Handle
+// is a general purpose error handling function. It can handle several error
+// handling cases:
+//   - if no argument is given and .Err != nil, it throws an error value immediately
+//   - if two arguments (errTarget, ErrFn) and Is(.Err, errTarget) ErrFn is called
 //   - if first argument is (string) and .Err != nil the error value is annotated and thrown
-//   - if first argument is (ErrFn) && .Err != nil, it calls ErrFn
+//   - if first argument is (ErrFn) and .Err != nil, it calls ErrFn
 //
 // The handler function (ErrFn) can process and annotate the incoming error how
-// it wants and returning error value decides if error is thrown immediately.
-// Handle annotates and throws an error immediately i.e. terminates error
-// handling DSL chain if Result.Err != nil. Handle supports error annotation
-// similarly as fmt.Errorf.
+// it wants and returning error value decides if error is thrown. Handle
+// annotates and throws an error immediately i.e. terminates error handling DSL
+// chain if Result.Err != nil. Handle supports error annotation similarly as
+// fmt.Errorf.
 //
 // For instance, to implement same as try.To(), you could do the following:
 //

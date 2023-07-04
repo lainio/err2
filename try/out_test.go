@@ -100,14 +100,14 @@ func TestResult2_Logf(t *testing.T) {
 func ExampleResult1_Handle() {
 	// try out f() |err| handle to show power of error handling language, EHL
 	callRead := func(in io.Reader, b []byte) (eof bool, n int) {
-		// normally we would use try.To1, but this is sample for Handle
+		// we should use try.To1, but this is sample of try.Out.Handle
 		n = try.Out1(in.Read(b)).
 			Handle(io.EOF, func(err error) error {
 				eof = true
 				return nil
 			}).       // our errors.Is == true, handler to get eof status
-			Handle(). // rest of the error just throw
-			Val1      // fnally read value read bytes
+			Handle(). // rest of the errors just throw
+			Val1      // get count of read bytes, 1st retval of io.Read
 		return
 	}
 	// simple function to copy stream with io.Reader
