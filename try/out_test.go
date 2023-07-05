@@ -59,6 +59,17 @@ func ExampleResult1_Def1() {
 	// Output: results: 1, 100
 }
 
+func ExampleResult1_Catch1() {
+	countSomething := func(s string) int {
+		return try.Out1(strconv.Atoi(s)).Catch1(100)
+	}
+	num1 := countSomething("1")
+	num2 := countSomething("not number, getting default (=100)")
+	fmt.Printf("results: %d, %d", num1, num2)
+
+	// Output: results: 1, 100
+}
+
 func ExampleResult1_Logf() {
 	// Set log tracing to stdout that we can see it in Example output. In
 	// normal cases that would be a Logging stream or stderr.
@@ -87,8 +98,7 @@ func TestResult2_Logf(t *testing.T) {
 		return try.To1(strconv.Atoi(s1)), try.To1(strconv.Atoi(s2)), nil
 	}
 	countSomething := func(s1, s2 string) (int, int) {
-		r := try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Def2(1, 2)
-		v1, v2 := r.Val1, r.Val2
+		v1, v2 := try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Catch2(1, 2)
 		return v1 + v2, v2
 	}
 	num1, num2 := countSomething("1", "err")

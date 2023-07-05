@@ -176,6 +176,37 @@ func (o *Result2[T, U]) Handle(a ...any) *Result2[T, U] {
 	return o
 }
 
+// Catch1 catches the error and sets Result.Val1 if given. The value is used in case of
+// Result.Err != nil. Catch returns the Val1 and .
+func (o *Result1[T]) Catch1(v ...T) T {
+	if o.Err != nil && len(v) == 1 {
+		o.Val1 = v[0]
+	}
+	return o.Val1
+}
+
+// Catch2 catches the error and sets Result.Val1/Val2 if given. The value(s) is
+// used in case of Result.Err != nil. Catch returns the Val1 and Val2.
+func (o *Result2[T, U]) Catch2(a ...any) (T, U) {
+	var ok bool
+	if o.Err != nil {
+		switch len(a) {
+		case 2:
+			o.Val2, ok = a[1].(U)
+			if !ok {
+				panic("ASSERT: wrong type")
+			}
+			fallthrough
+		case 1:
+			o.Val1, ok = a[0].(T)
+			if !ok {
+				panic("ASSERT: wrong type")
+			}
+		}
+	}
+	return o.Val1, o.Val2
+}
+
 // Def1 sets default value for Result.Val1. The value is returned in case of
 // Result.Err != nil.
 func (o *Result1[T]) Def1(v T) *Result1[T] {
