@@ -59,9 +59,9 @@ func ExampleResult1_Def1() {
 	// Output: results: 1, 100
 }
 
-func ExampleResult1_Catch1() {
+func ExampleResult1_Catch() {
 	countSomething := func(s string) int {
-		return try.Out1(strconv.Atoi(s)).Catch1(100)
+		return try.Out1(strconv.Atoi(s)).Catch(100)
 	}
 	num1 := countSomething("1")
 	num2 := countSomething("not number, getting default (=100)")
@@ -76,7 +76,7 @@ func ExampleResult1_Logf() {
 	err2.SetLogTracer(os.Stdout)
 
 	countSomething := func(s string) int {
-		return try.Out1(strconv.Atoi(s)).Logf("not number").Catch1(100)
+		return try.Out1(strconv.Atoi(s)).Logf("not number").Catch(100)
 	}
 	num1 := countSomething("1")
 	num2 := countSomething("WRONG")
@@ -98,7 +98,7 @@ func TestResult2_Logf(t *testing.T) {
 		return try.To1(strconv.Atoi(s1)), try.To1(strconv.Atoi(s2)), nil
 	}
 	countSomething := func(s1, s2 string) (int, int) {
-		v1, v2 := try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Catch2(1, 2)
+		v1, v2 := try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Catch(1, 2)
 		return v1 + v2, v2
 	}
 	num1, num2 := countSomething("1", "err")

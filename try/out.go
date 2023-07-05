@@ -176,20 +176,20 @@ func (o *Result2[T, U]) Handle(a ...any) *Result2[T, U] {
 	return o
 }
 
-// Catch1 catches the error and sets Result.Val1 if given. The value is used
-// only in the case if Result.Err != nil. Catch1 returns the Val1 in all cases.
-func (o *Result1[T]) Catch1(v ...T) T {
+// Catch catches the error and sets Result.Val1 if given. The value is used
+// only in the case if Result.Err != nil. Catch returns the Val1 in all cases.
+func (o *Result1[T]) Catch(v ...T) T {
 	if o.Err != nil && len(v) == 1 {
 		o.Val1 = v[0]
 	}
 	return o.Val1
 }
 
-// Catch2 catches the error and sets Result.Val1/Val2 if given. The value(s) is
+// Catch catches the error and sets Result.Val1/Val2 if given. The value(s) is
 // used in the case of Result.Err != nil. Catch returns the Val1 and Val2 in all
 // cases. In case you want to set only Val2's default value, use Def2 before
-// Catch2 call.
-func (o *Result2[T, U]) Catch2(a ...any) (T, U) {
+// Catch call.
+func (o *Result2[T, U]) Catch(a ...any) (T, U) {
 	if o.Err != nil {
 		switch len(a) {
 		case 2:
