@@ -76,7 +76,7 @@ func ExampleResult1_Logf() {
 	err2.SetLogTracer(os.Stdout)
 
 	countSomething := func(s string) int {
-		return try.Out1(strconv.Atoi(s)).Logf("not number").Def1(100).Val1
+		return try.Out1(strconv.Atoi(s)).Logf("not number").Catch1(100)
 	}
 	num1 := countSomething("1")
 	num2 := countSomething("WRONG")
