@@ -202,11 +202,11 @@ func IsNotRecoverable(err error) bool {
 	return Is(err, err2.ErrNotRecoverable)
 }
 
-// InNotEnabled function performs a filtered error check for the given argument.
+// IsNotEnabled function performs a filtered error check for the given argument.
 // It's the same as To function, but it checks if the error matches the
 // 'err2.ErrNotEnabled' before throwing an error. The false return value tells
 // that there are no errors. The true tells that the err's chain includes
 // 'err2.ErrNotEnabled'.
-func InNotEnabled(err error) bool {
+func IsNotEnabled(err error) bool {
 	return Is(err, err2.ErrNotEnabled)
 }
