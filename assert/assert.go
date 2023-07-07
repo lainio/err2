@@ -65,7 +65,7 @@ type (
 
 var (
 	// testers must be set if assertion package is used for the unit testing.
-	testers = x.NewRWMap[map[int]testing.TB]()
+	testers = x.NewRWMap[testersMap]()
 )
 
 const (
