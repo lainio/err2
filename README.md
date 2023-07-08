@@ -540,7 +540,7 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
 ### Upcoming releases
 
 ##### 0.9.3 
-- std flag pkg integration
+- Go's standard lib's flag pkg integration (similar to `glog`)
 - Continue removing unused parts from `assert` pkg
 - More documentation, repairing for some sort of marketing
 
