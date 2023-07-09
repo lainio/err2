@@ -35,7 +35,7 @@ var (
 //
 // There is no performance penalty. The handler is called only when err != nil.
 // There is no limit how many Handle functions can be added to defer stack. They
-// all are called if an error has occurred and they are in deferred.
+// all are called if an error has occurred.
 //
 // The function has an automatic mode where errors are annotated by function
 // name if no annotation arguments or handler function is given:
@@ -66,7 +66,7 @@ var (
 //	   func() {
 //	      os.Remove(dst)
 //	   },
-//	   func(p any) {} // panic handler, it's stops panics, you can re throw
+//	   func(p any) {} // panic handler, it's stops panics, you can re-throw
 //	)
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
@@ -128,7 +128,9 @@ func Catch(a ...any) {
 // fmt.Errorf. Because panic is used to transport the error instead of error
 // return value, it's called only if you want to non-local control structure for
 // error handling, i.e. your current function doesn't have error return value.
-// NOTE, Throwf is rarely needed. We suggest to use error return values instead.
+//
+//   - Throwf is rarely needed. We suggest to use error return values instead.
+//
 // Throwf is offered for deep recursive algorithms to help readability and
 // performance (see bechmarks) in those cases.
 //

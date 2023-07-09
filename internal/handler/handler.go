@@ -207,7 +207,8 @@ func WorkToDo(r any, err *error) bool {
 // Process executes error handling logic. Panics and whole defer stack is
 // included.
 //
-// NOTE! That there is an error or a panic to handle i.e. that's taken care.
+//   - err2.API functions call PreProcess and Process is exported for tests.
+//   - That there is an error or a panic to handle i.e. that's taken care.
 func Process(info *Info) {
 	switch info.Any.(type) {
 	case nil:
@@ -221,9 +222,9 @@ func Process(info *Info) {
 	}
 }
 
-// PreProcess is currently used for err2.Handle.
+// PreProcess is currently used for err2 API like err2.Handle and .Catch.
 //
-// NOTE! That there is an error or a panic to handle i.e. that's taken care.
+//   - That there is an error or a panic to handle i.e. that's taken care.
 //
 //nolint:nestif
 func PreProcess(info *Info, a ...any) {
