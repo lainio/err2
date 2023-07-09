@@ -208,7 +208,7 @@ i.e., discriminated union. Please see more from its documentation.
 Now we could have the following:
 
 ```go
-b := try.Out1(strconv.Atoi(s)).Logf("using default value = 100").Def1(100).Val1
+b := try.Out1(strconv.Atoi(s)).Logf("using default value = 100").Catch(100)
 ...
 ```
 
@@ -361,13 +361,15 @@ prefer if you could contribute some of the back to the err2 package.
 [check/handle
 proposal](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md).
 The package does it by using internally `panic/recovery`, which some might think
-isn't perfect. We have run many benchmarks to try to minimise the performance
-penalty this kind of mechanism might bring. We have focused on the _happy path_
-analyses. If the performance of the *error path* is essential, don't use this
-mechanism presented here. **But be aware that something is wrong if your code
-uses the error path as part of the algorithm itself.**
+isn't perfect.
 
-**For happy paths** by using `try.ToX` or `assert.That` error check functions
+We have run many benchmarks try to minimise the performance penalty this kind of
+mechanism might bring. We have focused on the _happy path_ analyses. If the
+performance of the *error path* is essential, don't use this mechanism presented
+here. **But be aware that something is wrong if your code uses the error path as
+part of the algorithm itself.**
+
+**For happy paths** by using `try.To*` or `assert.That` error check functions
 **there are no performance penalty at all**. However, the mandatory use of the
 `defer` might prevent some code optimisations like function inlining. And still,
 we have cases where using the `err2` and `try` package simplify the algorithm so
@@ -532,8 +534,8 @@ GitHub Discussions. Naturally, any issues and contributions are welcome as well!
   especially performance
 
 ##### 0.9.29
-- **New API for immediate error handling**: `try out f() handle err`
-  `val := try.Out1(strconv.Atoi(s)).Def1(10).Val1`
+- **New API for immediate error handling**: `try out handle/catch err`
+  `val := try.Out1(strconv.Atoi(s)).Catch(10)`
 - Our API has now all the same features Zig's error handling has
 - **Performance boost for assert pkg**: `defer assert.PushTester(t)()`
 
