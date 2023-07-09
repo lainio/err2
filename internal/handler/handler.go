@@ -295,8 +295,8 @@ func processArg(info *Info, i int, a ...any) {
 }
 
 func printStack(w io.Writer, si debug.StackInfo, msg any) {
-	// TODO: if we wanted to use this for unit test time error & panic tracing
-	// we should be able to dedect if we are in unit test mode.
+	// TODO: if we wanted to use this for error & panic tracing in unit tests 
+	// we should be able to detect if we are in unit test mode.
 	// - for performance reasons the default asserter tells in what mode we are
 	//   no need to use tester() func or similar
 	fmt.Fprintf(w, "---\n%v\n---\n", msg)
