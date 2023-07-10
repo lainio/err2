@@ -9,7 +9,7 @@ import (
 	"github.com/lainio/err2/assert"
 )
 
-func ExampleAsserter_True() {
+func ExampleThat() {
 	sample := func() (err error) {
 		defer err2.Handle(&err)
 
