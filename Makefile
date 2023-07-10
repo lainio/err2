@@ -98,3 +98,5 @@ test_cov: test_cov_out
 lint:
 	@golangci-lint run
 
+.PHONY:	check
+
