@@ -29,7 +29,7 @@ var (
 	// allows err2 handlers to catch them.
 	P = AsserterToError | AsserterCallerInfo
 
-	B = AsserterDebug | AsserterFormattedCallerInfo
+	B = AsserterToError | AsserterFormattedCallerInfo
 
 	T  = AsserterUnitTesting
 	TF = AsserterUnitTesting | AsserterStackTrace | AsserterCallerInfo
