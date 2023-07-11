@@ -146,7 +146,7 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 		if asserter.isUnitTesting() {
 			// Note. that the assert in the test function is printed in
 			// reportPanic below
-			const stackLvl = 5 // amount of functions before we're here
+			const stackLvl = 6 // amount of functions before we're here
 			debug.PrintStackForTest(os.Stderr, stackLvl)
 		} else {
 			// amount of functions before we're here, which is different
@@ -184,7 +184,8 @@ func (asserter Asserter) reportPanic(s string) {
 		fmt.Fprintln(os.Stderr, officialTestOutputPrefix+s)
 		tester().FailNow()
 	} else if asserter.isUnitTesting() {
-		fatal(s)
+		const framesToSkip = 4 // how many fn calls there is before FuncName call
+		fatal(s, framesToSkip)
 	}
 	if asserter.hasToError() {
 		panic(errors.New(s))
@@ -192,9 +193,11 @@ func (asserter Asserter) reportPanic(s string) {
 	panic(s)
 }
 
-func fatal(s string) {
+// fatal calls tester().FailNow() after printing test failing msg (arg s) that's
+// build according the correct test result output. framesToSkip tells how many
+// functions (stack call frames) to skip until get the function name to print.
+func fatal(s string, framesToSkip int) {
 	const shortFmtStr = `%s:%d: %s`
-	const framesToSkip = 4 // how many fn calls there is before FuncName call
 	includePath := false
 	_, filename, line, ok := str.FuncName(framesToSkip, includePath)
 	info := s
