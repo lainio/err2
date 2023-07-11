@@ -2,11 +2,13 @@ package assert
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"runtime"
 	"sync"
 	"testing"
 
+	"github.com/lainio/err2/internal/debug"
 	"github.com/lainio/err2/internal/x"
 	"golang.org/x/exp/constraints"
 )
@@ -90,18 +92,14 @@ const (
 //	}
 //
 // Because PushTester returns PopTester it allows us to merge these two calls to
-// one line. See the first t.Run call.
+// one line. See the first t.Run call. NOTE. More information in PopTester.
 func PushTester(t testing.TB, a ...defInd) function {
 	if len(a) > 0 {
 		SetDefault(a[0])
 	} else if Default()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
-		// TODO: still testing Test/TestFull? Test is minimum, no supprises?
 		SetDefault(Test)
-		// TODO: should we just demand that correct assert is in us? But this
-		// is the only place for it? **NO**, too difficult to set, all
-		// projects don't have TestMain
 		// TODO: parallel testing is something we should test.
 	}
 	testers.Tx(func(m testersMap) {
@@ -114,9 +112,11 @@ func PushTester(t testing.TB, a ...defInd) function {
 	return PopTester
 }
 
-// PopTester pops the testing context reference from the memory. This isn't
-// totally necessary, but if you want play by book, please do it. Usually done
-// by defer after PushTester.
+// PopTester pops the testing context reference from the memory. This is for
+// memory cleanup and adding similar to err2.Catch error/panic safety for tests.
+// By using PopTester you get error logs tuned for unit testing.
+//
+// You have two ways to call PopTester. With defer right after PushTester:
 //
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
@@ -126,10 +126,45 @@ func PushTester(t testing.TB, a ...defInd) function {
 //			assert.That(something, "test won't work")
 //		})
 //	}
-func PopTester() { // maybe need another version if we are going to cacth errors
-	testers.Tx(func(m testersMap) {
-		delete(m, goid())
+//
+// If you want to have one liner to combine Push/PopTester:
+//
+//	defer assert.PushTester(t)()
+func PopTester() {
+	defer testers.Tx(func(m testersMap) {
+		goid := goid()
+		delete(m, goid)
 	})
+
+	r := recover()
+	if r == nil {
+		return
+	}
+
+	var msg string
+	switch t := r.(type) {
+	case string:
+		msg = t
+	case runtime.Error:
+		msg = t.Error()
+	case error:
+		msg = t.Error()
+	default:
+		msg = "test panic catch"
+	}
+
+	// First, print the call stack. Note. that we aren't support full error
+	// tracing with unit test logging. However, using it has proved the top
+	// level error stack as more enough. Even so that we could consider using
+	// it for normal error stack straces if it would be possible.
+	const stackLvl = 6 // amount of functions before we're here
+	debug.PrintStackForTest(os.Stderr, stackLvl)
+
+	// Now that call stack errors are printed, if any. Let's print the actual
+	// line that caused the error, i.e., was throwing the error. Note that we
+	// are here in the 'catch-function'.
+	const framesToSkip = 4 // how many fn calls there is before FuncName call
+	fatal("assertion catching: "+msg, framesToSkip)
 }
 
 func tester() (t testing.TB) {
