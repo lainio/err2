@@ -47,8 +47,13 @@ func SetPanicTracer(w io.Writer) {
 	tracer.Panic.SetTracer(w)
 }
 
-// SetLogTracer sets a io.Writer for try.Out().Logf() function.
-// The default is nil.
+// SetLogTracer sets a io.Writer for try.Out().Logf() function. The default is
+// nil and then err2 uses std log package for logging.
+//
+// You can use that to redirect packages like glog and have proper logging. For
+// glog, add this line at the beginning of your app:
+//
+//	glog.CopyStandardLogTo("INFO")
 func SetLogTracer(w io.Writer) {
 	tracer.Log.SetTracer(w)
 }

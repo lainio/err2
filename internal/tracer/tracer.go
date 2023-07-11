@@ -26,8 +26,8 @@ func init() {
 	// Because we stop panics as default, we need to output as default
 	Panic.SetTracer(os.Stderr)
 
-	// stderr is a good default for try.Out().Logf().
-	Log.SetTracer(os.Stderr)
+	// nil is a good default for try.Out().Logf() because then we use std log.
+	Log.SetTracer(nil)
 }
 
 func (v *value) Tracer() io.Writer {

@@ -3,6 +3,7 @@ package try
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/lainio/err2/internal/tracer"
 )
@@ -43,12 +44,10 @@ func (o *Result) Logf(a ...any) *Result {
 	if o.Err == nil || len(a) == 0 {
 		return o
 	}
-	w := tracer.Log.Tracer()
-	if w != nil {
-		f, isFormat := a[0].(string)
-		if isFormat {
-			fmt.Fprintf(w, f+": %v\n", append(a[1:], o.Err)...)
-		}
+	f, isFormat := a[0].(string)
+	if isFormat {
+		s := fmt.Sprintf(f+": %v", append(a[1:], o.Err)...)
+		_ = logOutput(2, s)
 	}
 	return o
 }
@@ -270,4 +269,13 @@ func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
 
 func wrapStr() string {
 	return ": %w"
+}
+
+func logOutput(lvl int, s string) (err error) {
+	w := tracer.Log.Tracer()
+	if w == nil {
+		return log.Output(lvl, s)
+	}
+	fmt.Fprintln(w, s)
+	return nil
 }
