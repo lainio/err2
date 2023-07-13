@@ -34,11 +34,10 @@ func (db *Database) MoneyTransfer(from, to *Account, amount int) (err error) {
 }
 
 func doDBMain() {
-	err2.SetTracers(os.Stderr)
-	err2.SetTracers(nil) // <- out-comment/rm to get automatic error traces
-	defer err2.Catch(func(err error) {
-		fmt.Println(err.Error())
-	})
+	err2.SetErrorTracer(os.Stderr)
+	err2.SetErrorTracer(nil) // <- out-comment/rm to get automatic error traces
+
+	defer err2.Catch("CATCH Warning: %s", "test-name")
 
 	db, from, to := new(Database), new(Account), new(Account)
 
