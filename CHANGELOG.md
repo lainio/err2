@@ -3,11 +3,11 @@
 ### Version history
 
 ##### 0.9.29
-- **New API for immediate error handling**: `try out handle/catch err`
-  `val := try.Out1(strconv.Atoi(s)).Catch(10)`
-- **New err2.Catch API for automatic logging**
-- Our API has now all the same features Zig's error handling has
-- **Performance boost for assert pkg**: `defer assert.PushTester(t)()`
+- New API for immediate error handling: `try out handle/catch err`
+  `val := try.Out1strconv.Atois.Catch(10)`
+- New err2.Catch API for automatic logging
+- Performance boost for assert pkg: `defer assert.PushTester(t)()`
+- Our API has now *all the same features Zig's error handling has*
 
 ##### 0.9.1
 - **Performance boost for assert pkg**: `assert.That(boolVal)` == `if boolVal`
