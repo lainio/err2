@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 
 	"github.com/lainio/err2"
 )
@@ -12,6 +13,7 @@ var (
 
 func main() {
 	defer err2.Catch()
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
 
 	flag.Parse()
 
