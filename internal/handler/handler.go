@@ -267,7 +267,7 @@ func PreProcess(info *Info, a ...any) {
 	if curErr := info.safeErr(); logCatchCallMode && curErr != nil {
 		// TODO: this should be calculated, need new API? see FuncName
 		const framesToSkip = 6
-		if logOutput(6, curErr.Error()) == nil {
+		if LogOutput(6, curErr.Error()) == nil {
 			*info.Err = nil // prevent dublicate "logging"
 		}
 	}
@@ -341,8 +341,7 @@ func newSI(pn, fn string, lvl int) debug.StackInfo {
 	}
 }
 
-// TODO: exactly same as in try.Out
-func logOutput(lvl int, s string) (err error) {
+func LogOutput(lvl int, s string) (err error) {
 	w := tracer.Log.Tracer()
 	if w == nil {
 		return log.Output(lvl, s)

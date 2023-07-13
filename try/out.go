@@ -3,9 +3,8 @@ package try
 import (
 	"errors"
 	"fmt"
-	"log"
 
-	"github.com/lainio/err2/internal/tracer"
+	"github.com/lainio/err2/internal/handler"
 )
 
 type (
@@ -47,7 +46,7 @@ func (o *Result) Logf(a ...any) *Result {
 	f, isFormat := a[0].(string)
 	if isFormat {
 		s := fmt.Sprintf(f+": %v", append(a[1:], o.Err)...)
-		_ = logOutput(2, s)
+		_ = handler.LogOutput(2, s)
 	}
 	return o
 }
@@ -269,13 +268,4 @@ func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
 
 func wrapStr() string {
 	return ": %w"
-}
-
-func logOutput(lvl int, s string) (err error) {
-	w := tracer.Log.Tracer()
-	if w == nil {
-		return log.Output(lvl, s)
-	}
-	fmt.Fprintln(w, s)
-	return nil
 }
