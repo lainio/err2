@@ -110,8 +110,8 @@ func Handle(err *error, a ...any) {
 //
 //	defer err2.Catch("WARNING: catched errors: %s", name)
 //
-// Preceding line catches the errors and panics and prints annotated error
-// message to the currently set log.
+// The preceding line catches the errors and panics and prints an annotated
+// error message to the currently set log.
 func Catch(a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
