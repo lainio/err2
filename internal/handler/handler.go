@@ -4,6 +4,7 @@ package handler
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"runtime"
 
@@ -255,11 +256,29 @@ func PreProcess(info *Info, a ...any) {
 			}
 		}
 	}
-	if info.PanicHandler == nil && info.CallerName == "Catch" {
+	defCatchCallMode := info.PanicHandler == nil && info.CallerName == "Catch"
+	if defCatchCallMode {
 		info.PanicHandler = PanicNoop
 	}
 
 	Process(info)
+
+	logCatchCallMode := defCatchCallMode && firstArgIsString(a...)
+	if curErr := info.safeErr(); logCatchCallMode && curErr != nil {
+		// TODO: this should be calculated, need new API? see FuncName
+		const framesToSkip = 6
+		if logOutput(6, curErr.Error()) == nil {
+			*info.Err = nil // prevent dublicate "logging"
+		}
+	}
+}
+
+func firstArgIsString(a ...any) bool {
+	if len(a) > 0 {
+		_, isStr := a[0].(string)
+		return isStr
+	}
+	return false
 }
 
 func subProcess(info *Info, a ...any) {
@@ -269,7 +288,7 @@ func subProcess(info *Info, a ...any) {
 		if _, ok := a[1].(PanicHandler); ok {
 			processArg(info, 1, a...)
 		}
-	default: // more than 2
+	default: // more than 2, TODO: where's 1?
 		processArg(info, 0, a...)
 	}
 }
@@ -320,4 +339,14 @@ func newSI(pn, fn string, lvl int) debug.StackInfo {
 		Level:       lvl,
 		Regexp:      debug.PackageRegexp,
 	}
+}
+
+// TODO: exactly same as in try.Out
+func logOutput(lvl int, s string) (err error) {
+	w := tracer.Log.Tracer()
+	if w == nil {
+		return log.Output(lvl, s)
+	}
+	fmt.Fprintln(w, s)
+	return nil
 }
