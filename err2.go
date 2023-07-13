@@ -88,15 +88,15 @@ func Handle(err *error, a ...any) {
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
-// Note, that Catch always catch the panics. If you don't want to stop the (aka
-// recover) you should add panic handler and countinue panicing there. There can
-// be only one deferred Catch function per non error returning function like
-// main(). There is several ways to make deferred calls to Catch.
+// Note, that Catch always catch the panics. If you don't want to stop them
+// (recover) you should add panic handler and countinue panicing there. There
+// can be only one deferred Catch function per non error returning function like
+// main(). There is several ways to use the Catch function. Remember the defer.
 //
 //	defer err2.Catch()
 //
 // This stops errors and panics, and output depends on the current Tracer
-// settings.
+// settings. Default setting print call stacks for panics but not for errors.
 //
 //	defer err2.Catch(func(err error) {})
 //
@@ -105,6 +105,13 @@ func Handle(err *error, a ...any) {
 // that. In most cases if you need to stop panics you should have both:
 //
 //	defer err2.Catch(func(err error) {}, func(p any) {})
+//
+// Catch support logging as well:
+//
+//	defer err2.Catch("WARNING: catched errors: %s", name)
+//
+// Preceding line catches the errors and panics and prints annotated error
+// message to the currently set log.
 func Catch(a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.

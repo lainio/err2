@@ -81,6 +81,14 @@ default values is os.Stderr. The default error tracer is nil.
 	err2.SetPanicTracer(os.Stderr) // panic stack tracer's default is stderr
 	err2.SetErrorTracer(nil) // error stack tracer's default is nil
 
+# Automatic Logging
+
+Same err2 capablities support automatic logging like the err2.Catch and
+try.Result.Logf functions. To be able to tune up how logging behaves we offer a
+tracer API:
+
+	err2.SetLogTracer(nil) // the default is nil where std log pkg is used.
+
 # Error handling
 
 Package err2 relies on declarative control structures to achieve error and panic
