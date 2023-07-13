@@ -1,0 +1,116 @@
+## Cangelog
+
+### Version history
+
+##### 0.9.29
+- **New API for immediate error handling**: `try out handle/catch err`
+  `val := try.Out1(strconv.Atoi(s)).Catch(10)`
+- **New err2.Catch API for automatic logging**
+- Our API has now all the same features Zig's error handling has
+- **Performance boost for assert pkg**: `defer assert.PushTester(t)()`
+
+##### 0.9.1
+- **Performance boost for assert pkg**: `assert.That(boolVal)` == `if boolVal`
+- Go version 1.18 is a new minimum (was 1.19, use of `atomic.Pointer`)
+- Generic functions support type aliases
+- More support for `assert` package for tests: support for cross module asserts
+  during the tests
+- Using `assert` pkg for tests allow us to have **traversable call stack
+  during unit tests** -- cross module boundaries solved
+- Implementation: simplified `assert` pkg to `testing` pkg integration, and
+  especially performance
+
+##### 0.9.0
+- **Clean and simple API** 
+- Removing deprecated functions:
+    - Only `err2.Handle` for error returning functions
+    - Only `err2.Catch` for function that doesn't return error
+    - Please see `scripts/README.md` for *Auto-migration for your repos*
+- Default `err2.SetPanicTracer(os.Stderr)` allows `defer err2.Catch()`
+
+##### 0.8.14
+- `err2.Handle` supports sentinel errors, can now stop panics
+- `err2.Catch` has one generic API and it stops panics as default
+- Deprecated `CatchTrace` and `CatchAll` which merged with `Catch`
+- Auto-migration offered (similar to `go fix`)
+- **Code snippets** added
+- New assertion functions
+- No direct variables in APIs (race), etc.
+
+##### 0.8.13
+- **Bug-fix:** automatic error strings for methods
+- Added API to set preferred error string *Formatter* or implement own
+
+##### 0.8.12
+- New super **Handle** for most of the use cases to simplify the API
+- **Deferred error handlers are 2x faster now**
+- Restructuring internal pkgs
+- New documentation and tests, etc.
+
+##### 0.8.11
+- remove deprecations
+- New *global* err values and `try.IsXX` functions
+- More documentation
+
+##### 0.8.10
+- New assertion functions and helpers for tests
+
+##### 0.8.9
+- bug fixes
+- Deprecations
+- New Tracer API
+- Preparing `err2` API for 1.0
+
+##### 0.8.8
+- **Assertion package integrates with Go's testing system**
+- Type variables removed
+
+##### 0.8.7
+- **Auto-migration tool** to convert deprecated API usage for your repos
+- `err2.Throwf` added
+
+##### 0.8.6
+- Stack Tracing bug fixed
+- URL helper restored until migration tool
+
+##### 0.8.5
+- Typo in `StackTraceWriter` fixed
+
+##### 0.8.4
+- **Optimized** Stack Tracing
+- Documentation
+- Benchmarks, other tests
+
+##### 0.8.3
+- `try.IsXX()` bug fix
+- Lots of new docs
+- **Automatic Stack Tracing!**
+
+##### 0.8.1
+- **bug-fix**: `runtime.Error` types are treated as `panics` now (Issue #1)
+
+##### 0.8.0
+- `try.To()`, **Start to use Go generics**
+- `assert.That()` and other assert functions with the help of the generics
+
+##### 0.7.0
+- Filter functions for non-errors like `io.EOF`
+
+##### 0.6.1
+- `assert` package added, and new type helpers
+
+##### 0.5
+- Go modules are in use
+
+##### 0.4
+- Documentation update
+
+##### 0.3
+- `Returnf` added, not use own transport type anymore but just `error`
+
+##### 0.2
+- Code generation for type helpers
+
+##### 0.1
+- First draft (Summer 2019)
+
