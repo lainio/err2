@@ -96,7 +96,7 @@ func Handle(err *error, a ...any) {
 //
 // The deferred Catch is very convenient, because it makes your current
 // goroutine panic and error-safe, one line only! You can fine tune its
-// behaviour with functions like err2.SetErrorTrace, assert.SetDefault, etc.
+// behavior with functions like err2.SetErrorTrace, assert.SetDefault, etc.
 // Start with the defaults.
 //
 //	defer err2.Catch()
