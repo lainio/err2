@@ -89,29 +89,37 @@ func Handle(err *error, a ...any) {
 
 // Catch is a convenient helper to those functions that doesn't return errors.
 // Note, that Catch always catch the panics. If you don't want to stop them
-// (recover) you should add panic handler and countinue panicing there. There
+// (recover) you should add panic handler and continue panicking there. There
 // can be only one deferred Catch function per non error returning function like
-// main(). There is several ways to use the Catch function. Remember the defer.
+// main(). There is several ways to use the Catch function. And always remember
+// the defer.
+//
+// The deferred Catch is very convenient, because it makes your current
+// goroutine panic and error-safe, one line only! You can fine tune its
+// behaviour with functions like err2.SetErrorTrace, assert.SetDefault, etc.
+// Start with the defaults.
 //
 //	defer err2.Catch()
-//
-// This stops errors and panics, and output depends on the current Tracer
-// settings. Default setting print call stacks for panics but not for errors.
-//
-//	defer err2.Catch(func(err error) {})
-//
-// This one calls your error handler. You could have only panic handler, but
-// that's unusual. Only if you are sure that errors are handled you should do
-// that. In most cases if you need to stop panics you should have both:
-//
-//	defer err2.Catch(func(err error) {}, func(p any) {})
 //
 // Catch support logging as well:
 //
 //	defer err2.Catch("WARNING: catched errors: %s", name)
 //
 // The preceding line catches the errors and panics and prints an annotated
-// error message to the currently set log.
+// error message about the error source (from where the error was thrown) to the
+// currently set log.
+//
+// The next one stops errors and panics, but allows you handle errors, like
+// cleanups, etc. The output results depends on the current Tracer and assert
+// settings. Default setting print call stacks for panics but not for errors.
+//
+//	defer err2.Catch(func(err error) {})
+//
+// The last one calls your error handler, and you have an explicit panic
+// handler too, where you can e.g. continue panicking to propagate it for above
+// callers:
+//
+//	defer err2.Catch(func(err error) {}, func(p any) {})
 func Catch(a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
