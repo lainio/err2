@@ -244,8 +244,6 @@ func Out(err error) *Result {
 // or in some other cases, some of these would be desired action:
 //
 //	number := try.Out1(strconv.Atoi(str)).Catch(100)
-//	try.Out(os.Remove(dst)).Logf("remove")
-//	x, y := try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Catch(1, 2)
 //	x := try.Out1(strconv.Atoi(s)).Logf("not number").Catch(100)
 func Out1[T any](v T, err error) *Result1[T] {
 	return &Result1[T]{Val1: v, Result: Result{Err: err}}

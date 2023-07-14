@@ -45,7 +45,7 @@ do something specific after error returing function call. For example, you might
 want to ignore the specific error and use a default value. That's possible with
 the following code:
 
-	number := try.Out1(strconv.Atoi(str)).Def1(100).Val1
+	number := try.Out1(strconv.Atoi(str)).Catch(100)
 
 Or you might want to ignore an error but write a log if something happens:
 
