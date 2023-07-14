@@ -15,9 +15,9 @@ import (
 
 func ExampleOut1_copyFile() {
 	copyFile := func(src, dst string) (err error) {
-		defer err2.Handle(&err, "copy %s %s", src, dst)
+		defer err2.Handle(&err, "copy file")
 
-		r := try.To1(os.Open(src))
+		r := try.Out1(os.Open(src)).Handle("source").Val1
 		defer r.Close()
 
 		w := try.To1(os.Create(dst))
@@ -36,7 +36,7 @@ func ExampleOut1_copyFile() {
 			}).
 			Val1
 
-		w.Close()
+		try.Out(w.Close()).Handle("target close")
 		return nil
 	}
 
@@ -45,7 +45,7 @@ func ExampleOut1_copyFile() {
 		fmt.Println(err)
 	}
 
-	// Output: copy /notfound/path/file.go /notfound/path/file.bak: open /notfound/path/file.go: no such file or directory
+	// Output: copy file: source: open /notfound/path/file.go: no such file or directory
 }
 
 func ExampleResult1_Def1() {
