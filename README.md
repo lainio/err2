@@ -443,7 +443,3 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 - Go's standard lib's flag pkg integration (similar to `glog`)
 - Continue removing unused parts from `assert` pkg
 - More documentation, repairing for some sort of marketing
-
-##### 0.9.3 
-- Recruit someone to try test result processing for unit-tests and bring support
-  for IDEs like VC
