@@ -12,6 +12,7 @@ import (
 	fmtstore "github.com/lainio/err2/internal/formatter"
 	"github.com/lainio/err2/internal/str"
 	"github.com/lainio/err2/internal/tracer"
+	"github.com/lainio/err2/internal/x"
 )
 
 type (
@@ -229,20 +230,20 @@ func Process(info *Info) {
 //
 //nolint:nestif
 func PreProcess(info *Info, a ...any) {
+	// We want the function who sets the handler, i.e. calls the
+	// err2.Handle function via defer. Because call stack is in reverse
+	// order we need negative, and because the Handle caller is just
+	// previous AND funcName can search! This is enough:
+	const lvl = -1
+
 	if len(a) > 0 {
 		subProcess(info, a...)
 	} else {
-		// We want the function who sets the handler, i.e. calls the
-		// err2.Handle function via defer. Because call stack is in reverse
-		// order we need negative, and because the Handle caller is just
-		// previous AND funcName can search! This is enough:
-		const lvl = -1
-
 		fnName := "Handle"
 		if info.CallerName != "" {
 			fnName = info.CallerName
 		}
-		funcName, _, ok := debug.FuncName(debug.StackInfo{
+		funcName, _, _, ok := debug.FuncName(debug.StackInfo{
 			PackageName: "",
 			FuncName:    fnName,
 			Level:       lvl,
@@ -265,9 +266,14 @@ func PreProcess(info *Info, a ...any) {
 
 	logCatchCallMode := defCatchCallMode && firstArgIsString(a...)
 	if curErr := info.safeErr(); logCatchCallMode && curErr != nil {
-		// TODO: this should be calculated, need new API? see FuncName
+		_, _, frame, ok := debug.FuncName(debug.StackInfo{
+			PackageName: "",
+			FuncName:    "Catch",
+			Level:       lvl,
+		})
 		const framesToSkip = 6
-		if LogOutput(6, curErr.Error()) == nil {
+		frame = x.Whom(ok, frame, framesToSkip)
+		if LogOutput(frame, curErr.Error()) == nil {
 			*info.Err = nil // prevent dublicate "logging"
 		}
 	}

@@ -158,13 +158,20 @@ func FprintStack(w io.Writer, si StackInfo) {
 // See more information from runtime.Caller. The StackInfo tells how many stack
 // frames we should go back (Level), and other fields tell how to find the
 // actual line where calculation should be started.
-func FuncName(si StackInfo) (n string, ln int, ok bool) {
+func FuncName(si StackInfo) (n string, ln int, frame int, ok bool) {
 	stackBuf := bytes.NewBuffer(debug.Stack())
 	return funcName(stackBuf, si)
 }
 
 // funcName see Funcname documentation.
-func funcName(r io.Reader, si StackInfo) (n string, ln int, ok bool) {
+func funcName(r io.Reader,
+	si StackInfo,
+) (
+	n string,
+	ln int,
+	frame int,
+	ok bool,
+) {
 	var buf bytes.Buffer
 	stackBuf := io.TeeReader(r, &buf)
 	anchorLine := calcAnchor(stackBuf, si)
@@ -178,7 +185,7 @@ func funcName(r io.Reader, si StackInfo) (n string, ln int, ok bool) {
 			// aka this line to get ln
 			if ok {
 				ln = fnLNro(line)
-				return n, ln, ok
+				return n, ln, i / 2, ok
 			}
 
 			// we are interested the line before (2 x si.Level) the
@@ -186,13 +193,14 @@ func funcName(r io.Reader, si StackInfo) (n string, ln int, ok bool) {
 			reachAnchor = x.Whom(reachAnchor, true,
 				i == (anchorLine-2*si.Level))
 
-			if reachAnchor && i%2 == 0 && notOurFunction(line) {
+			foundIt := reachAnchor && i%2 == 0 && notOurFunction(line)
+			if foundIt {
 				n = fnName(line)
 				ok = n != "panic"
 			}
 		}
 	}
-	return n, 0, false
+	return n, 0, -1, false
 }
 
 // notOurFunction returns true if function in call stack line isn't from err2

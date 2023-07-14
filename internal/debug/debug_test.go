@@ -317,21 +317,22 @@ func TestFuncName(t *testing.T) {
 	type ttest struct {
 		name string
 		args
-		output string
-		outln  int
+		output   string
+		outln    int
+		outFrame int
 	}
 	tests := []ttest{
-		{"basic", args{input2, StackInfo{"", "Handle", 1, nil, nil}}, "err2.ReturnW", 214},
-		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil, nil}}, "err2.ReturnW", 214},
-		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil, nil}}, "err2.ReturnW", 214},
-		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil, nil}}, "ssi.(*DIDAgent).AssertWallet", 146},
+		{"basic", args{input2, StackInfo{"", "Handle", 1, nil, nil}}, "err2.ReturnW", 214, 6},
+		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil, nil}}, "err2.ReturnW", 214, 6},
+		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil, nil}}, "err2.ReturnW", 214, 6},
+		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil, nil}}, "ssi.(*DIDAgent).AssertWallet", 146, 8},
 	}
 	for _, ttv := range tests {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			r := strings.NewReader(tt.input)
-			name, ln, ok := funcName(r, StackInfo{
+			name, ln, fr, ok := funcName(r, StackInfo{
 				PackageName: tt.PackageName,
 				FuncName:    tt.FuncName,
 				Level:       tt.Level,
@@ -339,6 +340,7 @@ func TestFuncName(t *testing.T) {
 			test.Require(t, ok, "not found")
 			test.Requiref(t, tt.output == name, "not equal %v", name)
 			test.Requiref(t, ln == tt.outln, "ln must be equal %d == %d", ln, tt.outln)
+			test.RequireEqual(t, fr, tt.outFrame)
 		})
 	}
 }
