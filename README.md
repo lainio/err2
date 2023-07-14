@@ -208,8 +208,7 @@ i.e., discriminated union. Please see more from its documentation.
 Now we could have the following:
 
 ```go
-b := try.Out1(strconv.Atoi(s)).Logf("using default value = 100").Catch(100)
-...
+b := try.Out1(strconv.Atoi(s)).Logf("%s => 100", s).Catch(100)
 ```
 
 The previous statement tries to convert incoming string value `s`, but if it
@@ -432,7 +431,9 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ##### 0.9.29
 - New API for immediate error handling: `try out handle/catch err`
-  `val := try.Out1strconv.Atois.Catch(10)`
+  ```go
+  val := try.Out1(strconv.Atoi(s)).Catch(10)`
+  ```
 - New err2.Catch API for automatic logging
 - Performance boost for assert pkg: `defer assert.PushTester(t)()`
 - Our API has now *all the same features Zig's error handling has*
