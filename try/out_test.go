@@ -20,7 +20,7 @@ func ExampleOut1_copyFile() {
 		r := try.Out1(os.Open(src)).Handle("source").Val1
 		defer r.Close()
 
-		w := try.To1(os.Create(dst))
+		w := try.Out1(os.Create(dst)).Handle("target").Val1
 
 		// If you prefer immediate error handling for some reason.
 		_ = try.Out1(io.Copy(w, r)).
@@ -32,11 +32,11 @@ func ExampleOut1_copyFile() {
 			Handle(func(err error) error {
 				try.Out(w.Close()).Logf()
 				try.Out(os.Remove(dst)).Logf()
-				return err
+				return err // we don't want to change or annotate incoming
 			}).
 			Val1
 
-		try.Out(w.Close()).Handle("target close")
+		try.Out(w.Close()).Handle("target")
 		return nil
 	}
 
