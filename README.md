@@ -432,7 +432,7 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 ##### 0.9.29
 - New API for immediate error handling: `try out handle/catch err`
   ```go
-  val := try.Out1(strconv.Atoi(s)).Catch(10)`
+  val := try.Out1(strconv.Atoi(s)).Catch(10)
   ```
 - New err2.Catch API for automatic logging
 - Performance boost for assert pkg: `defer assert.PushTester(t)()`
