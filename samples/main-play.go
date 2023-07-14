@@ -84,7 +84,7 @@ func doPlayMain() {
 	//err2.SetFormatter(formatter.Noop) // default is formatter.Decamel
 
 	// errors are caught without specific handlers.
-	defer err2.Catch()
+	defer err2.Catch("CATCH")
 
 	// If you don't want to use tracers or you just need a proper error handler
 	// here.
@@ -92,9 +92,17 @@ func doPlayMain() {
 	//		fmt.Println("ERROR:", err)
 	//	})
 
-	try.To(doMain())
+	// by calling one of these you can test how automatic logging in above
+	// catch works correctly: the last source of error check is shown in line
+	// count
+	doDoMain()
+	//try.To(doMain())
 
 	println("______===")
+}
+
+func doDoMain() {
+	try.To(doMain())
 }
 
 func doMain() (err error) {
@@ -104,7 +112,7 @@ func doMain() (err error) {
 	// how err2 works. Especially interesting is automatic stack tracing.
 	//
 	// source file exists, but the destination is not in high probability
-	try.To(CopyFile("main.go", "/notfound/path/file.bak"))
+	//try.To(CopyFile("main.go", "/notfound/path/file.bak"))
 
 	// Both source and destination don't exist
 	//try.To(CopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
@@ -114,7 +122,7 @@ func doMain() (err error) {
 
 	// Next fn demonstrates how error and panic traces work, comment out all
 	// above CopyFile calls to play with:
-	//try.To(callRecur(1))
+	try.To(callRecur(1))
 
 	println("=== you cannot see this ===")
 	return nil
