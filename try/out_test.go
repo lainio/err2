@@ -107,6 +107,26 @@ func TestResult2_Logf(t *testing.T) {
 	test.RequireEqual(t, num2, 2)
 }
 
+func TestResult_Handle(t *testing.T) {
+	// try out f() |err| handle to show how to stop propagate error
+	callFn := func(mode int) (err error) {
+		defer err2.Handle(&err)
+
+		try.Out(fmt.Errorf("test error")).Handle(func(err error) error {
+			if mode == 0 {
+				return err
+			}
+			return nil // no error to throw
+		})
+		return nil
+	}
+	err := callFn(1)
+	test.Requiref(t, err == nil, "no error when Out.Handle sets it nil")
+
+	err = callFn(0)
+	test.Requiref(t, err != nil, "want error when Out.Handle sets it the same")
+}
+
 func ExampleResult1_Handle() {
 	// try out f() |err| handle to show power of error handling language, EHL
 	callRead := func(in io.Reader, b []byte) (eof bool, n int) {

@@ -99,8 +99,7 @@ func PushTester(t testing.TB, a ...defInd) function {
 	} else if Default()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
-		SetDefault(Test)
-		// TODO: parallel testing is something we should test.
+		SetDefault(TestFull)
 	}
 	testers.Tx(func(m testersMap) {
 		rid := goid()

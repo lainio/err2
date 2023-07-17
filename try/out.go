@@ -112,7 +112,6 @@ func (o *Result) Handle(a ...any) *Result {
 		o.Err = fmt.Errorf(f+wrapStr(), append(a[1:], o.Err)...)
 	case ErrFn:
 		o.Err = f(o.Err)
-		panic(o.Err)
 	case error:
 		if len(a) == 2 {
 			hfn, haveHandlerFn := a[1].(ErrFn)
