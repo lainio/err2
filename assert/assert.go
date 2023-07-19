@@ -16,10 +16,48 @@ import (
 type defInd = uint32
 
 const (
+	// Production is the best asserter for most uses. The assertion violations
+	// are treated as Go error values. And only a pragmatic caller info is
+	// automatically included into the error message like file name, line
+	// number, and caller function.
 	Production defInd = 0 + iota
+
+	// Development is the best asserter for most development uses. The
+	// assertion violations are treated as Go error values. And a formatted
+	// caller info is automatically included to the error message like file
+	// name, line number, and caller function.
 	Development
+
+	// Test minimalistic asserter for unit test use. Much more pragmatic is the
+	// TestFull assert that is the default if test asserter isn't given and
+	// still PushTester is called.
+	// Deprecated: Use TestFull instead.
 	Test
+
+	// TestFull assert that is the default if no test asserter is given and
+	// still PushTester is called. The TestFull asserter includes caller info
+	// and call stack to tests similarly like err2's error traces. You need a
+	// proper test result parser like 'github.com/lainio/nvim-go' (fork). Also
+	// most of the make-go-parsers can process the output properly and allow
+	// traverse of locations of the error trace.
+
+	// The call stack produced by these err2/assert test asserts can be used
+	// over package boundaries. For example, if your app and it's sub packages
+	// use err2/asserts for both tests and runtime asserts the results will be
+	// automatically merged. If any of the runtime asserts fails in app tests
+	// from the sub packages the current test fails too.
 	TestFull
+
+	// Debug asserter transforms assertion violations to panics which is the
+	// patter that e.g. Go's standard library uses:
+	//
+	//   if p == nil {
+	//        panic("pkg: ptr cannot be nil")
+	//   }
+	//
+	// is equal to:
+	//
+	//   assert.NotNil(p)
 	Debug
 )
 
