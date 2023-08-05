@@ -4,9 +4,10 @@ PKG_ERR2 := github.com/lainio/err2
 PKG_ASSERT := github.com/lainio/err2/assert
 PKG_TRY := github.com/lainio/err2/try
 PKG_DEBUG := github.com/lainio/err2/internal/debug
+PKG_HANDLER := github.com/lainio/err2/internal/handler
 PKG_STR := github.com/lainio/err2/internal/str
 PKG_X := github.com/lainio/err2/internal/x
-PKGS := $(PKG_ERR2) $(PKG_ASSERT) $(PKG_TRY) $(PKG_DEBUG) $(PKG_STR) $(PKG_X)
+PKGS := $(PKG_ERR2) $(PKG_ASSERT) $(PKG_TRY) $(PKG_DEBUG) $(PKG_HANDLER) $(PKG_STR) $(PKG_X)
 
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
@@ -28,6 +29,9 @@ test_try:
 
 test_debug:
 	$(GO) test $(TEST_ARGS) $(PKG_DEBUG)
+
+test_handler:
+	$(GO) test $(TEST_ARGS) $(PKG_HANDLER)
 
 test_str:
 	$(GO) test $(TEST_ARGS) $(PKG_STR)
