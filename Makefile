@@ -44,6 +44,9 @@ bench:
 bench_goid:
 	$(GO) test -bench='BenchmarkGoid' $(PKG_ASSERT)
 
+bench_reca:
+	$(GO) test -bench='BenchmarkRecursion.*' $(PKG_ERR2)
+
 bench_out:
 	$(GO) test -bench='BenchmarkTryOut_.*' $(PKG_ERR2)
 

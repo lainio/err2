@@ -26,6 +26,9 @@ func TestProcess(t *testing.T) {
 		args args
 		want want
 	}{
+		// TODO: this test e.g. has problem because Process is not called
+		// anymore if Any and Err are nil. Check is done before Process call.
+		// - check with handler.WorkToDo() should we even test this.
 		{"all nil and our handlers",
 			args{Info: handler.Info{
 				Any:          nil,
