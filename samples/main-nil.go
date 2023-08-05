@@ -15,7 +15,7 @@ var (
 	}
 
 	errAddNode = errors.New("add node error")
-	myErr error = nil
+	myErr      error
 
 	logger *slog.Logger
 )
@@ -29,7 +29,7 @@ func Init() {
 	}
 }
 
-func doMainAll()  {
+func doMainAll() {
 	logger.Info("=== 1. preferred successful status output ===")
 	doMain1()
 	logger.Info("=== 2. NilThen and try.To successful status ===")
@@ -81,4 +81,3 @@ func NilThen(fn func()) {
 	}
 	fn()
 }
-

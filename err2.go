@@ -80,10 +80,9 @@ func Handle(err *error, a ...any) {
 	// We put real panic objects back and keep only those which are
 	// carrying our errors. We must also call all of the handlers in defer
 	// stack.
-	handler.PreProcess(&handler.Info{
+	*err = handler.PreProcess(err, &handler.Info{
 		CallerName: "Handle",
 		Any:        r,
-		Err:        err,
 	}, a...)
 }
 
@@ -130,11 +129,10 @@ func Catch(a ...any) {
 	}
 
 	var err error
-	handler.PreProcess(&handler.Info{
+	err = handler.PreProcess(&err, &handler.Info{
 		CallerName: "Catch",
 		Any:        r,
 		NilHandler: handler.NilNoop,
-		Err:        &err,
 	}, a...)
 	doTrace(err)
 }

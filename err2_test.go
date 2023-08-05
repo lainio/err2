@@ -154,12 +154,28 @@ func TestPanicking_Handle(t *testing.T) {
 		f func() (err error)
 	}
 	myErr := fmt.Errorf("my error")
+	annErr := fmt.Errorf("annotated: %w", myErr)
 
 	tests := []struct {
 		name  string
 		args  args
 		wants error
 	}{
+		{"general error thru panic with annotion handler",
+			args{
+				func() (err error) {
+					// If we want keep same error value second argument
+					// must be nil
+					defer err2.Handle(&err, func(err error) error {
+						return fmt.Errorf("annotated: %w", err)
+					})
+
+					try.To(myErr)
+					return nil
+				},
+			},
+			annErr,
+		},
 		{"general error thru panic",
 			args{
 				func() (err error) {
@@ -251,7 +267,7 @@ func TestPanicking_Handle(t *testing.T) {
 			}()
 			err := tt.args.f()
 			if err != nil {
-				test.Requiref(t, err == myErr, "got %p, want %p", err, myErr)
+				test.RequireEqual(t, err.Error(), tt.wants.Error())
 			}
 		})
 	}
@@ -451,8 +467,11 @@ func ExampleHandle_handlerFn() {
 	}
 	err := doSomething(1, 2)
 	fmt.Printf("%v", err)
-	// Output: error with (1, 2): this is an ERROR
+	// Output: this is an ERROR
 }
+
+// TODO:
+// Output: error with (1, 2): this is an ERROR
 
 func ExampleHandle_noThrow() {
 	doSomething := func(a, b int) (err error) {

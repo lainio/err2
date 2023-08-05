@@ -39,6 +39,9 @@ test_str:
 test_x:
 	$(GO) test $(TEST_ARGS) $(PKG_X)
 
+testv:
+	$(GO) test -v $(TEST_ARGS) $(PKGS)
+
 test:
 	$(GO) test $(TEST_ARGS) $(PKGS)
 

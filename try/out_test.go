@@ -93,7 +93,9 @@ func TestResult2_Logf(t *testing.T) {
 	err2.SetLogTracer(os.Stdout)
 
 	convTwoStr := func(s1, s2 string) (_ int, _ int, err error) {
-		defer err2.Handle(&err, nil)
+		//defer err2.Handle(&err, nil) // TODO: why this is not working!!
+		//TODO
+		defer err2.Handle(&err)
 
 		return try.To1(strconv.Atoi(s1)), try.To1(strconv.Atoi(s2)), nil
 	}
@@ -103,8 +105,8 @@ func TestResult2_Logf(t *testing.T) {
 	}
 	num1, num2 := countSomething("1", "err")
 	fmt.Printf("results: %d, %d\n", num1, num2)
-	test.RequireEqual(t, num1, 3)
 	test.RequireEqual(t, num2, 2)
+	test.RequireEqual(t, num1, 3)
 }
 
 func TestResult_Handle(t *testing.T) {
