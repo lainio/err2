@@ -93,9 +93,7 @@ func TestResult2_Logf(t *testing.T) {
 	err2.SetLogTracer(os.Stdout)
 
 	convTwoStr := func(s1, s2 string) (_ int, _ int, err error) {
-		//defer err2.Handle(&err, nil) // TODO: why this is not working!!
-		//TODO
-		defer err2.Handle(&err)
+		defer err2.Handle(&err, nil)
 
 		return try.To1(strconv.Atoi(s1)), try.To1(strconv.Atoi(s2)), nil
 	}

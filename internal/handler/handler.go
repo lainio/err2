@@ -19,7 +19,7 @@ type (
 	// we want these to be type aliases, so they are much nicer to use
 	PanicHandler = func(p any)
 	ErrorHandler = func(err error) error // this is only proper type that work
-	NilHandler   = func() error          // TODO: we remove this
+	NilHandler   = func(err error) error // these two are the same
 	CheckHandler = func(noerr bool) error
 )
 
@@ -58,8 +58,8 @@ const (
 	wrapError = ": %w"
 )
 
-func PanicNoop(_ any) {}
-func NilNoop() error  { return nil }
+func PanicNoop(_ any)         {}
+func NilNoop(err error) error { return err }
 
 // func ErrorNoop(err error) {}
 
@@ -68,7 +68,7 @@ func (i *Info) callNilHandler() {
 		i.checkErrorTracer()
 	}
 	if i.NilHandler != nil {
-		*i.Err = i.NilHandler()
+		*i.Err = i.NilHandler(i.werr)
 	} else {
 		i.defaultNilHandler()
 	}
@@ -160,7 +160,7 @@ func (i *Info) defaultNilHandler() {
 
 func (i *Info) safeCallNilHandler() {
 	if i.NilHandler != nil {
-		*i.Err = i.NilHandler()
+		*i.Err = i.NilHandler(i.werr)
 	}
 }
 
@@ -226,12 +226,12 @@ func Process(info *Info) {
 	}
 }
 
-func PreProcess(er *error, info *Info, a ...any) error {
+func PreProcess(errPtr *error, info *Info, a ...any) error {
 	// Bug in Go?
 	// start to use local error ptr only for optimization reasons.
 	// We get 3x faster defer handlers without unsing ptr to original err
 	// named return val. Reason is unknown.
-	err := x.Whom(er != nil, *er, nil)
+	err := x.Whom(errPtr != nil, *errPtr, nil)
 	info.Err = &err
 
 	// We want the function who sets the handler, i.e. calls the
@@ -311,10 +311,11 @@ func processArg(info *Info, i int, a ...any) {
 		info.Args = a[i+1:]
 	case ErrorHandler: // err2.Catch uses this
 		info.ErrorHandler = first
+		info.NilHandler = first
 	case PanicHandler: // err2.Catch uses this
 		info.PanicHandler = first
-	case NilHandler:
-		info.NilHandler = first
+		//	case NilHandler:
+		//		info.NilHandler = first
 	case CheckHandler:
 		info.CheckHandler = first
 	case nil:

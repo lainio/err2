@@ -460,6 +460,16 @@ todo_assert() {
 	ag 'assert\.[DP]+\.'
 }
 
+todo_handle_func() {
+	dlog "searching old error handlers"
+	ag 'err2\.Handle\(&err, func\(\)'
+}
+
+todo_catch_func() {
+	dlog "searching old error handlers"
+	ag 'err2\.Catch\(func\(err error\)'
+}
+
 lint() {
 	dlog "Linter check for missing defers"
 	ag '^\s*err2\.(Handle|Catch)'

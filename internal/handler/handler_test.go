@@ -27,9 +27,6 @@ func TestProcess(t *testing.T) {
 		args args
 		want want
 	}{
-		// TODO: this test e.g. has problem because Process is not called
-		// anymore if Any and Err are nil. Check is done before Process call.
-		// - check with handler.WorkToDo() should we even test this.
 		{"all nil and our handlers",
 			args{Info: handler.Info{
 				Any:          nil,
@@ -285,10 +282,9 @@ func panicHandler(_ any) {
 	panicHandlerCalled = true
 }
 
-func nilHandlerForAnnotate() error {
+func nilHandlerForAnnotate(err error) error {
 	nilHandlerCalled = true
-	// in real case this is closure and it has access to err val
-	myErrVal = fmt.Errorf("nil annotate: %v", "error")
+	myErrVal = fmt.Errorf("nil annotate: %w", err)
 	return myErrVal
 }
 
@@ -303,7 +299,7 @@ func errorHandler(err error) error {
 	return err
 }
 
-func nilHandler() error {
+func nilHandler(err error) error {
 	nilHandlerCalled = true
-	return nil
+	return err
 }
