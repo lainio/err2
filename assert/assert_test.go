@@ -18,7 +18,7 @@ func ExampleThat() {
 	}
 	err := sample()
 	fmt.Printf("%v", err)
-	// Output: testing run example: assertion test
+	// Output: testing: run example: assertion test
 }
 
 func ExampleNotNil() {

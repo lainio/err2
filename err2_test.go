@@ -182,7 +182,7 @@ func TestPanicking_Handle(t *testing.T) {
 			},
 			annErr,
 		},
-		{"general error thru panic",
+		{"general error thru panic: handle nil: no automatic",
 			args{
 				func() (err error) {
 					// If we want keep same error value second argument
@@ -393,7 +393,7 @@ func ExampleHandle_errThrow() {
 	}
 	err := transport()
 	fmt.Printf("%v", err)
-	// Output: testing run example: our error
+	// Output: testing: run example: our error
 }
 
 func ExampleHandle_errReturn() {

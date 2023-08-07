@@ -9,6 +9,8 @@ import (
 	"github.com/lainio/err2/try"
 )
 
+// TODO: test migrations with these samples!
+
 func (db *Database) MoneyTransfer(from, to *Account, amount int) (err error) {
 	defer err2.Handle(&err)
 

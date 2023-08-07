@@ -45,6 +45,8 @@ func Decamel(s string) string {
 		if toSpace {
 			if prevSkipped {
 				continue
+			} else if v == '.' {
+				b.WriteRune(':')
 			}
 			v = ' '
 			prevSkipped = true

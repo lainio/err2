@@ -226,6 +226,8 @@ func Process(info *Info) {
 	}
 }
 
+// PreProcess is currently used for err2 API like err2.Handle and .Catch.
+//   - replaces the Process
 func PreProcess(errPtr *error, info *Info, a ...any) error {
 	// Bug in Go?
 	// start to use local error ptr only for optimization reasons.
