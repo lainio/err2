@@ -467,7 +467,7 @@ todo_handle_func() {
 
 todo_catch_func() {
 	dlog "searching old error handlers"
-	ag 'err2\.Catch\(func\(err error\)'
+	ag 'err2\.Catch\(func\(err error\) \{'
 }
 
 lint() {

@@ -34,9 +34,9 @@ them. The CopyFile example shows how it works:
 	     w := try.To1(os.Create(dst))
 	     // Add error handler to clean up the destination file. Place it here that
 	     // the next deferred close is called before our Remove call.
-	     defer err2.Handle(&err, func() {
+	     defer err2.Handle(&err, err2.Err(func(error) {
 	     	os.Remove(dst)
-	     })
+	     }))
 	     defer w.Close()
 
 	     // Try to copy the file. If error occurs now, all previous error handlers
