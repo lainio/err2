@@ -40,14 +40,17 @@ type (
 //
 //	error sending response: UDP not listening
 func (o *Result) Logf(a ...any) *Result {
-	if o.Err == nil || len(a) == 0 {
+	if o.Err == nil {
 		return o
 	}
-	f, isFormat := a[0].(string)
-	if isFormat {
-		s := fmt.Sprintf(f+": %v", append(a[1:], o.Err)...)
-		_ = handler.LogOutput(2, s)
+	s := o.Err.Error()
+	if len(a) != 0 {
+		f, isFormat := a[0].(string)
+		if isFormat {
+			s = fmt.Sprintf(f+": %v", append(a[1:], o.Err)...)
+		}
 	}
+	_ = handler.LogOutput(2, s)
 	return o
 }
 
