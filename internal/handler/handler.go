@@ -314,13 +314,10 @@ func processArg(info *Info, i int, a ...any) {
 		info.NilHandler = first
 	case PanicHandler: // err2.Catch uses this
 		info.PanicHandler = first
-		//	case NilHandler:
-		//		info.NilHandler = first
 	case CheckHandler:
 		info.CheckHandler = first
 	case nil:
-		info.NilHandler = NilNoop // TODO: this resets the error!! need
-		// argument!!!
+		info.NilHandler = NilNoop
 	default:
 		// we don't panic here because we can already be in recovery, but lets
 		// try to show an error message at least.

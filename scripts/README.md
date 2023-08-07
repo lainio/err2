@@ -9,6 +9,20 @@ successfully from type variables (see below) to Go generics API.
 This readme will guide you to use auto-migration scripts when ever we deprecate
 functions or make something obsolete.
 
+### `err2.Catch(func() {})` -> `err2.Catch(func(error) error {})` and others in v0.9.40
+
+The version 0.9.40 has major update because of the performance. We have managed
+to eliminate `defer` slowdown. Our benchmarks are 3x faster and about equal to
+those function call stacks (100 level) that don't use `defer`. And because
+`try.To` is already as fast as `if err != nil` we reached our goal in speedwise!
+
+Because all of the error handler function signatures are now:
+```go
+	ErrorHandler = func(err error) error
+```
+and the old one was `func()` and we dynamic signatures on `err2.Handle` and
+`err2.Catch` we cannot use compiler for type checking.
+
 ### `assert.SetDefaultAsserter` -> `assert.SetDefault` and others in v0.9.1
 
 Because direct renaming causes braking changes remember add -x flag to your

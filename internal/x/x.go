@@ -41,5 +41,3 @@ func Swap[T any](lhs, rhs *T) (nlhs T) {
 	*rhs = swap
 	return *lhs
 }
-
-// TODO: , Max, ...

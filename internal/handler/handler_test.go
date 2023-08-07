@@ -137,7 +137,7 @@ var Info = handler.Info{
 
 func Handle() {
 	a := []any{}
-	Info.Err = &myErrVal // TODO: middle of the perf-refactoring
+	Info.Err = &myErrVal
 	myErrVal = handler.PreProcess(&myErrVal, &Info, a...)
 }
 
@@ -152,7 +152,7 @@ func TestPreProcess_debug(t *testing.T) {
 	test.RequireEqual(t, nilHandlerCalled, false)
 
 	// See the name of this test function. Decamel it + error
-	const want = "testing t runner: error"
+	const want = "testing: t runner: error"
 	test.RequireEqual(t, myErrVal.Error(), want)
 
 	resetCalled()
@@ -233,7 +233,6 @@ func TestPreProcess(t *testing.T) {
 				var err = x.Whom(tt.args.Info.Err != nil,
 					*tt.args.Info.Err, nil)
 
-				// TODO: we should assign it to myErrVal
 				err = handler.PreProcess(&err, &tt.args.Info, tt.args.a...)
 
 				test.RequireEqual(t, panicHandlerCalled, tt.want.panicCalled)
