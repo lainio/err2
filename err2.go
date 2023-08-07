@@ -55,17 +55,16 @@ var (
 // In case of the actual error handling, the handler function should be given as
 // an second argument:
 //
-//	defer err2.Handle(&err, func() {
+//	defer err2.Handle(&err, func(err error) error {
 //		os.Remove(dst)
+//		return err
 //	})
 //
 // If you need to stop general panics in handler, you can do that by giving a
 // panic handler function:
 //
 //	defer err2.Handle(&err,
-//	   func() {
-//	      os.Remove(dst)
-//	   },
+//	   err2.Err( func(error) { os.Remove(dst) }), // err2.Err keeps it short
 //	   func(p any) {} // panic handler, it's stops panics, you can re-throw
 //	)
 func Handle(err *error, a ...any) {
@@ -109,16 +108,23 @@ func Handle(err *error, a ...any) {
 // currently set log.
 //
 // The next one stops errors and panics, but allows you handle errors, like
-// cleanups, etc. The output results depends on the current Tracer and assert
+// cleanups, etc. The error handler function has same signature as Handle's
+// error handling function: func(err error) error. By returning nil resets the
+// error, which allows e.g. prevent automatic error logs to happening.
+// Otherwise, the output results depends on the current Tracer and assert
 // settings. Default setting print call stacks for panics but not for errors.
 //
-//	defer err2.Catch(func(err error) {})
+//	defer err2.Catch(func(err error) error { return err} )
+//
+// or if you you prefer to use dedicated helpers:
+//
+//	defer err2.Catch(err2.Reset)
 //
 // The last one calls your error handler, and you have an explicit panic
 // handler too, where you can e.g. continue panicking to propagate it for above
 // callers:
 //
-//	defer err2.Catch(func(err error) {}, func(p any) {})
+//	defer err2.Catch(func(err error) error { return err }, func(p any) {})
 func Catch(a ...any) {
 	// This and others are similar but we need to call `recover` here because
 	// how it works with defer.
@@ -157,6 +163,27 @@ func Catch(a ...any) {
 func Throwf(format string, args ...any) {
 	err := fmt.Errorf(format, args...)
 	panic(err)
+}
+
+// Noop is predeclared helper to use with Handle and Catch. It keeps the current
+// error value the same. You can use it like this:
+//
+//	defer err2.Handle(&err, err2.Noop)
+func Noop(err error) error { return err }
+
+// Reset is predeclared helper to use with Handle and Catch. It sets the current
+// error value to nil. You can use it like this to reset the error:
+//
+//	defer err2.Handle(&err, err2.Reset)
+func Reset(error) error { return nil }
+
+// Err is predeclared helper to use with Handle and Catch. It offers simplifier
+// for error handling function.
+func Err(f func(err error)) func(error) error {
+	return func(err error) error {
+		f(err)
+		return err
+	}
 }
 
 func doTrace(err error) {
