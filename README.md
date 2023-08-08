@@ -429,18 +429,28 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.29
-- New API for immediate error handling: `try out handle/catch err`
-  ```go
-  val := try.Out1(strconv.Atoi(s)).Catch(10)
-  ```
-- New err2.Catch API for automatic logging
-- Performance boost for assert pkg: `defer assert.PushTester(t)()`
-- Our API has now *all the same features Zig's error handling has*
+##### 0.9.40
+- Huge performance boost for: `defer err2.Handle/Catch()` 
+  - **3x faster happy path**, tested 100 deep call stack with every lvl has `defer`
+  - solution caused change to API (core reason is Go's optimization "bug")
+- Changed API for deferred error handling: `defer err2.Handle/Catch()`
+  - deprecated:
+    ```go
+    defer err2.Handle(&err, func() { // THE OLD, deprecated API
+    defer err2.Handle(&err, func(error) error { // The New CURRENT API
+    ```
+  - added:
+    ```go
+    defer err2.Handle(&err, func(noerr bool) {
+            assert.That(noerr) // noerr is always true!!
+            doSomething()
+    })
+    ```
+- More documentation
 
 ### Upcoming releases
 
-##### 0.9.3 
+##### 0.9.5
 - Go's standard lib's flag pkg integration (similar to `glog`)
 - Continue removing unused parts from `assert` pkg
 - More documentation, repairing for some sort of marketing

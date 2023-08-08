@@ -20,8 +20,33 @@ Because all of the error handler function signatures are now:
 ```go
 	ErrorHandler = func(err error) error
 ```
-and the old one was `func()` and we dynamic signatures on `err2.Handle` and
-`err2.Catch` we cannot use compiler for type checking.
+and the old one was `func()` relaying closures. And because we have dynamic
+signatures on `err2.Handle` and `err2.Catch`, we cannot use compiler for type
+checking, which makes this so important but difficult. The `err2` package writes
+problems to `stderr` because it cannot panic in middle of the panicking. Note.
+This is only a legacy code problem. We are migration as you see :-)
+
+Follow these steps check do you have migration needs for v0.9.40:
+1. [Set up Migration Environment](#set-up-migration-environment)
+1. Execute following command:
+   ```shell
+   migr-name.sh todo_handle_func todo_catch_func
+   ```
+
+*Tip. You can execute that command from e.g. nvim/vim and you get your fix list.*
+```shell
+migr-name.sh todo_handle_func todo_catch_func > todo_list
+nvim -q todo_list
+```
+*Or depending on your current shell:*
+```shell
+nvim -q <(migr-name.sh todo_handle_func todo_catch_func)
+```
+
+**Note. We are still in middle to process check if we can make this migration
+automatic, at least semi-automatic. Probably we cannot do the same as with
+others because the error value setting isn't closure anymore where we can refer
+the `err` return variable directly.**
 
 ### `assert.SetDefaultAsserter` -> `assert.SetDefault` and others in v0.9.1
 
