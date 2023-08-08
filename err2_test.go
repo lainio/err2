@@ -638,6 +638,28 @@ func BenchmarkRecursionWithTryCall(b *testing.B) {
 	}
 }
 
+func BenchmarkRecursionWithTryAnd_Empty_Defer(b *testing.B) {
+	var recursion func(a int) (r int, err error)
+	recursion = func(a int) (r int, err error) {
+		defer func(e error) { // try to be as close to our case, but simple!
+			err = e
+		}(err)
+
+		if a == 0 {
+			return 0, nil
+		}
+		s := try.To1(noThrow())
+		_ = s
+		r = try.To1(recursion(a - 1))
+		r += a
+		return r, nil
+	}
+
+	for n := 0; n < b.N; n++ {
+		_, _ = recursion(100)
+	}
+}
+
 func BenchmarkRecursionWithTryAndDefer(b *testing.B) {
 	var recursion func(a int) (r int, err error)
 	recursion = func(a int) (r int, err error) {
