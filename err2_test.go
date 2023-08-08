@@ -49,6 +49,26 @@ func TestTry_Error(t *testing.T) {
 	t.Fail() // If everything works we are never here
 }
 
+func TestHandle_NoError(t *testing.T) {
+	var err error
+	var handlerCalled bool
+	defer func() {
+		test.RequireEqual(t, handlerCalled, true)
+	}()
+	defer err2.Handle(&err, func(err error) error {
+		// this should not be called, so lets try to fuckup things...
+		handlerCalled = false
+		return err
+	})
+
+	// This is the handler we are thesting!
+	defer err2.Handle(&err, func(noerr bool) {
+		handlerCalled = noerr
+	})
+
+	try.To(noErr())
+}
+
 func TestPanickingCatchAll(t *testing.T) {
 	type args struct {
 		f func()

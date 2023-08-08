@@ -20,7 +20,9 @@ type (
 	PanicHandler = func(p any)
 	ErrorHandler = func(err error) error // this is only proper type that work
 	NilHandler   = func(err error) error // these two are the same
-	CheckHandler = func(noerr bool) error
+
+	//CheckHandler = func(noerr bool, err error) error
+	CheckHandler = func(noerr bool)
 )
 
 // Info tells to Process function how to proceed.
@@ -58,12 +60,19 @@ const (
 	wrapError = ": %w"
 )
 
-func PanicNoop(_ any)         {}
+func PanicNoop(any)           {}
 func NilNoop(err error) error { return err }
 
 // func ErrorNoop(err error) {}
 
 func (i *Info) callNilHandler() {
+	if i.CheckHandler != nil {
+		i.CheckHandler(true)
+		// there is no err and user wants to handle OK with our pkg:
+		// nothing more to do here after callNilHandler call
+		return
+	}
+
 	if i.safeErr() != nil {
 		i.checkErrorTracer()
 	}
@@ -206,6 +215,14 @@ func (i *Info) wrapStr() string {
 // decision to abort the processing ASAP.
 func WorkToDo(r any, err *error) bool {
 	return (err != nil && *err != nil) || r != nil
+}
+
+func NoerrCallToDo(a ...any) (yes bool) {
+	//var yes bool
+	if len(a) != 0 {
+		_, yes = a[0].(CheckHandler)
+	}
+	return yes
 }
 
 // Process executes error handling logic. Panics and whole defer stack is

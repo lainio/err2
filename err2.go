@@ -72,7 +72,7 @@ func Handle(err *error, a ...any) {
 	// how how it works with defer.
 	r := recover()
 
-	if !handler.WorkToDo(r, err) {
+	if !handler.WorkToDo(r, err) && !handler.NoerrCallToDo(a...) {
 		return
 	}
 
