@@ -45,6 +45,18 @@ testv:
 test:
 	$(GO) test $(TEST_ARGS) $(PKGS)
 
+inline_err2:
+	$(GO) test -c -gcflags=-m=2 $(PKG_ERR2) 2>&1 | ag 'inlin' 
+
+tinline_err2:
+	$(GO) test -c -gcflags=-m=2 $(PKG_ERR2) 2>&1 | ag 'inlin' | ag 'err2_test'
+
+inline_handler:
+	$(GO) test -c -gcflags=-m=2 $(PKG_HANDLER) 2>&1 | ag 'inlin' 
+
+tinline_handler:
+	$(GO) test -c -gcflags=-m=2 $(PKG_HANDLER) 2>&1 | ag 'inlin'
+
 bench:
 	$(GO) test -bench=. $(PKGS)
 
@@ -68,6 +80,9 @@ bench_that:
 
 bench_copy:
 	$(GO) test -bench='Benchmark_CopyBuffer' $(PKG_TRY)
+
+bench_rece:
+	$(GO) test -bench='BenchmarkRecursionWithTryAnd_Empty_Defer' $(PKG_ERR2)
 
 bench_rec:
 	$(GO) test -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG_ERR2)

@@ -30,6 +30,8 @@ func Init() {
 }
 
 func doMainAll() {
+	Init()
+
 	logger.Info("=== 1. preferred successful status output ===")
 	doMain1()
 	logger.Info("=== 2. NilThen and try.To successful status ===")
@@ -46,7 +48,10 @@ func doMainAll() {
 	logger.Info("=== 3. NilThen and try.Out successful status ===")
 	doMain3()
 }
+
 func doMain3() {
+	Init()
+
 	defer err2.Catch("CATCH")
 	logger.Debug("3: ADD node")
 	defer NilThen(func() {
@@ -56,6 +61,8 @@ func doMain3() {
 }
 
 func doMain2() {
+	Init()
+
 	defer err2.Catch("CATCH")
 	logger.Debug("2: ADD node")
 	defer NilThen(func() {
@@ -66,6 +73,8 @@ func doMain2() {
 }
 
 func doMain1() {
+	Init()
+
 	defer err2.Catch("CATCH")
 	logger.Debug("1: ADD node")
 

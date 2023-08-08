@@ -17,7 +17,6 @@ func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 
 	flag.Parse()
-	Init()
 
 	switch *mode {
 	case "db":

@@ -431,8 +431,11 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ##### 0.9.40
 - Huge performance boost for: `defer err2.Handle/Catch()` 
-  - **3x faster happy path**, tested 100 deep call stack with every lvl has `defer`
-  - solution caused change to API (core reason is Go's optimization "bug")
+  - **3x faster happy path than the previous version, which is now equal to
+    simplest `defer` function in the err-returning function** . (Please see the
+    `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
+  - the solution caused a change to API, where the core reason is Go's
+    optimization "bug". (We don't have confirmation yet)
 - Changed API for deferred error handling: `defer err2.Handle/Catch()`
   - deprecated:
     ```go
