@@ -27,8 +27,9 @@ func CopyFile(src, dst string) (err error) {
 	defer r.Close()
 
 	w := try.To1(os.Create(dst))
-	defer err2.Handle(&err, func() {
+	defer err2.Handle(&err, func(err error) error {
 		try.Out(os.Remove(dst)).Logf()
+		return err
 	})
 	defer w.Close()
 
@@ -55,8 +56,9 @@ func OrgCopyFile(src, dst string) (err error) {
 	if err != nil {
 		return fmt.Errorf("mixing traditional error checking: %w", err)
 	}
-	defer err2.Handle(&err, func() {
+	defer err2.Handle(&err, func(err error) error {
 		try.Out(os.Remove(dst)).Logf("cleaning error")
+		return err
 	})
 	defer w.Close()
 	try.To1(io.Copy(w, r))

@@ -398,6 +398,21 @@ func TestSetErrorTracer(t *testing.T) {
 	test.Require(t, w == nil, "error tracer should be nil")
 }
 
+func ExampleCatch_withFmt() {
+	// Set default logger to stdout for this example
+	oldLogW := err2.LogTracer()
+	err2.SetLogTracer(os.Stdout)
+	defer err2.SetLogTracer(oldLogW)
+
+	transport := func() {
+		// See how Catch follows given format string similarly as Handle
+		defer err2.Catch("catch")
+		err2.Throwf("our error")
+	}
+	transport()
+	// Output: catch: our error
+}
+
 func ExampleHandle() {
 	var err error
 	defer err2.Handle(&err)

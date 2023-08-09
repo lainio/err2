@@ -138,6 +138,7 @@ func (i *Info) workError() (err error) {
 
 func (i *Info) fmtErr() {
 	*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, i.werr)...)
+	i.werr = *i.Err // remember change both our errors!
 }
 
 func (i *Info) buildFmtErr() {

@@ -25,7 +25,7 @@ func CopyFile(src, dst string) (err error) {
 		return fmt.Errorf("mixing traditional error checking: %w", err)
 	}
 	defer err2.Handle(&err, err2.Err(func(error) {
-		os.Remove(dst)
+		try.Out1(os.Remove(dst)).Logf("cleaning error")
 	}))
 	defer w.Close()
 	try.To1(io.Copy(w, r))
@@ -430,30 +430,34 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 ### Latest Release
 
 ##### 0.9.40
-- Huge performance boost for: `defer err2.Handle/Catch()` 
+- Significant performance boost for: `defer err2.Handle/Catch()` 
   - **3x faster happy path than the previous version, which is now equal to
-    simplest `defer` function in the err-returning function** . (Please see the
-    `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
+    simplest `defer` function in the `err`-returning function** . (Please see
+    the `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
   - the solution caused a change to API, where the core reason is Go's
     optimization "bug". (We don't have confirmation yet)
 - Changed API for deferred error handling: `defer err2.Handle/Catch()`
-  - deprecated:
+  - Deprecated:
     ```go
-    defer err2.Handle(&err, func() { // THE OLD, deprecated API
-    defer err2.Handle(&err, func(error) error { // The New CURRENT API
+    defer err2.Handle(&err, func() { // <- relaying closure to access err val
     ```
-  - added:
+  - Current version:
+    ```go
+    defer err2.Handle(&err, func(error) error { // <- err val goes thru
+    ```
+  - Added a new API:
     ```go
     defer err2.Handle(&err, func(noerr bool) {
             assert.That(noerr) // noerr is always true!!
             doSomething()
     })
     ```
+- Bug fixes: `ResultX.Logf()` now works as it should
 - More documentation
 
 ### Upcoming releases
 
 ##### 0.9.5
-- Go's standard lib's flag pkg integration (similar to `glog`)
+- Idea: Go's standard lib's flag pkg integration (similar to `glog`)
 - Continue removing unused parts from `assert` pkg
 - More documentation, repairing for some sort of marketing

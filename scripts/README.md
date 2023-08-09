@@ -11,10 +11,13 @@ functions or make something obsolete.
 
 ### `err2.Catch(func() {})` -> `err2.Catch(func(error) error {})` and others in v0.9.40
 
-The version 0.9.40 has major update because of the performance. We have managed
-to eliminate `defer` slowdown. Our benchmarks are 3x faster and about equal to
-those function call stacks (100 level) that don't use `defer`. And because
-`try.To` is already as fast as `if err != nil` we reached our goal in speedwise!
+The version 0.9.40 is a major update because of the performance. We have managed
+to eliminate `defer` slowdown. Our benchmarks are 3x faster than previous
+version and about equal to those function call stacks (100 level) that don't use
+`defer`. We are exactly at the same level of performance with those functions
+that use deferred function that accept an argument. Transporting an argument to
+deferred function seems to be slower than functions that don't. And because
+`try.To` is already as fast as `if err != nil` we reached our goal for speed!
 
 Because all of the error handler function signatures are now:
 ```go
