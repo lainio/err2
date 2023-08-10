@@ -28,9 +28,9 @@ func ExampleIsNotFound1() {
 	err2.SetErrorTracer(nil)
 
 	find := func(key int) string {
-		defer err2.Catch(func(err error) {
+		defer err2.Catch(err2.Err(func(err error) {
 			fmt.Println("ERROR:", err)
-		})
+		}))
 		notFound, value := try.IsNotFound1(FindObject(key))
 		if notFound {
 			return fmt.Sprintf("cannot find key (%d)", key)

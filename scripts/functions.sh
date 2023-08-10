@@ -353,8 +353,8 @@ clean() {
 
 search_0_multi='(^\s*)(err)( :?= )((.|\n)*?)(\n)(\s*try\.To\(err\))' 
 search_1_multi='(^\s*[\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
-search_2_multi="(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
-search_3_multi="(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
+search_2_multi='(^\s*[\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
+search_3_multi='(^\s*[\w\.]*, [\w\.]*, [\w\.]*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))'
 
 # other tested versions, left here for debugging purposes
 #search_2_multi="(^\s*\w*, \w*)(, err)( :?= )([\s\S]*?)(\n)(\s*try\.To\(err\))"
@@ -460,14 +460,28 @@ todo_assert() {
 	ag 'assert\.[DP]+\.'
 }
 
+search_handle_multi='(^\s*)(defer err2\.Handle\(&err, func\(\) \{)([\s\S]*?)(^\s*\}\)$)'
+
 todo_handle_func() {
-	dlog "searching old error handlers"
-	ag 'err2\.Handle\(&err, func\(\)'
+	vlog "searching old error Handlers"
+	ag "$search_handle_multi"
 }
 
+repl_handle_func() {
+	vlog "replacing old error Handlers"
+	check_commit "$search_handle_multi" '\1defer err2.Handle(&err, func(err error) error {\3\1\treturn err\n\1})'
+}
+
+search_catch_multi='(^\s*)(defer err2\.Catch\(func\(err error\) \{)([\s\S]*?)(^\s*\}\)$)'
+
 todo_catch_func() {
-	dlog "searching old error handlers"
-	ag 'err2\.Catch\(func\(err error\) \{'
+	vlog "searching old error Catchers"
+	ag "$search_catch_multi"
+}
+
+repl_catch_func() {
+	vlog "replacing old error Catchers"
+	check_commit "$search_catch_multi" '\1defer err2.Catch(err2.Err(func(err error) {\3\1}))'
 }
 
 lint() {

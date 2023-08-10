@@ -29,12 +29,17 @@ checking, which makes this so important but difficult. The `err2` package writes
 problems to `stderr` because it cannot panic in middle of the panicking. Note.
 This is only a legacy code problem. We are migration as you see :-)
 
+#### Manual v0.9.40 Migration With Location List (nvim/vim)
+
 Follow these steps check do you have migration needs for v0.9.40:
 1. [Set up Migration Environment](#set-up-migration-environment)
-1. Execute following command:
+1. Execute following command in your repo's root directory:
    ```shell
-   migr-name.sh todo_handle_func todo_catch_func
+   migr-name.sh -ndv todo_handle_func todo_catch_func
    ```
+
+*Tip. If your repo is large and you have many migration changes see the next
+[semi-automatic guide](#semi-automatic-v0.9.40-migration).*
 
 *Tip. You can execute that command from e.g. nvim/vim and you get your fix list.*
 ```shell
@@ -46,10 +51,20 @@ nvim -q todo_list
 nvim -q <(migr-name.sh todo_handle_func todo_catch_func)
 ```
 
-**Note. We are still in middle to process check if we can make this migration
-automatic, at least semi-automatic. Probably we cannot do the same as with
-others because the error value setting isn't closure anymore where we can refer
-the `err` return variable directly.**
+#### Semi-Automatic v0.9.40 Migration
+
+Follow these steps:
+1. [Set up Migration Environment](#set-up-migration-environment)
+1. Make sure that you haven't uncommitted changes in your repo and that you are
+   in the branch where you want to make the changes.
+1. Execute following command in your repo's root directory:
+   ```shell
+   migr-name.sh -ndv repl_handle_func repl_catch_func
+   ```
+1. Then continue with `build`, `test`, `lint`, etc. **And don't stop yet.**
+1. Use `git diff` or similar to skimming that all changes seem to be OK. Here
+   you have an opportunity to start use new features of `err2` like logging.
+1. You are ready to commit changes.
 
 ### `assert.SetDefaultAsserter` -> `assert.SetDefault` and others in v0.9.1
 
