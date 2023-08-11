@@ -11,19 +11,22 @@ type (
 	// ErrFn is function type for try.OutX handlers.
 	ErrFn = func(err error) error
 
-	// Result is the base of our error handling DSL for try.Out functions.
+	// Result is the base of our error handling language for try.Out functions.
 	Result struct {
+		// Err holds the error value returned from try.Out function result.
 		Err error
 	}
 
 	// Result1 is the base of our error handling DSL for try.Out1 functions.
 	Result1[T any] struct {
+		// Val1 holds the first value returned from try.Out1 function result.
 		Val1 T
 		Result
 	}
 
 	// Result2 is the base of our error handling DSL for try.Out2 functions.
 	Result2[T any, U any] struct {
+		// Val2 holds the first value returned from try.Out2 function result.
 		Val2 U
 		Result1[T]
 	}
