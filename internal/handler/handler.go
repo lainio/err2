@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/lainio/err2/internal/color"
 	"github.com/lainio/err2/internal/debug"
 	fmtstore "github.com/lainio/err2/internal/formatter"
 	"github.com/lainio/err2/internal/str"
@@ -340,8 +341,13 @@ func processArg(info *Info, i int, a ...any) {
 		info.NilHandler = NilNoop
 	default:
 		// we don't panic here because we can already be in recovery, but lets
-		// try to show an error message at least.
-		fmt.Fprintln(os.Stderr, "fatal error: err2.Handle: unsupported type")
+		// try to show an RED error message at least.
+		const msg = `err2 fatal error:  
+---
+unsupported handler function type: err2.Handle/Catch:
+see 'err2/scripts/README.md' and run auto-migration scripts for your repo
+---`
+		fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
 	}
 }
 
