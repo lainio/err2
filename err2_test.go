@@ -53,7 +53,7 @@ func TestHandle_NoError(t *testing.T) {
 	var err error
 	var handlerCalled bool
 	defer func() {
-		test.RequireEqual(t, handlerCalled, true)
+		test.Require(t, handlerCalled)
 	}()
 	defer err2.Handle(&err, func(err error) error {
 		// this should not be called, so lets try to fuckup things...

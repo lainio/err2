@@ -147,9 +147,9 @@ func TestPreProcess_debug(t *testing.T) {
 	// and that's what error stack tracing is all about
 	Handle()
 
-	test.RequireEqual(t, panicHandlerCalled, false)
-	test.RequireEqual(t, errorHandlerCalled, false)
-	test.RequireEqual(t, nilHandlerCalled, false)
+	test.Require(t, !panicHandlerCalled)
+	test.Require(t, !errorHandlerCalled)
+	test.Require(t, !nilHandlerCalled)
 
 	// See the name of this test function. Decamel it + error
 	const want = "testing: t runner: error"

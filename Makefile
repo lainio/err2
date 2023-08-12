@@ -58,46 +58,43 @@ tinline_handler:
 	$(GO) test -c -gcflags=-m=2 $(PKG_HANDLER) 2>&1 | ag 'inlin'
 
 bench:
-	$(GO) test -bench=. $(PKGS)
+	$(GO) test $(TEST_ARGS) -bench=. $(PKGS)
 
 bench_goid:
-	$(GO) test -bench='BenchmarkGoid' $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkGoid' $(PKG_ASSERT)
 
 bench_reca:
-	$(GO) test -bench='BenchmarkRecursion.*' $(PKG_ERR2)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursion.*' $(PKG_ERR2)
 
 bench_out:
-	$(GO) test -bench='BenchmarkTryOut_.*' $(PKG_ERR2)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkTryOut_.*' $(PKG_ERR2)
 
 bench_go:
-	$(GO) test -bench='BenchmarkTry_StringGenerics' $(PKG_ERR2)
-
-bench_arec:
-	$(GO) test -bench='BenchmarkRecursion.*' $(PKG_ERR2)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkTry_StringGenerics' $(PKG_ERR2)
 
 bench_that:
-	$(GO) test -bench='BenchmarkThat.*' $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkThat.*' $(PKG_ASSERT)
 
 bench_copy:
-	$(GO) test -bench='Benchmark_CopyBuffer' $(PKG_TRY)
+	$(GO) test $(TEST_ARGS) -bench='Benchmark_CopyBuffer' $(PKG_TRY)
 
 bench_rece:
-	$(GO) test -bench='BenchmarkRecursionWithTryAnd_Empty_Defer' $(PKG_ERR2)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursionWithTryAnd_Empty_Defer' $(PKG_ERR2)
 
 bench_rec:
-	$(GO) test -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG_ERR2)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursionWithOldErrorIfCheckAnd_Defer' $(PKG_ERR2)
 
 bench_err2:
-	$(GO) test -bench=. $(PKG_ERR2)
+	$(GO) test $(TEST_ARGS) -bench=. $(PKG_ERR2)
 
 bench_assert:
-	$(GO) test -bench=. $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench=. $(PKG_ASSERT)
 
 bench_str:
-	$(GO) test -bench=. $(PKG_STR)
+	$(GO) test $(TEST_ARGS) -bench=. $(PKG_STR)
 
 bench_x:
-	$(GO) test -bench=. $(PKG_X)
+	$(GO) test $(TEST_ARGS) -bench=. $(PKG_X)
 
 vet: | test
 	$(GO) vet $(PKGS)

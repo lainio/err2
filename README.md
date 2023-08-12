@@ -254,7 +254,8 @@ We also mark functions deprecated before they become obsolete. Usually, one
 released version before. We have tested this with a large code base in our
 systems, and it works wonderfully.
 
-More information can be found in the scripts' [readme file](./scripts/README.md).
+More information can be found in the `scripts/` directory [readme
+file](./scripts/README.md).
 
 ## Assertion
 
@@ -435,23 +436,29 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
     simplest `defer` function in the `err`-returning function** . (Please see
     the `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
   - the solution caused a change to API, where the core reason is Go's
-    optimization "bug". (We don't have confirmation yet)
+    optimization "bug". (We don't have confirmation yet.)
 - Changed API for deferred error handling: `defer err2.Handle/Catch()`
-  - Deprecated:
+  - *Obsolete*:
     ```go
-    defer err2.Handle(&err, func() { // <- relaying closure to access err val
+    defer err2.Handle(&err, func() {}) // <- relaying closure to access err val
     ```
   - Current version:
     ```go
-    defer err2.Handle(&err, func(error) error { // <- err val goes thru
+    defer err2.Handle(&err, func(err error) error { return err }) // not a closure
     ```
-  - Added a new API:
+    Because handler function is not relaying closures any more, it opens a new
+    opportunity to use and build general helper functions: `err2.Noop`, etc.
+  - Use auto-migration scripts especially for large code-bases. More information
+    can be found in the `scripts/` directory's [readme file](./scripts/README.md).
+  - Added a new (*experimental*) API:
     ```go
     defer err2.Handle(&err, func(noerr bool) {
             assert.That(noerr) // noerr is always true!!
             doSomething()
     })
     ```
+    This is experimental because we aren't sure if this is something we want to
+    have in the `err2` package.
 - Bug fixes: `ResultX.Logf()` now works as it should
 - More documentation
 

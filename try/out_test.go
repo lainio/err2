@@ -1,3 +1,5 @@
+//go:build !windows
+
 package try_test
 
 import (

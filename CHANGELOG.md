@@ -1,4 +1,4 @@
-## Cangelog
+## Changelog
 
 ### Version history
 

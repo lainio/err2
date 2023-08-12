@@ -43,18 +43,7 @@ type (
 //
 //	error sending response: UDP not listening
 func (o *Result) Logf(a ...any) *Result {
-	if o.Err == nil {
-		return o
-	}
-	s := o.Err.Error()
-	if len(a) != 0 {
-		f, isFormat := a[0].(string)
-		if isFormat {
-			s = fmt.Sprintf(f+": %v", append(a[1:], o.Err)...)
-		}
-	}
-	_ = handler.LogOutput(2, s)
-	return o
+	return o.logf(logfFrameLvl, a...)
 }
 
 // Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
@@ -68,7 +57,7 @@ func (o *Result) Logf(a ...any) *Result {
 //
 //	error sending response: UDP not listening
 func (o *Result1[T]) Logf(a ...any) *Result1[T] {
-	o.Result.Logf(a...)
+	o.Result.logf(logfFrameLvl, a...)
 	return o
 }
 
@@ -83,7 +72,7 @@ func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 //
 //	error sending response: UDP not listening
 func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
-	o.Result.Logf(a...)
+	o.Result.logf(logfFrameLvl, a...)
 	return o
 }
 
@@ -272,3 +261,22 @@ func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
 func wrapStr() string {
 	return ": %w"
 }
+
+func (o *Result) logf(lvl int, a ...any) *Result {
+	if o.Err == nil {
+		return o
+	}
+	s := o.Err.Error()
+	if len(a) != 0 {
+		f, isFormat := a[0].(string)
+		if isFormat {
+			s = fmt.Sprintf(f+": %v", append(a[1:], o.Err)...)
+		}
+	}
+	_ = handler.LogOutput(lvl, s)
+	return o
+}
+
+const (
+	logfFrameLvl = 4
+)

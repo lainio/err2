@@ -9,7 +9,7 @@ import (
 
 var (
 	mode  = flag.String("mode", "play", "runs the wanted playground: db, play, nil")
-	isErr = flag.Bool("err", false, "tells if we have error")
+	isErr = flag.Bool("err", false, "tells if we want to have an error")
 )
 
 func main() {

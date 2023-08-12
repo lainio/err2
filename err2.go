@@ -7,6 +7,13 @@ import (
 	"github.com/lainio/err2/internal/handler"
 )
 
+type (
+	// Handler is a function type used to process error values in Handle and
+	// Catch. We currently have a few build-ins of the Handler: err2.Noop,
+	// err2.Reset, etc.
+	Handler func(error) error
+)
+
 var (
 	// ErrNotFound is similar *no-error* like io.EOF for those who really want to
 	// use error return values to transport non errors. It's far better to have
@@ -101,7 +108,7 @@ func Handle(err *error, a ...any) {
 //
 // Catch support logging as well:
 //
-//	defer err2.Catch("WARNING: catched errors: %s", name)
+//	defer err2.Catch("WARNING: caught errors: %s", name)
 //
 // The preceding line catches the errors and panics and prints an annotated
 // error message about the error source (from where the error was thrown) to the
@@ -109,20 +116,20 @@ func Handle(err *error, a ...any) {
 //
 // The next one stops errors and panics, but allows you handle errors, like
 // cleanups, etc. The error handler function has same signature as Handle's
-// error handling function: func(err error) error. By returning nil resets the
+// error handling function, i.e., err2.Handler. By returning nil resets the
 // error, which allows e.g. prevent automatic error logs to happening.
 // Otherwise, the output results depends on the current Tracer and assert
-// settings. Default setting print call stacks for panics but not for errors.
+// settings. Default setting print call stacks for panics but not for errors:
 //
 //	defer err2.Catch(func(err error) error { return err} )
 //
 // or if you you prefer to use dedicated helpers:
 //
-//	defer err2.Catch(err2.Reset)
+//	defer err2.Catch(err2.Noop)
 //
 // The last one calls your error handler, and you have an explicit panic
 // handler too, where you can e.g. continue panicking to propagate it for above
-// callers:
+// callers or stop it like below:
 //
 //	defer err2.Catch(func(err error) error { return err }, func(p any) {})
 func Catch(a ...any) {
@@ -165,20 +172,26 @@ func Throwf(format string, args ...any) {
 	panic(err)
 }
 
-// Noop is predeclared helper to use with Handle and Catch. It keeps the current
+// Noop is a built-in helper to use with Handle and Catch. It keeps the current
 // error value the same. You can use it like this:
 //
 //	defer err2.Handle(&err, err2.Noop)
 func Noop(err error) error { return err }
 
-// Reset is predeclared helper to use with Handle and Catch. It sets the current
+// Reset is a built-in helper to use with Handle and Catch. It sets the current
 // error value to nil. You can use it like this to reset the error:
 //
 //	defer err2.Handle(&err, err2.Reset)
 func Reset(error) error { return nil }
 
-// Err is predeclared helper to use with Handle and Catch. It offers simplifier
-// for error handling function.
+// Err is a built-in helper to use with Handle and Catch. It offers simplifier
+// for error handling function for cases where you don't need to change the
+// current error value. For instance, if you want to just write error to stdout,
+// and don't want to use SetLogTracer and keep it to write to your logs.
+//
+//	defer err2.Catch(err2.Err(func(err error) {
+//		fmt.Println("ERROR:", err)
+//	}))
 func Err(f func(err error)) func(error) error {
 	return func(err error) error {
 		f(err)

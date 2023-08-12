@@ -1,3 +1,5 @@
+//go:build !windows
+
 package try_test
 
 import (
@@ -51,11 +53,12 @@ func ExampleIs_errorHappensNot() {
 	// Output: wrapping works
 }
 
+//nolint:unparam
 func ExampleOut_errorHappensNot() {
 	var is bool
-	var errFn = func(_ error) (err error) { //nolint:unparam
+	var errFn = func(error) error {
 		is = true
-		return
+		return nil
 	}
 	copyStream := func(src string) (s string, err error) {
 		defer err2.Handle(&err, "copy stream %s", src)
