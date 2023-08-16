@@ -60,9 +60,9 @@ check_prerequisites() {
 	fi
 
 	local go_version=$(go mod edit -json | jq -r '."Go"')
-	if [[ $go_version < 1.19 ]]; then
+	if [[ $go_version < 1.18 ]]; then
 		echo "ERROR:  Go version number ($go_version) is too low" >&2
-		echo "Sample: go mod edit -go=1.19 # sets the minimal version" >&2
+		echo "Sample: go mod edit -go=1.18 # sets the minimal version" >&2
 		exit 1
 	fi
 

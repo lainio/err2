@@ -2,7 +2,7 @@
 
 The err2 package will offer auto-migration scripts until version 1.0.0 is
 published. That means that you can safely use the package even the API is not
-yet 100% staple. We have used that approach for our production code that uses
+yet 100% stable. We have used that approach for our production code that uses
 `err2` and it works very well. Over 100 KLOC Go code has been auto-migrated
 successfully from type variables (see below) to Go generics API.
 
@@ -13,12 +13,12 @@ functions or make something obsolete.
 
 The version 0.9.40 is a major update because of the performance and API change.
 We have managed to eliminate `defer` slowdown. Our benchmarks are 3x faster than
-previous version and about equal to those function call stacks (100 level) that
-don't use `defer`. We are exactly at the same level of performance with those
-functions that use deferred function that accept an argument. Transporting an
-argument to deferred function seems to be slower than functions that don't. And
-because `try.To` is already as fast as `if err != nil` we reached our goal for
-speed!
+previous version and about equal to those function call stacks (100 deep-level)
+that don't use `defer`. We are exactly at the same level of performance with
+those functions that use deferred function that accept an argument. Transporting
+an argument to deferred function seems to be slower than functions that don't.
+And because `try.To` is already as fast as `if err != nil` we reached our goal
+for speed!
 
 Because all of the error handler function signatures are now:
 ```go
@@ -35,7 +35,8 @@ important but difficult. The `err2` package writes `fatal error: ...` to
 
 You have two (2) options for migration for v0.9.40:
 1. [(Semi)-Automatic Migration](#semi-automatic-migration)
-1. [Manual migration using (vim/nvim) location lists or similar](manual-migration-with-a-location-list)
+1. [Manual migration using (vim/nvim) location lists or
+   similar](#manual-migration-with-a-location-list)
 
 #### (Semi)-Automatic Migration
 
