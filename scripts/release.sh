@@ -2,10 +2,22 @@
 
 set -e
 
-if [[ -z "$1" ]]; then
-	echo "ERROR: give version number, e.g. v0.8.2"
-	exit 1
-fi
+check_prerequisites() {
+	for c in git go goreleaser; do
+		if ! [[ -x "$(command -v ${c})" ]]; then
+			echo "ERR: missing command: '${c}'." >&2
+			echo "Please install before continue." >&2
+			exit 1
+		fi
+	done
+
+	if [[ -z "$1" ]]; then
+		echo "ERROR: give version number, e.g. v0.8.2"
+		exit 1
+	fi
+}
+
+check_prerequisites $1
 
 version="$1"
 cur_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -20,6 +32,7 @@ if [[ -z "$(git status --porcelain)" ]]; then
 	git tag -a "$version" -m "v. $version"
 	git push origin "$cur_branch" --tags
 	GOPROXY=proxy.golang.org go list -m github.com/lainio/err2@"$version"
+	goreleaser release
 else
 	echo 'ERROR: working dir is not clean'
 fi

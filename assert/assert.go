@@ -16,10 +16,52 @@ import (
 type defInd = uint32
 
 const (
+	// Production is the best asserter for most uses. The assertion violations
+	// are treated as Go error values. And only a pragmatic caller info is
+	// automatically included into the error message like file name, line
+	// number, and caller function.
 	Production defInd = 0 + iota
+
+	// Development is the best asserter for most development uses. The
+	// assertion violations are treated as Go error values. And a formatted
+	// caller info is automatically included to the error message like file
+	// name, line number, and caller function.
 	Development
+
+	// Test minimalistic asserter for unit test use. More pragmatic is the
+	// TestFull asserter (default).
+	//
+	// Use this asserter if your IDE/editor doesn't support long file names, or
+	// for temporary problem solving for your programming environment.
 	Test
+
+	// TestFull asserter (default). The TestFull asserter includes caller info
+	// and call stack for unit testing, similarly like err2's error traces.
+	//
+	// The call stack produced by the test asserts can be used over Go module
+	// boundaries. For example, if your app and it's sub packages both use
+	// err2/assert for unit testing and runtime checks, the runtime assertions
+	// will be automatically converted to test asserts on the fly. If any of
+	// the runtime asserts in sub packages fails during the app tests, the
+	// current app test fails too.
+	//
+	// Note, that the cross-module assertions produce long file names (path
+	// included), and some of the Go test result parsers cannot handle that.
+	// A proper test result parser like 'github.com/lainio/nvim-go' (fork)
+	// works very well. Also most of the make result parsers can process the
+	// output properly and allow traverse of locations of the error trace.
 	TestFull
+
+	// Debug asserter transforms assertion violations to panics which is the
+	// patter that e.g. Go's standard library uses:
+	//
+	//   if p == nil {
+	//        panic("pkg: ptr cannot be nil")
+	//   }
+	//
+	// is equal to:
+	//
+	//   assert.NotNil(p)
 	Debug
 )
 
@@ -93,14 +135,18 @@ const (
 //
 // Because PushTester returns PopTester it allows us to merge these two calls to
 // one line. See the first t.Run call. NOTE. More information in PopTester.
+//
+// PushTester allows you to change the current default asserter by accepting it
+// as a second argument. NOTE. That it change the default asserter for whole
+// package. The argument is mainly for temporary development use and isn't not
+// preferrred API usage.
 func PushTester(t testing.TB, a ...defInd) function {
 	if len(a) > 0 {
 		SetDefault(a[0])
 	} else if Default()&AsserterUnitTesting == 0 {
 		// if this is forgotten or tests don't have proper place to set it
 		// it's good to keep the API as simple as possible
-		SetDefault(Test)
-		// TODO: parallel testing is something we should test.
+		SetDefault(TestFull)
 	}
 	testers.Tx(func(m testersMap) {
 		rid := goid()

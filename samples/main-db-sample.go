@@ -13,17 +13,19 @@ func (db *Database) MoneyTransfer(from, to *Account, amount int) (err error) {
 	defer err2.Handle(&err)
 
 	tx := try.To1(db.BeginTransaction())
-	defer err2.Handle(&err, func() {
+	defer err2.Handle(&err, func(err error) error {
 		if errRoll := tx.Rollback(); errRoll != nil {
 			// with go 1.20: err = fmt.Errorf("%w: ROLLBACK ERROR: %w", err, errRoll)
 			err = fmt.Errorf("%v: ROLLBACK ERROR: %w", err, errRoll)
 		}
+		return err
 	})
 
 	try.To(from.ReserveBalance(tx, amount))
 
-	defer err2.Handle(&err, func() { // optional, following sample's wording
+	defer err2.Handle(&err, func(err error) error { // optional, following sample's wording
 		err = fmt.Errorf("cannot %w", err)
+		return err
 	})
 
 	try.To(from.Withdraw(tx, amount))

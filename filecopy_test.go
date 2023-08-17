@@ -1,3 +1,5 @@
+//go:build !windows
+
 package err2_test
 
 import (
@@ -40,5 +42,5 @@ func Example() {
 	// in real word example 'run example' is 'copy file' it comes automatically
 	// from function name that calls `err2.Handle` in deferred.
 
-	// Output: testing run example: open /notfound/path/file.go: no such file or directory
+	// Output: testing: run example: open /notfound/path/file.go: no such file or directory
 }

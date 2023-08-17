@@ -24,9 +24,9 @@ func CopyFile(src, dst string) (err error) {
 	if err != nil {
 		return fmt.Errorf("mixing traditional error checking: %w", err)
 	}
-	defer err2.Handle(&err, func() {
-		os.Remove(dst)
-	})
+	defer err2.Handle(&err, err2.Err(func(error) {
+		try.Out1(os.Remove(dst)).Logf("cleaning error")
+	}))
 	defer w.Close()
 	try.To1(io.Copy(w, r))
 	return nil
@@ -254,7 +254,8 @@ We also mark functions deprecated before they become obsolete. Usually, one
 released version before. We have tested this with a large code base in our
 systems, and it works wonderfully.
 
-More information can be found in the scripts' [readme file](./scripts/README.md).
+More information can be found in the `scripts/` directory [readme
+file](./scripts/README.md).
 
 ## Assertion
 
@@ -429,18 +430,41 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.29
-- New API for immediate error handling: `try out handle/catch err`
-  ```go
-  val := try.Out1(strconv.Atoi(s)).Catch(10)
-  ```
-- New err2.Catch API for automatic logging
-- Performance boost for assert pkg: `defer assert.PushTester(t)()`
-- Our API has now *all the same features Zig's error handling has*
+##### 0.9.40
+- Significant performance boost for: `defer err2.Handle/Catch()` 
+  - **3x faster happy path than the previous version, which is now equal to
+    simplest `defer` function in the `err`-returning function** . (Please see
+    the `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
+  - the solution caused a change to API, where the core reason is Go's
+    optimization "bug". (We don't have confirmation yet.)
+- Changed API for deferred error handling: `defer err2.Handle/Catch()`
+  - *Obsolete*:
+    ```go
+    defer err2.Handle(&err, func() {}) // <- relaying closure to access err val
+    ```
+  - Current version:
+    ```go
+    defer err2.Handle(&err, func(err error) error { return err }) // not a closure
+    ```
+    Because handler function is not relaying closures any more, it opens a new
+    opportunity to use and build general helper functions: `err2.Noop`, etc.
+  - Use auto-migration scripts especially for large code-bases. More information
+    can be found in the `scripts/` directory's [readme file](./scripts/README.md).
+  - Added a new (*experimental*) API:
+    ```go
+    defer err2.Handle(&err, func(noerr bool) {
+            assert.That(noerr) // noerr is always true!!
+            doSomething()
+    })
+    ```
+    This is experimental because we aren't sure if this is something we want to
+    have in the `err2` package.
+- Bug fixes: `ResultX.Logf()` now works as it should
+- More documentation
 
 ### Upcoming releases
 
-##### 0.9.3 
-- Go's standard lib's flag pkg integration (similar to `glog`)
+##### 0.9.5
+- Idea: Go's standard lib's flag pkg integration (similar to `glog`)
 - Continue removing unused parts from `assert` pkg
 - More documentation, repairing for some sort of marketing

@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	mode = flag.String("mode", "play", "runs the wanted playground: db, play,")
+	mode  = flag.String("mode", "play", "runs the wanted playground: db, play, nil")
+	isErr = flag.Bool("err", false, "tells if we want to have an error")
 )
 
 func main() {
@@ -20,6 +21,12 @@ func main() {
 	switch *mode {
 	case "db":
 		doDBMain()
+	case "nil":
+		doMainAll()
+	case "nil1":
+		doMain1()
+	case "nil2":
+		doMain2()
 	case "play":
 		doPlayMain()
 	default:

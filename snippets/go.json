@@ -7,8 +7,8 @@
 		},
 		"defer err2.Catch func": {
 			"prefix": "ecaf",
-			"body": "defer err2.Catch(func(err error) {\n\t$0\n})\n",
-			"description": "Snippet for err2.Catch(func(err error) {})"
+			"body": "defer err2.Catch(func(err error) error {\n\t$0\n})\n",
+			"description": "Snippet for err2.Catch(func(err error) error {})"
 		},
 		"defer err2.Handle": {
 			"prefix": "eha",
@@ -22,8 +22,8 @@
 		},
 		"defer err2.Handle func": {
 			"prefix": "ehaf",
-			"body": "defer err2.Handle(&err, func() {\n\t$0\n})\n",
-			"description": "Snippet for err2.Handle(&err, func() {})"
+			"body": "defer err2.Handle(&err, func(err error) error {\n\t$0\n})\n",
+			"description": "Snippet for err2.Handle(&err, func(err error) error {})"
 		},
 		"defer assert.PushTester(t)()": {
 			"prefix": "aspa",

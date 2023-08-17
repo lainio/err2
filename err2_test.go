@@ -42,11 +42,31 @@ func TestDefault_Error(t *testing.T) {
 
 func TestTry_Error(t *testing.T) {
 	var err error
-	defer err2.Handle(&err, func() {})
+	defer err2.Handle(&err, func(err error) error { return err })
 
 	try.To1(throw())
 
 	t.Fail() // If everything works we are never here
+}
+
+func TestHandle_NoError(t *testing.T) {
+	var err error
+	var handlerCalled bool
+	defer func() {
+		test.Require(t, handlerCalled)
+	}()
+	defer err2.Handle(&err, func(err error) error {
+		// this should not be called, so lets try to fuckup things...
+		handlerCalled = false
+		return err
+	})
+
+	// This is the handler we are thesting!
+	defer err2.Handle(&err, func(noerr bool) {
+		handlerCalled = noerr
+	})
+
+	try.To(noErr())
 }
 
 func TestPanickingCatchAll(t *testing.T) {
@@ -61,7 +81,10 @@ func TestPanickingCatchAll(t *testing.T) {
 		{"general panic",
 			args{
 				func() {
-					defer err2.Catch(func(err error) {}, func(v any) {})
+					defer err2.Catch(
+						err2.Noop,
+						func(v any) {},
+					)
 					panic("panic")
 				},
 			},
@@ -70,7 +93,10 @@ func TestPanickingCatchAll(t *testing.T) {
 		{"runtime.error panic",
 			args{
 				func() {
-					defer err2.Catch(func(err error) {}, func(v any) {})
+					defer err2.Catch(
+						err2.Err(func(error) {}), // Using simplifier
+						func(v any) {},
+					)
 					var b []byte
 					b[0] = 0
 				},
@@ -90,7 +116,7 @@ func TestPanickingCatchAll(t *testing.T) {
 		{"stop panic with error handler in catch",
 			args{
 				func() {
-					defer err2.Catch(func(err error) {})
+					defer err2.Catch(err2.Noop)
 					var b []byte
 					b[0] = 0
 				},
@@ -121,7 +147,7 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 			args{
 				func() {
 					var err error
-					defer err2.Handle(&err, func() {})
+					defer err2.Handle(&err, err2.Noop)
 					panic("panic")
 				},
 			},
@@ -131,7 +157,7 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 			args{
 				func() {
 					var err error
-					defer err2.Handle(&err, func() {})
+					defer err2.Handle(&err, err2.Noop)
 					var b []byte
 					b[0] = 0
 				},
@@ -154,13 +180,29 @@ func TestPanicking_Handle(t *testing.T) {
 		f func() (err error)
 	}
 	myErr := fmt.Errorf("my error")
+	annErr := fmt.Errorf("annotated: %w", myErr)
 
 	tests := []struct {
 		name  string
 		args  args
 		wants error
 	}{
-		{"general error thru panic",
+		{"general error thru panic with annotion handler",
+			args{
+				func() (err error) {
+					// If we want keep same error value second argument
+					// must be nil
+					defer err2.Handle(&err, func(err error) error {
+						return fmt.Errorf("annotated: %w", err)
+					})
+
+					try.To(myErr)
+					return nil
+				},
+			},
+			annErr,
+		},
+		{"general error thru panic: handle nil: no automatic",
 			args{
 				func() (err error) {
 					// If we want keep same error value second argument
@@ -185,7 +227,7 @@ func TestPanicking_Handle(t *testing.T) {
 		{"general panic plus err handler",
 			args{
 				func() (err error) {
-					defer err2.Handle(&err, func() {})
+					defer err2.Handle(&err, err2.Noop)
 					panic("panic")
 				},
 			},
@@ -194,7 +236,10 @@ func TestPanicking_Handle(t *testing.T) {
 		{"general panic stoped with handler plus err handler",
 			args{
 				func() (err error) {
-					defer err2.Handle(&err, func() {}, func(p any) {})
+					defer err2.Handle(&err,
+						func(err error) error { return err },
+						func(p any) {},
+					)
 					panic("panic")
 				},
 			},
@@ -251,7 +296,7 @@ func TestPanicking_Handle(t *testing.T) {
 			}()
 			err := tt.args.f()
 			if err != nil {
-				test.Requiref(t, err == myErr, "got %p, want %p", err, myErr)
+				test.RequireEqual(t, err.Error(), tt.wants.Error())
 			}
 		})
 	}
@@ -269,7 +314,7 @@ func TestPanicking_Catch(t *testing.T) {
 		{"general panic",
 			args{
 				func() {
-					defer err2.Catch(func(err error) {})
+					defer err2.Catch(err2.Noop)
 					panic("panic")
 				},
 			},
@@ -278,7 +323,7 @@ func TestPanicking_Catch(t *testing.T) {
 		{"runtime.error panic",
 			args{
 				func() {
-					defer err2.Catch(func(err error) {})
+					defer err2.Catch(err2.Noop)
 					var b []byte
 					b[0] = 0
 				},
@@ -305,9 +350,10 @@ func TestCatch_Error(t *testing.T) {
 }
 
 func Test_TryOutError(t *testing.T) {
-	defer err2.Catch(func(err error) {
+	defer err2.Catch(func(err error) error {
 		test.RequireEqual(t, err.Error(), "fails: test: this is an ERROR",
 			"=> we should catch right error str here")
+		return err
 	})
 
 	var retVal string
@@ -331,9 +377,10 @@ func TestCatch_Panic(t *testing.T) {
 	}()
 
 	defer err2.Catch(
-		func(err error) {
+		func(err error) error {
 			t.Log("it was panic, not an error")
 			t.Fail() // we should not be here
+			return nil
 		},
 		func(v any) {
 			panicHandled = true
@@ -351,6 +398,21 @@ func TestSetErrorTracer(t *testing.T) {
 	test.Require(t, w == nil, "error tracer should be nil")
 }
 
+func ExampleCatch_withFmt() {
+	// Set default logger to stdout for this example
+	oldLogW := err2.LogTracer()
+	err2.SetLogTracer(os.Stdout)
+	defer err2.SetLogTracer(oldLogW)
+
+	transport := func() {
+		// See how Catch follows given format string similarly as Handle
+		defer err2.Catch("catch")
+		err2.Throwf("our error")
+	}
+	transport()
+	// Output: catch: our error
+}
+
 func ExampleHandle() {
 	var err error
 	defer err2.Handle(&err)
@@ -366,7 +428,7 @@ func ExampleHandle_errThrow() {
 	}
 	err := transport()
 	fmt.Printf("%v", err)
-	// Output: testing run example: our error
+	// Output: testing: run example: our error
 }
 
 func ExampleHandle_errReturn() {
@@ -441,10 +503,10 @@ func ExampleHandle_deferStack() {
 
 func ExampleHandle_handlerFn() {
 	doSomething := func(a, b int) (err error) {
-		defer err2.Handle(&err, func() {
+		defer err2.Handle(&err, func(err error) error {
 			// Example for just annotating current err. Normally Handle is
 			// used for cleanup. See CopyFile example for more information.
-			err = fmt.Errorf("error with (%d, %d): %v", a, b, err)
+			return fmt.Errorf("error with (%d, %d): %v", a, b, err)
 		})
 		try.To1(throw())
 		return err
@@ -456,8 +518,8 @@ func ExampleHandle_handlerFn() {
 
 func ExampleHandle_noThrow() {
 	doSomething := func(a, b int) (err error) {
-		defer err2.Handle(&err, func() {
-			err = fmt.Errorf("error with (%d, %d): %v", a, b, err)
+		defer err2.Handle(&err, func(err error) error {
+			return fmt.Errorf("error with (%d, %d): %v", a, b, err)
 		})
 		try.To1(noThrow())
 		return err
@@ -588,6 +650,28 @@ func BenchmarkRecursionWithTryCall(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		_ = cleanRecursion(100)
+	}
+}
+
+func BenchmarkRecursionWithTryAnd_Empty_Defer(b *testing.B) {
+	var recursion func(a int) (r int, err error)
+	recursion = func(a int) (r int, err error) {
+		defer func(e error) { // try to be as close to our case, but simple!
+			err = e
+		}(err)
+
+		if a == 0 {
+			return 0, nil
+		}
+		s := try.To1(noThrow())
+		_ = s
+		r = try.To1(recursion(a - 1))
+		r += a
+		return r, nil
+	}
+
+	for n := 0; n < b.N; n++ {
+		_, _ = recursion(100)
 	}
 }
 

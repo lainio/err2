@@ -1,3 +1,5 @@
+//go:build !windows
+
 package try_test
 
 import (
@@ -103,8 +105,28 @@ func TestResult2_Logf(t *testing.T) {
 	}
 	num1, num2 := countSomething("1", "err")
 	fmt.Printf("results: %d, %d\n", num1, num2)
-	test.RequireEqual(t, num1, 3)
 	test.RequireEqual(t, num2, 2)
+	test.RequireEqual(t, num1, 3)
+}
+
+func TestResult_Handle(t *testing.T) {
+	// try out f() |err| handle to show how to stop propagate error
+	callFn := func(mode int) (err error) {
+		defer err2.Handle(&err)
+
+		try.Out(fmt.Errorf("test error")).Handle(func(err error) error {
+			if mode == 0 {
+				return err
+			}
+			return nil // no error to throw
+		})
+		return nil
+	}
+	err := callFn(1)
+	test.Requiref(t, err == nil, "no error when Out.Handle sets it nil")
+
+	err = callFn(0)
+	test.Requiref(t, err != nil, "want error when Out.Handle sets it the same")
 }
 
 func ExampleResult1_Handle() {

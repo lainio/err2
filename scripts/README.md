@@ -2,12 +2,78 @@
 
 The err2 package will offer auto-migration scripts until version 1.0.0 is
 published. That means that you can safely use the package even the API is not
-yet 100% staple. We have used that approach for our production code that uses
+yet 100% stable. We have used that approach for our production code that uses
 `err2` and it works very well. Over 100 KLOC Go code has been auto-migrated
 successfully from type variables (see below) to Go generics API.
 
 This readme will guide you to use auto-migration scripts when ever we deprecate
 functions or make something obsolete.
+
+### Auto-Migration of v0.9.40
+
+The version 0.9.40 is a major update because of the performance and API change.
+We have managed to eliminate `defer` slowdown. Our benchmarks are 3x faster than
+previous version and about equal to those function call stacks (100 deep-level)
+that don't use `defer`. We are exactly at the same level of performance with
+those functions that use deferred function that accept an argument. Transporting
+an argument to deferred function seems to be slower than functions that don't.
+And because `try.To` is already as fast as `if err != nil` we reached our goal
+for speed!
+
+Because all of the error handler function signatures are now:
+```go
+	ErrorHandler = func(err error) error
+```
+and the old one was `func()` relaying closures. And because we have dynamic
+signatures on `err2.Handle` and `err2.Catch`, we cannot use compiler (Go lacks
+the function overloading) for type checking, which makes this migration so
+important but difficult. The `err2` package writes `fatal error: ...` to
+`stderr` because it cannot panic in middle of the panicking.
+
+> Note. This is only a legacy code problem. We are in the migration as you can
+> see :-)
+
+You have two (2) options for migration for v0.9.40:
+1. [(Semi)-Automatic Migration](#semi-automatic-migration)
+1. [Manual migration using (vim/nvim) location lists or
+   similar](#manual-migration-with-a-location-list)
+
+#### (Semi)-Automatic Migration
+
+Follow these steps:
+1. [Set up Migration Environment](#set-up-migration-environment)
+1. Make sure that you haven't uncommitted changes in your repo and that you are
+   in the branch where you want to make the changes.
+1. Execute following command in your repo's root directory:
+   ```shell
+   migr-name.sh -n repl_handle_func repl_catch_func
+   ```
+1. Then continue with `build`, `test`, `lint`, etc. **And don't stop yet.**
+1. Use `git diff` or similar to skimming that all changes seem to be OK. Here
+   you have an opportunity to start use new features of `err2` like logging.
+1. You are ready to commit changes.
+
+#### Manual Migration With a Location List
+
+Follow these steps check do you have migration needs for v0.9.40:
+1. [Set up Migration Environment](#set-up-migration-environment)
+1. Execute following command in your repo's root directory:
+   ```shell
+   migr-name.sh -n todo_handle_func todo_catch_func
+   ```
+
+*Tip. If your repo is large and you have many migration changes see the next
+[semi-automatic guide](#semi-automatic-migration).*
+
+*Tip. You can execute that command from e.g. nvim/vim and you get your fix list.*
+```shell
+migr-name.sh todo_handle_func todo_catch_func > todo_list
+nvim -q todo_list
+```
+*Or depending on your current shell:*
+```shell
+nvim -q <(migr-name.sh todo_handle_func todo_catch_func)
+```
 
 ### `assert.SetDefaultAsserter` -> `assert.SetDefault` and others in v0.9.1
 

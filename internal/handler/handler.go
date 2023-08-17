@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/lainio/err2/internal/color"
 	"github.com/lainio/err2/internal/debug"
 	fmtstore "github.com/lainio/err2/internal/formatter"
 	"github.com/lainio/err2/internal/str"
@@ -18,8 +19,11 @@ import (
 type (
 	// we want these to be type aliases, so they are much nicer to use
 	PanicHandler = func(p any)
-	ErrorHandler = func(err error)
-	NilHandler   = func()
+	ErrorHandler = func(err error) error // this is only proper type that work
+	NilHandler   = func(err error) error // these two are the same
+
+	//CheckHandler = func(noerr bool, err error) error
+	CheckHandler = func(noerr bool)
 )
 
 // Info tells to Process function how to proceed.
@@ -40,25 +44,33 @@ type Info struct {
 	// handler then we call still ErrorHandler and get the error from Any. It
 	// goes for other way around: we get error but nilHandler is only one to
 	// set, we use that for the error (which is accessed from the closure).
-	NilHandler   // If nil default implementation is used.
 	ErrorHandler // If nil default implementation is used.
+	NilHandler   // If nil default (pre-defined here) implementation is used.
 
 	PanicHandler // If nil panic() is called.
 
+	CheckHandler // this would be for cases where there isn't any error, but
+	// this should be the last defer.
+
 	CallerName string
+
+	werr error
 }
 
 const (
 	wrapError = ": %w"
 )
 
-func PanicNoop(_ any) {}
-func NilNoop()        {}
+func PanicNoop(any)           {}
+func NilNoop(err error) error { return err }
 
 // func ErrorNoop(err error) {}
 
 func (i *Info) callNilHandler() {
-	if !i.workToDo() {
+	if i.CheckHandler != nil {
+		i.CheckHandler(true)
+		// there is no err and user wants to handle OK with our pkg:
+		// nothing more to do here after callNilHandler call
 		return
 	}
 
@@ -66,17 +78,13 @@ func (i *Info) callNilHandler() {
 		i.checkErrorTracer()
 	}
 	if i.NilHandler != nil {
-		i.NilHandler()
+		*i.Err = i.NilHandler(i.werr)
 	} else {
 		i.defaultNilHandler()
 	}
 }
 
 func (i *Info) checkErrorTracer() {
-	if !i.workToDo() {
-		return
-	}
-
 	if i.ErrorTracer == nil {
 		i.ErrorTracer = tracer.Error.Tracer()
 	}
@@ -90,13 +98,9 @@ func (i *Info) checkErrorTracer() {
 }
 
 func (i *Info) callErrorHandler() {
-	if !i.workToDo() {
-		return
-	}
-
 	i.checkErrorTracer()
 	if i.ErrorHandler != nil {
-		i.ErrorHandler(i.Any.(error))
+		*i.Err = i.ErrorHandler(i.Any.(error))
 	} else {
 		i.defaultErrorHandler()
 	}
@@ -113,10 +117,6 @@ func (i *Info) checkPanicTracer() {
 }
 
 func (i *Info) callPanicHandler() {
-	if !i.workToDo() {
-		return
-	}
-
 	i.checkPanicTracer()
 	if i.PanicHandler != nil {
 		i.PanicHandler(i.Any)
@@ -125,29 +125,53 @@ func (i *Info) callPanicHandler() {
 	}
 }
 
-func (i *Info) defaultNilHandler() {
-	err := i.safeErr()
+func (i *Info) workError() (err error) {
+	err = i.safeErr()
 	if err == nil {
 		var ok bool
 		err, ok = i.Any.(error)
 		if !ok {
-			return
+			return nil
 		}
 	}
-	if err != nil {
-		if i.Format != "" {
-			*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, err)...)
-		} else {
-			*i.Err = err
-		}
+	return err
+}
+
+func (i *Info) fmtErr() {
+	*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, i.werr)...)
+	i.werr = *i.Err // remember change both our errors!
+}
+
+func (i *Info) buildFmtErr() {
+	if i.Format != "" {
+		i.fmtErr()
+		return
 	}
+	*i.Err = i.werr
+}
+
+func (i *Info) safeCallErrorHandler() {
+	if i.ErrorHandler != nil {
+		*i.Err = i.ErrorHandler(i.werr)
+	}
+}
+
+func (i *Info) defaultNilHandler() {
+	i.werr = i.workError()
+	if i.werr == nil {
+		return
+	}
+	i.buildFmtErr()
 	if i.workToDo() {
 		// error transported thru i.Err not by panic (i.Any)
 		// let's allow caller to use ErrorHandler if it's set
-		if i.ErrorHandler != nil {
-			i.ErrorHandler(err)
-			return
-		}
+		i.safeCallErrorHandler()
+	}
+}
+
+func (i *Info) safeCallNilHandler() {
+	if i.NilHandler != nil {
+		*i.Err = i.NilHandler(i.werr)
 	}
 }
 
@@ -158,26 +182,15 @@ func (i *Info) defaultNilHandler() {
 // get panic object's error (below). We still must call handler functions to the
 // rest of the handlers if there is an error.
 func (i *Info) defaultErrorHandler() {
-	err := i.safeErr()
-	if err == nil {
-		var ok bool
-		err, ok = i.Any.(error)
-		if !ok {
-			return
-		}
+	i.werr = i.workError()
+	if i.werr == nil {
+		return
 	}
-	if i.Format != "" {
-		*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, err)...)
-	} else {
-		*i.Err = err
-	}
+	i.buildFmtErr()
 	if i.workToDo() {
 		// error transported thru i.Err not by panic (i.Any)
 		// let's allow caller to use NilHandler if it's set
-		if i.NilHandler != nil {
-			i.NilHandler()
-			return
-		}
+		i.safeCallNilHandler()
 	}
 }
 
@@ -206,6 +219,14 @@ func WorkToDo(r any, err *error) bool {
 	return (err != nil && *err != nil) || r != nil
 }
 
+func NoerrCallToDo(a ...any) (yes bool) {
+	//var yes bool
+	if len(a) != 0 {
+		_, yes = a[0].(CheckHandler)
+	}
+	return yes
+}
+
 // Process executes error handling logic. Panics and whole defer stack is
 // included.
 //
@@ -215,7 +236,7 @@ func Process(info *Info) {
 	switch info.Any.(type) {
 	case nil:
 		info.callNilHandler()
-	case runtime.Error:
+	case runtime.Error: // need own or handled like errors
 		info.callPanicHandler()
 	case error:
 		info.callErrorHandler()
@@ -225,11 +246,15 @@ func Process(info *Info) {
 }
 
 // PreProcess is currently used for err2 API like err2.Handle and .Catch.
-//
-//   - That there is an error or a panic to handle i.e. that's taken care.
-//
-//nolint:nestif
-func PreProcess(info *Info, a ...any) {
+//   - replaces the Process
+func PreProcess(errPtr *error, info *Info, a ...any) error {
+	// Bug in Go?
+	// start to use local error ptr only for optimization reasons.
+	// We get 3x faster defer handlers without unsing ptr to original err
+	// named return val. Reason is unknown.
+	err := x.Whom(errPtr != nil, *errPtr, nil)
+	info.Err = &err
+
 	// We want the function who sets the handler, i.e. calls the
 	// err2.Handle function via defer. Because call stack is in reverse
 	// order we need negative, and because the Handle caller is just
@@ -277,6 +302,7 @@ func PreProcess(info *Info, a ...any) {
 			*info.Err = nil // prevent dublicate "logging"
 		}
 	}
+	return err
 }
 
 func firstArgIsString(a ...any) bool {
@@ -306,16 +332,22 @@ func processArg(info *Info, i int, a ...any) {
 		info.Args = a[i+1:]
 	case ErrorHandler: // err2.Catch uses this
 		info.ErrorHandler = first
+		info.NilHandler = first
 	case PanicHandler: // err2.Catch uses this
 		info.PanicHandler = first
-	case NilHandler:
-		info.NilHandler = first
+	case CheckHandler:
+		info.CheckHandler = first
 	case nil:
 		info.NilHandler = NilNoop
 	default:
-		// we don't panic because we can already be in recovery, but lets
-		// try to show an error message at least.
-		fmt.Fprintln(os.Stderr, "fatal error: err2.Handle: unsupported type")
+		// we don't panic here because we can already be in recovery, but lets
+		// try to show an RED error message at least.
+		const msg = `err2 fatal error:  
+---
+unsupported handler function type: err2.Handle/Catch:
+see 'err2/scripts/README.md' and run auto-migration scripts for your repo
+---`
+		fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
 	}
 }
 

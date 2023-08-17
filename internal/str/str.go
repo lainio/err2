@@ -32,6 +32,8 @@ func Decamel(s string) string {
 		isUpper     bool
 		prevSkipped bool
 	)
+	b.Grow(2 * len(s))
+
 	for i, v := range s {
 		skip := v == '(' || v == ')' || v == '*'
 		if skip {
@@ -45,6 +47,8 @@ func Decamel(s string) string {
 		if toSpace {
 			if prevSkipped {
 				continue
+			} else if v == '.' {
+				b.WriteRune(':')
 			}
 			v = ' '
 			prevSkipped = true

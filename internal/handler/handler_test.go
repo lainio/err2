@@ -8,6 +8,7 @@ import (
 
 	"github.com/lainio/err2/internal/handler"
 	"github.com/lainio/err2/internal/test"
+	"github.com/lainio/err2/internal/x"
 )
 
 func TestProcess(t *testing.T) {
@@ -114,14 +115,15 @@ func TestProcess(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			handler.Process(&tt.args.Info)
+			if handler.WorkToDo(tt.args.Any, tt.args.Err) {
+				handler.Process(&tt.args.Info)
 
-			test.RequireEqual(t, panicHandlerCalled, tt.want.panicCalled)
-			test.RequireEqual(t, errorHandlerCalled, tt.want.errorCalled)
-			test.RequireEqual(t, nilHandlerCalled, tt.want.nilCalled)
+				test.RequireEqual(t, panicHandlerCalled, tt.want.panicCalled)
+				test.RequireEqual(t, errorHandlerCalled, tt.want.errorCalled)
+				test.RequireEqual(t, nilHandlerCalled, tt.want.nilCalled)
 
-			test.RequireEqual(t, myErrVal.Error(), tt.want.errStr)
-
+				test.RequireEqual(t, myErrVal.Error(), tt.want.errStr)
+			}
 			resetCalled()
 		})
 	}
@@ -135,7 +137,8 @@ var Info = handler.Info{
 
 func Handle() {
 	a := []any{}
-	handler.PreProcess(&Info, a...)
+	Info.Err = &myErrVal
+	myErrVal = handler.PreProcess(&myErrVal, &Info, a...)
 }
 
 func TestPreProcess_debug(t *testing.T) {
@@ -144,12 +147,12 @@ func TestPreProcess_debug(t *testing.T) {
 	// and that's what error stack tracing is all about
 	Handle()
 
-	test.RequireEqual(t, panicHandlerCalled, false)
-	test.RequireEqual(t, errorHandlerCalled, false)
-	test.RequireEqual(t, nilHandlerCalled, false)
+	test.Require(t, !panicHandlerCalled)
+	test.Require(t, !errorHandlerCalled)
+	test.Require(t, !nilHandlerCalled)
 
 	// See the name of this test function. Decamel it + error
-	const want = "testing t runner: error"
+	const want = "testing: t runner: error"
 	test.RequireEqual(t, myErrVal.Error(), want)
 
 	resetCalled()
@@ -224,17 +227,21 @@ func TestPreProcess(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if len(tt.args.a) > 0 {
-				handler.PreProcess(&tt.args.Info, tt.args.a...)
+			if handler.WorkToDo(tt.args.Any, tt.args.Err) &&
+				len(tt.args.a) > 0 {
+
+				var err = x.Whom(tt.args.Info.Err != nil,
+					*tt.args.Info.Err, nil)
+
+				err = handler.PreProcess(&err, &tt.args.Info, tt.args.a...)
 
 				test.RequireEqual(t, panicHandlerCalled, tt.want.panicCalled)
 				test.RequireEqual(t, errorHandlerCalled, tt.want.errorCalled)
 				test.RequireEqual(t, nilHandlerCalled, tt.want.nilCalled)
 
-				test.RequireEqual(t, myErrVal.Error(), tt.want.errStr)
-
-				resetCalled()
+				test.RequireEqual(t, err.Error(), tt.want.errStr)
 			}
+			resetCalled()
 		})
 	}
 }
@@ -274,21 +281,24 @@ func panicHandler(_ any) {
 	panicHandlerCalled = true
 }
 
-func nilHandlerForAnnotate() {
+func nilHandlerForAnnotate(err error) error {
 	nilHandlerCalled = true
-	// in real case this is closure and it has access to err val
-	myErrVal = fmt.Errorf("nil annotate: %v", "error")
+	myErrVal = fmt.Errorf("nil annotate: %w", err)
+	return myErrVal
 }
 
-func errorHandlerForAnnotate(err error) {
+func errorHandlerForAnnotate(err error) error {
 	errorHandlerCalled = true
 	myErrVal = fmt.Errorf("annotate: %v", err)
+	return myErrVal
 }
 
-func errorHandler(_ error) {
+func errorHandler(err error) error {
 	errorHandlerCalled = true
+	return err
 }
 
-func nilHandler() {
+func nilHandler(err error) error {
 	nilHandlerCalled = true
+	return err
 }

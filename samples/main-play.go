@@ -21,6 +21,25 @@ import (
 // CopyFile copies the source file to the given destination. If any error occurs it
 // returns an error value describing the reason.
 func CopyFile(src, dst string) (err error) {
+	defer err2.Handle(&err)
+
+	r := try.To1(os.Open(src))
+	defer r.Close()
+
+	w := try.To1(os.Create(dst))
+	defer err2.Handle(&err, func(err error) error {
+		try.Out(os.Remove(dst)).Logf()
+		return err
+	})
+	defer w.Close()
+
+	try.To1(io.Copy(w, r))
+	return nil
+}
+
+// OrgCopyFile copies the source file to the given destination. If any error occurs it
+// returns an error value describing the reason.
+func OrgCopyFile(src, dst string) (err error) {
 	defer err2.Handle(&err) // automatic error message: see err2.Formatter
 	// You can out-comment above handler line(s) to see what happens.
 
@@ -37,8 +56,9 @@ func CopyFile(src, dst string) (err error) {
 	if err != nil {
 		return fmt.Errorf("mixing traditional error checking: %w", err)
 	}
-	defer err2.Handle(&err, func() {
-		os.Remove(dst)
+	defer err2.Handle(&err, func(err error) error {
+		try.Out(os.Remove(dst)).Logf("cleaning error")
+		return err
 	})
 	defer w.Close()
 	try.To1(io.Copy(w, r))
@@ -112,7 +132,7 @@ func doMain() (err error) {
 	// how err2 works. Especially interesting is automatic stack tracing.
 	//
 	// source file exists, but the destination is not in high probability
-	//try.To(CopyFile("main.go", "/notfound/path/file.bak"))
+	try.To(CopyFile("main.go", "/notfound/path/file.bak"))
 
 	// Both source and destination don't exist
 	//try.To(CopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
