@@ -1,5 +1,7 @@
 #!/bin/bash
 
+GO_MIN_VER=1.18
+
 filtered_build() {
 	local osname=$(uname -s)
 	local pkg=${1:-"./..."}
@@ -60,9 +62,9 @@ check_prerequisites() {
 	fi
 
 	local go_version=$(go mod edit -json | jq -r '."Go"')
-	if [[ $go_version < 1.18 ]]; then
+	if [[ $go_version < $GO_MIN_VER ]]; then
 		echo "ERROR:  Go version number ($go_version) is too low" >&2
-		echo "Sample: go mod edit -go=1.18 # sets the minimal version" >&2
+		echo "Sample: go mod edit -go=$GO_MIN_VER # sets the minimal version" >&2
 		exit 1
 	fi
 
