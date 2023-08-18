@@ -12,7 +12,7 @@ import (
 )
 
 func TestProcess(t *testing.T) {
-	t.Parallel()
+	// NOTE. No Parallel, uses pkg lvl variables
 	type args struct {
 		handler.Info
 	}
@@ -117,7 +117,7 @@ func TestProcess(t *testing.T) {
 	for _, ttv := range tests {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// NOTE. No Parallel, uses pkg lvl variables
 			if handler.WorkToDo(tt.args.Any, tt.args.Err) {
 				handler.Process(&tt.args.Info)
 
@@ -145,7 +145,8 @@ func Handle() {
 }
 
 func TestPreProcess_debug(t *testing.T) {
-	t.Parallel()
+	// NOTE. No Parallel, uses pkg lvl variables
+
 	// in real case PreProcess is called from Handle function. So, we make our
 	// own Handle here. Now our test function name will be the Handle caller
 	// and that's what error stack tracing is all about
@@ -163,7 +164,7 @@ func TestPreProcess_debug(t *testing.T) {
 }
 
 func TestPreProcess(t *testing.T) {
-	t.Parallel()
+	// NOTE. No Parallel, uses pkg lvl variables
 	type args struct {
 		handler.Info
 		a []any
@@ -233,7 +234,7 @@ func TestPreProcess(t *testing.T) {
 	for _, ttv := range tests {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// NOTE. No Parallel, uses pkg lvl variables
 			if handler.WorkToDo(tt.args.Any, tt.args.Err) &&
 				len(tt.args.a) > 0 {
 
