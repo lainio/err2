@@ -37,6 +37,7 @@ func TestFullName(t *testing.T) {
 }
 
 func TestIsAnchor(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		input string
 		StackInfo
@@ -78,8 +79,10 @@ func TestIsAnchor(t *testing.T) {
 			"github.com/lainio/err2/try.To1[...](...)",
 			StackInfo{"lainio/err2", "", 0, nil, nil}}, true},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			test.Require(t, tt.retval == tt.isAnchor(tt.input), "equal")
 		})
 	}
@@ -132,6 +135,7 @@ func TestIsFuncAnchor(t *testing.T) {
 }
 
 func TestFnLNro(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		input  string
@@ -141,8 +145,10 @@ func TestFnLNro(t *testing.T) {
 			"	/Users/harrilainio/go/pkg/mod/github.com/lainio/err2@v0.8.5/internal/handler/handler.go:69 +0xbc",
 			69},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			output := fnLNro(tt.input)
 			test.Require(t, output == tt.output, output)
 		})
@@ -210,6 +216,7 @@ func TestStackPrint_noLimits(t *testing.T) {
 }
 
 func TestStackPrintForTest(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		input  string
@@ -220,8 +227,10 @@ func TestStackPrintForTest(t *testing.T) {
 		{"short", input, outputForTestLvl2, 2},
 		//{"real test trace", inputFromTest, outputFromTest, 4},
 	}
-	for _, tt := range tests {
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			r := strings.NewReader(tt.input)
 			w := new(bytes.Buffer)
 			printStackForTest(r, w, tt.lvl)

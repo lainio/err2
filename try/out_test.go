@@ -90,6 +90,7 @@ func ExampleResult1_Logf() {
 }
 
 func TestResult2_Logf(t *testing.T) {
+	t.Parallel()
 	// Set log tracing to stdout that we can see it in Example output. In
 	// normal cases that would be a Logging stream or stderr.
 	err2.SetLogTracer(os.Stdout)
@@ -110,6 +111,7 @@ func TestResult2_Logf(t *testing.T) {
 }
 
 func TestResult_Handle(t *testing.T) {
+	t.Parallel()
 	// try out f() |err| handle to show how to stop propagate error
 	callFn := func(mode int) (err error) {
 		defer err2.Handle(&err)
