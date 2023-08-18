@@ -67,7 +67,7 @@ func NilNoop(err error) error { return err }
 // func ErrorNoop(err error) {}
 
 func (i *Info) callNilHandler() {
-	if i.CheckHandler != nil {
+	if i.CheckHandler != nil && i.safeErr() == nil {
 		i.CheckHandler(true)
 		// there is no err and user wants to handle OK with our pkg:
 		// nothing more to do here after callNilHandler call
