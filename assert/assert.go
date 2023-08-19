@@ -16,34 +16,45 @@ import (
 type defInd = uint32
 
 const (
-	// Production is the best asserter for most uses. The assertion violations
-	// are treated as Go error values. And only a pragmatic caller info is
-	// automatically included into the error message like file name, line
-	// number, and caller function.
+	// Production (pkg default) is the best asserter for most uses. The
+	// assertion violations are treated as Go error values. And only a
+	// pragmatic caller info is automatically included into the error message
+	// like file name, line number, and caller function, all in one line:
+	//
+	//  copy file: main.go:37: CopyFile(): assertion violation: string shouldn't be empty
 	Production defInd = 0 + iota
 
 	// Development is the best asserter for most development uses. The
 	// assertion violations are treated as Go error values. And a formatted
 	// caller info is automatically included to the error message like file
-	// name, line number, and caller function.
+	// name, line number, and caller function. Everything in a beautiful
+	// multi-line message:
+	//
+	//  --------------------------------
+	//  Assertion Fault at:
+	//  main.go:37 CopyFile():
+	//  assertion violation: string shouldn't be empty
+	//  --------------------------------
 	Development
 
 	// Test minimalistic asserter for unit test use. More pragmatic is the
-	// TestFull asserter (default).
+	// TestFull asserter (test default).
 	//
-	// Use this asserter if your IDE/editor doesn't support long file names, or
-	// for temporary problem solving for your programming environment.
+	// Use this asserter if your IDE/editor doesn't support full file names and
+	// it relies a relative path (Go standard). You can use this also if you
+	// need temporary problem solving for your programming environment.
 	Test
 
-	// TestFull asserter (default). The TestFull asserter includes caller info
-	// and call stack for unit testing, similarly like err2's error traces.
+	// TestFull asserter (test default). The TestFull asserter includes the
+	// caller info and the call stack for unit testing, similarly like err2's
+	// error traces.
 	//
 	// The call stack produced by the test asserts can be used over Go module
 	// boundaries. For example, if your app and it's sub packages both use
 	// err2/assert for unit testing and runtime checks, the runtime assertions
-	// will be automatically converted to test asserts on the fly. If any of
-	// the runtime asserts in sub packages fails during the app tests, the
-	// current app test fails too.
+	// will be automatically converted to test asserts. If any of the runtime
+	// asserts of the sub packages fails during the app tests, the app test
+	// fails as well.
 	//
 	// Note, that the cross-module assertions produce long file names (path
 	// included), and some of the Go test result parsers cannot handle that.
@@ -53,7 +64,7 @@ const (
 	TestFull
 
 	// Debug asserter transforms assertion violations to panics which is the
-	// patter that e.g. Go's standard library uses:
+	// pattern that e.g. Go's standard library uses:
 	//
 	//   if p == nil {
 	//        panic("pkg: ptr cannot be nil")
