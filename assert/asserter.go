@@ -48,6 +48,7 @@ const (
 const officialTestOutputPrefix = "    "
 
 // NoImplementation always fails with no implementation.
+// Deprecated: use e.g. assert.NotImplemented(), only default asserter is used.
 func (asserter Asserter) NoImplementation(a ...any) {
 	asserter.reportAssertionFault("not implemented", a...)
 }
@@ -55,6 +56,7 @@ func (asserter Asserter) NoImplementation(a ...any) {
 // True asserts that term is true. If not it panics with the given formatting
 // string. Note! This and Truef are the most performant of all the assertion
 // functions.
+// Deprecated: use e.g. assert.That(), only default asserter is used.
 func (asserter Asserter) True(term bool, a ...any) {
 	if !term {
 		asserter.reportAssertionFault("assertion fault", a...)
@@ -63,6 +65,7 @@ func (asserter Asserter) True(term bool, a ...any) {
 
 // Truef asserts that term is true. If not it panics with the given formatting
 // string.
+// Deprecated: use e.g. assert.That(), only default asserter is used.
 func (asserter Asserter) Truef(term bool, format string, a ...any) {
 	if !term {
 		if asserter.hasStackTrace() {
@@ -76,6 +79,7 @@ func (asserter Asserter) Truef(term bool, format string, a ...any) {
 // panics/errors (current Asserter) with the given msg. Note! This is very slow
 // (before we have generics). If you need performance use EqualInt. It's not so
 // convenient, though.
+// Deprecated: use e.g. assert.Len(), only default asserter is used.
 func (asserter Asserter) Len(obj any, length int, a ...any) {
 	ok, l := getLen(obj)
 	if !ok {
@@ -90,6 +94,7 @@ func (asserter Asserter) Len(obj any, length int, a ...any) {
 
 // EqualInt asserts that integers are equal. If not it panics/errors (current
 // Asserter) with the given msg.
+// Deprecated: use e.g. assert.Equal(), only default asserter is used.
 func (asserter Asserter) EqualInt(val, want int, a ...any) {
 	if want != val {
 		defMsg := fmt.Sprintf("got %d, want %d", val, want)
@@ -101,6 +106,7 @@ func (asserter Asserter) EqualInt(val, want int, a ...any) {
 // panics/errors (current Asserter) with the given msg. Note! This is very slow
 // (before we have generics). If you need performance use EqualInt. It's not so
 // convenient, though.
+// Deprecated: use e.g. assert.Len(), only default asserter is used.
 func (asserter Asserter) Lenf(obj any, length int, format string, a ...any) {
 	args := combineArgs(format, a)
 	asserter.Len(obj, length, args...)
@@ -108,6 +114,7 @@ func (asserter Asserter) Lenf(obj any, length int, format string, a ...any) {
 
 // Empty asserts that length of the object is zero. If not it panics with the
 // given formatting string. Note! This is slow.
+// Deprecated: use e.g. assert.Empty(), only default asserter is used.
 func (asserter Asserter) Empty(obj any, msg ...any) {
 	ok, l := getLen(obj)
 	if !ok {
@@ -122,6 +129,7 @@ func (asserter Asserter) Empty(obj any, msg ...any) {
 
 // NotEmptyf asserts that length of the object greater than zero. If not it
 // panics with the given formatting string. Note! This is slow.
+// Deprecated: use e.g. assert.NotEmpty(), only default asserter is used.
 func (asserter Asserter) NotEmptyf(obj any, format string, msg ...any) {
 	args := combineArgs(format, msg)
 	asserter.Empty(obj, args...)
@@ -129,6 +137,7 @@ func (asserter Asserter) NotEmptyf(obj any, format string, msg ...any) {
 
 // NotEmpty asserts that length of the object greater than zero. If not it
 // panics with the given formatting string. Note! This is slow.
+// Deprecated: use e.g. assert.NotEmpty(), only default asserter is used.
 func (asserter Asserter) NotEmpty(obj any, msg ...any) {
 	ok, l := getLen(obj)
 	if !ok {
