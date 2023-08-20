@@ -11,8 +11,10 @@ import (
 	"github.com/lainio/err2/try"
 )
 
+const errStringInThrow = "this is an ERROR"
+
 func throw() (string, error) {
-	return "", fmt.Errorf("this is an ERROR")
+	return "", fmt.Errorf(errStringInThrow)
 }
 
 func twoStrNoThrow() (string, string, error)        { return "test", "test", nil }
@@ -113,12 +115,16 @@ func TestHandle_noerrHandler(t *testing.T) {
 		try.To1(throw())
 	})
 
-	t.Run("noerr is first and error happens", func(t *testing.T) {
+	t.Run("noerr is first and error happens with many handlers", func(t *testing.T) {
 		t.Parallel()
-		var err error
-		var handlerCalled bool
+		var (
+			err               error
+			finalAnnotatedErr = fmt.Errorf("err: %v", errStringInThrow)
+			handlerCalled     bool
+		)
 		defer func() {
 			test.Require(t, !handlerCalled)
+			test.RequireEqual(t, err.Error(), finalAnnotatedErr.Error())
 		}()
 
 		// This is the handler we are thesting!
@@ -127,11 +133,18 @@ func TestHandle_noerrHandler(t *testing.T) {
 			handlerCalled = noerr
 		})
 
+		// important! test that our handler doesn't change the current error
+		// and it's not nil
+		defer err2.Handle(&err, func(er error) error {
+			test.Require(t, er != nil, "er val: ", er, err)
+			return er
+		})
+
 		defer err2.Handle(&err, func(err error) error {
 			// this should not be called, so lets try to fuckup things...
 			handlerCalled = false
 			test.Require(t, err != nil)
-			return err
+			return finalAnnotatedErr
 		})
 		try.To1(throw())
 	})
@@ -191,7 +204,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 		try.To(noErr())
 	})
 
-	t.Run("noerr handler is first of MANY and error happens UNTIL reset", func(t *testing.T) {
+	t.Run("noerr handler is first of MANY and error happens UNTIL RESET", func(t *testing.T) {
 		t.Parallel()
 		var err error
 		var noerrHandlerCalled, errHandlerCalled bool
@@ -202,14 +215,14 @@ func TestHandle_noerrHandler(t *testing.T) {
 
 		// This is the handler we are thesting!
 		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, true)
+			test.Require(t, true) // we are here, for debugging
 			test.Require(t, noerr)
 			noerrHandlerCalled = noerr
 		})
 
-		// this is the err handler that resets the error to nil
+		// this is the err handler that -- RESETS -- the error to nil
 		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, true) // helps fast debugging
+			test.Require(t, err != nil) // helps fast debugging
 
 			// this should not be called, so lets try to fuckup things...
 			noerrHandlerCalled = false // see first deferred function
@@ -219,7 +232,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 		})
 
 		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, true) // helps fast debugging
+			test.Require(t, err != nil) // helps fast debugging
 			// this should not be called, so lets try to fuckup things...
 			noerrHandlerCalled = false // see first deferred function
 
@@ -237,6 +250,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 			test.Require(t, handlerCalled)
 		}()
 
+		defer err2.Handle(&err)
 		defer err2.Handle(&err)
 
 		defer err2.Handle(&err, func(err error) error {
