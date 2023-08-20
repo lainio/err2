@@ -475,6 +475,33 @@ repl_handle_func() {
 }
 
 search_catch_multi='(^\s*)(defer err2\.Catch\(func\(err error\) \{)([\s\S]*?)(^\s*\}\)$)'
+search_catch_multi_with_panic_handler='(^\s*)(defer err2\.Catch\(func\(err error\) \{)([\s\S]*?)(^\s*\}, func\()(\w* any\) \{)'
+# '^\s*\}, func\(\w* any\) \{'         1      2                                       3         4               5
+
+# --- make Catch panic easier
+# '^\s*\}, func\(\w* interface\{\}\) \{'
+search_catch_old_signature='(^\s*\}, func\(\w* )(interface\{\})(\) \{)'
+#                           1                   2              3
+
+todo_catchold_sig() {
+	vlog "searching old Catch panic handler signatures"
+	ag "$search_catch_old_signature"
+}
+
+repl_catchold_sig() {
+	vlog "replacing old Catch panic handler signatures"
+	check_commit "$search_catch_old_signature" '\1any\3'
+}
+
+todo_catchp_func() {
+	vlog "searching old error Catchers"
+	ag "$search_catch_multi_with_panic_handler"
+}
+
+repl_catchp_func() {
+	vlog "replacing old error Catchers with panic"
+	check_commit "$search_catch_multi_with_panic_handler" '\1defer err2.Catch(err2.Err(func(err error) {\3\1}), func(\5'
+}
 
 todo_catch_func() {
 	vlog "searching old error Catchers"
