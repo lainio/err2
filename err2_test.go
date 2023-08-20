@@ -113,7 +113,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 		try.To1(throw())
 	})
 
-	t.Run("noerr is error order is first and error happens", func(t *testing.T) {
+	t.Run("noerr is first and error happens", func(t *testing.T) {
 		t.Parallel()
 		var err error
 		var handlerCalled bool
@@ -173,6 +173,8 @@ func TestHandle_noerrHandler(t *testing.T) {
 			handlerCalled = noerr
 		})
 
+		defer err2.Handle(&err)
+
 		defer err2.Handle(&err, func(err error) error {
 			test.Require(t, false, "no error to handle!")
 			// this should not be called, so lets try to fuckup things...
@@ -189,6 +191,44 @@ func TestHandle_noerrHandler(t *testing.T) {
 		try.To(noErr())
 	})
 
+	t.Run("noerr handler is first of MANY and error happens UNTIL reset", func(t *testing.T) {
+		t.Parallel()
+		var err error
+		var noerrHandlerCalled, errHandlerCalled bool
+		defer func() {
+			test.Require(t, noerrHandlerCalled)
+			test.Require(t, errHandlerCalled)
+		}()
+
+		// This is the handler we are thesting!
+		defer err2.Handle(&err, func(noerr bool) {
+			test.Require(t, true)
+			test.Require(t, noerr)
+			noerrHandlerCalled = noerr
+		})
+
+		// this is the err handler that resets the error to nil
+		defer err2.Handle(&err, func(err error) error {
+			test.Require(t, true) // helps fast debugging
+
+			// this should not be called, so lets try to fuckup things...
+			noerrHandlerCalled = false // see first deferred function
+			// keep the track that we have been here
+			errHandlerCalled = true // see first deferred function
+			return nil
+		})
+
+		defer err2.Handle(&err, func(err error) error {
+			test.Require(t, true) // helps fast debugging
+			// this should not be called, so lets try to fuckup things...
+			noerrHandlerCalled = false // see first deferred function
+
+			errHandlerCalled = true // see first deferred function
+			return err
+		})
+		try.To1(throw())
+	})
+
 	t.Run("noerr handler is middle of MANY and NO error happens", func(t *testing.T) {
 		t.Parallel()
 		var err error
@@ -196,6 +236,8 @@ func TestHandle_noerrHandler(t *testing.T) {
 		defer func() {
 			test.Require(t, handlerCalled)
 		}()
+
+		defer err2.Handle(&err)
 
 		defer err2.Handle(&err, func(err error) error {
 			test.Require(t, false, "no error to handle!")
