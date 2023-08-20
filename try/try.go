@@ -70,7 +70,7 @@ import (
 // To is a helper function to call functions which returns an error value and
 // check the value. If an error occurs, it panics the error so that err2
 // handlers can catch it if needed. Note! If no err2.Handle or err2.Catch exist
-// in the call stack and To detects the error, the error is not handled, and the
+// in the call stack and To panics an error, the error is not handled, and the
 // app will crash. When using try.To functions you should always have proper
 // err2.Handle or err2.Catch statements in the call stack.
 //
@@ -86,7 +86,7 @@ func To(err error) {
 // To1 is a helper function to call functions which returns values (T, error)
 // and check the error value. If an error occurs, it panics the error so that
 // err2 handlers can catch it if needed. Note! If no err2.Handle or err2.Catch
-// exist in the call stack and To1 detects the error, the error is not handled,
+// exist in the call stack and To1 panics an error, the error is not handled,
 // and the app will crash. When using try.To1 functions you should always have
 // proper err2.Handle or err2.Catch statements in the call stack.
 //
@@ -101,7 +101,7 @@ func To1[T any](v T, err error) T {
 // To2 is a helper function to call functions which returns values (T, U, error)
 // and check the error value. If an error occurs, it panics the error so that
 // err2 handlers can catch it if needed. Note! If no err2.Handle or err2.Catch
-// exist in the call stack and To2 detects the error, the error is not handled,
+// exist in the call stack and To2 panics an error, the error is not handled,
 // and the app will crash. When using try.To2 functions you should always have
 // proper err2.Handle or err2.Catch statements in the call stack.
 //
@@ -116,7 +116,7 @@ func To2[T, U any](v1 T, v2 U, err error) (T, U) {
 // To3 is a helper function to call functions which returns values (T, U, V,
 // error) and check the error value. If an error occurs, it panics the error so
 // that err2 handlers can catch it if needed. Note! If no err2.Handle or
-// err2.Catch exist in the call stack and To3 detects the error, the error is
+// err2.Catch exist in the call stack and To3 panics an error, the error is
 // not handled, and the app will crash. When using try.To3 functions you should
 // always have proper err2.Handle or err2.Catch statements in the call stack.
 func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {
