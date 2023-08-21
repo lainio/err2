@@ -67,7 +67,7 @@ func NilNoop(err error) error { return err }
 // func ErrorNoop(err error) {}
 
 func (i *Info) callNilHandler() {
-	if i.CheckHandler != nil {
+	if i.CheckHandler != nil && i.safeErr() == nil {
 		i.CheckHandler(true)
 		// there is no err and user wants to handle OK with our pkg:
 		// nothing more to do here after callNilHandler call
@@ -79,6 +79,7 @@ func (i *Info) callNilHandler() {
 	}
 	if i.NilHandler != nil {
 		*i.Err = i.NilHandler(i.werr)
+		i.werr = *i.Err // remember change both our errors!
 	} else {
 		i.defaultNilHandler()
 	}
@@ -101,6 +102,7 @@ func (i *Info) callErrorHandler() {
 	i.checkErrorTracer()
 	if i.ErrorHandler != nil {
 		*i.Err = i.ErrorHandler(i.Any.(error))
+		i.werr = *i.Err // remember change both our errors!
 	} else {
 		i.defaultErrorHandler()
 	}
@@ -254,6 +256,7 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 	// named return val. Reason is unknown.
 	err := x.Whom(errPtr != nil, *errPtr, nil)
 	info.Err = &err
+	info.werr = *info.Err // remember change both our errors!
 
 	// We want the function who sets the handler, i.e. calls the
 	// err2.Handle function via defer. Because call stack is in reverse

@@ -430,6 +430,10 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
+##### 0.9.41
+- Issue #18: **bug fixed**: noerr-handler had to be the last one of the err2
+  handlers
+
 ##### 0.9.40
 - Significant performance boost for: `defer err2.Handle/Catch()` 
   - **3x faster happy path than the previous version, which is now equal to

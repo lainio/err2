@@ -46,13 +46,12 @@ func TestDecamel(t *testing.T) {
 		{"unnatural method and anonym", args{"(**DIDAgent)...AssertWallet...Func1"}, "didagent assert wallet: func1"},
 		{"from spf13 cobra", args{"bot.glob..func5"}, "bot: glob: func5"},
 	}
-	for _, tt := range tests {
-		s := tt.args.s
-		want := tt.want
+	for _, ttv := range tests {
+		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := str.Decamel(s)
-			test.RequireEqual(t, got, want)
+			got := str.Decamel(tt.args.s)
+			test.RequireEqual(t, got, tt.want)
 		})
 	}
 }

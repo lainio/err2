@@ -63,7 +63,9 @@ var (
 // an second argument:
 //
 //	defer err2.Handle(&err, func(err error) error {
-//		os.Remove(dst)
+//		if rmErr := os.Remove(dst); rmErr != nil {
+//			return fmt.Errorf("%w: cleanup error: %w", err, rmErr)
+//		}
 //		return err
 //	})
 //
@@ -71,8 +73,8 @@ var (
 // panic handler function:
 //
 //	defer err2.Handle(&err,
-//	   err2.Err( func(error) { os.Remove(dst) }), // err2.Err keeps it short
-//	   func(p any) {} // panic handler, it's stops panics, you can re-throw
+//	   err2.Err( func(error) { os.Remove(dst) }), // err2.Err() keeps it short
+//	   func(p any) {} // <- handler stops panics, re-throw or not
 //	)
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because

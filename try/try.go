@@ -67,34 +67,58 @@ import (
 	"github.com/lainio/err2"
 )
 
-// To is a helper function to call functions which returns (error)
-// and check the error value. If an error occurs, it panics the error where err2
-// handlers can catch it if needed.
+// To is a helper function to call functions which returns an error value and
+// check the value. If an error occurs, it panics the error so that err2
+// handlers can catch it if needed. Note! If no err2.Handle or err2.Catch exist
+// in the call stack and To panics an error, the error is not handled, and the
+// app will crash. When using try.To functions you should always have proper
+// err2.Handle or err2.Catch statements in the call stack.
+//
+//	defer err2.Handle(&err)
+//	...
+//	try.To(w.Close())
 func To(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-// To1 is a helper function to call functions which returns (T, error)
-// and check the error value. If an error occurs, it panics the error where err2
-// handlers can catch it if needed.
+// To1 is a helper function to call functions which returns values (T, error)
+// and check the error value. If an error occurs, it panics the error so that
+// err2 handlers can catch it if needed. Note! If no err2.Handle or err2.Catch
+// exist in the call stack and To1 panics an error, the error is not handled,
+// and the app will crash. When using try.To1 functions you should always have
+// proper err2.Handle or err2.Catch statements in the call stack.
+//
+//	defer err2.Handle(&err)
+//	...
+//	r := try.To1(os.Open(src))
 func To1[T any](v T, err error) T {
 	To(err)
 	return v
 }
 
-// To2 is a helper function to call functions which returns (T, U, error)
-// and check the error value. If an error occurs, it panics the error where err2
-// handlers can catch it if needed.
+// To2 is a helper function to call functions which returns values (T, U, error)
+// and check the error value. If an error occurs, it panics the error so that
+// err2 handlers can catch it if needed. Note! If no err2.Handle or err2.Catch
+// exist in the call stack and To2 panics an error, the error is not handled,
+// and the app will crash. When using try.To2 functions you should always have
+// proper err2.Handle or err2.Catch statements in the call stack.
+//
+//	defer err2.Handle(&err)
+//	...
+//	kid, pk := try.To2(keys.CreateAndExportPubKeyBytes(kms.ED25519))
 func To2[T, U any](v1 T, v2 U, err error) (T, U) {
 	To(err)
 	return v1, v2
 }
 
-// To3 is a helper function to call functions which returns (T, U, V, error)
-// and check the error value. If an error occurs, it panics the error where err2
-// handlers can catch it if needed.
+// To3 is a helper function to call functions which returns values (T, U, V,
+// error) and check the error value. If an error occurs, it panics the error so
+// that err2 handlers can catch it if needed. Note! If no err2.Handle or
+// err2.Catch exist in the call stack and To3 panics an error, the error is
+// not handled, and the app will crash. When using try.To3 functions you should
+// always have proper err2.Handle or err2.Catch statements in the call stack.
 func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {
 	To(err)
 	return v1, v2, v3

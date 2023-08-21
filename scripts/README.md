@@ -9,7 +9,7 @@ successfully from type variables (see below) to Go generics API.
 This readme will guide you to use auto-migration scripts when ever we deprecate
 functions or make something obsolete.
 
-### Auto-Migration of v0.9.40
+### Auto-Migration of v0.9.40 & v0.9.41
 
 The version 0.9.40 is a major update because of the performance and API change.
 We have managed to eliminate `defer` slowdown. Our benchmarks are 3x faster than
@@ -52,7 +52,11 @@ Follow these steps:
 1. Use `git diff` or similar to skimming that all changes seem to be OK. Here
    you have an opportunity to start use new features of `err2` like logging.
 1. You are ready to commit changes.
-
+1. *Problem solving tip.* Use following command to search helper functions:
+   ```shell
+   migr-name.sh -h todo_catch
+   migr-name.sh -h repl_catch
+   ```
 #### Manual Migration With a Location List
 
 Follow these steps check do you have migration needs for v0.9.40:

@@ -5,6 +5,7 @@ import (
 )
 
 func TestGoid(t *testing.T) {
+	t.Parallel()
 	stackBytes := []byte(`goroutine 518 [running]:
 `)
 
