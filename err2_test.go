@@ -1,9 +1,11 @@
 package err2_test
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/lainio/err2"
@@ -882,6 +884,46 @@ func BenchmarkRecursionWithTryAnd_Empty_Defer(b *testing.B) {
 		defer func(e error) { // try to be as close to our case, but simple!
 			err = e
 		}(err)
+
+		if a == 0 {
+			return 0, nil
+		}
+		s := try.To1(noThrow())
+		_ = s
+		r = try.To1(recursion(a - 1))
+		r += a
+		return r, nil
+	}
+
+	for n := 0; n < b.N; n++ {
+		_, _ = recursion(100)
+	}
+}
+
+func doWork(ePtr *error, r any) {
+	switch v := r.(type) {
+	case nil:
+		return
+	case runtime.Error:
+		*ePtr = errors.Join(v, *ePtr)
+	case error:
+		*ePtr = errors.Join(v, *ePtr)
+	default:
+		// panicing
+	}
+}
+
+func BenchmarkRecursionWithTryAnd_HeavyPtrPtr_Defer(b *testing.B) {
+	var recursion func(a int) (r int, err error)
+	recursion = func(a int) (r int, err error) {
+		defer func(ePtr *error) {
+			r := recover()
+			nothingToDo := r == nil && (ePtr == nil || *ePtr == nil)
+			if nothingToDo {
+				return
+			}
+			doWork(ePtr, r)
+		}(&err)
 
 		if a == 0 {
 			return 0, nil
