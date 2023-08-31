@@ -78,6 +78,9 @@ bench_that:
 bench_copy:
 	$(GO) test $(TEST_ARGS) -bench='Benchmark_CopyBuffer' $(PKG_TRY)
 
+bench_rech:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursionWithTryAnd_HeavyPtrPtr_Defer' $(PKG_ERR2)
+
 bench_rece:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursionWithTryAnd_Empty_Defer' $(PKG_ERR2)
 
