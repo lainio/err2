@@ -97,6 +97,11 @@ var (
 	// These two are our indexing system for default asserter. Note also the
 	// mutex blew. All of this is done to keep client package race detector
 	// cool.
+	//  Production
+	//  Development
+	//  Test
+	//  TestFull
+	//  Debug
 	defAsserter = []Asserter{P, B, T, TF, D}
 	def         defInd
 
@@ -534,6 +539,23 @@ func SetDefault(i defInd) Asserter {
 	// would be owerkill. We need only defaults to be set at once.
 	def = i
 	return defAsserter[i]
+}
+
+// mapDefInd runtime asserters, that's why test asserts are removed for now.
+var mapDefInd = map[string]defInd{
+	"Production":  Production,
+	"Development": Development,
+	//"Test":        Test,
+	//"TestFull":    TestFull,
+	"Debug": Debug,
+}
+
+func NewDefInd(v string) defInd {
+	ind, found := mapDefInd[v]
+	if !found {
+		return Production
+	}
+	return ind
 }
 
 func combineArgs(format string, a []any) []any {
