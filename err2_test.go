@@ -1,7 +1,6 @@
 package err2_test
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -905,9 +904,9 @@ func doWork(ePtr *error, r any) {
 	case nil:
 		return
 	case runtime.Error:
-		*ePtr = errors.Join(v, *ePtr)
+		*ePtr = fmt.Errorf("%v: %w", *ePtr, v)
 	case error:
-		*ePtr = errors.Join(v, *ePtr)
+		*ePtr = fmt.Errorf("%v: %w", *ePtr, v)
 	default:
 		// panicing
 	}
