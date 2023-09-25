@@ -4,7 +4,6 @@ import (
 	"flag"
 
 	"github.com/lainio/err2/assert"
-	"github.com/lainio/err2/internal/tracer"
 )
 
 var (
@@ -19,9 +18,6 @@ var (
 )
 
 func init() {
-	flag.Var(&tracer.Log, "err2-log", "stream for logging: nil -> log pkg")
-	flag.Var(&tracer.Error, "err2-trace", "stream for error tracing: stderr, stdout")
-	flag.Var(&tracer.Panic, "err2-panic-trace", "stream for panic tracing")
 	flag.Var(&asserterFlag, "err2-asserter", "asserter: Production, Development, Debug")
 }
 

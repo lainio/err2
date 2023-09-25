@@ -2,6 +2,7 @@
 package tracer
 
 import (
+	"flag"
 	"io"
 	"os"
 	"sync/atomic"
@@ -30,10 +31,17 @@ func init() {
 
 	// nil is a good default for try.Out().Logf() because then we use std log.
 	Log.SetTracer(nil)
+
+	flag.Var(&Log, "err2-log", "stream for logging: nil -> log pkg")
+	flag.Var(&Error, "err2-trace", "stream for error tracing: stderr, stdout")
+	flag.Var(&Panic, "err2-panic-trace", "stream for panic tracing")
 }
 
 func (v *value) Tracer() io.Writer {
-	return v.Load().(writer).w
+	if w, ok := v.Load().(writer); ok {
+		return w.w
+	}
+	return nil
 }
 
 func (v *value) SetTracer(w io.Writer) {
@@ -55,7 +63,7 @@ func (v *value) Set(value string) error {
 		v.SetTracer(os.Stderr)
 	case "stdout":
 		v.SetTracer(os.Stdout)
-	default:
+	case "nil":
 		v.SetTracer(nil)
 	}
 	return nil
