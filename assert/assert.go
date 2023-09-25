@@ -1,6 +1,7 @@
 package assert
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"reflect"
@@ -16,13 +17,17 @@ import (
 type defInd = uint32
 
 const (
+	// Plain converts asserts just plain error messages without extra
+	// information.
+	Plain defInd = 0 + iota
+
 	// Production (pkg default) is the best asserter for most uses. The
 	// assertion violations are treated as Go error values. And only a
 	// pragmatic caller info is automatically included into the error message
 	// like file name, line number, and caller function, all in one line:
 	//
 	//  copy file: main.go:37: CopyFile(): assertion violation: string shouldn't be empty
-	Production defInd = 0 + iota
+	Production
 
 	// Development is the best asserter for most development uses. The
 	// assertion violations are treated as Go error values. And a formatted
@@ -76,8 +81,12 @@ const (
 	Debug
 )
 
+type flagAsserter struct{}
+
 // Deprecated: use e.g. assert.That(), only default asserter is used.
 var (
+	PL = AsserterToError
+
 	// P is a production Asserter that sets panic objects to errors which
 	// allows err2 handlers to catch them.
 	P = AsserterToError | AsserterCallerInfo
@@ -97,12 +106,13 @@ var (
 	// These two are our indexing system for default asserter. Note also the
 	// mutex blew. All of this is done to keep client package race detector
 	// cool.
+	//  Plain
 	//  Production
 	//  Development
 	//  Test
 	//  TestFull
 	//  Debug
-	defAsserter = []Asserter{P, B, T, TF, D}
+	defAsserter = []Asserter{PL, P, B, T, TF, D}
 	def         defInd
 
 	// mu is package lvl Mutex that is used to cool down race detector of
@@ -112,10 +122,13 @@ var (
 	// indexing system we are using for default asserter (above) we are pretty
 	// much theard safe.
 	mu sync.Mutex
+
+	asserterFlag flagAsserter
 )
 
 func init() {
 	SetDefault(Production)
+	flag.Var(&asserterFlag, "asserter", "`asserter`: Plain, Prod, Dev, Debug")
 }
 
 type (
@@ -543,29 +556,31 @@ func SetDefault(i defInd) Asserter {
 
 // mapDefInd runtime asserters, that's why test asserts are removed for now.
 var mapDefInd = map[string]defInd{
-	"Production":  Production,
-	"Development": Development,
+	"Plain": Plain,
+	"Prod":  Production,
+	"Dev":   Development,
 	//"Test":        Test,
 	//"TestFull":    TestFull,
 	"Debug": Debug,
 }
 
-var MapDefIndToString = map[defInd]string{
-	Production:  "Production",
-	Development: "Development",
+var mapDefIndToString = map[defInd]string{
+	Plain:       "Plain",
+	Production:  "Prod",
+	Development: "Dev",
 	Test:        "Test",
 	TestFull:    "TestFull",
 	Debug:       "Debug",
 }
 
 func AsserterString() string {
-	return MapDefIndToString[def]
+	return mapDefIndToString[def]
 }
 
-func NewDefInd(v string) defInd {
+func newDefInd(v string) defInd {
 	ind, found := mapDefInd[v]
 	if !found {
-		return Production
+		return Plain
 	}
 	return ind
 }
@@ -600,4 +615,20 @@ func myByteToInt(b []byte) int {
 
 type Number interface {
 	constraints.Float | constraints.Integer
+}
+
+// String is part of the flag interfaces
+func (f *flagAsserter) String() string {
+	return AsserterString()
+}
+
+// Get is part of the flag interfaces, getter.
+func (f *flagAsserter) Get() any {
+	return mapDefIndToString[def]
+}
+
+// Set is part of the flag.Value interface.
+func (*flagAsserter) Set(value string) error {
+	SetDefault(newDefInd(value))
+	return nil
 }
