@@ -32,9 +32,9 @@ func init() {
 	// nil is a good default for try.Out().Logf() because then we use std log.
 	Log.SetTracer(nil)
 
-	flag.Var(&Log, "err2-log", "stream for logging: nil -> log pkg")
-	flag.Var(&Error, "err2-trace", "stream for error tracing: stderr, stdout")
-	flag.Var(&Panic, "err2-panic-trace", "stream for panic tracing")
+	flag.Var(&Log, "err2-log", "`stream` for logging: nil -> log pkg")
+	flag.Var(&Error, "err2-trace", "`stream` for error tracing: stderr, stdout")
+	flag.Var(&Panic, "err2-panic-trace", "`stream` for panic tracing")
 }
 
 func (v *value) Tracer() io.Writer {
@@ -50,11 +50,16 @@ func (v *value) SetTracer(w io.Writer) {
 
 // String is part of the flag interfaces
 func (v *value) String() string {
+	if v == nil {
+		return "null"
+	}
 	return x.Whom(v.Tracer() != nil, "stderr", "nil")
 }
 
 // Get is part of the flag interfaces, getter.
-func (v *value) Get() any { return nil }
+func (v *value) Get() any {
+	return v.Tracer()
+}
 
 // Set is part of the flag.Value interface.
 func (v *value) Set(value string) error {
