@@ -550,6 +550,18 @@ var mapDefInd = map[string]defInd{
 	"Debug": Debug,
 }
 
+var MapDefIndToString = map[defInd]string{
+	Production:  "Production",
+	Development: "Development",
+	Test:        "Test",
+	TestFull:    "TestFull",
+	Debug:       "Debug",
+}
+
+func AsserterString() string {
+	return MapDefIndToString[def]
+}
+
 func NewDefInd(v string) defInd {
 	ind, found := mapDefInd[v]
 	if !found {

@@ -42,7 +42,7 @@ func (v *value) SetTracer(w io.Writer) {
 
 // String is part of the flag interfaces
 func (v *value) String() string {
-	return x.Whom(v.Tracer() != nil, "true", "false")
+	return x.Whom(v.Tracer() != nil, "stderr", "nil")
 }
 
 // Get is part of the flag interfaces, getter.
@@ -55,6 +55,8 @@ func (v *value) Set(value string) error {
 		v.SetTracer(os.Stderr)
 	case "stdout":
 		v.SetTracer(os.Stdout)
+	default:
+		v.SetTracer(nil)
 	}
 	return nil
 }
