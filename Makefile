@@ -12,7 +12,7 @@ PKGS := $(PKG_ERR2) $(PKG_ASSERT) $(PKG_TRY) $(PKG_DEBUG) $(PKG_HANDLER) $(PKG_S
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
 GO ?= go
-TEST_ARGS ?= 
+TEST_ARGS ?= -benchmem
 
 # GO ?= go1.20rc2
 
