@@ -11,7 +11,7 @@ func TestGoid(t *testing.T) {
 	stackBytes := []byte(`goroutine 518 [running]:
 `)
 
-	id := myByteToInt(stackBytes[10:])
+	id := asciiWordToInt(stackBytes[10:])
 	if id != 518 {
 		t.Fail()
 	}
@@ -42,7 +42,7 @@ func BenchmarkGoid_MyByteToInt(b *testing.B) {
 `)
 
 	for n := 0; n < b.N; n++ {
-		_ = myByteToInt(stackBytes[10:])
+		_ = asciiWordToInt(stackBytes[10:])
 	}
 }
 

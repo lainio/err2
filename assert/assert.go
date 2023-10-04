@@ -595,10 +595,10 @@ func combineArgs(format string, a []any) []any {
 func goid() int {
 	var buf [64]byte
 	runtime.Stack(buf[:], false)
-	return myByteToInt(buf[10:])
+	return asciiWordToInt(buf[10:])
 }
 
-func myByteToInt(b []byte) int {
+func asciiWordToInt(b []byte) int {
 	n := 0
 	for _, ch := range b {
 		if ch == ' ' {
