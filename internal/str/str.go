@@ -11,14 +11,17 @@ import (
 )
 
 var (
-	re = regexp.MustCompile(`([A-Z]+)`)
+	uncamel = regexp.MustCompile(`([A-Z]+)`)
+	clean   = regexp.MustCompile(`[^\w]`)
 )
 
-// CamelRegexp return the given string as space delimeted. Note! it's slow. Use
+// DecamelRegexp return the given string as space delimeted. Note! it's slow. Use
 // Decamel instead.
-func CamelRegexp(str string) string {
-	str = re.ReplaceAllString(str, ` $1`)
+func DecamelRegexp(str string) string {
+	str = clean.ReplaceAllString(str, " ")
+	str = uncamel.ReplaceAllString(str, ` $1`)
 	str = strings.Trim(str, " ")
+	str = strings.ToLower(str)
 	return str
 }
 
