@@ -45,6 +45,9 @@ testv:
 test:
 	$(GO) test $(TEST_ARGS) $(PKGS)
 
+escape_err2:
+	$(GO) test -c -gcflags=-m=2 $(PKG_ERR2) 2>&1 | ag 'escape' 
+
 inline_err2:
 	$(GO) test -c -gcflags=-m=2 $(PKG_ERR2) 2>&1 | ag 'inlin' 
 
