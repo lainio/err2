@@ -11,7 +11,7 @@ const (
 	camelStr = "BenchmarkRecursionWithOldErrorIfCheckAnd_Defer"
 )
 
-func BenchmarkCamelRegexp(b *testing.B) {
+func BenchmarkDecamelRegexp(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = str.DecamelRegexp(camelStr)
 	}
