@@ -13,6 +13,7 @@ SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
 GO ?= go
 TEST_ARGS ?= -benchmem
+# -"gcflags '-N -l'" both optimization & inlining disabled
 
 # GO ?= go1.20rc2
 
