@@ -147,7 +147,6 @@ func Catch(a ...any) {
 	err = handler.PreProcess(&err, &handler.Info{
 		CallerName: "Catch",
 		Any:        r,
-		// NilHandler: handler.NilNoop, // TODO: why this is here?
 	}, a...)
 	doTrace(err)
 }
