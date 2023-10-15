@@ -15,6 +15,15 @@ check_prerequisites() {
 		echo "ERROR: give version number, e.g. v0.8.2"
 		exit 1
 	fi
+
+	if [[ $1 =~ ^v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,3}$ ]]; then
+		echo "version string format is CORRECT"
+	else
+		echo "version string format ins't correct"
+		exit 1
+	fi
+exit 0
+
 }
 
 check_prerequisites $1
