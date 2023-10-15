@@ -277,9 +277,9 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 			Level:       lvl,
 		})
 		if ok {
-			fmter := fmtstore.Formatter()
-			if fmter != nil { // TODO: check the init order!
-				info.Format = fmter.Format(funcName)
+			setFmter := fmtstore.Formatter()
+			if setFmter != nil {
+				info.Format = setFmter.Format(funcName)
 			} else {
 				info.Format = str.Decamel(funcName)
 			}
