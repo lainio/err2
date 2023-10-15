@@ -106,9 +106,10 @@ func Handle(err *error, a ...any) {
 // behavior with functions like err2.SetErrorTrace, assert.SetDefault, and
 // logging settings. Start with the defaults and simplest version of Catch:
 //
-//	defer err2.Catch() // writes errors to logs and panic traces to stderr
+//	defer err2.Catch()
 //
-// Catch support logging as well:
+// In default the above writes errors to logs and panic traces to stderr.
+// Naturally, you can annotate logging:
 //
 //	defer err2.Catch("WARNING: caught errors: %s", name)
 //
