@@ -17,7 +17,16 @@ check_prerequisites() {
 	fi
 
 	if [[ $1 =~ ^v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,3}$ ]]; then
-		echo "version string format is CORRECT"
+		# echo "version string format is CORRECT"
+		local last_tag=`git tag -l | sort | tail -1`
+		if [[ "$last_tag" == "$1" ]]; then
+			echo "tag $last_tag already exists"
+			exit 1
+		fi
+		if [[ "$last_tag" > "$1" ]]; then
+			echo "greater tag $last_tag already exists"
+			exit 1
+		fi
 	else
 		echo "version string format ins't correct"
 		exit 1
