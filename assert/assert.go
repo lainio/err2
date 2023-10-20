@@ -143,6 +143,7 @@ var (
 
 const (
 	assertionMsg = "assertion violation"
+	gotWantFmt   = ": got '%v', want '%v'"
 )
 
 // PushTester sets the current testing context for default asserter. This must
@@ -356,7 +357,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 // Asserter) with the given message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want '%v'", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -365,7 +366,7 @@ func Equal[T comparable](val, want T, a ...any) {
 // panics/errors (current Asserter) with the given message.
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want '%v'", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -390,7 +391,7 @@ func Len(obj string, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -403,7 +404,7 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -416,7 +417,7 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
