@@ -46,6 +46,8 @@ func CopyFile(src, dst string) (err error) {
 - [Assertion](#assertion)
   - [Assertion Package for Runtime Use](#assertion-package-for-runtime-use)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
+- [Automatic Flags](#automatic-flags)
+  - [Support for Cobra Flags](support-for-cobra-flags)
 - [Code Snippets](#code-snippets)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
@@ -346,6 +348,87 @@ can be the same or different modules.
 execution, we will find it and can even move thru every step in the call
 stack.**
 
+## Automatic Flags
+
+When you are using `err2` or `assert` packages, i.e., just importing them, you
+have an option to automatically add support for flags.
+
+Let's say you have build CLI tool and it returns an error. You can run it again
+with:
+
+```
+your-app -err2-trace stderr
+```
+
+Now you get full error trace addition to the error message. Naturally, this
+also works asserts, which you can configure also with the flags:
+
+```
+your-app -assert Debug
+```
+
+That adds more information to the assertion statement, which in default is in
+production (`Prod`) mode, i.e., K&D error message.
+
+All you need to do is to add `flag.Parse` to your `main` function.
+
+#### Support for Cobra Flags
+
+If you are using [cobra](https://github.com/spf13/cobra) you can still easily
+support packages like `err2` and `glog` and their flags.
+
+1. Add std flag package to imports in `cmd/root.go`:
+
+   ```go
+   import (
+   	goflag "flag"
+       ...
+   )
+   ```
+
+1. Add the following to (usually) `cmd/root.go`'s `init` function's end:
+
+   ```go
+   func init() {
+       ...
+   	// NOTE! Very important. Adds support for std flag pkg users: glog, err2
+   	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
+   }
+   ```
+
+1. And finally modify your `PersistentPreRunE` in `cmd/root.go` to something
+   like:
+
+   ```go
+   	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
+   		defer err2.Handle(&err)
+   
+   		// NOTE! Very important. Adds support for std flag pkg users: glog, err2
+   		goflag.Parse()
+   
+   		try.To(goflag.Set("logtostderr", "true"))
+   		handleViperFlags(cmd) // local helper with envs
+   		glog.CopyStandardLogTo("ERROR") // for err2
+   		return nil
+   	},
+   ```
+
+As a result you can have bunch of usable flags added to your CLI:
+
+```
+Flags:
+      --alsologtostderr                   log to standard error as well as files
+      --asserter asserter                 asserter: Plain, Prod, Dev, Debug (default Prod)
+      --config string                     configuration file, FCLI_CONFIG
+  -n, --dry-run                           perform a trial run with no changes made, FCLI_DRY_RUN
+      --err2-log stream                   stream for logging: nil -> log pkg (default nil)
+      --err2-panic-trace stream           stream for panic tracing (default stderr)
+      --err2-trace stream                 stream for error tracing: stderr, stdout (default nil)
+      ...
+```
+
+And many others form `glog` in this specific example case.
+
 ## Code Snippets
 
 Most of the repetitive code blocks are offered as code snippets. They are in
@@ -430,45 +513,12 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.41
-- Issue #18: **bug fixed**: noerr-handler had to be the last one of the err2
-  handlers
-
-##### 0.9.40
-- Significant performance boost for: `defer err2.Handle/Catch()` 
-  - **3x faster happy path than the previous version, which is now equal to
-    simplest `defer` function in the `err`-returning function** . (Please see
-    the `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
-  - the solution caused a change to API, where the core reason is Go's
-    optimization "bug". (We don't have confirmation yet.)
-- Changed API for deferred error handling: `defer err2.Handle/Catch()`
-  - *Obsolete*:
-    ```go
-    defer err2.Handle(&err, func() {}) // <- relaying closure to access err val
-    ```
-  - Current version:
-    ```go
-    defer err2.Handle(&err, func(err error) error { return err }) // not a closure
-    ```
-    Because handler function is not relaying closures any more, it opens a new
-    opportunity to use and build general helper functions: `err2.Noop`, etc.
-  - Use auto-migration scripts especially for large code-bases. More information
-    can be found in the `scripts/` directory's [readme file](./scripts/README.md).
-  - Added a new (*experimental*) API:
-    ```go
-    defer err2.Handle(&err, func(noerr bool) {
-            assert.That(noerr) // noerr is always true!!
-            doSomething()
-    })
-    ```
-    This is experimental because we aren't sure if this is something we want to
-    have in the `err2` package.
-- Bug fixes: `ResultX.Logf()` now works as it should
-- More documentation
+##### 0.9.5
+- `flag` package integration:
 
 ### Upcoming releases
 
-##### 0.9.5
-- Idea: Go's standard lib's flag pkg integration (similar to `glog`)
-- Continue removing unused parts from `assert` pkg
-- More documentation, repairing for some sort of marketing
+##### 0.9.6
+- Idea: TODO
+- Continue removing unused parts
+- More documentation
