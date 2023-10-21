@@ -44,10 +44,11 @@ func CopyFile(src, dst string) (err error) {
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
 - [Assertion](#assertion)
+  - [Asserters](#asserters)
   - [Assertion Package for Runtime Use](#assertion-package-for-runtime-use)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Automatic Flags](#automatic-flags)
-  - [Support for Cobra Flags](support-for-cobra-flags)
+  - [Support for Cobra Flags](#support-for-cobra-flags)
 - [Code Snippets](#code-snippets)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
@@ -162,6 +163,10 @@ If no `Tracer` is set no stack tracing is done. This is the default because in
 the most cases proper error messages are enough and panics are handled
 immediately by a programmer.
 
+> Note. Since v0.9.5 you can set these tracers through Go's standard flag
+> package just by adding `flag.Parse()` to your program. See more information
+> from [Automatic Flags](#automatic-flags).
+
 [Read the package documentation for more
 information](https://pkg.go.dev/github.com/lainio/err2).
 
@@ -268,6 +273,8 @@ cycle. The default mode is to return an `error` value that includes a formatted
 and detailed assertion violation message. A developer gets immediate and proper
 feedback, allowing cleanup of the code and APIs before the release.
 
+#### Asserters
+
 The assert package offers a few pre-build *asserters*, which are used to
 configure how the assert package deals with assert violations. The line below
 exemplifies how the default asserter is set in the package.
@@ -288,6 +295,10 @@ For certain type of programs this is the best way. It allows us to keep all the
 error messages as simple as possible. And by offering option to turn additional
 information on, which allows super users and developers get more technical
 information when needed.
+
+> Note. Since v0.9.5 you can set these asserters through Go's standard flag
+> package just by adding `flag.Parse()` to your program. See more information
+> from [Automatic Flags](#automatic-flags).
 
 #### Assertion Package for Runtime Use
 
@@ -351,7 +362,13 @@ stack.**
 ## Automatic Flags
 
 When you are using `err2` or `assert` packages, i.e., just importing them, you
-have an option to automatically add support for Go's standard `flag` package.
+have an option to automatically support for err2 configuration flags through
+Go's standard `flag` package. See more information about err2 settings from
+[Error Stack Tracing](#error-stack-tracing) and [Asserters](#asserters). 
+
+Now you can always deploy your applications and services with the simple
+end-user friendly error messages and no stack traces, **but you can switch them
+on when ever you need**.
 
 Let's say you have build CLI (`your-app`) tool with the support for Go's flag
 package, and the app returns an error. Let's assume you're a developer. You can
@@ -403,15 +420,15 @@ support packages like `err2` and `glog` and their flags.
 
    ```go
    PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
-   	defer err2.Handle(&err)
-   
-   	// NOTE! Very important. Adds support for std flag pkg users: glog, err2
-   	goflag.Parse()
-   
-   	try.To(goflag.Set("logtostderr", "true"))
-   	handleViperFlags(cmd) // local helper with envs
-   	glog.CopyStandardLogTo("ERROR") // for err2
-   	return nil
+       defer err2.Handle(&err)
+       
+       // NOTE! Very important. Adds support for std flag pkg users: glog, err2
+       goflag.Parse()
+       
+       try.To(goflag.Set("logtostderr", "true"))
+       handleViperFlags(cmd) // local helper with envs
+       glog.CopyStandardLogTo("ERROR") // for err2
+       return nil
    },
    ```
 
