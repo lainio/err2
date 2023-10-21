@@ -351,24 +351,26 @@ stack.**
 ## Automatic Flags
 
 When you are using `err2` or `assert` packages, i.e., just importing them, you
-have an option to automatically add support for flags.
+have an option to automatically add support for Go's standard `flag` package.
 
-Let's say you have build CLI tool and it returns an error. You can run it again
-with:
+Let's say you have build CLI (`your-app`) tool with the support for Go's flag
+package, and the app returns an error. Let's assume you're a developer. You can
+run it again with:
 
 ```
 your-app -err2-trace stderr
 ```
 
 Now you get full error trace addition to the error message. Naturally, this
-also works asserts, which you can configure also with the flags:
+also works with assertions. You can configure their output with the flag
+`asserter`:
 
 ```
-your-app -assert Debug
+your-app -asserter Debug
 ```
 
 That adds more information to the assertion statement, which in default is in
-production (`Prod`) mode, i.e., K&D error message.
+production (`Prod`) mode, i.e., outputs K&D error message.
 
 All you need to do is to add `flag.Parse` to your `main` function.
 
@@ -381,7 +383,7 @@ support packages like `err2` and `glog` and their flags.
 
    ```go
    import (
-   	goflag "flag"
+       goflag "flag"
        ...
    )
    ```
@@ -391,8 +393,8 @@ support packages like `err2` and `glog` and their flags.
    ```go
    func init() {
        ...
-   	// NOTE! Very important. Adds support for std flag pkg users: glog, err2
-   	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
+       // NOTE! Very important. Adds support for std flag pkg users: glog, err2
+       pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
    }
    ```
 
@@ -400,34 +402,29 @@ support packages like `err2` and `glog` and their flags.
    like:
 
    ```go
-   	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
-   		defer err2.Handle(&err)
+   PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
+   	defer err2.Handle(&err)
    
-   		// NOTE! Very important. Adds support for std flag pkg users: glog, err2
-   		goflag.Parse()
+   	// NOTE! Very important. Adds support for std flag pkg users: glog, err2
+   	goflag.Parse()
    
-   		try.To(goflag.Set("logtostderr", "true"))
-   		handleViperFlags(cmd) // local helper with envs
-   		glog.CopyStandardLogTo("ERROR") // for err2
-   		return nil
-   	},
+   	try.To(goflag.Set("logtostderr", "true"))
+   	handleViperFlags(cmd) // local helper with envs
+   	glog.CopyStandardLogTo("ERROR") // for err2
+   	return nil
+   },
    ```
 
 As a result you can have bunch of usable flags added to your CLI:
 
 ```
 Flags:
-      --alsologtostderr                   log to standard error as well as files
       --asserter asserter                 asserter: Plain, Prod, Dev, Debug (default Prod)
-      --config string                     configuration file, FCLI_CONFIG
-  -n, --dry-run                           perform a trial run with no changes made, FCLI_DRY_RUN
       --err2-log stream                   stream for logging: nil -> log pkg (default nil)
       --err2-panic-trace stream           stream for panic tracing (default stderr)
       --err2-trace stream                 stream for error tracing: stderr, stdout (default nil)
       ...
 ```
-
-And many others form `glog` in this specific example case.
 
 ## Code Snippets
 
