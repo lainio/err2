@@ -56,8 +56,9 @@ Please see the code examples for more information.
 
 The assert package supports Go's flags. All you need to do is to call flag.Parse.
 And the following flags are supported (="default-value"):
-    -asserter="Prod"
-        A name of the asserter Plain, Prod, Dev, Debug (see constants)
+
+	-asserter="Prod"
+	    A name of the asserter Plain, Prod, Dev, Debug (see constants)
 
 And assert package's configuration flags are inserted.
 
