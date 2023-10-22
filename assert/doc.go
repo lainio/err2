@@ -52,6 +52,15 @@ error messages and diagnostic they need.
 
 Please see the code examples for more information.
 
+# Flag Package Support
+
+The assert package supports Go's flags. All you need to do is to call flag.Parse.
+And the following flags are supported (="default-value"):
+    -asserter="Prod"
+        A name of the asserter Plain, Prod, Dev, Debug (see constants)
+
+And assert package's configuration flags are inserted.
+
 Note. assert.That's performance is equal to the if-statement. Most of the
 generics-based versions are almost as fast. If your algorithm is
 performance-critical please run `make bench` in the err2 repo and decide case by
