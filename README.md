@@ -387,7 +387,7 @@ your-app -asserter Debug
 ```
 
 That adds more information to the assertion statement, which in default is in
-production (`Prod`) mode, i.e., outputs K&D error message.
+production (`Prod`) mode, i.e., outputs a single-line assertion message.
 
 All you need to do is to add `flag.Parse` to your `main` function.
 
@@ -528,11 +528,12 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 ### Latest Release
 
 ##### 0.9.5
-- `flag` package integration:
+- `flag` package support to set `err2` and `assert` package configuration
+- `err2.Catch` default mode is to log error
+- cleanup and refactoring, new tests and benchmarks
 
 ### Upcoming releases
 
 ##### 0.9.6
-- Idea: TODO
-- Continue removing unused parts
-- More documentation
+- Continue removing unused parts and repairing for 1.0.0 release.
+- Always more and better documentation
