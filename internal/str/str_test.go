@@ -11,15 +11,40 @@ const (
 	camelStr = "BenchmarkRecursionWithOldErrorIfCheckAnd_Defer"
 )
 
-func BenchmarkCamelRegexp(b *testing.B) {
+func BenchmarkDecamelRegexp(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		_ = str.CamelRegexp(camelStr)
+		_ = str.DecamelRegexp(camelStr)
 	}
 }
 
 func BenchmarkDecamel(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = str.Decamel(camelStr)
+	}
+}
+
+func TestCamel(t *testing.T) {
+	t.Parallel()
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"simple", args{"CamelString"}, "camel string"},
+		{"number", args{"CamelString2Testing"}, "camel string2 testing"},
+		{"acronym", args{"ARMCamelString"}, "armcamel string"},
+		{"acronym at end", args{"archIsARM"}, "arch is arm"},
+	}
+	for _, ttv := range tests {
+		tt := ttv
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := str.DecamelRegexp(tt.args.s)
+			test.RequireEqual(t, got, tt.want)
+		})
 	}
 }
 

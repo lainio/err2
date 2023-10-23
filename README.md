@@ -44,8 +44,11 @@ func CopyFile(src, dst string) (err error) {
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
 - [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
 - [Assertion](#assertion)
+  - [Asserters](#asserters)
   - [Assertion Package for Runtime Use](#assertion-package-for-runtime-use)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
+- [Automatic Flags](#automatic-flags)
+  - [Support for Cobra Flags](#support-for-cobra-flags)
 - [Code Snippets](#code-snippets)
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
@@ -160,6 +163,10 @@ If no `Tracer` is set no stack tracing is done. This is the default because in
 the most cases proper error messages are enough and panics are handled
 immediately by a programmer.
 
+> Note. Since v0.9.5 you can set these tracers through Go's standard flag
+> package just by adding `flag.Parse()` to your program. See more information
+> from [Automatic Flags](#automatic-flags).
+
 [Read the package documentation for more
 information](https://pkg.go.dev/github.com/lainio/err2).
 
@@ -266,6 +273,8 @@ cycle. The default mode is to return an `error` value that includes a formatted
 and detailed assertion violation message. A developer gets immediate and proper
 feedback, allowing cleanup of the code and APIs before the release.
 
+#### Asserters
+
 The assert package offers a few pre-build *asserters*, which are used to
 configure how the assert package deals with assert violations. The line below
 exemplifies how the default asserter is set in the package.
@@ -286,6 +295,10 @@ For certain type of programs this is the best way. It allows us to keep all the
 error messages as simple as possible. And by offering option to turn additional
 information on, which allows super users and developers get more technical
 information when needed.
+
+> Note. Since v0.9.5 you can set these asserters through Go's standard flag
+> package just by adding `flag.Parse()` to your program. See more information
+> from [Automatic Flags](#automatic-flags).
 
 #### Assertion Package for Runtime Use
 
@@ -345,6 +358,90 @@ can be the same or different modules.
 **This means that where ever assertion violation happens during the test
 execution, we will find it and can even move thru every step in the call
 stack.**
+
+## Automatic Flags
+
+When you are using `err2` or `assert` packages, i.e., just importing them, you
+have an option to automatically support for err2 configuration flags through
+Go's standard `flag` package. See more information about err2 settings from
+[Error Stack Tracing](#error-stack-tracing) and [Asserters](#asserters). 
+
+Now you can always deploy your applications and services with the simple
+end-user friendly error messages and no stack traces, **but you can switch them
+on when ever you need**.
+
+Let's say you have build CLI (`your-app`) tool with the support for Go's flag
+package, and the app returns an error. Let's assume you're a developer. You can
+run it again with:
+
+```
+your-app -err2-trace stderr
+```
+
+Now you get full error trace addition to the error message. Naturally, this
+also works with assertions. You can configure their output with the flag
+`asserter`:
+
+```
+your-app -asserter Debug
+```
+
+That adds more information to the assertion statement, which in default is in
+production (`Prod`) mode, i.e., outputs a single-line assertion message.
+
+All you need to do is to add `flag.Parse` to your `main` function.
+
+#### Support for Cobra Flags
+
+If you are using [cobra](https://github.com/spf13/cobra) you can still easily
+support packages like `err2` and `glog` and their flags.
+
+1. Add std flag package to imports in `cmd/root.go`:
+
+   ```go
+   import (
+       goflag "flag"
+       ...
+   )
+   ```
+
+1. Add the following to (usually) `cmd/root.go`'s `init` function's end:
+
+   ```go
+   func init() {
+       ...
+       // NOTE! Very important. Adds support for std flag pkg users: glog, err2
+       pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
+   }
+   ```
+
+1. And finally modify your `PersistentPreRunE` in `cmd/root.go` to something
+   like:
+
+   ```go
+   PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
+       defer err2.Handle(&err)
+       
+       // NOTE! Very important. Adds support for std flag pkg users: glog, err2
+       goflag.Parse()
+       
+       try.To(goflag.Set("logtostderr", "true"))
+       handleViperFlags(cmd) // local helper with envs
+       glog.CopyStandardLogTo("ERROR") // for err2
+       return nil
+   },
+   ```
+
+As a result you can have bunch of usable flags added to your CLI:
+
+```
+Flags:
+      --asserter asserter                 asserter: Plain, Prod, Dev, Debug (default Prod)
+      --err2-log stream                   stream for logging: nil -> log pkg (default nil)
+      --err2-panic-trace stream           stream for panic tracing (default stderr)
+      --err2-trace stream                 stream for error tracing: stderr, stdout (default nil)
+      ...
+```
 
 ## Code Snippets
 
@@ -430,45 +527,13 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.41
-- Issue #18: **bug fixed**: noerr-handler had to be the last one of the err2
-  handlers
-
-##### 0.9.40
-- Significant performance boost for: `defer err2.Handle/Catch()` 
-  - **3x faster happy path than the previous version, which is now equal to
-    simplest `defer` function in the `err`-returning function** . (Please see
-    the `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
-  - the solution caused a change to API, where the core reason is Go's
-    optimization "bug". (We don't have confirmation yet.)
-- Changed API for deferred error handling: `defer err2.Handle/Catch()`
-  - *Obsolete*:
-    ```go
-    defer err2.Handle(&err, func() {}) // <- relaying closure to access err val
-    ```
-  - Current version:
-    ```go
-    defer err2.Handle(&err, func(err error) error { return err }) // not a closure
-    ```
-    Because handler function is not relaying closures any more, it opens a new
-    opportunity to use and build general helper functions: `err2.Noop`, etc.
-  - Use auto-migration scripts especially for large code-bases. More information
-    can be found in the `scripts/` directory's [readme file](./scripts/README.md).
-  - Added a new (*experimental*) API:
-    ```go
-    defer err2.Handle(&err, func(noerr bool) {
-            assert.That(noerr) // noerr is always true!!
-            doSomething()
-    })
-    ```
-    This is experimental because we aren't sure if this is something we want to
-    have in the `err2` package.
-- Bug fixes: `ResultX.Logf()` now works as it should
-- More documentation
+##### 0.9.5
+- `flag` package support to set `err2` and `assert` package configuration
+- `err2.Catch` default mode is to log error
+- cleanup and refactoring, new tests and benchmarks
 
 ### Upcoming releases
 
-##### 0.9.5
-- Idea: Go's standard lib's flag pkg integration (similar to `glog`)
-- Continue removing unused parts from `assert` pkg
-- More documentation, repairing for some sort of marketing
+##### 0.9.6
+- Continue removing unused parts and repairing for 1.0.0 release.
+- Always more and better documentation

@@ -12,7 +12,8 @@ PKGS := $(PKG_ERR2) $(PKG_ASSERT) $(PKG_TRY) $(PKG_DEBUG) $(PKG_HANDLER) $(PKG_S
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
 GO ?= go
-TEST_ARGS ?= 
+TEST_ARGS ?= -benchmem
+# -"gcflags '-N -l'" both optimization & inlining disabled
 
 # GO ?= go1.20rc2
 
@@ -44,6 +45,9 @@ testv:
 
 test:
 	$(GO) test $(TEST_ARGS) $(PKGS)
+
+escape_err2:
+	$(GO) test -c -gcflags=-m=2 $(PKG_ERR2) 2>&1 | ag 'escape' 
 
 inline_err2:
 	$(GO) test -c -gcflags=-m=2 $(PKG_ERR2) 2>&1 | ag 'inlin' 
@@ -77,6 +81,9 @@ bench_that:
 
 bench_copy:
 	$(GO) test $(TEST_ARGS) -bench='Benchmark_CopyBuffer' $(PKG_TRY)
+
+bench_rech:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursionWithTryAnd_HeavyPtrPtr_Defer' $(PKG_ERR2)
 
 bench_rece:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursionWithTryAnd_Empty_Defer' $(PKG_ERR2)

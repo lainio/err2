@@ -103,12 +103,13 @@ func Handle(err *error, a ...any) {
 //
 // The deferred Catch is very convenient, because it makes your current
 // goroutine panic and error-safe, one line only! You can fine tune its
-// behavior with functions like err2.SetErrorTrace, assert.SetDefault, etc.
-// Start with the defaults.
+// behavior with functions like err2.SetErrorTrace, assert.SetDefault, and
+// logging settings. Start with the defaults and simplest version of Catch:
 //
 //	defer err2.Catch()
 //
-// Catch support logging as well:
+// In default the above writes errors to logs and panic traces to stderr.
+// Naturally, you can annotate logging:
 //
 //	defer err2.Catch("WARNING: caught errors: %s", name)
 //
@@ -147,7 +148,6 @@ func Catch(a ...any) {
 	err = handler.PreProcess(&err, &handler.Info{
 		CallerName: "Catch",
 		Any:        r,
-		NilHandler: handler.NilNoop,
 	}, a...)
 	doTrace(err)
 }

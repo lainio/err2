@@ -1,6 +1,7 @@
 package assert
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"reflect"
@@ -16,13 +17,17 @@ import (
 type defInd = uint32
 
 const (
+	// Plain converts asserts just plain error messages without extra
+	// information.
+	Plain defInd = 0 + iota
+
 	// Production (pkg default) is the best asserter for most uses. The
 	// assertion violations are treated as Go error values. And only a
 	// pragmatic caller info is automatically included into the error message
 	// like file name, line number, and caller function, all in one line:
 	//
 	//  copy file: main.go:37: CopyFile(): assertion violation: string shouldn't be empty
-	Production defInd = 0 + iota
+	Production
 
 	// Development is the best asserter for most development uses. The
 	// assertion violations are treated as Go error values. And a formatted
@@ -76,8 +81,12 @@ const (
 	Debug
 )
 
+type flagAsserter struct{}
+
 // Deprecated: use e.g. assert.That(), only default asserter is used.
 var (
+	PL = AsserterToError
+
 	// P is a production Asserter that sets panic objects to errors which
 	// allows err2 handlers to catch them.
 	P = AsserterToError | AsserterCallerInfo
@@ -97,7 +106,13 @@ var (
 	// These two are our indexing system for default asserter. Note also the
 	// mutex blew. All of this is done to keep client package race detector
 	// cool.
-	defAsserter = []Asserter{P, B, T, TF, D}
+	//  Plain
+	//  Production
+	//  Development
+	//  Test
+	//  TestFull
+	//  Debug
+	defAsserter = []Asserter{PL, P, B, T, TF, D}
 	def         defInd
 
 	// mu is package lvl Mutex that is used to cool down race detector of
@@ -107,10 +122,13 @@ var (
 	// indexing system we are using for default asserter (above) we are pretty
 	// much theard safe.
 	mu sync.Mutex
+
+	asserterFlag flagAsserter
 )
 
 func init() {
 	SetDefault(Production)
+	flag.Var(&asserterFlag, "asserter", "`asserter`: Plain, Prod, Dev, Debug")
 }
 
 type (
@@ -125,6 +143,7 @@ var (
 
 const (
 	assertionMsg = "assertion violation"
+	gotWantFmt   = ": got '%v', want '%v'"
 )
 
 // PushTester sets the current testing context for default asserter. This must
@@ -338,7 +357,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 // Asserter) with the given message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want '%v'", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -347,7 +366,7 @@ func Equal[T comparable](val, want T, a ...any) {
 // panics/errors (current Asserter) with the given message.
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want '%v'", val, want)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -372,7 +391,7 @@ func Len(obj string, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -385,7 +404,7 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -398,7 +417,7 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%d', want '%d'", l, length)
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -536,6 +555,37 @@ func SetDefault(i defInd) Asserter {
 	return defAsserter[i]
 }
 
+// mapDefInd runtime asserters, that's why test asserts are removed for now.
+var mapDefInd = map[string]defInd{
+	"Plain": Plain,
+	"Prod":  Production,
+	"Dev":   Development,
+	//"Test":        Test,
+	//"TestFull":    TestFull,
+	"Debug": Debug,
+}
+
+var mapDefIndToString = map[defInd]string{
+	Plain:       "Plain",
+	Production:  "Prod",
+	Development: "Dev",
+	Test:        "Test",
+	TestFull:    "TestFull",
+	Debug:       "Debug",
+}
+
+func AsserterString() string {
+	return mapDefIndToString[def]
+}
+
+func newDefInd(v string) defInd {
+	ind, found := mapDefInd[v]
+	if !found {
+		return Plain
+	}
+	return ind
+}
+
 func combineArgs(format string, a []any) []any {
 	args := make([]any, 1, len(a)+1)
 	args[0] = format
@@ -546,10 +596,10 @@ func combineArgs(format string, a []any) []any {
 func goid() int {
 	var buf [64]byte
 	runtime.Stack(buf[:], false)
-	return myByteToInt(buf[10:])
+	return asciiWordToInt(buf[10:])
 }
 
-func myByteToInt(b []byte) int {
+func asciiWordToInt(b []byte) int {
 	n := 0
 	for _, ch := range b {
 		if ch == ' ' {
@@ -566,4 +616,20 @@ func myByteToInt(b []byte) int {
 
 type Number interface {
 	constraints.Float | constraints.Integer
+}
+
+// String is part of the flag interfaces
+func (f *flagAsserter) String() string {
+	return AsserterString()
+}
+
+// Get is part of the flag interfaces, getter.
+func (f *flagAsserter) Get() any {
+	return mapDefIndToString[def]
+}
+
+// Set is part of the flag.Value interface.
+func (*flagAsserter) Set(value string) error {
+	SetDefault(newDefInd(value))
+	return nil
 }

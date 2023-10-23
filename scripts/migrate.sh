@@ -128,7 +128,7 @@ echo "================================="
 echo
 
 if [[ $bads != "" ]]; then
-	echo "====== TODO Summary ====" >&2
+	echo "====== Summary ====" >&2
 	echo "Please check the following files before commit:" >&2
 	echo "" >&2
 	echo "$bads" | tr " " "\n" >&2

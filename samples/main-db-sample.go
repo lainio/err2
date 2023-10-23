@@ -43,14 +43,14 @@ func doDBMain() {
 
 	db, from, to := new(Database), new(Account), new(Account)
 
-	// --- TODO: play with these lines to simulate different errors:
+	// --- play with these lines to simulate different errors:
 	db.errRoll = errRollback
 	//db.err = errBegin              // tx fails
 	from.balance = 1100            // no enough funds
 	from.errWithdraw = errWithdraw // withdraw error
 	to.errDeposit = errDeposit     // deposit error
 	amount := 100                  // no enough funds
-	// --- TODO: simulation variables end
+	// --- simulation variables end
 
 	try.To(db.MoneyTransfer(from, to, amount))
 

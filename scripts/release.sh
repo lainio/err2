@@ -15,6 +15,22 @@ check_prerequisites() {
 		echo "ERROR: give version number, e.g. v0.8.2"
 		exit 1
 	fi
+
+	if [[ $1 =~ ^v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,3}$ ]]; then
+		# echo "version string format is CORRECT"
+		local last_tag=`git tag -l | sort | tail -1`
+		if [[ "$last_tag" == "$1" ]]; then
+			echo "tag $last_tag already exists"
+			exit 1
+		fi
+		if [[ "$last_tag" > "$1" ]]; then
+			echo "greater tag $last_tag already exists"
+			exit 1
+		fi
+	else
+		echo "version string format ins't correct"
+		exit 1
+	fi
 }
 
 check_prerequisites $1
@@ -32,7 +48,7 @@ if [[ -z "$(git status --porcelain)" ]]; then
 	git tag -a "$version" -m "v. $version"
 	git push origin "$cur_branch" --tags
 	GOPROXY=proxy.golang.org go list -m github.com/lainio/err2@"$version"
-	goreleaser release
+	goreleaser release --clean
 else
 	echo 'ERROR: working dir is not clean'
 fi

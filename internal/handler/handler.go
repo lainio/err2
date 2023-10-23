@@ -267,7 +267,7 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 	if len(a) > 0 {
 		subProcess(info, a...)
 	} else {
-		fnName := "Handle"
+		fnName := "Handle" // default
 		if info.CallerName != "" {
 			fnName = info.CallerName
 		}
@@ -277,9 +277,9 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 			Level:       lvl,
 		})
 		if ok {
-			fmter := fmtstore.Formatter()
-			if fmter != nil { // TODO: check the init order!
-				info.Format = fmter.Format(funcName)
+			setFmter := fmtstore.Formatter()
+			if setFmter != nil {
+				info.Format = setFmter.Format(funcName)
 			} else {
 				info.Format = str.Decamel(funcName)
 			}
@@ -292,8 +292,7 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 
 	Process(info)
 
-	logCatchCallMode := defCatchCallMode && firstArgIsString(a...)
-	if curErr := info.safeErr(); logCatchCallMode && curErr != nil {
+	if curErr := info.safeErr(); defCatchCallMode && curErr != nil {
 		_, _, frame, ok := debug.FuncName(debug.StackInfo{
 			PackageName: "",
 			FuncName:    "Catch",
@@ -308,7 +307,8 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 	return err
 }
 
-func firstArgIsString(a ...any) bool {
+// firstArgIsString not used any more.
+func _(a ...any) bool {
 	if len(a) > 0 {
 		_, isStr := a[0].(string)
 		return isStr

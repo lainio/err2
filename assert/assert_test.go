@@ -152,15 +152,6 @@ func ExampleZero() {
 	// Output: sample: assert_test.go:146: ExampleZero.func1(): assertion violation: got '1', want (== '0')
 }
 
-// ifPanicZero in needed that we have argument here! It's like a macro for
-// benchmarking. The others aren't needed below. TODO: refactor unneeded
-// helpers.
-func ifPanicZero(i int) {
-	if i == 0 {
-		panic("i == 0")
-	}
-}
-
 func assertZero(i int) {
 	assert.Zero(i)
 }
@@ -218,6 +209,12 @@ func BenchmarkEqual(b *testing.B) {
 }
 
 func BenchmarkAsserter_TrueIfVersion(b *testing.B) {
+	ifPanicZero := func(i int) {
+		if i == 0 {
+			panic("i == 0")
+		}
+	}
+
 	for n := 0; n < b.N; n++ {
 		ifPanicZero(4)
 	}
