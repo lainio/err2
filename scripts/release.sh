@@ -31,8 +31,6 @@ check_prerequisites() {
 		echo "version string format ins't correct"
 		exit 1
 	fi
-exit 0
-
 }
 
 check_prerequisites $1
