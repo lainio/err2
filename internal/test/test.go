@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// require fails the test if the condition is false.
+// Require fails the test if the condition is false.
 func Require(tb testing.TB, condition bool, v ...interface{}) {
 	tb.Helper()
 	if !condition {
@@ -13,7 +13,7 @@ func Require(tb testing.TB, condition bool, v ...interface{}) {
 	}
 }
 
-// require fails the test if the condition is false.
+// Requiref fails the test if the condition is false.
 func Requiref(tb testing.TB, condition bool, format string, v ...interface{}) {
 	tb.Helper()
 	if !condition {
@@ -21,7 +21,7 @@ func Requiref(tb testing.TB, condition bool, format string, v ...interface{}) {
 	}
 }
 
-// requireEqual fails the test if the values aren't equal
+// RequireEqual fails the test if the values aren't equal
 func RequireEqual[T comparable](tb testing.TB, val, want T, a ...any) {
 	tb.Helper()
 	if want != val {

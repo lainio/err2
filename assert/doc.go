@@ -58,17 +58,23 @@ The assert package supports Go's flags. All you need to do is to call flag.Parse
 And the following flags are supported (="default-value"):
 
 	-asserter="Prod"
-	    A name of the asserter Plain, Prod, Dev, Debug (see constants)
+	    A name of the asserter Plain, Prod, Dev, Debug
+	    See more information from constants: Plain, Production, Development, Debug
 
 And assert package's configuration flags are inserted.
 
-Note. assert.That's performance is equal to the if-statement. Most of the
-generics-based versions are almost as fast. If your algorithm is
-performance-critical please run `make bench` in the err2 repo and decide case by
-case. Also you can make an issue or even PR if you would like to have something
-similar like glog.V() function.
+# Performance
 
-Note. Format string functions need to be own instances because of Go's vet and
-test tool integration.
+assert.That's performance is equal to the if-statement thanks for inlining. And
+the most of the generics-based versions are about the equally fast.
+
+If your algorithm is performance-critical please run `make bench` in the err2
+repo and decide case by case. Also you can make an issue or even PR if you would
+like to have something similar like glog.V() function.
+
+# Technical Notes
+
+Format string functions need to be own instances because of Go's vet and test
+tool integration.
 */
 package assert

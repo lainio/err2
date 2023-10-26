@@ -912,6 +912,9 @@ func doWork(ePtr *error, r any) {
 	}
 }
 
+// Next benchmark is only for internal test for trying to reproduce Go compilers
+// missing optimization behavior.
+
 func BenchmarkRecursionWithTryAnd_HeavyPtrPtr_Defer(b *testing.B) {
 	var recursion func(a int) (r int, err error)
 	recursion = func(a int) (r int, err error) {

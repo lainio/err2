@@ -17,7 +17,7 @@ import (
 type defInd = uint32
 
 const (
-	// Plain converts asserts just plain error messages without extra
+	// Plain converts asserts just plain K&D error messages without extra
 	// information.
 	Plain defInd = 0 + iota
 
@@ -68,8 +68,12 @@ const (
 	// output properly and allow traverse of locations of the error trace.
 	TestFull
 
-	// Debug asserter transforms assertion violations to panics which is the
-	// pattern that e.g. Go's standard library uses:
+	// Debug asserter transforms assertion violations to panic calls where
+	// panic object's type is string, i.e., err2 package treats it as a normal
+	// panic, not an error.
+	//
+	// The pattern that e.g. Go's standard
+	// library uses:
 	//
 	//   if p == nil {
 	//        panic("pkg: ptr cannot be nil")
