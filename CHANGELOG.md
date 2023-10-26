@@ -2,6 +2,11 @@
 
 ### Version history
 
+##### 0.9.5 **mistake in build number: 5 < 41**
+- `flag` package support to set `err2` and `assert` package configuration
+- `err2.Catch` default mode is to log error
+- cleanup and refactoring, new tests and benchmarks
+
 ##### 0.9.41
 - Issue #18: **bug fixed**: noerr-handler had to be the last one of the err2
   handlers

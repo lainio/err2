@@ -527,7 +527,7 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.5
+##### 0.9.51
 - `flag` package support to set `err2` and `assert` package configuration
 - `err2.Catch` default mode is to log error
 - cleanup and refactoring, new tests and benchmarks
