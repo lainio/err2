@@ -242,7 +242,7 @@ notExist := try.Is(r2.err, plugin.ErrNotExist)
 **Note.** Any other error than `plugin.ErrNotExist` is treated as an real error:
 1. `try.Is` function first checks `if err == nil`, and if yes, it returns
    `false`.
-2. Then it checks if `errors.Is` == `plugin.ErrNotExist` and if yes, it returns
+2. Then it checks if `errors.Is(err, plugin.ErrNotExist)` and if yes, it returns
    `true`.
 3. Finally, it calls `try.To` for the non nil error, and we already know what then
    happens: nearest `err2.Handle` gets it first.
