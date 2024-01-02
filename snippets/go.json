@@ -1,5 +1,10 @@
 {
 	".source.go": {
+		"defer err2.Catch to stderr": {
+			"prefix": "ecte",
+			"body": "defer err2.Catch(err2.toStderr)\n",
+			"description": "Snippet for err2.Catch(toStderr)"
+		},
 		"defer err2.Catch": {
 			"prefix": "eca",
 			"body": "defer err2.Catch()\n",

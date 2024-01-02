@@ -3,6 +3,7 @@ package err2
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/lainio/err2/internal/handler"
 )
@@ -172,6 +173,32 @@ func Catch(a ...any) {
 func Throwf(format string, args ...any) {
 	err := fmt.Errorf(format, args...)
 	panic(err)
+}
+
+// ToStderr is a built-in helper to use with Handle and Catch. It prints the
+// error to stderr and it resets the current error value. It's a handy Catch
+// handler in main function.
+//
+// You can use it like this:
+//
+//	func main() {
+//		defer err2.Catch(err2.ToStderr)
+func ToStderr(err error) error {
+	fmt.Fprintln(os.Stderr, err.Error())
+	return nil
+}
+
+// ToStdout is a built-in helper to use with Handle and Catch. It prints the
+// error to stdout and it resets the current error value. It's a handy Catch
+// handler in main function.
+//
+// You can use it like this:
+//
+//	func main() {
+//		defer err2.Catch(err2.ToStdout)
+func ToStdout(err error) error {
+	fmt.Fprintln(os.Stdout, err.Error())
+	return nil
 }
 
 // Noop is a built-in helper to use with Handle and Catch. It keeps the current
