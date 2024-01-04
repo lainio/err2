@@ -87,8 +87,8 @@ little error handling. But most importantly, it doesn't help developers with
 > Automation is not just about efficiency but primarily about repeatability and
 > resilience. -- Gregor Hohpe
 
-Automatic error propagation is crucial because it makes your code tolerant
-of the change. And, of course, it helps to make your code error-safe: 
+Automatic error propagation is crucial because it makes your code change
+tolerant. And, of course, it helps to make your code error-safe: 
 
 ![Never send a human to do a machine's job](https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
 
