@@ -146,8 +146,10 @@ var (
 )
 
 const (
-	assertionMsg = "assertion violation"
-	gotWantFmt   = ": got '%v', want '%v'"
+	assertionMsg      = "assertion violation"
+	gotWantFmt        = ": got '%v', want '%v'"
+	gotWantLongerFmt  = ": got '%v', should be longer than '%v'"
+	gotWantShorterFmt = ": got '%v', should be shorter than '%v'"
 )
 
 // PushTester sets the current testing context for default asserter. This must
@@ -400,6 +402,32 @@ func Len(obj string, length int, a ...any) {
 	}
 }
 
+// Longer asserts that the length of the string is longer to the given. If not
+// it panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func Longer(obj string, length int, a ...any) {
+	l := len(obj)
+
+	if l > length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// Shorter asserts that the length of the string is shorter to the given. If not
+// it panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func Shorter(obj string, length int, a ...any) {
+	l := len(obj)
+
+	if l <= length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
 // SLen asserts that the length of the slice is equal to the given. If not it
 // panics/errors (current Asserter) with the given message. Note! This is
 // reasonably fast but not as fast as 'That' because of lacking inlining for the
@@ -413,6 +441,32 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	}
 }
 
+// SLonger asserts that the length of the slice is equal to the given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
+	l := len(obj)
+
+	if l <= length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// SShorter asserts that the length of the slice is equal to the given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
+	l := len(obj)
+
+	if l >= length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
 // MLen asserts that the length of the map is equal to the given. If not it
 // panics/errors (current Asserter) with the given message. Note! This is
 // reasonably fast but not as fast as 'That' because of lacking inlining for the
@@ -422,6 +476,71 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 
 	if l != length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// MLonger asserts that the length of the map is longer to the given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
+	l := len(obj)
+
+	if l <= length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// MShorter asserts that the length of the map is shorter to the given. If not
+// it panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
+	l := len(obj)
+
+	if l >= length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// CLen asserts that the length of the chan is equal to the given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func CLen[C ~chan T, T any](obj C, length int, a ...any) {
+	l := len(obj)
+
+	if l != length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// CLonger asserts that the length of the chan is longer to the given. If not it
+// panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
+	l := len(obj)
+
+	if l <= length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
+		Default().reportAssertionFault(defMsg, a...)
+	}
+}
+
+// CShorter asserts that the length of the chan is shorter to the given. If not
+// it panics/errors (current Asserter) with the given message. Note! This is
+// reasonably fast but not as fast as 'That' because of lacking inlining for the
+// current implementation of Go's type parametric functions.
+func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
+	l := len(obj)
+
+	if l >= length {
+		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }
@@ -485,7 +604,9 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 
 // NoError asserts that the error is nil. If is not it panics with the given
 // formatting string. Thanks to inlining, the performance penalty is equal to a
-// single 'if-statement' that is almost nothing.
+// single 'if-statement' that is almost nothing. Note. We recommend that you
+// prefer try.To every case even in tests because they work exactly the same
+// during the test runs and you can use same code for both: runtime and tests.
 func NoError(err error, a ...any) {
 	if err != nil {
 		defMsg := "NoError:" + assertionMsg + ": " + err.Error()

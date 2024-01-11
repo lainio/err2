@@ -152,6 +152,32 @@ func ExampleZero() {
 	// Output: sample: assert_test.go:146: ExampleZero.func1(): assertion violation: got '1', want (== '0')
 }
 
+func ExampleSLonger() {
+	sample := func(b []byte) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.SLonger(b, 0) // ok
+		assert.SLonger(b, 1) // not ok
+		return err
+	}
+	err := sample([]byte{01}) // len = 1
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:160: ExampleSLonger.func1(): assertion violation: got '1', should be longer than '1'
+}
+
+func ExampleMShorter() {
+	sample := func(b map[byte]byte) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.MShorter(b, 1) // ok
+		assert.MShorter(b, 0) // not ok
+		return err
+	}
+	err := sample(map[byte]byte{01: 01}) // len = 1
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:172: ExampleMShorter.func1(): assertion violation: got '1', should be shorter than '1'
+}
+
 func assertZero(i int) {
 	assert.Zero(i)
 }
