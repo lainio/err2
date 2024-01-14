@@ -129,7 +129,7 @@ func doPlayMain() {
 	//err2.SetFormatter(formatter.Noop) // default is formatter.Decamel
 
 	// errors are caught without specific handlers.
-	defer err2.Catch("CATCH")
+	defer err2.Catch(err2.ToStderr)
 
 	// If you don't want to use tracers or you just need a proper error handler
 	// here.
