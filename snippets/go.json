@@ -2,8 +2,13 @@
 	".source.go": {
 		"defer err2.Catch to stderr": {
 			"prefix": "ecte",
-			"body": "defer err2.Catch(err2.toStderr)\n",
-			"description": "Snippet for err2.Catch(toStderr)"
+			"body": "defer err2.Catch(err2.ToStderr)\n",
+			"description": "Snippet for err2.Catch(ToStderr)"
+		},
+		"defer err2.Catch to stdout": {
+			"prefix": "ecte",
+			"body": "defer err2.Catch(err2.ToStdout)\n",
+			"description": "Snippet for err2.Catch(ToStdout)"
 		},
 		"defer err2.Catch": {
 			"prefix": "eca",
