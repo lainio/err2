@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/lainio/err2"
 	"github.com/lainio/err2/try"
@@ -36,9 +35,6 @@ func (db *Database) MoneyTransfer(from, to *Account, amount int) (err error) {
 }
 
 func doDBMain() {
-	err2.SetErrorTracer(os.Stderr)
-	err2.SetErrorTracer(nil) // <- out-comment/rm to get automatic error traces
-
 	defer err2.Catch("CATCH Warning: %s", "test-name")
 
 	db, from, to := new(Database), new(Account), new(Account)
