@@ -87,8 +87,8 @@ little error handling. But most importantly, it doesn't help developers with
 > Automation is not just about efficiency but primarily about repeatability and
 > resilience. -- Gregor Hohpe
 
-Automatic error propagation is crucial because it makes your code tolerant
-of the change. And, of course, it helps to make your code error-safe: 
+Automatic error propagation is crucial because it makes your code change
+tolerant. And, of course, it helps to make your code error-safe: 
 
 ![Never send a human to do a machine's job](https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
 
@@ -242,7 +242,7 @@ notExist := try.Is(r2.err, plugin.ErrNotExist)
 **Note.** Any other error than `plugin.ErrNotExist` is treated as an real error:
 1. `try.Is` function first checks `if err == nil`, and if yes, it returns
    `false`.
-2. Then it checks if `errors.Is` == `plugin.ErrNotExist` and if yes, it returns
+2. Then it checks if `errors.Is(err, plugin.ErrNotExist)` and if yes, it returns
    `true`.
 3. Finally, it calls `try.To` for the non nil error, and we already know what then
    happens: nearest `err2.Handle` gets it first.
@@ -527,10 +527,11 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.51
-- `flag` package support to set `err2` and `assert` package configuration
-- `err2.Catch` default mode is to log error
-- cleanup and refactoring, new tests and benchmarks
+##### 0.9.52
+- `err2.Stderr` helpers for `Catch/Handle` to direct auto-logging + snippets
+- `assert` package `Shorter` `Longer` helpers for automatic messages
+- `asserter` package remove deprecated slow reflection based funcs
+- cleanup and refactoring for sample apps
 
 ### Upcoming releases
 

@@ -37,6 +37,31 @@ func CopyFile(src, dst string) (err error) {
 	return nil
 }
 
+func ClassicCopyFile(src, dst string) error {
+	r, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("copy %s %s: %v", src, dst, err)
+	}
+	defer r.Close()
+
+	w, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("copy %s %s: %v", src, dst, err)
+	}
+
+	if _, err := io.Copy(w, r); err != nil {
+		w.Close()
+		os.Remove(dst)
+		return fmt.Errorf("copy %s %s: %v", src, dst, err)
+	}
+
+	if err := w.Close(); err != nil {
+		os.Remove(dst)
+		return fmt.Errorf("copy %s %s: %v", src, dst, err)
+	}
+	return nil
+}
+
 // OrgCopyFile copies the source file to the given destination. If any error occurs it
 // returns an error value describing the reason.
 func OrgCopyFile(src, dst string) (err error) {
@@ -104,7 +129,7 @@ func doPlayMain() {
 	//err2.SetFormatter(formatter.Noop) // default is formatter.Decamel
 
 	// errors are caught without specific handlers.
-	defer err2.Catch("CATCH")
+	defer err2.Catch(err2.Stderr)
 
 	// If you don't want to use tracers or you just need a proper error handler
 	// here.

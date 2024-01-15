@@ -13,7 +13,7 @@ var (
 )
 
 func main() {
-	defer err2.Catch()
+	defer err2.Catch(err2.Stderr)
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 
 	flag.Parse()

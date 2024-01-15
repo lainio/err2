@@ -3,6 +3,7 @@ package err2
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/lainio/err2/internal/handler"
 )
@@ -32,6 +33,11 @@ var (
 	// same error. These error are mainly for that purpose.
 	ErrNotRecoverable = errors.New("cannot recover")
 	ErrRecoverable    = errors.New("recoverable")
+
+	// Stdnull is helper variable for io.Writer need e.g. err2.SetLogTracer in
+	// cases you don't want to use automatic log writer, i.e. LogTracer == nil.
+	// It's usually used to change how the Catch works, e.g., in CLI apps.
+	Stdnull = &nullDev{}
 )
 
 // Handle is the general purpose error handling function. What makes it so
@@ -115,7 +121,11 @@ func Handle(err *error, a ...any) {
 //
 // The preceding line catches the errors and panics and prints an annotated
 // error message about the error source (from where the error was thrown) to the
-// currently set log.
+// currently set log. Note, when log stream isn't set, the standard log is used.
+// It can be bound to, e.g., glog. And if you want to suppress automatic logging
+// use the following setup:
+//
+//	err2.SetLogTracer(err2.Stdnull)
 //
 // The next one stops errors and panics, but allows you handle errors, like
 // cleanups, etc. The error handler function has same signature as Handle's
@@ -174,6 +184,32 @@ func Throwf(format string, args ...any) {
 	panic(err)
 }
 
+// Stderr is a built-in helper to use with Handle and Catch. It prints the
+// error to stderr and it resets the current error value. It's a handy Catch
+// handler in main function.
+//
+// You can use it like this:
+//
+//	func main() {
+//		defer err2.Catch(err2.Stderr)
+func Stderr(err error) error {
+	fmt.Fprintln(os.Stderr, err.Error())
+	return nil
+}
+
+// Stdout is a built-in helper to use with Handle and Catch. It prints the
+// error to stdout and it resets the current error value. It's a handy Catch
+// handler in main function.
+//
+// You can use it like this:
+//
+//	func main() {
+//		defer err2.Catch(err2.Stdout)
+func Stdout(err error) error {
+	fmt.Fprintln(os.Stdout, err.Error())
+	return nil
+}
+
 // Noop is a built-in helper to use with Handle and Catch. It keeps the current
 // error value the same. You can use it like this:
 //
@@ -200,6 +236,10 @@ func Err(f func(err error)) func(error) error {
 		return err
 	}
 }
+
+type nullDev struct{}
+
+func (nullDev) Write([]byte) (int, error) { return 0, nil }
 
 func doTrace(err error) {
 	if err == nil || err.Error() == "" {
