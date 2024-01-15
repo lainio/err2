@@ -527,10 +527,11 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.51
-- `flag` package support to set `err2` and `assert` package configuration
-- `err2.Catch` default mode is to log error
-- cleanup and refactoring, new tests and benchmarks
+##### 0.9.52
+- `err2.Stderr` helpers for `Catch/Handle` to direct auto-logging + snippets
+- `assert` package `Shorter` `Longer` helpers for automatic messages
+- `asserter` package remove deprecated slow reflection based funcs
+- cleanup and refactoring for sample apps
 
 ### Upcoming releases
 
