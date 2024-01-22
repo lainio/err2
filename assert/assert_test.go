@@ -260,6 +260,13 @@ func BenchmarkSLen(b *testing.B) {
 	}
 }
 
+func BenchmarkLen(b *testing.B) {
+	s := "len"
+	for n := 0; n < b.N; n++ {
+		assert.Len(s, 3)
+	}
+}
+
 func BenchmarkSLen_thatVersion(b *testing.B) {
 	d := []byte{1, 2}
 	for n := 0; n < b.N; n++ {
