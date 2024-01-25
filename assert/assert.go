@@ -107,9 +107,10 @@ var (
 )
 
 var (
-	// These two are our indexing system for default asserter. Note also the
-	// mutex blew. All of this is done to keep client package race detector
+	// These two are our indexing system for default asserter. Note, also the
+	// mutex below. All of this is done to keep client package race detector
 	// cool.
+	//
 	//  Plain
 	//  Production
 	//  Development
@@ -170,12 +171,14 @@ const (
 //	}
 //
 // Because PushTester returns PopTester it allows us to merge these two calls to
-// one line. See the first t.Run call. NOTE. More information in PopTester.
+// one line. See the first t.Run call above. See more information in PopTester.
 //
 // PushTester allows you to change the current default asserter by accepting it
-// as a second argument. NOTE. That it change the default asserter for whole
-// package. The argument is mainly for temporary development use and isn't not
-// preferrred API usage.
+// as a second argument.
+//
+// Note, that the second argument, if given, changes the default asserter for
+// whole package. The argument is mainly for temporary development use and isn't
+// not preferred API usage.
 func PushTester(t testing.TB, a ...defInd) function {
 	if len(a) > 0 {
 		SetDefault(a[0])
@@ -235,7 +238,7 @@ func PopTester() {
 		msg = "test panic catch"
 	}
 
-	// First, print the call stack. Note. that we aren't support full error
+	// First, print the call stack. Note, that we aren't support full error
 	// tracing with unit test logging. However, using it has proved the top
 	// level error stack as more enough. Even so that we could consider using
 	// it for normal error stack straces if it would be possible.
@@ -243,7 +246,7 @@ func PopTester() {
 	debug.PrintStackForTest(os.Stderr, stackLvl)
 
 	// Now that call stack errors are printed, if any. Let's print the actual
-	// line that caused the error, i.e., was throwing the error. Note that we
+	// line that caused the error, i.e., was throwing the error. Note, that we
 	// are here in the 'catch-function'.
 	const framesToSkip = 4 // how many fn calls there is before FuncName call
 	fatal("assertion catching: "+msg, framesToSkip)
@@ -351,7 +354,8 @@ func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 }
 
 // NotEqual asserts that the values aren't equal. If they are it panics/errors
-// (current Asserter) with the given message.
+// (according the current Asserter) with the auto-generated message. You can
+// append the generated got-want message by using optional message arguments.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v' want (!= '%v')", val, want)
@@ -359,8 +363,9 @@ func NotEqual[T comparable](val, want T, a ...any) {
 	}
 }
 
-// Equal asserts that the values are equal. If not it panics/errors (current
-// Asserter) with the given message.
+// Equal asserts that the values are equal. If not it panics/errors (according
+// the current Asserter) with the auto-generated message. You can append the
+// generated got-want message by using optional message arguments.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
@@ -369,7 +374,9 @@ func Equal[T comparable](val, want T, a ...any) {
 }
 
 // DeepEqual asserts that the (whatever) values are equal. If not it
-// panics/errors (current Asserter) with the given message.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
@@ -378,8 +385,12 @@ func DeepEqual(val, want any, a ...any) {
 }
 
 // NotDeepEqual asserts that the (whatever) values are equal. If not it
-// panics/errors (current Asserter) with the given message. NOTE, it uses
-// reflect.DeepEqual which means that also the types must be the same:
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note, it uses reflect.DeepEqual which means that also the types must be the
+// same:
 //
 //	assert.DeepEqual(pubKey, ed25519.PublicKey(pubKeyBytes))
 func NotDeepEqual(val, want any, a ...any) {
@@ -390,9 +401,12 @@ func NotDeepEqual(val, want any, a ...any) {
 }
 
 // Len asserts that the length of the string is equal to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func Len(obj string, length int, a ...any) {
 	l := len(obj)
 
@@ -403,9 +417,12 @@ func Len(obj string, length int, a ...any) {
 }
 
 // Longer asserts that the length of the string is longer to the given. If not
-// it panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// it panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func Longer(obj string, length int, a ...any) {
 	l := len(obj)
 
@@ -416,9 +433,12 @@ func Longer(obj string, length int, a ...any) {
 }
 
 // Shorter asserts that the length of the string is shorter to the given. If not
-// it panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// it panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func Shorter(obj string, length int, a ...any) {
 	l := len(obj)
 
@@ -429,9 +449,12 @@ func Shorter(obj string, length int, a ...any) {
 }
 
 // SLen asserts that the length of the slice is equal to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
@@ -442,9 +465,12 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 }
 
 // SLonger asserts that the length of the slice is equal to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
@@ -454,10 +480,13 @@ func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 	}
 }
 
-// SShorter asserts that the length of the slice is equal to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// SShorter asserts that the length of the slice is equal to the given. If not
+// it panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
@@ -468,9 +497,12 @@ func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 }
 
 // MLen asserts that the length of the map is equal to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
@@ -481,9 +513,12 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 }
 
 // MLonger asserts that the length of the map is longer to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
@@ -494,9 +529,12 @@ func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 }
 
 // MShorter asserts that the length of the map is shorter to the given. If not
-// it panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// it panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
@@ -507,9 +545,12 @@ func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 }
 
 // CLen asserts that the length of the chan is equal to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
 
@@ -520,9 +561,12 @@ func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 }
 
 // CLonger asserts that the length of the chan is longer to the given. If not it
-// panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
 
@@ -533,9 +577,12 @@ func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 }
 
 // CShorter asserts that the length of the chan is shorter to the given. If not
-// it panics/errors (current Asserter) with the given message. Note! This is
-// reasonably fast but not as fast as 'That' because of lacking inlining for the
-// current implementation of Go's type parametric functions.
+// it panics/errors (according the current Asserter) with the auto-generated
+// message. You can append the generated got-want message by using optional
+// message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
 
@@ -559,7 +606,8 @@ func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U)
 }
 
 // NotEmpty asserts that the string is not empty. If it is, it panics/errors
-// (current Asserter) with the given message.
+// (according the current Asserter) with the auto-generated message. You can
+// append the generated got-want message by using optional message arguments.
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
 		defMsg := assertionMsg + ": string shouldn't be empty"
@@ -568,7 +616,8 @@ func NotEmpty(obj string, a ...any) {
 }
 
 // Empty asserts that the string is empty. If it is NOT, it panics/errors
-// (current Asserter) with the given message.
+// (according the current Asserter) with the auto-generated message. You can
+// append the generated got-want message by using optional message arguments.
 func Empty(obj string, a ...any) {
 	if obj != "" {
 		defMsg := assertionMsg + ": string should be empty"
@@ -577,9 +626,11 @@ func Empty(obj string, a ...any) {
 }
 
 // SNotEmpty asserts that the slice is not empty. If it is, it panics/errors
-// (current Asserter) with the given message. Note! This is reasonably fast but
-// not as fast as 'That' because of lacking inlining for the current
-// implementation of Go's type parametric functions.
+// (according the current Asserter) with the auto-generated message. You can
+// append the generated got-want message by using optional message arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 	l := len(obj)
 
@@ -590,9 +641,13 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 }
 
 // MNotEmpty asserts that the map is not empty. If it is, it panics/errors
-// (current Asserter) with the given message. Note! This is reasonably fast but
-// not as fast as 'That' because of lacking inlining for the current
-// implementation of Go's type parametric functions.
+// (according the current Asserter) with the auto-generated message. You can
+// append the generated got-want message by using optional message arguments.
+// You can append the generated got-want message by using optional message
+// arguments.
+//
+// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// inlining for the current implementation of Go's type parametric functions.
 func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	l := len(obj)
 
@@ -604,9 +659,13 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 
 // NoError asserts that the error is nil. If is not it panics with the given
 // formatting string. Thanks to inlining, the performance penalty is equal to a
-// single 'if-statement' that is almost nothing. Note. We recommend that you
-// prefer try.To every case even in tests because they work exactly the same
-// during the test runs and you can use same code for both: runtime and tests.
+// single 'if-statement' that is almost nothing.
+//
+// Note. We recommend that you prefer try.To. They work exactly the same during
+// the test runs and you can use the same code for both: runtime and tests.
+// However, there are cases that you want assert that there is no error in cases
+// where fast fail and immediate stop of execution is wanted at runtime. With
+// asserts you get the file location as well. (See the asserters).
 func NoError(err error, a ...any) {
 	if err != nil {
 		defMsg := "NoError:" + assertionMsg + ": " + err.Error()
@@ -662,13 +721,17 @@ func Default() Asserter {
 
 // SetDefault set the current default asserter for the package. For example, you
 // might set it to panic about every assertion fault, and in other cases, throw
-// an error, and print the call stack immediately when assert occurs. Note, that
-// if you are using tracers you might get two call stacks, so test what's best
-// for your case. Tip. If our own packages (client packages for assert) have
-// lots of parallel testing and race detection, please try to use same asserter
-// for allo foot hem and do it only one in TestMain, or in init.
+// an error, and print the call stack immediately when assert occurs.
 //
-//	SetDefault(assert.TestFull)
+// Note, that if you are using tracers you might get two call stacks, so test
+// what's best for your case.
+//
+// Tip. If our own packages (client packages for assert) have lots of parallel
+// testing and race detection, please try to use same asserter for all of them
+// and do it only one in TestMain, or in init.
+//
+//	func TestMain(m *testing.M) {
+//		SetDefault(assert.TestFull)
 func SetDefault(i defInd) Asserter {
 	// pkg lvl lock to allow only one pkg client call this at the time
 	mu.Lock()
@@ -699,7 +762,7 @@ var mapDefIndToString = map[defInd]string{
 	Debug:       "Debug",
 }
 
-func AsserterString() string {
+func defaultAsserterString() string {
 	return mapDefIndToString[def]
 }
 
@@ -745,7 +808,7 @@ type Number interface {
 
 // String is part of the flag interfaces
 func (f *flagAsserter) String() string {
-	return AsserterString()
+	return defaultAsserterString()
 }
 
 // Get is part of the flag interfaces, getter.
