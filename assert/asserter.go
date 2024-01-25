@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 
 	"github.com/lainio/err2/internal/debug"
 	"github.com/lainio/err2/internal/str"
@@ -47,6 +46,13 @@ const (
 // every test log or result output has 4 spaces in them
 const officialTestOutputPrefix = "    "
 
+// reportAssertionFault reports assertion fault according the current asserter
+// and its config. If extra argumnets are given (a ...any) and the first is
+// string, it's treated as format string and following args as its parameters.
+//
+// Note. We use the pattern where we build defaultMsg argument reaady in cases
+// like 'got: X, want: Y'. This hits two birds with one stone: we have automatic
+// and correct assert messages, and we can add information to it if we want to.
 func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 	if asserter.hasStackTrace() {
 		if asserter.isUnitTesting() {
@@ -65,6 +71,8 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 		defaultMsg = asserter.callerInfo(defaultMsg)
 	}
 	if len(a) > 0 {
+		// we concat given format string to the in cases we
+		// have got: want: pattern in use, i.e. best from both worlds
 		if format, ok := a[0].(string); ok {
 			asserter.reportPanic(fmt.Sprintf(format, a[1:]...))
 		} else {
@@ -73,16 +81,6 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 	} else {
 		asserter.reportPanic(defaultMsg)
 	}
-}
-
-func getLen(x any) (ok bool, length int) {
-	v := reflect.ValueOf(x)
-	defer func() {
-		if e := recover(); e != nil {
-			ok = false
-		}
-	}()
-	return true, v.Len()
 }
 
 func (asserter Asserter) reportPanic(s string) {
