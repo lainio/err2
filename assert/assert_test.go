@@ -13,12 +13,12 @@ func ExampleThat() {
 	sample := func() (err error) {
 		defer err2.Handle(&err)
 
-		assert.That(false, "assertion test")
+		assert.That(false, "optional message")
 		return err
 	}
 	err := sample()
 	fmt.Printf("%v", err)
-	// Output: testing: run example: assertion test
+	// Output: testing: run example: assert_test.go:16: ExampleThat.func1(): That: assertion violation: optional message
 }
 
 func ExampleNotNil() {
@@ -176,6 +176,19 @@ func ExampleMShorter() {
 	err := sample(map[byte]byte{01: 01}) // len = 1
 	fmt.Printf("%v", err)
 	// Output: sample: assert_test.go:172: ExampleMShorter.func1(): assertion violation: got '1', should be shorter than '1'
+}
+
+func ExampleSShorter() {
+	sample := func(b []byte) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.SShorter(b, 2)                                      // ok
+		assert.SShorter(b, 0, "optional message (%s)", "test_str") // not ok
+		return err
+	}
+	err := sample([]byte{01}) // len = 1
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:186: ExampleSShorter.func1(): assertion violation: got '1', should be shorter than '0': optional message (test_str)
 }
 
 func assertZero(i int) {

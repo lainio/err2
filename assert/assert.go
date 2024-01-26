@@ -151,6 +151,8 @@ const (
 	gotWantFmt        = ": got '%v', want '%v'"
 	gotWantLongerFmt  = ": got '%v', should be longer than '%v'"
 	gotWantShorterFmt = ": got '%v', should be shorter than '%v'"
+
+	conCatErrStr = ": "
 )
 
 // PushTester sets the current testing context for default asserter. This must
@@ -668,7 +670,7 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 // asserts you get the file location as well. (See the asserters).
 func NoError(err error, a ...any) {
 	if err != nil {
-		defMsg := "NoError:" + assertionMsg + ": " + err.Error()
+		defMsg := "NoError:" + assertionMsg + conCatErrStr + err.Error()
 		Default().reportAssertionFault(defMsg, a...)
 	}
 }

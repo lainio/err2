@@ -7,6 +7,7 @@ import (
 
 	"github.com/lainio/err2/internal/debug"
 	"github.com/lainio/err2/internal/str"
+	"github.com/lainio/err2/internal/x"
 )
 
 // Asserter is type for asserter object guided by its flags.
@@ -71,12 +72,11 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
 		defaultMsg = asserter.callerInfo(defaultMsg)
 	}
 	if len(a) > 0 {
-		// we concat given format string to the in cases we
-		// have got: want: pattern in use, i.e. best from both worlds
 		if format, ok := a[0].(string); ok {
-			asserter.reportPanic(fmt.Sprintf(format, a[1:]...))
+			f := x.Whom(defaultMsg != "", defaultMsg+conCatErrStr+format, format)
+			asserter.reportPanic(fmt.Sprintf(f, a[1:]...))
 		} else {
-			asserter.reportPanic(fmt.Sprintln(a...))
+			asserter.reportPanic(fmt.Sprintln(append([]any{defaultMsg}, a...)))
 		}
 	} else {
 		asserter.reportPanic(defaultMsg)
