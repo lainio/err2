@@ -292,7 +292,7 @@ func TestPanickingCatchAll(t *testing.T) {
 				func() {
 					defer err2.Catch(
 						err2.Noop,
-						func(v any) {},
+						func(any) {},
 					)
 					panic("panic")
 				},
@@ -304,7 +304,7 @@ func TestPanickingCatchAll(t *testing.T) {
 				func() {
 					defer err2.Catch(
 						err2.Err(func(error) {}), // Using simplifier
-						func(v any) {},
+						func(any) {},
 					)
 					var b []byte
 					b[0] = 0
@@ -453,7 +453,7 @@ func TestPanicking_Handle(t *testing.T) {
 				func() (err error) {
 					defer err2.Handle(&err,
 						func(err error) error { return err },
-						func(p any) {},
+						func(any) {},
 					)
 					panic("panic")
 				},
@@ -463,7 +463,7 @@ func TestPanicking_Handle(t *testing.T) {
 		{"general panic stoped with handler",
 			args{
 				func() (err error) {
-					defer err2.Handle(&err, func(p any) {})
+					defer err2.Handle(&err, func(any) {})
 					panic("panic")
 				},
 			},
@@ -472,7 +472,7 @@ func TestPanicking_Handle(t *testing.T) {
 		{"general panic stoped with handler plus fmt string",
 			args{
 				func() (err error) {
-					defer err2.Handle(&err, func(p any) {}, "string")
+					defer err2.Handle(&err, func(any) {}, "string")
 					panic("panic")
 				},
 			},
@@ -492,7 +492,7 @@ func TestPanicking_Handle(t *testing.T) {
 		{"runtime.error panic stopped with handler",
 			args{
 				func() (err error) {
-					defer err2.Handle(&err, func(p any) {})
+					defer err2.Handle(&err, func(any) {})
 					var b []byte
 					b[0] = 0
 					return nil
@@ -600,12 +600,12 @@ func TestCatch_Panic(t *testing.T) {
 	}()
 
 	defer err2.Catch(
-		func(err error) error {
+		func(error) error {
 			t.Log("it was panic, not an error")
 			t.Fail() // we should not be here
 			return nil
 		},
-		func(v any) {
+		func(any) {
 			panicHandled = true
 		})
 

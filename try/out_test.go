@@ -26,7 +26,7 @@ func ExampleOut1_copyFile() {
 
 		// If you prefer immediate error handling for some reason.
 		_ = try.Out1(io.Copy(w, r)).
-			Handle(io.EOF, func(err error) error {
+			Handle(io.EOF, func(error) error {
 				fmt.Println("err == io.EOF")
 				return nil // by returning nil we can reset the error
 				// return err // fallthru to next check if err != nil
@@ -136,7 +136,7 @@ func ExampleResult1_Handle() {
 	callRead := func(in io.Reader, b []byte) (eof bool, n int) {
 		// we should use try.To1, but this is sample of try.Out.Handle
 		n = try.Out1(in.Read(b)).
-			Handle(io.EOF, func(err error) error {
+			Handle(io.EOF, func(error) error {
 				eof = true
 				return nil
 			}).       // our errors.Is == true, handler to get eof status
