@@ -1,6 +1,6 @@
 # IDEs, etc.
 .idea
-Session.vim*
+*.vim*
 coverage.*
 
 # Binaries for programs and plugins
