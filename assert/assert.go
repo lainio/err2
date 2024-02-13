@@ -731,16 +731,20 @@ func Default() Asserter {
 	return defAsserter[def]
 }
 
-// SetDefault set the current default asserter for the package. For example, you
-// might set it to panic about every assertion fault, and in other cases, throw
-// an error, and print the call stack immediately when assert occurs.
+// SetDefault set the current default asserter for assert pkg.
+//
+// Note, that you should use this in TestMain function, and use Flag package to
+// set it for the app. For the tests you can set it to panic about every
+// assertion fault, or to throw an error, or/and print the call stack
+// immediately when assert occurs. The err2 package helps you to catch and
+// report all types of the asserts.
 //
 // Note, that if you are using tracers you might get two call stacks, so test
 // what's best for your case.
 //
 // Tip. If our own packages (client packages for assert) have lots of parallel
 // testing and race detection, please try to use same asserter for all of them
-// and do it only one in TestMain, or in init.
+// and set asserter only one in TestMain, or in init.
 //
 //	func TestMain(m *testing.M) {
 //		SetDefault(assert.TestFull)
