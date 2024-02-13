@@ -112,13 +112,6 @@ func doPlayMain() {
 	// Keep here that you can play without changing imports
 	assert.That(true)
 
-	// If asserts are treated as panics instead of errors, you get the stack trace.
-	// you can try that by taking the next line out of the comment:
-	assert.SetDefault(assert.Development)
-
-	// same thing but one line assert msg
-	//assert.SetDefault(assert.Production)
-
 	// To see how automatic stack tracing works.
 	//err2.SetErrorTracer(os.Stderr)
 
