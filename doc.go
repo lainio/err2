@@ -101,6 +101,10 @@ And the following flags are supported (="default-value"):
 	-err2-trace="nil"
 	    A name of the stream currently supported stderr, stdout or nil
 
+Note, that you have called err2.SetErrorTracer and others, before you call
+flag.Parse. This allows you set the defaults according your app's need and allow
+end-user change them during the runtime.
+
 # Error handling
 
 Package err2 relies on declarative control structures to achieve error and panic
