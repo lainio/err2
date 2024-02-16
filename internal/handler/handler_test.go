@@ -30,21 +30,21 @@ func TestProcess(t *testing.T) {
 	}{
 		{"all nil and our handlers",
 			args{Info: handler.Info{
-				Any:          nil,
-				Err:          &nilError,
-				NilHandler:   nilHandler,
-				ErrorHandler: errorHandler,
-				PanicHandler: panicHandler,
+				Any:     nil,
+				Err:     &nilError,
+				NilFn:   nilHandler,
+				ErrorFn: errorHandler,
+				PanicFn: panicHandler,
 			}},
 			want{
 				errStr: "error",
 			}},
 		{"error is transported in panic",
 			args{Info: handler.Info{
-				Any:          errors.New("error"),
-				Err:          &nilError,
-				ErrorHandler: errorHandler,
-				PanicHandler: panicHandler,
+				Any:     errors.New("error"),
+				Err:     &nilError,
+				ErrorFn: errorHandler,
+				PanicFn: panicHandler,
 			}},
 			want{
 				panicCalled: false,
@@ -53,11 +53,11 @@ func TestProcess(t *testing.T) {
 			}},
 		{"runtime.Error is transported in panic",
 			args{Info: handler.Info{
-				Any:          myErrRT,
-				Err:          &nilError,
-				NilHandler:   nilHandler,
-				ErrorHandler: errorHandler,
-				PanicHandler: panicHandler,
+				Any:     myErrRT,
+				Err:     &nilError,
+				NilFn:   nilHandler,
+				ErrorFn: errorHandler,
+				PanicFn: panicHandler,
 			}},
 			want{
 				panicCalled: true,
@@ -65,11 +65,11 @@ func TestProcess(t *testing.T) {
 			}},
 		{"panic is transported in panic",
 			args{Info: handler.Info{
-				Any:          "panic",
-				Err:          &nilError,
-				NilHandler:   nilHandler,
-				ErrorHandler: errorHandler,
-				PanicHandler: panicHandler,
+				Any:     "panic",
+				Err:     &nilError,
+				NilFn:   nilHandler,
+				ErrorFn: errorHandler,
+				PanicFn: panicHandler,
 			}},
 			want{
 				panicCalled: true,
@@ -77,11 +77,11 @@ func TestProcess(t *testing.T) {
 			}},
 		{"error in panic and default format print",
 			args{Info: handler.Info{
-				Any:          errors.New("error"),
-				Err:          &nilError,
-				Format:       "format %v",
-				Args:         []any{"test"},
-				PanicHandler: panicHandler,
+				Any:     errors.New("error"),
+				Err:     &nilError,
+				Format:  "format %v",
+				Args:    []any{"test"},
+				PanicFn: panicHandler,
 			}},
 			want{
 				panicCalled: false,
@@ -89,12 +89,12 @@ func TestProcess(t *testing.T) {
 			}},
 		{"error transported in panic and our OWN handler",
 			args{Info: handler.Info{
-				Any:          errors.New("error"),
-				Err:          &nilError,
-				Format:       "format %v",
-				Args:         []any{"test"},
-				ErrorHandler: errorHandlerForAnnotate,
-				PanicHandler: panicHandler,
+				Any:     errors.New("error"),
+				Err:     &nilError,
+				Format:  "format %v",
+				Args:    []any{"test"},
+				ErrorFn: errorHandlerForAnnotate,
+				PanicFn: panicHandler,
 			}},
 			want{
 				panicCalled: false,
@@ -103,10 +103,10 @@ func TestProcess(t *testing.T) {
 			}},
 		{"error is transported in error val",
 			args{Info: handler.Info{
-				Any:          nil,
-				Err:          &myErrVal,
-				ErrorHandler: errorHandler,
-				PanicHandler: panicHandler,
+				Any:     nil,
+				Err:     &myErrVal,
+				ErrorFn: errorHandler,
+				PanicFn: panicHandler,
 			}},
 			want{
 				panicCalled: false,
@@ -196,11 +196,11 @@ func TestPreProcess(t *testing.T) {
 		{"all nil and our handlers",
 			args{
 				Info: handler.Info{
-					Any:          nil,
-					Err:          &nilError,
-					NilHandler:   nilHandler,
-					ErrorHandler: errorHandlerForAnnotate,
-					PanicHandler: panicHandler,
+					Any:     nil,
+					Err:     &nilError,
+					NilFn:   nilHandler,
+					ErrorFn: errorHandlerForAnnotate,
+					PanicFn: panicHandler,
 				},
 				a: []any{"test"}}, // no affec because
 			want{
