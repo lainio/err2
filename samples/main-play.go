@@ -136,7 +136,7 @@ func doPlayMain() {
 	doDoMain()
 	//try.To(doMain())
 
-	println("______===")
+	println("___ happy ending ===")
 }
 
 func doDoMain() {
@@ -145,6 +145,9 @@ func doDoMain() {
 
 func doMain() (err error) {
 	// Example of Handle/Catch API where we can have multiple handlers.
+	// Note that this is a silly sample where logging is done trice and noops
+	// are used without a purpose. All of this is that you get an idea how you
+	// could use the error handlers and chain them together.
 	defer err2.Handle(&err, err2.Log, err2.Noop, err2.Noop, err2.Log)
 
 	// You can select any one of the try.To(CopyFile lines to play with and see
