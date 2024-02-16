@@ -3,7 +3,6 @@ package err2
 import (
 	"fmt"
 	"os"
-)
 
 	"github.com/lainio/err2/internal/handler"
 )
@@ -64,4 +63,12 @@ func Err(f func(err error)) Handler {
 		f(err)
 		return err
 	}
+}
+
+const lvl = 10
+
+// Log prints error string to the current log that is set by SetLogTracer.
+func Log(err error) error {
+	_ = handler.LogOutput(lvl, err.Error())
+	return err
 }
