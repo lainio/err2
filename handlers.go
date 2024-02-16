@@ -16,6 +16,9 @@ import (
 //	func main() {
 //		defer err2.Catch(err2.Stderr)
 func Stderr(err error) error {
+	if err == nil {
+		return nil
+	}
 	fmt.Fprintln(os.Stderr, err.Error())
 	return nil
 }
@@ -29,6 +32,9 @@ func Stderr(err error) error {
 //	func main() {
 //		defer err2.Catch(err2.Stdout)
 func Stdout(err error) error {
+	if err == nil {
+		return nil
+	}
 	fmt.Fprintln(os.Stdout, err.Error())
 	return nil
 }
@@ -69,6 +75,9 @@ const lvl = 10
 
 // Log prints error string to the current log that is set by SetLogTracer.
 func Log(err error) error {
+	if err == nil {
+		return nil
+	}
 	_ = handler.LogOutput(lvl, err.Error())
 	return err
 }
