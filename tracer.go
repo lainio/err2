@@ -31,6 +31,9 @@ func LogTracer() io.Writer {
 //
 //	func CopyFile(src, dst string) (err error) {
 //	     defer err2.Handle(&err) // <- error trace print decision is done here
+//
+// Remember that you can overwrite these with Flag package support. See
+// documentation of err2 package's flag section.
 func SetErrorTracer(w io.Writer) {
 	tracer.Error.SetTracer(w)
 }
@@ -43,6 +46,9 @@ func SetErrorTracer(w io.Writer) {
 //
 //	func CopyFile(src, dst string) (err error) {
 //	     defer err2.Handle(&err) // <- error trace print decision is done here
+//
+// Remember that you can overwrite these with Flag package support. See
+// documentation of err2 package's flag section.
 func SetPanicTracer(w io.Writer) {
 	tracer.Panic.SetTracer(w)
 }
@@ -54,12 +60,18 @@ func SetPanicTracer(w io.Writer) {
 // glog, add this line at the beginning of your app:
 //
 //	glog.CopyStandardLogTo("INFO")
+//
+// Remember that you can overwrite these with Flag package support. See
+// documentation of err2 package's flag section.
 func SetLogTracer(w io.Writer) {
 	tracer.Log.SetTracer(w)
 }
 
 // SetTracers a convenient helper to set a io.Writer for error and panic stack
 // tracing. More information see SetErrorTracer and SetPanicTracer functions.
+//
+// Remember that you can overwrite these with Flag package support. See
+// documentation of err2 package's flag section.
 func SetTracers(w io.Writer) {
 	tracer.Error.SetTracer(w)
 	tracer.Panic.SetTracer(w)
