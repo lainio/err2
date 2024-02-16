@@ -11,7 +11,7 @@ type (
 	// Handler is a function type used to process error values in Handle and
 	// Catch. We currently have a few build-ins of the Handler: err2.Noop,
 	// err2.Reset, etc.
-	Handler = func(error) error
+	Handler = handler.ErrorFn
 )
 
 var (

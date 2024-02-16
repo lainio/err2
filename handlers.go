@@ -5,17 +5,8 @@ import (
 	"os"
 )
 
-// Handlers is a helper to call several error handlers in a sequence.
-//
-//	defer err2.Handle(&err, err2.Handlers(err2.Log, MapToHTTPErr))
-func Handlers(f ...Handler) Handler {
-	return func(err error) error {
-		for _, handler := range f {
-			err = handler(err)
-		}
-		return err
-	}
-}
+	"github.com/lainio/err2/internal/handler"
+)
 
 // Stderr is a built-in helper to use with Handle and Catch. It prints the
 // error to stderr and it resets the current error value. It's a handy Catch
