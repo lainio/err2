@@ -144,7 +144,8 @@ func doDoMain() {
 }
 
 func doMain() (err error) {
-	defer err2.Handle(&err)
+	// Example of Handle/Catch API where we can have multiple handlers.
+	defer err2.Handle(&err, err2.Log, err2.Noop, err2.Noop, err2.Log)
 
 	// You can select any one of the try.To(CopyFile lines to play with and see
 	// how err2 works. Especially interesting is automatic stack tracing.
