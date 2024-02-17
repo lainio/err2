@@ -54,7 +54,7 @@ const officialTestOutputPrefix = "    "
 // Note. We use the pattern where we build defaultMsg argument reaady in cases
 // like 'got: X, want: Y'. This hits two birds with one stone: we have automatic
 // and correct assert messages, and we can add information to it if we want to.
-func (asserter Asserter) reportAssertionFault(defaultMsg string, a ...any) {
+func (asserter Asserter) reportAssertionFault(defaultMsg string, a []any) {
 	if asserter.hasStackTrace() {
 		if asserter.isUnitTesting() {
 			// Note. that the assert in the test function is printed in

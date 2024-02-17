@@ -260,7 +260,7 @@ func tester() (t testing.TB) {
 
 // NotImplemented always panics with 'not implemented' assertion message.
 func NotImplemented(a ...any) {
-	Default().reportAssertionFault("not implemented", a...)
+	Default().reportAssertionFault("not implemented", a)
 }
 
 // ThatNot asserts that the term is NOT true. If is it panics with the given
@@ -269,7 +269,7 @@ func NotImplemented(a ...any) {
 func ThatNot(term bool, a ...any) {
 	if term {
 		defMsg := "ThatNot: " + assertionMsg
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -279,7 +279,7 @@ func ThatNot(term bool, a ...any) {
 func That(term bool, a ...any) {
 	if !term {
 		defMsg := "That: " + assertionMsg
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -288,7 +288,7 @@ func That(term bool, a ...any) {
 func NotNil[P ~*T, T any](p P, a ...any) {
 	if p == nil {
 		defMsg := assertionMsg + ": pointer shouldn't be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -297,7 +297,7 @@ func NotNil[P ~*T, T any](p P, a ...any) {
 func Nil[T any](p *T, a ...any) {
 	if p != nil {
 		defMsg := assertionMsg + ": pointer should be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -311,7 +311,7 @@ func Nil[T any](p *T, a ...any) {
 func INil(i any, a ...any) {
 	if i != nil {
 		defMsg := assertionMsg + ": interface should be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -325,7 +325,7 @@ func INil(i any, a ...any) {
 func INotNil(i any, a ...any) {
 	if i == nil {
 		defMsg := assertionMsg + ": interface shouldn't be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -334,7 +334,7 @@ func INotNil(i any, a ...any) {
 func SNil[S ~[]T, T any](s S, a ...any) {
 	if s != nil {
 		defMsg := assertionMsg + ": slice should be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -343,7 +343,7 @@ func SNil[S ~[]T, T any](s S, a ...any) {
 func SNotNil[S ~[]T, T any](s S, a ...any) {
 	if s == nil {
 		defMsg := assertionMsg + ": slice shouldn't be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -352,7 +352,7 @@ func SNotNil[S ~[]T, T any](s S, a ...any) {
 func CNotNil[C ~chan T, T any](c C, a ...any) {
 	if c == nil {
 		defMsg := assertionMsg + ": channel shouldn't be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -361,7 +361,7 @@ func CNotNil[C ~chan T, T any](c C, a ...any) {
 func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 	if m == nil {
 		defMsg := assertionMsg + ": map shouldn't be nil"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -371,7 +371,7 @@ func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v' want (!= '%v')", val, want)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -381,7 +381,7 @@ func NotEqual[T comparable](val, want T, a ...any) {
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -392,7 +392,7 @@ func Equal[T comparable](val, want T, a ...any) {
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -408,7 +408,7 @@ func DeepEqual(val, want any, a ...any) {
 func NotDeepEqual(val, want any, a ...any) {
 	if reflect.DeepEqual(val, want) {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= '%v')", val, want)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -424,7 +424,7 @@ func Len(obj string, length int, a ...any) {
 
 	if l != length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -440,7 +440,7 @@ func Longer(obj string, length int, a ...any) {
 
 	if l > length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -456,7 +456,7 @@ func Shorter(obj string, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -472,7 +472,7 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 
 	if l != length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -488,7 +488,7 @@ func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -504,7 +504,7 @@ func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 
 	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -520,7 +520,7 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 
 	if l != length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -536,7 +536,7 @@ func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -552,7 +552,7 @@ func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 
 	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -568,7 +568,7 @@ func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 
 	if l != length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -584,7 +584,7 @@ func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -600,7 +600,7 @@ func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
 
 	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -612,7 +612,7 @@ func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U)
 
 	if !ok {
 		defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 	return val
 }
@@ -623,7 +623,7 @@ func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U)
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
 		defMsg := assertionMsg + ": string shouldn't be empty"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -633,7 +633,7 @@ func NotEmpty(obj string, a ...any) {
 func Empty(obj string, a ...any) {
 	if obj != "" {
 		defMsg := assertionMsg + ": string should be empty"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -648,7 +648,7 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 
 	if l == 0 {
 		defMsg := assertionMsg + ": slice shouldn't be empty"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -665,7 +665,7 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 
 	if l == 0 {
 		defMsg := assertionMsg + ": map shouldn't be empty"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -681,7 +681,7 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 func NoError(err error, a ...any) {
 	if err != nil {
 		defMsg := "NoError:" + assertionMsg + conCatErrStr + err.Error()
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -691,7 +691,7 @@ func NoError(err error, a ...any) {
 func Error(err error, a ...any) {
 	if err == nil {
 		defMsg := "Error:" + assertionMsg + ": missing error"
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -701,7 +701,7 @@ func Error(err error, a ...any) {
 func Zero[T Number](val T, a ...any) {
 	if val != 0 {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -711,7 +711,7 @@ func Zero[T Number](val T, a ...any) {
 func NotZero[T Number](val T, a ...any) {
 	if val == 0 {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= 0)", val)
-		Default().reportAssertionFault(defMsg, a...)
+		Default().reportAssertionFault(defMsg, a)
 	}
 }
 
@@ -793,7 +793,7 @@ func newDefInd(v string) defInd {
 func combineArgs(format string, a []any) []any {
 	args := make([]any, 1, len(a)+1)
 	args[0] = format
-	args = append(args, a...)
+	args = append(args, a)
 	return args
 }
 
