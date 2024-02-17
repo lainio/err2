@@ -221,8 +221,10 @@ func WorkToDo(r any, err *error) bool {
 	return (err != nil && *err != nil) || r != nil
 }
 
-func NoerrCallToDo(a ...any) (yes bool) {
-	//var yes bool
+// NoerrCallToDo returns if we have the _exception case_, aka, func (noerr bool)
+// where these handlers are called even normally only error handlers are called,
+// i.e. those which have error to handle.
+func NoerrCallToDo(a []any) (yes bool) {
 	if len(a) != 0 {
 		_, yes = a[0].(CheckHandler)
 	}
@@ -249,7 +251,7 @@ func Process(info *Info) {
 
 // PreProcess is currently used for err2 API like err2.Handle and .Catch.
 //   - replaces the Process
-func PreProcess(errPtr *error, info *Info, a ...any) error {
+func PreProcess(errPtr *error, info *Info, a []any) error {
 	// Bug in Go?
 	// start to use local error ptr only for optimization reasons.
 	// We get 3x faster defer handlers without unsing ptr to original err
@@ -265,7 +267,7 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 	const lvl = -1
 
 	if len(a) > 0 {
-		subProcess(info, a...)
+		subProcess(info, a)
 	} else {
 		fnName := "Handle" // default
 		if info.CallerName != "" {
@@ -307,16 +309,7 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 	return err
 }
 
-// firstArgIsString not used any more.
-func _(a ...any) bool {
-	if len(a) > 0 {
-		_, isStr := a[0].(string)
-		return isStr
-	}
-	return false
-}
-
-func subProcess(info *Info, a ...any) {
+func subProcess(info *Info, a []any) {
 	// not that switch cannot be 0: see call side
 	switch len(a) {
 	case 0:
@@ -325,22 +318,22 @@ programming error: subProcess: case 0:
 ---`
 		fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
 	case 1:
-		processArg(info, 0, a...)
+		processArg(info, 0, a)
 	default: // case 2, 3, ...
-		processArg(info, 0, a...)
+		processArg(info, 0, a)
 		if _, ok := a[1].(PanicFn); ok {
-			processArg(info, 1, a...)
+			processArg(info, 1, a)
 		} else if _, ok := a[1].(ErrorFn); ok {
 			// check second ^ and then change the rest by combining them to
 			// one that we set to proper places: ErrorFn and NilFn
-			hfn := Pipeline(AssertErrHandlers(a))
+			hfn := Pipeline(ToErrorFns(a))
 			info.ErrorFn = hfn
 			info.NilFn = hfn
 		}
 	}
 }
 
-func processArg(info *Info, i int, a ...any) {
+func processArg(info *Info, i int, a []any) {
 	switch first := a[i].(type) {
 	case string:
 		info.Format = first
@@ -411,25 +404,17 @@ func Pipeline(f []ErrorFn) ErrorFn {
 	}
 }
 
-func bugAssertErrHandlers(handlerFns ...any) (hs []ErrorFn) {
-	hs = make([]ErrorFn, 0, len(handlerFns))
-	for _, a := range handlerFns {
-		if fn, ok := a.(ErrorFn); ok {
-			hs = append(hs, fn)
-		} else {
-			return nil
-		}
-	}
-	return hs
-}
-
-func AssertErrHandlers(handlerFns []any) (hs []ErrorFn) {
+func ToErrorFns(handlerFns []any) (hs []ErrorFn) {
 	count := len(handlerFns)
 	hs = make([]ErrorFn, 0, count)
 	for _, a := range handlerFns {
 		if fn, ok := a.(ErrorFn); ok {
 			hs = append(hs, fn)
 		} else {
+			msg := `---
+assertion vialation: your handlers should be 'func(erro) error' type
+---`
+			fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
 			return nil
 		}
 	}

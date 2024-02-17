@@ -86,7 +86,7 @@ func Handle(err *error, a ...any) {
 	// how how it works with defer.
 	r := recover()
 
-	if !handler.WorkToDo(r, err) && !handler.NoerrCallToDo(a...) {
+	if !handler.WorkToDo(r, err) && !handler.NoerrCallToDo(a) {
 		return
 	}
 
@@ -96,7 +96,7 @@ func Handle(err *error, a ...any) {
 	*err = handler.PreProcess(err, &handler.Info{
 		CallerName: "Handle",
 		Any:        r,
-	}, a...)
+	}, a)
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
@@ -157,7 +157,7 @@ func Catch(a ...any) {
 	err = handler.PreProcess(&err, &handler.Info{
 		CallerName: "Catch",
 		Any:        r,
-	}, a...)
+	}, a)
 	doTrace(err)
 }
 

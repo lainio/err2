@@ -43,7 +43,7 @@ type (
 //
 //	error sending response: UDP not listening
 func (o *Result) Logf(a ...any) *Result {
-	return o.logf(logfFrameLvl, a...)
+	return o.logf(logfFrameLvl, a)
 }
 
 // Logf prints a log line to pre-set logging stream (err2.SetLogWriter)
@@ -57,7 +57,7 @@ func (o *Result) Logf(a ...any) *Result {
 //
 //	error sending response: UDP not listening
 func (o *Result1[T]) Logf(a ...any) *Result1[T] {
-	o.Result.logf(logfFrameLvl, a...)
+	o.Result.logf(logfFrameLvl, a)
 	return o
 }
 
@@ -72,7 +72,7 @@ func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 //
 //	error sending response: UDP not listening
 func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
-	o.Result.logf(logfFrameLvl, a...)
+	o.Result.logf(logfFrameLvl, a)
 	return o
 }
 
@@ -262,7 +262,7 @@ func wrapStr() string {
 	return ": %w"
 }
 
-func (o *Result) logf(lvl int, a ...any) *Result {
+func (o *Result) logf(lvl int, a []any) *Result {
 	if o.Err == nil {
 		return o
 	}

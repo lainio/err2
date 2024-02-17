@@ -141,7 +141,7 @@ var Info = handler.Info{
 func Handle() {
 	a := []any{}
 	Info.Err = &myErrVal
-	myErrVal = handler.PreProcess(&myErrVal, &Info, a...)
+	myErrVal = handler.PreProcess(&myErrVal, &Info, a)
 }
 
 func TestPreProcess_debug(t *testing.T) {
@@ -241,7 +241,7 @@ func TestPreProcess(t *testing.T) {
 				var err = x.Whom(tt.args.Info.Err != nil,
 					*tt.args.Info.Err, nil)
 
-				err = handler.PreProcess(&err, &tt.args.Info, tt.args.a...)
+				err = handler.PreProcess(&err, &tt.args.Info, tt.args.a)
 
 				test.RequireEqual(t, panicHandlerCalled, tt.want.panicCalled)
 				test.RequireEqual(t, errorHandlerCalled, tt.want.errorCalled)
