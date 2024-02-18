@@ -412,7 +412,7 @@ func ToErrorFns(handlerFns []any) (hs []ErrorFn) {
 			hs = append(hs, fn)
 		} else {
 			msg := `---
-assertion vialation: your handlers should be 'func(erro) error' type
+assertion violation: your handlers should be 'func(error) error' type
 ---`
 			fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
 			return nil
