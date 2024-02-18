@@ -74,6 +74,13 @@ var (
 //		return err
 //	})
 //
+// You can have unlimited amount of error handlers. They are called if error
+// happens and they are called in the same order as they are given or until one
+// of them resets the error like Reset (notice other predefined error handlers)
+// in next sample:
+//
+//	defer err2.Handle(err2.Noop, err2.Reset, err2.Log) // err2.Log not called!
+//
 // If you need to stop general panics in handler, you can do that by giving a
 // panic handler function:
 //
@@ -131,7 +138,8 @@ func Handle(err *error, a ...any) {
 // error handling function, i.e., err2.Handler. By returning nil resets the
 // error, which allows e.g. prevent automatic error logs to happening.
 // Otherwise, the output results depends on the current Tracer and assert
-// settings. Default setting print call stacks for panics but not for errors:
+// settings. The default trace setting prints call stacks for panics but not for
+// errors:
 //
 //	defer err2.Catch(func(err error) error { return err} )
 //
@@ -139,8 +147,14 @@ func Handle(err *error, a ...any) {
 //
 //	defer err2.Catch(err2.Noop)
 //
-// The last one calls your error handler, and you have an explicit panic
-// handler too, where you can e.g. continue panicking to propagate it for above
+// You can have unlimited amount of error handlers. They are called if error
+// happens and they are called in the same order as they are given or until one
+// of them resets the error like Reset in next sample:
+//
+//	defer err2.Catch(err2.Noop, err2.Reset, err2.Log) // err2.Log not called!
+//
+// The last one calls your error handler, and you have an explicit panic handler
+// as well, where you can e.g. continue panicking to propagate it for above
 // callers or stop it like below:
 //
 //	defer err2.Catch(func(err error) error { return err }, func(p any) {})
