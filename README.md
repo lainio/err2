@@ -129,7 +129,9 @@ func doSomething() (err error) {
 
 See more information from `err2.Handle`'s documentation. It supports several
 error-handling scenarios. And remember that you can have as many error handlers
-per function as you need.
+per function as you need, as well as you can chain error handling functions per
+`err2.Handle` that allows you to build new error handling middleware for your
+own purposes.
 
 #### Error Stack Tracing
 
@@ -527,14 +529,8 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 0.9.52
-- `err2.Stderr` helpers for `Catch/Handle` to direct auto-logging + snippets
-- `assert` package `Shorter` `Longer` helpers for automatic messages
-- `asserter` package remove deprecated slow reflection based funcs
-- cleanup and refactoring for sample apps
-
-### Upcoming releases
-
-##### 0.9.6
-- Continue removing unused parts and repairing for 1.0.0 release.
-- Always more and better documentation
+##### 1.0.0
+- Documentation updates and cleanups
+- `Catch/Handle` take unlimited amount error handler functions
+  - allows building e.g. error handling middleware
+- technical refactoring like variadic function calls only in API level
