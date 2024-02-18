@@ -38,7 +38,7 @@ func TestHandlers(t *testing.T) {
 			anys := tt.args.f
 
 			test.Require(t, anys != nil, "cannot be nil")
-			fns := handler.AssertErrHandlers(anys)
+			fns := handler.ToErrorFns(anys)
 			test.Require(t, fns != nil, "cannot be nil")
 
 			errHandler := handler.Pipeline(fns)
