@@ -53,14 +53,14 @@ them. The CopyFile example shows how it works:
 The try package provides convenient helpers to check the errors. For example,
 instead of
 
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 	   return err
 	}
 
 we can write
 
-	b := try.To1(ioutil.ReadAll(r))
+	b := try.To1(io.ReadAll(r))
 
 Note that try.ToX functions are as fast as if err != nil statements. Please see
 the try package documentation for more information about the error checks.
