@@ -350,7 +350,7 @@ func processArg(info *Info, i int, a []any) {
 	default:
 		// we don't panic here because we can already be in recovery, but lets
 		// try to show an RED error message at least.
-		const msg = `err2 fatal error:  
+		const msg = `err2 fatal error:
 ---
 unsupported handler function type: err2.Handle/Catch:
 see 'err2/scripts/README.md' and run auto-migration scripts for your repo
