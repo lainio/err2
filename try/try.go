@@ -10,7 +10,7 @@ about err2 and try packager roles can be seen in the FileCopy example:
 
 	w := try.To1(os.Create(dst))
 	defer err2.Handle(&err, func(error) error {
-	     try.To(os.Remove(dst)).Logf()
+	     try.Out(os.Remove(dst)).Logf()
 	     return nil
 	})
 	defer w.Close()

@@ -67,9 +67,12 @@ the try package documentation for more information about the error checks.
 
 # Automatic Stack Tracing
 
-err2 offers optional stack tracing. And yes, it's fully automatic. Just set the
-tracers at the beginning your app, e.g. main function, to the stream you want
-traces to be written:
+err2 offers optional stack tracing. And yes, it's fully automatic. Just call
+
+	flag.Parse() # this is enough for err2 pkg to add its flags
+
+at the beginning your app, e.g. main function, or set the tracers
+programmatically (before flag.Parse if you are using that):
 
 	err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
 	 or
