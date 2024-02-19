@@ -435,10 +435,10 @@ func Len(obj string, length int, a ...any) {
 //
 // Note! This is reasonably fast but not as fast as 'That' because of lacking
 // inlining for the current implementation of Go's type parametric functions.
-func Longer(obj string, length int, a ...any) {
-	l := len(obj)
+func Longer(s string, length int, a ...any) {
+	l := len(s)
 
-	if l > length {
+	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
 		Default().reportAssertionFault(defMsg, a)
 	}
@@ -451,10 +451,10 @@ func Longer(obj string, length int, a ...any) {
 //
 // Note! This is reasonably fast but not as fast as 'That' because of lacking
 // inlining for the current implementation of Go's type parametric functions.
-func Shorter(obj string, length int, a ...any) {
-	l := len(obj)
+func Shorter(str string, length int, a ...any) {
+	l := len(str)
 
-	if l <= length {
+	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
 		Default().reportAssertionFault(defMsg, a)
 	}
