@@ -15,7 +15,8 @@ var (
 
 func init() {
 	// highlight that this is before flag.Parse to allow it to work properly.
-	err2.SetLogTracer(os.Stderr)
+	err2.SetLogTracer(os.Stderr) // for import
+	err2.SetLogTracer(nil)
 }
 
 func main() {
