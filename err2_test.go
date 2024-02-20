@@ -655,9 +655,22 @@ func ExampleHandle_errThrow() {
 	// Output: testing: run example: our error
 }
 
+func ExampleHandle_annotatedErrReturn() {
+	normalReturn := func() (err error) {
+		defer err2.Handle(&err) // automatic annotation
+		return fmt.Errorf("our error")
+	}
+	err := normalReturn()
+	fmt.Printf("%v", err)
+
+	// ------- automatic in Go example/test
+	// ------- v ------------------ v --------
+	// Output: testing: run example: our error
+}
+
 func ExampleHandle_errReturn() {
 	normalReturn := func() (err error) {
-		defer err2.Handle(&err, "")
+		defer err2.Handle(&err, nil) // nil disables automatic annotation
 		return fmt.Errorf("our error")
 	}
 	err := normalReturn()
@@ -729,7 +742,9 @@ func ExampleHandle_handlerFn() {
 	doSomething := func(a, b int) (err error) {
 		defer err2.Handle(&err, func(err error) error {
 			// Example for just annotating current err. Normally Handle is
-			// used for cleanup. See CopyFile example for more information.
+			// used for e.g. cleanup, not annotation that can be left for
+			// err2 automatic annotation. See CopyFile example for more
+			// information.
 			return fmt.Errorf("error with (%d, %d): %v", a, b, err)
 		})
 		try.To1(throw())
@@ -738,6 +753,26 @@ func ExampleHandle_handlerFn() {
 	err := doSomething(1, 2)
 	fmt.Printf("%v", err)
 	// Output: error with (1, 2): this is an ERROR
+}
+
+func ExampleHandle_multipleHandlerFns() {
+	doSomething := func(a, b int) (err error) {
+		defer err2.Handle(&err,
+			// cause automatic annotation <== 2 error handlers do the trick
+			err2.Noop,
+			func(err error) error {
+				// Example for just annotating current err. Normally Handle
+				// is used for e.g. cleanup, not annotation that can be left
+				// for err2 automatic annotation. See CopyFile example for
+				// more information.
+				return fmt.Errorf("%w error with (%d, %d)", err, a, b)
+			})
+		try.To1(throw())
+		return err
+	}
+	err := doSomething(1, 2)
+	fmt.Printf("%v", err)
+	// Output: testing: run example: this is an ERROR error with (1, 2)
 }
 
 func ExampleHandle_noThrow() {
