@@ -81,3 +81,33 @@ func Log(err error) error {
 	_ = handler.LogOutput(lvl, err.Error())
 	return err
 }
+
+// StderrNoReset is a built-in helper to use with Handle and Catch. It prints
+// the error to stderr. If you need to reset err value use Stderr instead.
+//
+// You can use it like this:
+//
+//	func myFunction() {
+//		defer err2.Handle(err2.Noop, err2.StderrNoReset)
+func StderrNoReset(err error) error {
+	if err == nil {
+		return nil
+	}
+	fmt.Fprintln(os.Stderr, err.Error())
+	return nil
+}
+
+// StdoutNoReset is a built-in helper to use with Handle and Catch. It prints
+// the error to stdout.
+//
+// You can use it like this:
+//
+//	func main() {
+//		defer err2.Catch(err2.StdoutNoReset)
+func StdoutNoReset(err error) error {
+	if err == nil {
+		return nil
+	}
+	fmt.Fprintln(os.Stdout, err.Error())
+	return nil
+}
