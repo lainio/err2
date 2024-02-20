@@ -55,6 +55,8 @@ type Info struct {
 	CallerName string
 
 	werr error
+
+	needErrorAnnotation bool
 }
 
 const (
@@ -101,7 +103,15 @@ func (i *Info) checkErrorTracer() {
 func (i *Info) callErrorHandler() {
 	i.checkErrorTracer()
 	if i.ErrorFn != nil {
-		*i.Err = i.ErrorFn(i.Any.(error))
+		// we want to auto-annotate error first and exec ErrorFn then
+		i.werr = i.workError()
+		if i.needErrorAnnotation && i.werr != nil {
+			i.buildFmtErr()
+			*i.Err = i.ErrorFn(*i.Err)
+		} else {
+			*i.Err = i.ErrorFn(i.Any.(error))
+		}
+
 		i.werr = *i.Err // remember change both our errors!
 	} else {
 		i.defaultErrorHandler()
@@ -269,23 +279,7 @@ func PreProcess(errPtr *error, info *Info, a []any) error {
 	if len(a) > 0 {
 		subProcess(info, a)
 	} else {
-		fnName := "Handle" // default
-		if info.CallerName != "" {
-			fnName = info.CallerName
-		}
-		funcName, _, _, ok := debug.FuncName(debug.StackInfo{
-			PackageName: "",
-			FuncName:    fnName,
-			Level:       lvl,
-		})
-		if ok {
-			setFmter := fmtstore.Formatter()
-			if setFmter != nil {
-				info.Format = setFmter.Format(funcName)
-			} else {
-				info.Format = str.Decamel(funcName)
-			}
-		}
+		buildFormatStr(info, lvl)
 	}
 	defCatchCallMode := info.PanicFn == nil && info.CallerName == "Catch"
 	if defCatchCallMode {
@@ -309,6 +303,32 @@ func PreProcess(errPtr *error, info *Info, a []any) error {
 	return err
 }
 
+func buildFormatStr(info *Info, lvl int) {
+	if fs, ok := doBuildFormatStr(info, lvl); ok {
+		info.Format = fs
+	}
+}
+
+func doBuildFormatStr(info *Info, lvl int) (fs string, ok bool) {
+	fnName := "Handle"
+	if info.CallerName != "" {
+		fnName = info.CallerName
+	}
+	funcName, _, _, ok := debug.FuncName(debug.StackInfo{
+		PackageName: "",
+		FuncName:    fnName,
+		Level:       lvl,
+	})
+	if ok {
+		setFmter := fmtstore.Formatter()
+		if setFmter != nil {
+			return setFmter.Format(funcName), true
+		}
+		return str.Decamel(funcName), true
+	}
+	return
+}
+
 func subProcess(info *Info, a []any) {
 	// not that switch cannot be 0: see call side
 	switch len(a) {
@@ -326,11 +346,28 @@ programming error: subProcess: case 0:
 		} else if _, ok := a[1].(ErrorFn); ok {
 			// check second ^ and then change the rest by combining them to
 			// one that we set to proper places: ErrorFn and NilFn
-			hfn := Pipeline(ToErrorFns(a))
+			errorFns, dis := ToErrorFns(a)
+			autoOn := !dis
+			hfn := Pipeline(errorFns)
 			info.ErrorFn = hfn
 			info.NilFn = hfn
+
+			if fs, ok := doBuildFormatStr(info, -1); autoOn && ok {
+				//println("fmt:", fs)
+				info.Format = fs
+				info.needErrorAnnotation = true
+			}
 		}
 	}
+}
+
+func isAutoAnnotationFn(errorFns []ErrorFn) bool {
+	for _, f := range errorFns {
+		if f == nil {
+			return false
+		}
+	}
+	return true
 }
 
 func processArg(info *Info, i int, a []any) {
@@ -404,19 +441,24 @@ func Pipeline(f []ErrorFn) ErrorFn {
 	}
 }
 
-func ToErrorFns(handlerFns []any) (hs []ErrorFn) {
+func ToErrorFns(handlerFns []any) (hs []ErrorFn, dis bool) {
 	count := len(handlerFns)
 	hs = make([]ErrorFn, 0, count)
 	for _, a := range handlerFns {
-		if fn, ok := a.(ErrorFn); ok {
-			hs = append(hs, fn)
-		} else {
-			msg := `---
+		autoAnnotationDisabling := a == nil
+		if !autoAnnotationDisabling {
+			if fn, ok := a.(ErrorFn); ok {
+				hs = append(hs, fn)
+			} else {
+				msg := `---
 assertion violation: your handlers should be 'func(error) error' type
 ---`
-			fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
-			return nil
+				fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
+				return nil, true
+			}
+		} else {
+			dis = autoAnnotationDisabling
 		}
 	}
-	return hs
+	return hs, dis
 }
