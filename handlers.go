@@ -94,7 +94,7 @@ func StderrNoReset(err error) error {
 		return nil
 	}
 	fmt.Fprintln(os.Stderr, err.Error())
-	return nil
+	return err
 }
 
 // StdoutNoReset is a built-in helper to use with Handle and Catch. It prints
@@ -109,5 +109,5 @@ func StdoutNoReset(err error) error {
 		return nil
 	}
 	fmt.Fprintln(os.Stdout, err.Error())
-	return nil
+	return err
 }
