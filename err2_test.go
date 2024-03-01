@@ -663,7 +663,7 @@ func ExampleHandle_annotatedErrReturn() {
 	err := normalReturn()
 	fmt.Printf("%v", err)
 
-	// ------- automatic in Go example/test
+	// ------- func name comes from Go example/test harness
 	// ------- v ------------------ v --------
 	// Output: testing: run example: our error
 }

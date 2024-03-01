@@ -7,7 +7,7 @@ add following two lines at the beginning of your unit tests:
 	func TestInvite(t *testing.T) {
 	     defer assert.PushTester(t)() // push testing variable t beginning of any test
 
-		//                 v-----v Invite control flow includes assertions
+		//                 v-----v Invite's control flow includes assertions
 	     alice.Node = root1.Invite(alice.Node, root1.Key, alice.PubKey, 1)
 	     assert.Equal(alice.Len(), 1) // assert anything normally
 

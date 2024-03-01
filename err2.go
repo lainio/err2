@@ -79,8 +79,8 @@ var (
 // of them resets the error like Reset (notice other predefined error handlers)
 // in next sample:
 //
-//	defer err2.Handle(err2.Noop, err2.Log) // 2 handlers ==> annotated by err2
-//	defer err2.Handle(nil, err2.Noop, err2.Log) // nil disables auto-annotation
+//	defer err2.Handle(&err, err2.Noop, err2.Log) // handlers > 1: err annotated
+//	defer err2.Handle(&err, nil, err2.Log) // nil disables auto-annotation
 //
 // If you need to stop general panics in handler, you can do that by giving a
 // panic handler function:
