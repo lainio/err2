@@ -148,19 +148,23 @@ func doMain() (err error) {
 	// Note that this is a silly sample where logging is done trice and noops
 	// are used without a purpose. All of this is that you get an idea how you
 	// could use the error handlers and chain them together.
-	defer err2.Handle(&err, err2.Log, err2.Noop, err2.Noop, err2.Log)
+
+	//defer err2.Handle(&err, err2.Noop, err2.Log, err2.Log)
+	//defer err2.Handle(&err, nil, err2.Noop, err2.Log)
+	//defer err2.Handle(&err, nil, err2.Log)
+	defer err2.Handle(&err)
 
 	// You can select any one of the try.To(CopyFile lines to play with and see
 	// how err2 works. Especially interesting is automatic stack tracing.
 	//
 	// source file exists, but the destination is not in high probability
-	try.To(CopyFile("main.go", "/notfound/path/file.bak"))
+	//try.To(OrgCopyFile("main.go", "/notfound/path/file.bak"))
 
 	// Both source and destination don't exist
-	//try.To(CopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
+	//try.To(OrgCopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
 
 	// 2nd argument is empty
-	//try.To(CopyFile("main.go", ""))
+	try.To(OrgCopyFile("main.go", ""))
 
 	// Next fn demonstrates how error and panic traces work, comment out all
 	// above CopyFile calls to play with:
