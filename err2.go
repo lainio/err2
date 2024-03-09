@@ -33,9 +33,10 @@ var (
 	ErrNotRecoverable = errors.New("cannot recover")
 	ErrRecoverable    = errors.New("recoverable")
 
-	// Stdnull is helper variable for io.Writer need e.g. err2.SetLogTracer in
-	// cases you don't want to use automatic log writer, i.e. LogTracer == nil.
-	// It's usually used to change how the Catch works, e.g., in CLI apps.
+	// Stdnull implements io.Writer that writes nothing, e.g.,
+	// err2.SetLogTracer in cases you don't want to use automatic log writer,
+	// i.e., LogTracer == /dev/null. It can be used to change how the Catch
+	// works, e.g., in CLI apps.
 	Stdnull = &nullDev{}
 )
 
@@ -79,11 +80,12 @@ var (
 // of them resets the error like Reset (notice other predefined error handlers)
 // in next sample:
 //
+//	defer err2.Handle(&err, err2.Reset, err2.Log) // Log not called
 //	defer err2.Handle(&err, err2.Noop, err2.Log) // handlers > 1: err annotated
 //	defer err2.Handle(&err, nil, err2.Log) // nil disables auto-annotation
 //
 // If you need to stop general panics in handler, you can do that by giving a
-// panic handler function:
+// panic handler function. See the second handler below:
 //
 //	defer err2.Handle(&err,
 //	   err2.Err( func(error) { os.Remove(dst) }), // err2.Err() keeps it short
@@ -130,7 +132,7 @@ func Handle(err *error, a ...any) {
 // error message about the error source (from where the error was thrown) to the
 // currently set log. Note, when log stream isn't set, the standard log is used.
 // It can be bound to, e.g., glog. And if you want to suppress automatic logging
-// use the following setup:
+// entirely use the following setup:
 //
 //	err2.SetLogTracer(err2.Stdnull)
 //
