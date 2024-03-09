@@ -204,13 +204,22 @@ func (o *Result1[T]) Def1(v T) *Result1[T] {
 	return o
 }
 
-// Def2 sets default value for Result.Val2. The value is returned in case of
+// Def1 sets default value for Result.Val1. The value is returned in case of
 // Result.Err != nil.
-func (o *Result2[T, U]) Def2(v T, v2 U) *Result2[T, U] {
+func (o *Result2[T, U]) Def1(v T) *Result2[T, U] {
 	if o.Err == nil {
 		return o
 	}
 	o.Val1 = v
+	return o
+}
+
+// Def2 sets default value for Result.Val2. The value is returned in case of
+// Result.Err != nil.
+func (o *Result2[T, U]) Def2(v2 U) *Result2[T, U] {
+	if o.Err == nil {
+		return o
+	}
 	o.Val2 = v2
 	return o
 }
