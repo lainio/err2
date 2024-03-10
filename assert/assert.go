@@ -268,7 +268,7 @@ func NotImplemented(a ...any) {
 // single 'if-statement' that is almost nothing.
 func ThatNot(term bool, a ...any) {
 	if term {
-		defMsg := "ThatNot: " + assertionMsg
+		defMsg := assertionMsg
 		Default().reportAssertionFault(defMsg, a)
 	}
 }
@@ -278,7 +278,7 @@ func ThatNot(term bool, a ...any) {
 // single 'if-statement' that is almost nothing.
 func That(term bool, a ...any) {
 	if !term {
-		defMsg := "That: " + assertionMsg
+		defMsg := assertionMsg
 		Default().reportAssertionFault(defMsg, a)
 	}
 }

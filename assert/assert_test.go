@@ -18,7 +18,7 @@ func ExampleThat() {
 	}
 	err := sample()
 	fmt.Printf("%v", err)
-	// Output: testing: run example: assert_test.go:16: ExampleThat.func1(): That: assertion violation: optional message
+	// Output: testing: run example: assert_test.go:16: ExampleThat.func1(): assertion violation: optional message
 }
 
 func ExampleNotNil() {
