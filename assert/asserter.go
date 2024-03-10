@@ -73,7 +73,8 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a []any) {
 	}
 	if len(a) > 0 {
 		if format, ok := a[0].(string); ok {
-			f := x.Whom(defaultMsg != "", defaultMsg+conCatErrStr+format, format)
+			allowDefMsg := !asserter.isErrorOnly() && defaultMsg != ""
+			f := x.Whom(allowDefMsg, defaultMsg+conCatErrStr+format, format)
 			asserter.reportPanic(fmt.Sprintf(f, a[1:]...))
 		} else {
 			asserter.reportPanic(fmt.Sprintln(append([]any{defaultMsg}, a...)))
@@ -139,6 +140,10 @@ func (asserter Asserter) callerInfo(msg string) (info string) {
 	}
 
 	return
+}
+
+func (asserter Asserter) isErrorOnly() bool {
+	return asserter == AsserterToError
 }
 
 func (asserter Asserter) hasToError() bool {
