@@ -78,18 +78,19 @@ var (
 // You can have unlimited amount of error handlers. They are called if error
 // happens and they are called in the same order as they are given or until one
 // of them resets the error like Reset (notice other predefined error handlers)
-// in next sample:
+// in the next samples:
 //
 //	defer err2.Handle(&err, err2.Reset, err2.Log) // Log not called
 //	defer err2.Handle(&err, err2.Noop, err2.Log) // handlers > 1: err annotated
 //	defer err2.Handle(&err, nil, err2.Log) // nil disables auto-annotation
 //
-// If you need to stop general panics in handler, you can do that by giving a
-// panic handler function. See the second handler below:
+// If you need to stop general panics in a handler, you can do that by declaring
+// a panic handler. See the second handler below:
 //
 //	defer err2.Handle(&err,
 //	   err2.Err( func(error) { os.Remove(dst) }), // err2.Err() keeps it short
-//	   func(p any) {} // <- handler stops panics, re-throw or not
+//	   // below handler catches panics, but you can re-throw if needed
+//	   func(p any) {}
 //	)
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
@@ -152,7 +153,7 @@ func Handle(err *error, a ...any) {
 //
 // You can have unlimited amount of error handlers. They are called if error
 // happens and they are called in the same order as they are given or until one
-// of them resets the error like Reset in next sample:
+// of them resets the error like Reset in the next sample:
 //
 //	defer err2.Catch(err2.Noop, err2.Reset, err2.Log) // err2.Log not called!
 //
