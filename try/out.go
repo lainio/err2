@@ -9,7 +9,7 @@ import (
 
 type (
 	// ErrFn is function type for try.OutX handlers.
-	ErrFn = func(err error) error
+	ErrFn = handler.ErrorFn
 
 	// Result is the base of our error handling language for try.Out functions.
 	Result struct {
