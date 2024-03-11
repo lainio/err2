@@ -533,4 +533,6 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 - Documentation updates and cleanups
 - `Catch/Handle` take unlimited amount error handler functions
   - allows building e.g. error handling middleware
+- automatic outputs aren't overwritten by given args, only with `assert.Plain`
+- Minor API fixes: `Result2.Def2()`, etc.
 - technical refactoring like variadic function calls only in API level
