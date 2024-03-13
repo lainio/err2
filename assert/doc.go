@@ -2,7 +2,7 @@
 Package assert includes runtime assertion helpers both for normal execution as
 well as a assertion package for Go's testing. What makes solution unique is its
 capable to support both modes with same API. Only thing you need to do is to
-add following two lines at the beginning of your unit tests:
+add a PushTester line at the beginning of your unit tests:
 
 	func TestInvite(t *testing.T) {
 	     defer assert.PushTester(t)() // push testing variable t beginning of any test
@@ -14,14 +14,14 @@ add following two lines at the beginning of your unit tests:
 # Merge Runtime And Unit Test Assertions
 
 Especially powerful feature is that even if some assertion violation happens
-during the execution of called functions not the test function itself. See the
-above example. If assertion failure happens inside of the Invite() function
-instead of the actual test function, TestInvite, it's still reported correctly
-as normal test failure when TestInvite unit test is executed. It doesn't matter
-how deep the recursion is, or if parallel test runs are performed. It works just
-as you hoped.
+during the execution of called functions, and not the test function itself, they
+are catched. See the above example. If assertion failure happens inside the
+Invite() function instead of the actual test function, TestInvite, it's still
+reported correctly as normal test failure. It doesn't matter how deep the
+recursion is, or if parallel test runs are performed. It works just as you
+hoped.
 
-This is the actual Invite function implementation's first two lines. Even the
+This is the actual Invite function implementation's first two lines. Even if the
 assertion line is written more for runtime detection and active comment, it
 catches all unit test errors as well:
 

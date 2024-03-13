@@ -77,8 +77,8 @@ var (
 //
 // You can have unlimited amount of error handlers. They are called if error
 // happens and they are called in the same order as they are given or until one
-// of them resets the error like Reset (notice other predefined error handlers)
-// in the next samples:
+// of them resets the error like Reset (notice the other predefined error
+// handlers) in the next samples:
 //
 //	defer err2.Handle(&err, err2.Reset, err2.Log) // Log not called
 //	defer err2.Handle(&err, err2.Noop, err2.Log) // handlers > 1: err annotated
