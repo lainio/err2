@@ -72,8 +72,7 @@ const (
 	// panic object's type is string, i.e., err2 package treats it as a normal
 	// panic, not an error.
 	//
-	// The pattern that e.g. Go's standard
-	// library uses:
+	// For example, the pattern that e.g. Go's standard library uses:
 	//
 	//   if p == nil {
 	//        panic("pkg: ptr cannot be nil")
@@ -87,23 +86,14 @@ const (
 
 type flagAsserter struct{}
 
-// Deprecated: use e.g. assert.That(), only default asserter is used.
+// Asserters
 var (
-	PL = AsserterToError
-
-	// P is a production Asserter that sets panic objects to errors which
-	// allows err2 handlers to catch them.
-	P = AsserterToError | AsserterCallerInfo
-
-	B = AsserterToError | AsserterFormattedCallerInfo
-
-	T  = AsserterUnitTesting
-	TF = AsserterUnitTesting | AsserterStackTrace | AsserterCallerInfo
-
-	// D is a development Asserter that sets panic objects to strings that
-	// doesn't by caught by err2 handlers.
-	// Deprecated: use e.g. assert.That(), only default asserter is used.
-	D = AsserterDebug
+	plain    = AsserterToError
+	prod     = AsserterToError | AsserterCallerInfo
+	dev      = AsserterToError | AsserterFormattedCallerInfo
+	test     = AsserterUnitTesting
+	testFull = AsserterUnitTesting | AsserterStackTrace | AsserterCallerInfo
+	dbg      = AsserterDebug
 )
 
 var (
@@ -117,7 +107,7 @@ var (
 	//  Test
 	//  TestFull
 	//  Debug
-	defAsserter = []Asserter{PL, P, B, T, TF, D}
+	defAsserter = []Asserter{plain, prod, dev, test, testFull, dbg}
 	def         defInd
 
 	// mu is package lvl Mutex that is used to cool down race detector of
