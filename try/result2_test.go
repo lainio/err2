@@ -26,9 +26,9 @@ func ExampleResult2_Logf() {
 		return v1 + v2, v2
 	}
 	_, _ = countSomething("1", "2")
-	num1, num2 := countSomething("WRONG", "2")
+	num1, num2 := countSomething("BAD", "2")
 	fmt.Printf("results: %d, %d", num1, num2)
 	err2.SetLogTracer(nil)
-	// Output: testing: run example: strconv.Atoi: parsing "WRONG": invalid syntax
+	// Output: testing: run example: strconv.Atoi: parsing "BAD": invalid syntax
 	// results: 20, 10
 }

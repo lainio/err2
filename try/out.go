@@ -261,7 +261,7 @@ func Out1[T any](v T, err error) *Result1[T] {
 //
 // or in some other cases, some of these would be desired action:
 //
-//	x, y := try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Catch(1, 2)
+//	x, y := try.Out2(convTwoStr(s1, s2)).Logf("bad number").Catch(1, 2)
 //	y := try.Out2(convTwoStr(s1, s2)).Handle().Val2
 func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
 	return &Result2[T, U]{Val2: v2, Result1: Result1[T]{Val1: v1, Result: Result{Err: err}}}
