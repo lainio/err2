@@ -10,38 +10,38 @@ import (
 	"github.com/lainio/err2/internal/x"
 )
 
-// Asserter is type for asserter object guided by its flags.
-type Asserter uint32
+// asserter is type for asserter object guided by its flags.
+type asserter uint32
 
 const (
-	// AsserterDebug is the default mode where all asserts are treaded as
+	// asserterDebug is the default mode where all asserts are treaded as
 	// panics
-	AsserterDebug Asserter = 0
+	asserterDebug asserter = 0
 
-	// AsserterToError is Asserter flag to guide asserter to use Go's error
+	// asserterToError is Asserter flag to guide asserter to use Go's error
 	// type for panics.
-	AsserterToError Asserter = 1 << iota
+	asserterToError asserter = 1 << iota
 
-	// AsserterStackTrace is Asserter flag to print call stack to stdout OR if
+	// asserterStackTrace is Asserter flag to print call stack to stdout OR if
 	// in AsserterUnitTesting mode the call stack is printed to test result
 	// output if there is any assertion failures.
-	AsserterStackTrace
+	asserterStackTrace
 
-	// AsserterCallerInfo is an asserter flag to add info of the function
+	// asserterCallerInfo is an asserter flag to add info of the function
 	// asserting. It includes filename, line number and function name.
 	// This is especially powerful with AsserterUnitTesting where it allows get
 	// information where the assertion violation happens even over modules!
-	AsserterCallerInfo
+	asserterCallerInfo
 
-	// AsserterFormattedCallerInfo is an asserter flag to add info of the function
+	// asserterFormattedCallerInfo is an asserter flag to add info of the function
 	// asserting. It includes filename, line number and function name in
 	// multi-line formatted string output.
-	AsserterFormattedCallerInfo
+	asserterFormattedCallerInfo
 
-	// AsserterUnitTesting is an asserter only for unit testing. It can be
+	// asserterUnitTesting is an asserter only for unit testing. It can be
 	// compined with AsserterCallerInfo and/or AsserterStackTrace. There is
 	// variable T which have all of these three asserters.
-	AsserterUnitTesting
+	asserterUnitTesting
 )
 
 // every test log or result output has 4 spaces in them
@@ -56,7 +56,7 @@ const officialTestOutputPrefix = "    "
 // and correct assert messages, and we can add information to it if we want to.
 // If asserter is Plain (isErrorOnly()) user wants to override automatic assert
 // messgages with our given, usually simple message.
-func (asserter Asserter) reportAssertionFault(defaultMsg string, a []any) {
+func (asserter asserter) reportAssertionFault(defaultMsg string, a []any) {
 	if asserter.hasStackTrace() {
 		if asserter.isUnitTesting() {
 			// Note. that the assert in the test function is printed in
@@ -86,7 +86,7 @@ func (asserter Asserter) reportAssertionFault(defaultMsg string, a []any) {
 	}
 }
 
-func (asserter Asserter) reportPanic(s string) {
+func (asserter asserter) reportPanic(s string) {
 	if asserter.isUnitTesting() && asserter.hasCallerInfo() {
 		fmt.Fprintln(os.Stderr, officialTestOutputPrefix+s)
 		tester().FailNow()
@@ -126,7 +126,7 @@ Assertion Fault at:
 
 var shortFmtStr = `%s:%d: %s(): %s`
 
-func (asserter Asserter) callerInfo(msg string) (info string) {
+func (asserter asserter) callerInfo(msg string) (info string) {
 	ourFmtStr := shortFmtStr
 	if asserter.hasFormattedCallerInfo() {
 		ourFmtStr = longFmtStr
@@ -144,28 +144,28 @@ func (asserter Asserter) callerInfo(msg string) (info string) {
 	return
 }
 
-func (asserter Asserter) isErrorOnly() bool {
-	return asserter == AsserterToError
+func (asserter asserter) isErrorOnly() bool {
+	return asserter == asserterToError
 }
 
-func (asserter Asserter) hasToError() bool {
-	return asserter&AsserterToError != 0
+func (asserter asserter) hasToError() bool {
+	return asserter&asserterToError != 0
 }
 
-func (asserter Asserter) hasStackTrace() bool {
-	return asserter&AsserterStackTrace != 0
+func (asserter asserter) hasStackTrace() bool {
+	return asserter&asserterStackTrace != 0
 }
 
-func (asserter Asserter) hasCallerInfo() bool {
-	return asserter&AsserterCallerInfo != 0 || asserter.hasFormattedCallerInfo()
+func (asserter asserter) hasCallerInfo() bool {
+	return asserter&asserterCallerInfo != 0 || asserter.hasFormattedCallerInfo()
 }
 
-func (asserter Asserter) hasFormattedCallerInfo() bool {
-	return asserter&AsserterFormattedCallerInfo != 0
+func (asserter asserter) hasFormattedCallerInfo() bool {
+	return asserter&asserterFormattedCallerInfo != 0
 }
 
 // isUnitTesting is expensive because it calls tester(). think carefully where
 // to use it
-func (asserter Asserter) isUnitTesting() bool {
-	return asserter&AsserterUnitTesting != 0 && tester() != nil
+func (asserter asserter) isUnitTesting() bool {
+	return asserter&asserterUnitTesting != 0 && tester() != nil
 }
