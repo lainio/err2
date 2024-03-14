@@ -1,7 +1,7 @@
 /*
 Package assert includes runtime assertion helpers both for normal execution as
 well as a assertion package for Go's testing. What makes solution unique is its
-capable to support both modes with same API. Only thing you need to do is to
+capable to support both modes with the same API. Only thing you need to do is to
 add a PushTester line at the beginning of your unit tests:
 
 	func TestInvite(t *testing.T) {
@@ -13,13 +13,13 @@ add a PushTester line at the beginning of your unit tests:
 
 # Merge Runtime And Unit Test Assertions
 
-Especially powerful feature is that even if some assertion violation happens
-during the execution of called functions, and not the test function itself, they
-are catched. See the above example. If assertion failure happens inside the
-Invite() function instead of the actual test function, TestInvite, it's still
-reported correctly as normal test failure. It doesn't matter how deep the
-recursion is, or if parallel test runs are performed. It works just as you
-hoped.
+If some assertion violation happens in the deep call stack, they are still
+reported as a test failure. See the above example. If assertion failure happens
+somewhere inside the Invite() functions call stack, it's still reported
+correctly as a test failure of the TestInvite. It doesn't matter how deep the
+recursion is, or if parallel test runs are performed. The failure report
+includes all the locations of the meaningful call stack steps. See the chapter
+Call Stack Traveral During Tests.
 
 This is the actual Invite function implementation's first two lines. Even if the
 assertion line is written more for runtime detection and active comment, it
@@ -28,16 +28,12 @@ catches all unit test errors as well:
 	func (c Chain) Invite(...) {
 		assert.That(c.isLeaf(invitersKey), "only leaf can invite")
 
-# Call Stack Traversal During tests
+# Call Stack Traversal During Tests
 
-The asserter package has super powerful feature. It allows us track assertion
-violations over package and even module boundaries. When using err2 assert
-package for runtime Asserts and assert violation happens in whatever package
-and module, the whole call stack is brought to unit test logs. Naturally this is
-optional. Only thing you need to do is set proper asserter and call PushTester.
-
-	// use unit testing asserter
-	assert.SetDefault(assert.TestFull)
+Assert package allows us track assertion violations over package and even module
+boundaries. When an assertion fails during the unit testing, the whole call
+stack is brought to unit test logs. And some help with your IDE, that output can
+be tranferred to a location list, for examplem in Neovim/Vim.
 
 With large multi repo environment this has proven to be valuable.
 
