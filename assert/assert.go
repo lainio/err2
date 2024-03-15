@@ -169,8 +169,9 @@ const (
 //		})
 //	}
 //
-// Because PushTester returns PopTester it allows us to merge these two calls to
-// one line. See the first t.Run call above. See more information in PopTester.
+// Because PushTester returns [PopTester] it allows us to merge these two calls
+// to one line. See the first t.Run call above. See more information in
+// [PopTester].
 //
 // PushTester allows you to change the current default asserter by accepting it
 // as a second argument.
@@ -200,7 +201,7 @@ func PushTester(t testing.TB, a ...defInd) function {
 // memory cleanup and adding similar to err2.Catch error/panic safety for tests.
 // By using PopTester you get error logs tuned for unit testing.
 //
-// You have two ways to call PopTester. With defer right after PushTester:
+// You have two ways to call [PopTester]. With defer right after [PushTester]:
 //
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
@@ -211,7 +212,7 @@ func PushTester(t testing.TB, a ...defInd) function {
 //		})
 //	}
 //
-// If you want to have one liner to combine Push/PopTester:
+// If you want, you can combine [PushTester] and PopTester to one-liner:
 //
 //	defer assert.PushTester(t)()
 func PopTester() {
@@ -240,7 +241,7 @@ func PopTester() {
 	// First, print the call stack. Note, that we aren't support full error
 	// tracing with unit test logging. However, using it has proved the top
 	// level error stack as more enough. Even so that we could consider using
-	// it for normal error stack straces if it would be possible.
+	// it for normal error stack traces if it would be possible.
 	const stackLvl = 6 // amount of functions before we're here
 	debug.PrintStackForTest(os.Stderr, stackLvl)
 
@@ -302,9 +303,8 @@ func Nil[T any](p *T, a ...any) {
 // (default Asserter) with the given message.
 //
 // Note, use this only for real interface types. Go's interface's has two values
-// so this won't work e.g. slices! Read more information about interface type.
-//
-//	https://go.dev/doc/faq#nil_error
+// so this won't work e.g. slices! Read more information about interface type:
+// https://go.dev/doc/faq#nil_error.
 func INil(i any, a ...any) {
 	if i != nil {
 		defMsg := assertionMsg + ": interface should be nil"
@@ -316,9 +316,8 @@ func INil(i any, a ...any) {
 // panics/errors (default Asserter) with the given message.
 //
 // Note, use this only for real interface types. Go's interface's has two values
-// so this won't work e.g. slices! Read more information about interface type.
-//
-//	https://go.dev/doc/faq#nil_error
+// so this won't work e.g. slices! Read more information about interface type:
+// https://go.dev/doc/faq#nil_error.
 func INotNil(i any, a ...any) {
 	if i == nil {
 		defMsg := assertionMsg + ": interface shouldn't be nil"
@@ -414,7 +413,7 @@ func NotDeepEqual(val, want any, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func Len(obj string, length int, a ...any) {
 	l := len(obj)
@@ -430,7 +429,7 @@ func Len(obj string, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func Longer(s string, length int, a ...any) {
 	l := len(s)
@@ -446,7 +445,7 @@ func Longer(s string, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func Shorter(str string, length int, a ...any) {
 	l := len(str)
@@ -462,7 +461,7 @@ func Shorter(str string, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
@@ -478,7 +477,7 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
@@ -494,7 +493,7 @@ func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
@@ -510,7 +509,7 @@ func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
@@ -526,7 +525,7 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
@@ -542,7 +541,7 @@ func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
@@ -558,7 +557,7 @@ func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
@@ -574,7 +573,7 @@ func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
@@ -590,7 +589,7 @@ func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
@@ -638,7 +637,7 @@ func Empty(obj string, a ...any) {
 // (according the current Asserter) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 	l := len(obj)
@@ -655,7 +654,7 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 // You can append the generated got-want message by using optional message
 // arguments.
 //
-// Note! This is reasonably fast but not as fast as 'That' because of lacking
+// Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	l := len(obj)
@@ -670,14 +669,15 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 //
-// Note. We recommend that you prefer try.To. They work exactly the same during
+// Note. We recommend that you prefer [try.To]. They work exactly the same during
 // the test runs and you can use the same code for both: runtime and tests.
 // However, there are cases that you want assert that there is no error in cases
 // where fast fail and immediate stop of execution is wanted at runtime. With
-// asserts you get the file location as well. (See the asserters).
+// asserts ([Production], [Development], [Debug]) you get the file location as
+// well.
 func NoError(err error, a ...any) {
 	if err != nil {
-		defMsg := "NoError:" + assertionMsg + conCatErrStr + err.Error()
+		defMsg := assertionMsg + conCatErrStr + err.Error()
 		current().reportAssertionFault(defMsg, a)
 	}
 }
