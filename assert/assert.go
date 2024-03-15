@@ -18,22 +18,28 @@ type defInd = uint32
 
 const (
 	// Plain converts asserts just plain K&D error messages without extra
-	// information.
+	// information. That's useful for apps that want to use assert package to
+	// validate e.g. command fields:
+	//
+	//  assert.NotEmpty(c.PoolName, "pool name cannot be empty")
+	//
+	// Note, that Plain is only asserter that override auto-generated assertion
+	// messages with given arguments like 'pool name cannot be empty'. Others
+	// add given arguments at the end of the auto-generated assert message.
 	Plain defInd = 0 + iota
 
-	// Production (pkg default) is the best asserter for most uses. The
+	// Production (pkg default) is the best asserter for most cases. The
 	// assertion violations are treated as Go error values. And only a
-	// pragmatic caller info is automatically included into the error message
-	// like file name, line number, and caller function, all in one line:
+	// pragmatic caller info is included into the error values like source
+	// filename, line number, and caller function, all in one line:
 	//
 	//  copy file: main.go:37: CopyFile(): assertion violation: string shouldn't be empty
 	Production
 
-	// Development is the best asserter for most development uses. The
-	// assertion violations are treated as Go error values. And a formatted
-	// caller info is automatically included to the error message like file
-	// name, line number, and caller function. Everything in a beautiful
-	// multi-line message:
+	// Development is the best asserter for development use. The assertion
+	// violations are treated as Go error values. And a formatted caller info
+	// is included to the error message like source filename , line number, and
+	// caller function. Everything in a noticeable multi-line message:
 	//
 	//  --------------------------------
 	//  Assertion Fault at:
