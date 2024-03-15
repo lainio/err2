@@ -16,77 +16,78 @@ import (
 
 type defInd = uint32
 
+// Asserters are the way to set what kind of messages assert package outputs if
+// assertion is violated.
+//
+// [Plain] converts asserts just plain K&D error messages without extra
+// information. That's useful for apps that want to use assert package to
+// validate e.g. command fields:
+//
+//	assert.NotEmpty(c.PoolName, "pool name cannot be empty")
+//
+// Note, that Plain is only asserter that override auto-generated assertion
+// messages with given arguments like 'pool name cannot be empty'. Others add
+// given arguments at the end of the auto-generated assert message.
+//
+// [Production] (pkg's default) is the best asserter for most cases. The
+// assertion violations are treated as Go error values. And only a pragmatic
+// caller info is included into the error values like source filename, line
+// number, and caller function, all in one line:
+//
+//	copy file: main.go:37: CopyFile(): assertion violation: string shouldn't be empty
+//
+// [Development] is the best asserter for development use. The assertion
+// violations are treated as Go error values. And a formatted caller info is
+// included to the error message like source filename , line number, and caller
+// function. Everything in a noticeable multi-line message:
+//
+//	--------------------------------
+//	Assertion Fault at:
+//	main.go:37 CopyFile():
+//	assertion violation: string shouldn't be empty
+//	--------------------------------
+//
+// [Test] minimalistic asserter for unit test use. More pragmatic is the
+// TestFull asserter (test default).
+//
+// Use this asserter if your IDE/editor doesn't support full file names and it
+// relies a relative path (Go standard). You can use this also if you need
+// temporary problem solving for your programming environment.
+//
+// [TestFull] asserter (test default). The TestFull asserter includes the caller
+// info and the call stack for unit testing, similarly like err2's error traces.
+//
+// The call stack produced by the test asserts can be used over Go module
+// boundaries. For example, if your app and it's sub packages both use
+// err2/assert for unit testing and runtime checks, the runtime assertions will
+// be automatically converted to test asserts. If any of the runtime asserts of
+// the sub packages fails during the app tests, the app test fails as well.
+//
+// Note, that the cross-module assertions produce long file names (path
+// included), and some of the Go test result parsers cannot handle that. A
+// proper test result parser like 'github.com/lainio/nvim-go' (fork) works very
+// well. Also most of the make result parsers can process the output properly
+// and allow traverse of locations of the error trace.
+//
+// [Debug] asserter transforms assertion violations to panic calls where panic
+// object's type is string, i.e., err2 package treats it as a normal panic, not
+// an error.
+//
+// For example, the pattern that e.g. Go's standard library uses:
+//
+//	if p == nil {
+//	     panic("pkg: ptr cannot be nil")
+//	}
+//
+// is equal to:
+//
+//	assert.NotNil(p)
 const (
-	// Plain converts asserts just plain K&D error messages without extra
-	// information. That's useful for apps that want to use assert package to
-	// validate e.g. command fields:
-	//
-	//  assert.NotEmpty(c.PoolName, "pool name cannot be empty")
-	//
-	// Note, that Plain is only asserter that override auto-generated assertion
-	// messages with given arguments like 'pool name cannot be empty'. Others
-	// add given arguments at the end of the auto-generated assert message.
 	Plain defInd = 0 + iota
-
-	// Production (pkg default) is the best asserter for most cases. The
-	// assertion violations are treated as Go error values. And only a
-	// pragmatic caller info is included into the error values like source
-	// filename, line number, and caller function, all in one line:
-	//
-	//  copy file: main.go:37: CopyFile(): assertion violation: string shouldn't be empty
 	Production
-
-	// Development is the best asserter for development use. The assertion
-	// violations are treated as Go error values. And a formatted caller info
-	// is included to the error message like source filename , line number, and
-	// caller function. Everything in a noticeable multi-line message:
-	//
-	//  --------------------------------
-	//  Assertion Fault at:
-	//  main.go:37 CopyFile():
-	//  assertion violation: string shouldn't be empty
-	//  --------------------------------
 	Development
-
-	// Test minimalistic asserter for unit test use. More pragmatic is the
-	// TestFull asserter (test default).
-	//
-	// Use this asserter if your IDE/editor doesn't support full file names and
-	// it relies a relative path (Go standard). You can use this also if you
-	// need temporary problem solving for your programming environment.
 	Test
-
-	// TestFull asserter (test default). The TestFull asserter includes the
-	// caller info and the call stack for unit testing, similarly like err2's
-	// error traces.
-	//
-	// The call stack produced by the test asserts can be used over Go module
-	// boundaries. For example, if your app and it's sub packages both use
-	// err2/assert for unit testing and runtime checks, the runtime assertions
-	// will be automatically converted to test asserts. If any of the runtime
-	// asserts of the sub packages fails during the app tests, the app test
-	// fails as well.
-	//
-	// Note, that the cross-module assertions produce long file names (path
-	// included), and some of the Go test result parsers cannot handle that.
-	// A proper test result parser like 'github.com/lainio/nvim-go' (fork)
-	// works very well. Also most of the make result parsers can process the
-	// output properly and allow traverse of locations of the error trace.
 	TestFull
-
-	// Debug asserter transforms assertion violations to panic calls where
-	// panic object's type is string, i.e., err2 package treats it as a normal
-	// panic, not an error.
-	//
-	// For example, the pattern that e.g. Go's standard library uses:
-	//
-	//   if p == nil {
-	//        panic("pkg: ptr cannot be nil")
-	//   }
-	//
-	// is equal to:
-	//
-	//   assert.NotNil(p)
 	Debug
 )
 
