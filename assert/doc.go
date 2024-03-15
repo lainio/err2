@@ -44,14 +44,15 @@ raise up quality of our software.
 
 	"Assertions are active comments"
 
-The package offers a convenient way to set preconditions to code which allow us
-detect programming errors and API violations faster. Still allowing
+The assert package offers a convenient way to set preconditions to code which
+allow us detect programming errors and API violations faster. Still allowing
 production-time error handling if needed. And everything is automatic. You can
-set proper asserter according to flag or environment variable. This allows
-developer, operator and every-day user share the exact same binary but get the
-error messages and diagnostic they need.
+set asserter with SetDefault function or --asserter flag if Go's flag package is
+in use. This allows developer, operator and every-day user share the exact same
+binary but get the error messages and diagnostic they need.
 
-	// add formatted caller info for normal errors coming from assertions
+	// Production asserter adds formatted caller info to normal errors.
+	// Information is transported thru error values when err2.Handle is in use.
 	assert.SetDefault(assert.Production)
 
 Please see the code examples for more information.
