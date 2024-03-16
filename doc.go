@@ -62,7 +62,7 @@ we can write
 
 	b := try.To1(io.ReadAll(r))
 
-Note that try.ToX functions are as fast as if err != nil statements. Please see
+Note that [try.To] functions are as fast as if err != nil statements. Please see
 the try package documentation for more information about the error checks.
 
 # Automatic Stack Tracing
@@ -72,13 +72,13 @@ err2 offers optional stack tracing. And yes, it's fully automatic. Just call
 	flag.Parse() # this is enough for err2 pkg to add its flags
 
 at the beginning your app, e.g. main function, or set the tracers
-programmatically (before flag.Parse if you are using that):
+programmatically (before [flag.Parse] if you are using that):
 
 	err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
 	 or
 	err2.SetPanicTracer(log.Writer()) // panic stack trace to std logger
 
-Note. Since err2.Catch's default mode is to catch panics, the panic tracer's
+Note. Since [Catch]'s default mode is to catch panics, the panic tracer's
 default values is os.Stderr. The default error tracer is nil.
 
 	err2.SetPanicTracer(os.Stderr) // panic stack tracer's default is stderr
@@ -86,8 +86,8 @@ default values is os.Stderr. The default error tracer is nil.
 
 # Automatic Logging
 
-Same err2 capablities support automatic logging like the err2.Catch and
-try.Result.Logf functions. To be able to tune up how logging behaves we offer a
+Same err2 capablities support automatic logging like the [Catch] and
+[try.Result.Logf] functions. To be able to tune up how logging behaves we offer a
 tracer API:
 
 	err2.SetLogTracer(nil) // the default is nil where std log pkg is used.
@@ -104,7 +104,7 @@ And the following flags are supported (="default-value"):
 	-err2-trace="nil"
 	    A name of the stream currently supported stderr, stdout or nil
 
-Note, that you have called err2.SetErrorTracer and others, before you call
+Note, that you have called [SetErrorTracer] and others, before you call
 flag.Parse. This allows you set the defaults according your app's need and allow
 end-user change them during the runtime.
 
@@ -115,7 +115,7 @@ safety. In every function which uses err2 or try package for error-checking has
 to have at least one declarative error handler if it returns error value. If
 there are no error handlers and error occurs it panics. We think that panicking
 for the errors is much better than not checking errors at all. Nevertheless, if
-the call stack includes any err2 error handlers like err2.Handle the error is
+the call stack includes any err2 error handlers like [Handle] the error is
 handled where the handler is saved to defer-stack. (defer is not lexically
 scoped)
 
