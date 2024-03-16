@@ -14,31 +14,33 @@ type (
 	Handler = handler.ErrorFn
 )
 
+// Sentinel error value helpers. They are convenient thanks to [try.IsNotFound]
+// and similar functions.
+//
+// [ErrNotFound] ... [ErrNotEnabled] are similar no-error like [io.EOF] for
+// those who really want to use error return values to transport non errors.
+// It's far better to have discriminated unions as errors for function calls.
+// But if you insist the related helpers are in they [try] package:
+// try.IsNotFound, ...
+//
+// [ErrRecoverable] and [ErrNotRecoverable] since Go 1.20 wraps multiple errors
+// same time, i.e. wrapped errors aren't list anymore but tree. This allows mark
+// multiple semantics to same error. These error are mainly for that purpose.
 var (
-	// ErrNotFound is similar *no-error* like io.EOF for those who really want to
-	// use error return values to transport non errors. It's far better to have
-	// discriminated unions as errors for function calls. But if you insist the
-	// related helpers are in they try package: try.IsNotFound(), ... These
-	// 'global' errors and their helper functions in try package are for
-	// experimenting now.
-	ErrNotFound     = errors.New("not found")
-	ErrNotExist     = errors.New("not exist")
-	ErrAlreadyExist = errors.New("already exist")
-	ErrNotAccess    = errors.New("permission denied")
-	ErrNotEnabled   = errors.New("not enabled")
-
-	// Since Go 1.20 wraps multiple errors same time, i.e. wrapped errors
-	// aren't list anymore but tree. This allows mark multiple semantics to
-	// same error. These error are mainly for that purpose.
+	ErrNotFound       = errors.New("not found")
+	ErrNotExist       = errors.New("not exist")
+	ErrAlreadyExist   = errors.New("already exist")
+	ErrNotAccess      = errors.New("permission denied")
+	ErrNotEnabled     = errors.New("not enabled")
 	ErrNotRecoverable = errors.New("cannot recover")
 	ErrRecoverable    = errors.New("recoverable")
-
-	// Stdnull implements io.Writer that writes nothing, e.g.,
-	// [SetLogTracer] in cases you don't want to use automatic log writer,
-	// i.e., [LogTracer] == /dev/null. It can be used to change how the Catch
-	// works, e.g., in CLI apps.
-	Stdnull = &nullDev{}
 )
+
+// Stdnull implements [io.Writer] that writes nothing, e.g.,
+// [SetLogTracer] in cases you don't want to use automatic log writer,
+// i.e., [LogTracer] == /dev/null. It can be used to change how the [Catch]
+// works, e.g., in CLI apps.
+var Stdnull = &nullDev{}
 
 // Handle is the general purpose error handling function. What makes it so
 // convenient is its ability to handle all error handling cases:
@@ -46,8 +48,8 @@ var (
 //   - annotate the error value
 //   - execute real error handling like cleanup and releasing resources.
 //
-// There is no performance penalty. The handler is called only when err != nil.
-// There is no limit how many Handle functions can be added to defer stack. They
+// There's no performance penalty. The handler is called only when err != nil.
+// There's no limit how many Handle functions can be added to defer stack. They
 // all are called if an error has occurred.
 //
 // The function has an automatic mode where errors are annotated by function
@@ -58,7 +60,7 @@ var (
 //
 // Note. If you are still using sentinel errors you must be careful with the
 // automatic error annotation because it uses wrapping. If you must keep the
-// error value got from error checks: 'try.To(..)', you must disable automatic
+// error value got from error checks: [try.To], you must disable automatic
 // error annotation (%w), or set the returned error values in the handler
 // function. Disabling can be done by setting second argument nil:
 //
@@ -112,10 +114,10 @@ func Handle(err *error, a ...any) {
 
 // Catch is a convenient helper to those functions that doesn't return errors.
 // Note, that Catch always catch the panics. If you don't want to stop them
-// (recover) you should add panic handler and continue panicking there. There
-// can be only one deferred Catch function per non error returning function like
-// main(). There is several ways to use the Catch function. And always remember
-// the defer.
+// (i.e., use of [recover]) you should add panic handler and continue panicking
+// there. There can be only one deferred Catch function per non error returning
+// function like main(). There is several ways to use the Catch function. And
+// always remember the [defer].
 //
 // The deferred Catch is very convenient, because it makes your current
 // goroutine panic and error-safe. You can fine tune its 'global' behavior with
