@@ -1,6 +1,6 @@
 /*
-Package try is a package for try.ToX functions that implement the error
-checking. try.ToX functions check 'if err != nil' and if it throws the err to the
+Package try is a package for [To], [To1], and [To2] functions that implement the error
+checking. [To] functions check 'if err != nil' and if it throws the err to the
 error handlers, which are implemented by the err2 package. More information
 about err2 and try packager roles can be seen in the FileCopy example:
 
@@ -20,31 +20,33 @@ about err2 and try packager roles can be seen in the FileCopy example:
 
 # try.To — Fast Checking
 
-All of the try.To functions are as fast as the simple 'if err != nil {'
+All of the [To] functions are as fast as the simple 'if err != nil {'
 statement, thanks to the compiler inlining and optimization.
 
-Note that try.ToX function names end to a number (x) because:
+We have three error check functions: [To], [To1], and [To2] because:
 
 	"No variadic type parameters. There is no support for variadic type parameters,
 	which would permit writing a single generic function that takes different
 	numbers of both type parameters and regular parameters." - Go Generics
 
-The leading number at the end of the To2 tells that To2 takes two different
-non-error arguments, and the third one must be an error value.
+For example, the leading number at the end of the [To2] tells that [To2] takes
+two different non-error arguments, and the third one must be an error value.
 
-Looking at the FileCopy example again, you see that all the functions
-are directed to try.To1 are returning (type1, error) tuples. All of these
-tuples are the correct input to try.To1. However, if you have a function that
-returns (type1, type2, error), you must use try.To2 function to check the error.
-Currently the try.To3 takes (3 + 1) return values which is the greatest amount.
+Looking at the [CopyFile] example again, you see that all the functions
+are directed to [To1] are returning (type1, error) tuples. All of these
+tuples are the correct input to [To1]. However, if you have a function that
+returns (type1, type2, error), you must use [To2] function to check the error.
+Currently the [To3] takes (3 + 1) return values which is the greatest amount.
 If more is needed, let us know.
 
 # try.Out — Error Handling Language
 
-The try package offers an error handling DSL. It's for cases where you want to
-do something specific after error returing function call. For example, you might
-want to ignore the specific error and use a default value. That's possible with
-the following code:
+The try package offers an error handling DSL that's based on [Out], [Out1], and
+[Out2] functions and their corresponding return values [Result], [Result1], and
+[Result2]. DSL is for the cases where you want to do something specific after
+error returning function call. Those cases are rare. But you might want, for
+example, to ignore the specific error and use a default value without any
+special error handling. That's possible with the following code:
 
 	number := try.Out1(strconv.Atoi(str)).Catch(100)
 
@@ -71,7 +73,7 @@ import (
 // check the value. If an error occurs, it panics the error so that err2
 // handlers can catch it if needed. Note! If no err2.Handle or err2.Catch exist
 // in the call stack and To panics an error, the error is not handled, and the
-// app will crash. When using try.To functions you should always have proper
+// app will crash. When using To function you should always have proper
 // err2.Handle or err2.Catch statements in the call stack.
 //
 //	defer err2.Handle(&err)
@@ -87,7 +89,7 @@ func To(err error) {
 // and check the error value. If an error occurs, it panics the error so that
 // err2 handlers can catch it if needed. Note! If no err2.Handle or err2.Catch
 // exist in the call stack and To1 panics an error, the error is not handled,
-// and the app will crash. When using try.To1 functions you should always have
+// and the app will crash. When using To1 function you should always have
 // proper err2.Handle or err2.Catch statements in the call stack.
 //
 //	defer err2.Handle(&err)
@@ -102,7 +104,7 @@ func To1[T any](v T, err error) T {
 // and check the error value. If an error occurs, it panics the error so that
 // err2 handlers can catch it if needed. Note! If no err2.Handle or err2.Catch
 // exist in the call stack and To2 panics an error, the error is not handled,
-// and the app will crash. When using try.To2 functions you should always have
+// and the app will crash. When using To2 function you should always have
 // proper err2.Handle or err2.Catch statements in the call stack.
 //
 //	defer err2.Handle(&err)
@@ -117,7 +119,7 @@ func To2[T, U any](v1 T, v2 U, err error) (T, U) {
 // error) and check the error value. If an error occurs, it panics the error so
 // that err2 handlers can catch it if needed. Note! If no err2.Handle or
 // err2.Catch exist in the call stack and To3 panics an error, the error is
-// not handled, and the app will crash. When using try.To3 functions you should
+// not handled, and the app will crash. When using To3 function you should
 // always have proper err2.Handle or err2.Catch statements in the call stack.
 func To3[T, U, V any](v1 T, v2 U, v3 V, err error) (T, U, V) {
 	To(err)
