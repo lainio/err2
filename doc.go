@@ -50,7 +50,7 @@ them. The CopyFile example shows how it works:
 
 # Error checks and Automatic Error Propagation
 
-The try package provides convenient helpers to check the errors. For example,
+The [github.com/lainio/err2/try] package provides convenient helpers to check the errors. For example,
 instead of
 
 	b, err := io.ReadAll(r)
@@ -94,7 +94,7 @@ tracer API:
 
 # Flag Package Support
 
-The err2 package supports Go's flags. All you need to do is to call flag.Parse.
+The err2 package supports Go's flags. All you need to do is to call [flag.Parse].
 And the following flags are supported (="default-value"):
 
 	-err2-log="nil"
@@ -105,7 +105,7 @@ And the following flags are supported (="default-value"):
 	    A name of the stream currently supported stderr, stdout or nil
 
 Note, that you have called [SetErrorTracer] and others, before you call
-flag.Parse. This allows you set the defaults according your app's need and allow
+[flag.Parse]. This allows you set the defaults according your app's need and allow
 end-user change them during the runtime.
 
 # Error handling

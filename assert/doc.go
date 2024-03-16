@@ -47,7 +47,7 @@ raise up quality of our software.
 The assert package offers a convenient way to set preconditions to code which
 allow us detect programming errors and API violations faster. Still allowing
 production-time error handling if needed. And everything is automatic. You can
-set asserter with SetDefault function or --asserter flag if Go's flag package is
+set asserter with [SetDefault] function or --asserter flag if Go's flag package is
 in use. This allows developer, operator and every-day user share the exact same
 binary but get the error messages and diagnostic they need.
 
@@ -73,7 +73,7 @@ And assert package's configuration flags are inserted.
 assert.That's performance is equal to the if-statement thanks for inlining. And
 the most of the generics-based versions are about the equally fast. Practice has
 thought that we should prefer other than assert.That because by using detailed
-version like assert.Shorter we get precise error messages automatically. Some
+version like [assert.Shorter] we get precise error messages automatically. Some
 also prefer readability of specific asserters.
 
 If your algorithm is performance-critical please run `make bench` in the err2

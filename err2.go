@@ -20,8 +20,9 @@ type (
 // [ErrNotFound] ... [ErrNotEnabled] are similar no-error like [io.EOF] for
 // those who really want to use error return values to transport non errors.
 // It's far better to have discriminated unions as errors for function calls.
-// But if you insist the related helpers are in they [try] package:
-// try.IsNotFound, ...
+// But if you insist the related helpers are in they
+// [github.com/lainio/err2/try] package:
+// [github.com/lainio/err2/try.IsNotFound], ...
 //
 // [ErrRecoverable] and [ErrNotRecoverable] since Go 1.20 wraps multiple errors
 // same time, i.e. wrapped errors aren't list anymore but tree. This allows mark
@@ -60,9 +61,9 @@ var Stdnull = &nullDev{}
 //
 // Note. If you are still using sentinel errors you must be careful with the
 // automatic error annotation because it uses wrapping. If you must keep the
-// error value got from error checks: [try.To], you must disable automatic
-// error annotation (%w), or set the returned error values in the handler
-// function. Disabling can be done by setting second argument nil:
+// error value got from error checks: [github.com/lainio/err2/try.To], you must
+// disable automatic error annotation (%w), or set the returned error values in
+// the handler function. Disabling can be done by setting second argument nil:
 //
 //	func SaveData(...) (err error) {
 //	     defer err2.Handle(&err, nil) // nil arg disable automatic annotation.
@@ -183,7 +184,7 @@ func Catch(a ...any) {
 }
 
 // Throwf builds and throws (panics) an error. For creation it's similar to
-// fmt.Errorf. Because panic is used to transport the error instead of error
+// [fmt.Errorf]. Because panic is used to transport the error instead of error
 // return value, it's called only if you want to non-local control structure for
 // error handling, i.e. your current function doesn't have error return value.
 //

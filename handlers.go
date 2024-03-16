@@ -8,7 +8,7 @@ import (
 )
 
 // Stderr is a built-in helper to use with [Handle] and [Catch]. It prints the
-// error to stderr and it resets the current error value. It's a handy Catch
+// error to stderr and it resets the current error value. It's a handy [Catch]
 // handler in main function.
 //
 // You can use it like this:
@@ -23,8 +23,8 @@ func Stderr(err error) error {
 	return nil
 }
 
-// Stdout is a built-in helper to use with Handle and Catch. It prints the
-// error to stdout and it resets the current error value. It's a handy Catch
+// Stdout is a built-in helper to use with [Handle] and [Catch]. It prints the
+// error to stdout and it resets the current error value. It's a handy [Catch]
 // handler in main function.
 //
 // You can use it like this:
@@ -39,13 +39,13 @@ func Stdout(err error) error {
 	return nil
 }
 
-// Noop is a built-in helper to use with Handle and Catch. It keeps the current
+// Noop is a built-in helper to use with [Handle] and [Catch]. It keeps the current
 // error value the same. You can use it like this:
 //
 //	defer err2.Handle(&err, err2.Noop)
 func Noop(err error) error { return err }
 
-// Reset is a built-in helper to use with Handle and Catch. It sets the current
+// Reset is a built-in helper to use with [Handle] and [Catch]. It sets the current
 // error value to nil. You can use it like this to reset the error:
 //
 //	defer err2.Handle(&err, err2.Reset)
@@ -60,7 +60,7 @@ func Reset(error) error { return nil }
 //		fmt.Println("ERROR:", err)
 //	}))
 //
-// Note, that since Err helper we have other helpers like Stdout that allows
+// Note, that since Err helper we have other helpers like [Stdout] that allows
 // previous block be written as simple as:
 //
 //	defer err2.Catch(err2.Stdout)
