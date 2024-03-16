@@ -105,7 +105,7 @@ func ExampleIsEOF1() {
 
 func Example_copyFile() {
 	copyFile := func(src, dst string) (err error) {
-		defer err2.Handle(&err, "copy %s %s", src, dst)
+		defer err2.Handle(&err, "copy file %s %s", src, dst)
 
 		// These try package helpers are as fast as Check() calls which is as
 		// fast as `if err != nil {}`
@@ -126,5 +126,5 @@ func Example_copyFile() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	// Output: copy /notfound/path/file.go /notfound/path/file.bak: open /notfound/path/file.go: no such file or directory
+	// Output: copy file /notfound/path/file.go /notfound/path/file.bak: open /notfound/path/file.go: no such file or directory
 }
