@@ -8,9 +8,9 @@ import (
 )
 
 type (
-	// Handler is a function type used to process error values in Handle and
-	// Catch. We currently have a few build-ins of the Handler: err2.Noop,
-	// err2.Reset, etc.
+	// Handler is a function type used to process error values in [Handle] and
+	// [Catch]. We currently have a few build-ins of the Handler: [Noop],
+	// [Reset], etc.
 	Handler = handler.ErrorFn
 )
 
@@ -34,8 +34,8 @@ var (
 	ErrRecoverable    = errors.New("recoverable")
 
 	// Stdnull implements io.Writer that writes nothing, e.g.,
-	// err2.SetLogTracer in cases you don't want to use automatic log writer,
-	// i.e., LogTracer == /dev/null. It can be used to change how the Catch
+	// [SetLogTracer] in cases you don't want to use automatic log writer,
+	// i.e., [LogTracer] == /dev/null. It can be used to change how the Catch
 	// works, e.g., in CLI apps.
 	Stdnull = &nullDev{}
 )
@@ -66,7 +66,7 @@ var (
 //	     defer err2.Handle(&err, nil) // nil arg disable automatic annotation.
 //
 // In case of the actual error handling, the handler function should be given as
-// an second argument:
+// a second argument:
 //
 //	defer err2.Handle(&err, func(err error) error {
 //		if rmErr := os.Remove(dst); rmErr != nil {
@@ -77,7 +77,7 @@ var (
 //
 // You can have unlimited amount of error handlers. They are called if error
 // happens and they are called in the same order as they are given or until one
-// of them resets the error like Reset (notice the other predefined error
+// of them resets the error like [Reset] (notice the other predefined error
 // handlers) in the next samples:
 //
 //	defer err2.Handle(&err, err2.Reset, err2.Log) // Log not called
@@ -118,9 +118,10 @@ func Handle(err *error, a ...any) {
 // the defer.
 //
 // The deferred Catch is very convenient, because it makes your current
-// goroutine panic and error-safe, one line only! You can fine tune its
-// behavior with functions like err2.SetErrorTrace, assert.SetDefault, and
-// logging settings. Start with the defaults and simplest version of Catch:
+// goroutine panic and error-safe. You can fine tune its 'global' behavior with
+// functions like [SetErrorTracer], [SetPanicTracer], and [SetLogTracer]. Its
+// 'local' behavior depends the arguments you give it. Let's start with the
+// defaults and simplest version of Catch:
 //
 //	defer err2.Catch()
 //
@@ -139,9 +140,9 @@ func Handle(err *error, a ...any) {
 //
 // The next one stops errors and panics, but allows you handle errors, like
 // cleanups, etc. The error handler function has same signature as Handle's
-// error handling function, i.e., err2.Handler. By returning nil resets the
+// error handling function [Handler]. By returning nil resets the
 // error, which allows e.g. prevent automatic error logs to happening.
-// Otherwise, the output results depends on the current Tracer and assert
+// Otherwise, the output results depends on the current [Tracer] and assert
 // settings. The default trace setting prints call stacks for panics but not for
 // errors:
 //
