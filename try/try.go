@@ -58,7 +58,8 @@ Or you might just want to change it later to error return:
 
 	try.Out(os.Remove(dst)).Handle("file cleanup fail")
 
-Please see the documentation and examples of ResultX types and their methods.
+Please see the documentation and examples of [Result], [Result1], and [Result2]
+types and their methods.
 */
 package try
 
