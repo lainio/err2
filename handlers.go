@@ -7,7 +7,7 @@ import (
 	"github.com/lainio/err2/internal/handler"
 )
 
-// Stderr is a built-in helper to use with Handle and Catch. It prints the
+// Stderr is a built-in helper to use with [Handle] and [Catch]. It prints the
 // error to stderr and it resets the current error value. It's a handy Catch
 // handler in main function.
 //
@@ -51,10 +51,10 @@ func Noop(err error) error { return err }
 //	defer err2.Handle(&err, err2.Reset)
 func Reset(error) error { return nil }
 
-// Err is a built-in helper to use with Handle and Catch. It offers simplifier
+// Err is a built-in helper to use with [Handle] and [Catch]. It offers simplifier
 // for error handling function for cases where you don't need to change the
 // current error value. For instance, if you want to just write error to stdout,
-// and don't want to use SetLogTracer and keep it to write to your logs.
+// and don't want to use [SetLogTracer] and keep it to write to your logs.
 //
 //	defer err2.Catch(err2.Err(func(err error) {
 //		fmt.Println("ERROR:", err)
@@ -73,7 +73,7 @@ func Err(f func(err error)) Handler {
 
 const lvl = 10
 
-// Log prints error string to the current log that is set by SetLogTracer.
+// Log prints error string to the current log that is set by [SetLogTracer].
 func Log(err error) error {
 	if err == nil {
 		return nil
@@ -82,7 +82,7 @@ func Log(err error) error {
 	return err
 }
 
-// StderrNoReset is a built-in helper to use with Handle and Catch. It prints
+// StderrNoReset is a built-in helper to use with [Handle] and [Catch]. It prints
 // the error to stderr. If you need to reset err value use Stderr instead.
 //
 // You can use it like this:
@@ -97,7 +97,7 @@ func StderrNoReset(err error) error {
 	return err
 }
 
-// StdoutNoReset is a built-in helper to use with Handle and Catch. It prints
+// StdoutNoReset is a built-in helper to use with [Handle] and [Catch]. It prints
 // the error to stdout.
 //
 // You can use it like this:
