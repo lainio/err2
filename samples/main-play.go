@@ -3,7 +3,7 @@
 // favorite editor and start to play with the main.go file. The comments on it
 // guide you.
 //
-// We have only a few examples built over the CopyFile and callRecur functions,
+// We have only a few examples built over the [CopyFile] and [CallRecur] functions,
 // but with them you can try all the important APIs from err2, try, and assert.
 // Just follow the comments and try suggested things :-)
 package main
@@ -90,7 +90,7 @@ func OrgCopyFile(src, dst string) (err error) {
 	return nil
 }
 
-func callRecur(d int) (err error) {
+func CallRecur(d int) (err error) {
 	defer err2.Handle(&err)
 
 	return doRecur(d)
@@ -168,7 +168,7 @@ func doMain() (err error) {
 
 	// Next fn demonstrates how error and panic traces work, comment out all
 	// above CopyFile calls to play with:
-	try.To(callRecur(1))
+	try.To(CallRecur(1))
 
 	println("=== you cannot see this ===")
 	return nil
