@@ -157,7 +157,7 @@ func Handle(err *error, a ...any) {
 //
 // You can have unlimited amount of error handlers. They are called if error
 // happens and they are called in the same order as they are given or until one
-// of them resets the error like Reset in the next sample:
+// of them resets the error like [Reset] in the next sample:
 //
 //	defer err2.Catch(err2.Noop, err2.Reset, err2.Log) // err2.Log not called!
 //

@@ -24,8 +24,8 @@ func SetFormatter(f formatter.Interface) {
 	fmtstore.SetFormatter(f)
 }
 
-// Returns the current formatter. See more information from SetFormatter and
-// formatter package.
+// Returns the current formatter. See more information from [SetFormatter] and
+// [formatter] package.
 func Formatter() formatter.Interface {
 	return fmtstore.Formatter()
 }
