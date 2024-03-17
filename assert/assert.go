@@ -303,8 +303,10 @@ func Nil[T any](p *T, a ...any) {
 // (default Asserter) with the given message.
 //
 // Note, use this only for real interface types. Go's interface's has two values
-// so this won't work e.g. slices! Read more information about interface type:
-// https://go.dev/doc/faq#nil_error.
+// so this won't work e.g. slices!
+// Read more information about [the interface type].
+//
+// [the interface type]: https://go.dev/doc/faq#nil_error
 func INil(i any, a ...any) {
 	if i != nil {
 		defMsg := assertionMsg + ": interface should be nil"
@@ -316,8 +318,10 @@ func INil(i any, a ...any) {
 // panics/errors (default Asserter) with the given message.
 //
 // Note, use this only for real interface types. Go's interface's has two values
-// so this won't work e.g. slices! Read more information about interface type:
-// https://go.dev/doc/faq#nil_error.
+// so this won't work e.g. slices!
+// Read more information about [the interface type].
+//
+// [the interface type]: https://go.dev/doc/faq#nil_error
 func INotNil(i any, a ...any) {
 	if i == nil {
 		defMsg := assertionMsg + ": interface shouldn't be nil"
