@@ -25,7 +25,7 @@ func CopyFile(src, dst string) (err error) {
 		return fmt.Errorf("mixing traditional error checking: %w", err)
 	}
 	defer err2.Handle(&err, err2.Err(func(error) {
-		try.Out1(os.Remove(dst)).Logf("cleaning error")
+		try.Out(os.Remove(dst)).Logf("cleaning error")
 	}))
 	defer w.Close()
 	try.To1(io.Copy(w, r))
