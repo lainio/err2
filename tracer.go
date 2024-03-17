@@ -27,14 +27,23 @@ func LogTracer() io.Writer {
 }
 
 // SetErrorTracer sets a [io.Writer] for automatic error stack tracing. The err2
-// default is nil. Note that the current function is capable to print error
-// stack trace when the function has at least one deferred error handler, e.g:
+// default is nil. Note that any function that has deferred [Handle] or [Catch]
+// is capable to print error stack trace:
 //
 //	func CopyFile(src, dst string) (err error) {
-//	     defer err2.Handle(&err) // <- error trace print decision is done here
+//	     defer err2.Handle(&err) // <- makes error trace printing decision
+//
+// Error trace is almost the same format as Go's standard call stack but it may
+// have multiple sections because every [Handle] and [Catch] prints it. If an
+// error happens in a deep call stack, the error trace includes various parts.
+// The principle is similar to [Zig Error Return Traces], where you see how
+// error bubbles up. However, our error trace is a combination of error return
+// traces and stack traces because we get all the needed information at once.
 //
 // Remember that you can reset these with [flag] package support. See
 // documentation of err2 package's flag section.
+//
+// [Zig Error Return Traces]: https://ziglang.org/documentation/master/#Error-Return-Traces
 func SetErrorTracer(w io.Writer) {
 	tracer.Error.SetTracer(w)
 }
