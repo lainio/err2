@@ -73,7 +73,8 @@ func Err(f func(err error)) Handler {
 
 const lvl = 10
 
-// Log prints error string to the current log that is set by [SetLogTracer].
+// Log is a built-in helper to use with [Handle] and [Catch]. Log prints error
+// string to the current log that is set by [SetLogTracer].
 func Log(err error) error {
 	if err == nil {
 		return nil
