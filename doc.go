@@ -2,15 +2,9 @@
 Package err2 provides three main functionality:
  1. err2 package includes helper functions for error handling & automatic error
     stack tracing
- 2. try package is for error checking
- 3. assert package is for design-by-contract and preconditions both for normal
-    runtime and for testing
-
-The traditional error handling idiom in Go is roughly akin to
-
-	if err != nil { return err }
-
-which applied recursively.
+ 2. [github.com/lainio/err2/try] sub-package is for error checking
+ 3. [github.com/lainio/err2/assert] sub-package is for design-by-contract and
+    preconditions both for normal runtime and for unit testing
 
 The err2 package drives programmers to focus on error handling rather than
 checking errors. We think that checks should be so easy that we never forget
@@ -19,7 +13,7 @@ them. The CopyFile example shows how it works:
 	// CopyFile copies source file to the given destination. If any error occurs it
 	// returns error value describing the reason.
 	func CopyFile(src, dst string) (err error) {
-	     // Add first error handler just to annotate the error properly.
+	     // Add first error handler is to catch and annotate the error properly.
 	     defer err2.Handle(&err)
 
 	     // Try to open the file. If error occurs now, err will be
@@ -32,16 +26,18 @@ them. The CopyFile example shows how it works:
 	     // Try to create a file. If error occurs now, err will be annotated and
 	     // returned properly.
 	     w := try.To1(os.Create(dst))
-	     // Add error handler to clean up the destination file. Place it here that
-	     // the next deferred close is called before our Remove call.
+	     // Add error handler to clean up the destination file in case of
+	     // error. Handler fn is called only if there has been an error at the
+	     // following try.To check. We place it here that the next deferred
+	     // close is called before our Remove a file call.
 	     defer err2.Handle(&err, err2.Err(func(error) {
 	     	os.Remove(dst)
 	     }))
 	     defer w.Close()
 
 	     // Try to copy the file. If error occurs now, all previous error handlers
-	     // will be called in the reversed order. And final return error is
-	     // properly annotated in all the cases.
+	     // will be called in the reversed order. And a final error value is
+	     // properly annotated and returned in all the cases.
 	     try.To1(io.Copy(w, r))
 
 	     // All OK, just return nil.
@@ -62,8 +58,9 @@ we can write
 
 	b := try.To1(io.ReadAll(r))
 
-Note that [try.To] functions are as fast as if err != nil statements. Please see
-the try package documentation for more information about the error checks.
+Note that try.To functions are as fast as if err != nil statements. Please see
+the [github.com/lainio/err2/try] package documentation for more information
+about the error checks.
 
 # Automatic Stack Tracing
 
