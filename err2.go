@@ -14,8 +14,8 @@ type (
 	Handler = handler.ErrorFn
 )
 
-// Sentinel error value helpers. They are convenient thanks to [try.IsNotFound]
-// and similar functions.
+// Sentinel error value helpers. They are convenient thanks to
+// [github.com/lainio/err2/try.IsNotFound] and similar functions.
 //
 // [ErrNotFound] ... [ErrNotEnabled] are similar no-error like [io.EOF] for
 // those who really want to use error return values to transport non errors.
@@ -38,7 +38,7 @@ var (
 )
 
 // Stdnull implements [io.Writer] that writes nothing, e.g.,
-// [SetLogTracer] in cases you don't want to use automatic log writer,
+// [SetLogTracer] in cases you don't want to use automatic log writer (=nil),
 // i.e., [LogTracer] == /dev/null. It can be used to change how the [Catch]
 // works, e.g., in CLI apps.
 var Stdnull = &nullDev{}
@@ -145,7 +145,7 @@ func Handle(err *error, a ...any) {
 // cleanups, etc. The error handler function has same signature as Handle's
 // error handling function [Handler]. By returning nil resets the
 // error, which allows e.g. prevent automatic error logs to happening.
-// Otherwise, the output results depends on the current [Tracer] and assert
+// Otherwise, the output results depends on the current trace and assert
 // settings. The default trace setting prints call stacks for panics but not for
 // errors:
 //
@@ -155,15 +155,15 @@ func Handle(err *error, a ...any) {
 //
 //	defer err2.Catch(err2.Noop)
 //
-// You can have unlimited amount of error handlers. They are called if error
+// You can give unlimited amount of error handlers. They are called if error
 // happens and they are called in the same order as they are given or until one
 // of them resets the error like [Reset] in the next sample:
 //
 //	defer err2.Catch(err2.Noop, err2.Reset, err2.Log) // err2.Log not called!
 //
-// The last one calls your error handler, and you have an explicit panic handler
-// as well, where you can e.g. continue panicking to propagate it for above
-// callers or stop it like below:
+// The next sample calls your error handler, and you have an explicit panic
+// handler as well, where you can e.g. continue panicking to propagate it for
+// above callers or stop it like below:
 //
 //	defer err2.Catch(func(err error) error { return err }, func(p any) {})
 func Catch(a ...any) {
@@ -183,7 +183,7 @@ func Catch(a ...any) {
 	doTrace(err)
 }
 
-// Throwf builds and throws (panics) an error. For creation it's similar to
+// Throwf builds and throws an error (panic). For creation it's similar to
 // [fmt.Errorf]. Because panic is used to transport the error instead of error
 // return value, it's called only if you want to non-local control structure for
 // error handling, i.e. your current function doesn't have error return value.

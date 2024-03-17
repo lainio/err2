@@ -31,7 +31,7 @@ them. The CopyFile example shows how it works:
 	     // following try.To check. We place it here that the next deferred
 	     // close is called before our Remove a file call.
 	     defer err2.Handle(&err, err2.Err(func(error) {
-	     	os.Remove(dst)
+	     	try.Out(os.Remove(dst)).Logf("cleanup failed")
 	     }))
 	     defer w.Close()
 
@@ -75,11 +75,22 @@ programmatically (before [flag.Parse] if you are using that):
 	 or
 	err2.SetPanicTracer(log.Writer()) // panic stack trace to std logger
 
-Note. Since [Catch]'s default mode is to catch panics, the panic tracer's
-default values is os.Stderr. The default error tracer is nil.
+Note. Since [Catch]'s default mode is to recover from panics, it's a good
+practice still print their stack trace. The panic tracer's default values is
+[os.Stderr]. The default error tracer is nil.
 
 	err2.SetPanicTracer(os.Stderr) // panic stack tracer's default is stderr
 	err2.SetErrorTracer(nil) // error stack tracer's default is nil
+
+Note, that both panic and error traces are optimized by err2 package. That means
+that the head of the stack trace isn't the panic function, but an actual line
+that caused it. It works for all three categories:
+  - normal error values
+  - [runtime.Error] values
+  - any types of the panics
+
+The last two types are handled as panics in the error handling functions given
+to [Handle] and [Catch].
 
 # Automatic Logging
 

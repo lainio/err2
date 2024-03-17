@@ -2,7 +2,7 @@
 Package assert includes runtime assertion helpers both for normal execution as
 well as a assertion package for Go's testing. What makes solution unique is its
 capable to support both modes with the same API. Only thing you need to do is to
-add a PushTester line at the beginning of your unit tests:
+add a [PushTester] line at the beginning of your unit tests:
 
 	func TestInvite(t *testing.T) {
 	     defer assert.PushTester(t)() // push testing variable t beginning of any test
@@ -59,8 +59,8 @@ Please see the code examples for more information.
 
 # Flag Package Support
 
-The assert package supports Go's flags. All you need to do is to call flag.Parse.
-And the following flags are supported (="default-value"):
+The assert package supports Go's flags. All you need to do is to call
+[flag.Parse]. And the following flags are supported (="default-value"):
 
 	-asserter="Prod"
 	    A name of the asserter Plain, Prod, Dev, Debug
@@ -70,15 +70,15 @@ And assert package's configuration flags are inserted.
 
 # Performance
 
-assert.That's performance is equal to the if-statement thanks for inlining. And
+[assert.That]'s performance is equal to the if-statement thanks for inlining. And
 the most of the generics-based versions are about the equally fast. Practice has
-thought that we should prefer other than assert.That because by using detailed
+thought that we should prefer other than [assert.That] because by using detailed
 version like [assert.Shorter] we get precise error messages automatically. Some
 also prefer readability of specific asserters.
 
 If your algorithm is performance-critical please run `make bench` in the err2
 repo and decide case by case. Also you can make an issue or even PR if you would
-like to have something similar like glog.V() function.
+like to have something similar like [glog.V] function.
 
 # Naming
 

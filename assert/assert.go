@@ -48,7 +48,7 @@ type defInd = uint32
 //	--------------------------------
 //
 // [Test] minimalistic asserter for unit test use. More pragmatic is the
-// TestFull asserter (test default).
+// [TestFull] asserter (test default).
 //
 // Use this asserter if your IDE/editor doesn't support full file names and it
 // relies a relative path (Go standard). You can use this also if you need
@@ -56,6 +56,7 @@ type defInd = uint32
 //
 // [TestFull] asserter (test default). The TestFull asserter includes the caller
 // info and the call stack for unit testing, similarly like err2's error traces.
+// Note, that [PushTester] set's TestFull if it's not yet set.
 //
 // The call stack produced by the test asserts can be used over Go module
 // boundaries. For example, if your app and it's sub packages both use
@@ -65,9 +66,9 @@ type defInd = uint32
 //
 // Note, that the cross-module assertions produce long file names (path
 // included), and some of the Go test result parsers cannot handle that. A
-// proper test result parser like 'github.com/lainio/nvim-go' (fork) works very
-// well. Also most of the make result parsers can process the output properly
-// and allow traverse of locations of the error trace.
+// proper test result parser like [nvim-go] (fork) works very well. Also most of
+// the make result parsers can process the output properly and allow traverse of
+// locations of the error trace.
 //
 // [Debug] asserter transforms assertion violations to panic calls where panic
 // object's type is string, i.e., err2 package treats it as a normal panic, not
@@ -82,6 +83,8 @@ type defInd = uint32
 // is equal to:
 //
 //	assert.NotNil(p)
+//
+// [nvim-go]: https://github.com/lainio/nvim-go
 const (
 	Plain defInd = 0 + iota
 	Production
@@ -257,6 +260,9 @@ func tester() (t testing.TB) {
 }
 
 // NotImplemented always panics with 'not implemented' assertion message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func NotImplemented(a ...any) {
 	current().reportAssertionFault("not implemented", a)
 }
@@ -264,6 +270,9 @@ func NotImplemented(a ...any) {
 // ThatNot asserts that the term is NOT true. If is it panics with the given
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func ThatNot(term bool, a ...any) {
 	if term {
 		defMsg := assertionMsg
@@ -274,6 +283,9 @@ func ThatNot(term bool, a ...any) {
 // That asserts that the term is true. If not it panics with the given
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func That(term bool, a ...any) {
 	if !term {
 		defMsg := assertionMsg
@@ -282,7 +294,10 @@ func That(term bool, a ...any) {
 }
 
 // NotNil asserts that the pointer IS NOT nil. If it is it panics/errors (default
-// Asserter) with the given message.
+// Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func NotNil[P ~*T, T any](p P, a ...any) {
 	if p == nil {
 		defMsg := assertionMsg + ": pointer shouldn't be nil"
@@ -291,7 +306,10 @@ func NotNil[P ~*T, T any](p P, a ...any) {
 }
 
 // Nil asserts that the pointer IS nil. If it is not it panics/errors (default
-// Asserter) with the given message.
+// Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func Nil[T any](p *T, a ...any) {
 	if p != nil {
 		defMsg := assertionMsg + ": pointer should be nil"
@@ -300,7 +318,10 @@ func Nil[T any](p *T, a ...any) {
 }
 
 // INil asserts that the interface value IS nil. If it is it panics/errors
-// (default Asserter) with the given message.
+// (default Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note, use this only for real interface types. Go's interface's has two values
 // so this won't work e.g. slices!
@@ -315,7 +336,10 @@ func INil(i any, a ...any) {
 }
 
 // INotNil asserts that the interface value is NOT nil. If it is it
-// panics/errors (default Asserter) with the given message.
+// panics/errors (default Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note, use this only for real interface types. Go's interface's has two values
 // so this won't work e.g. slices!
@@ -330,7 +354,10 @@ func INotNil(i any, a ...any) {
 }
 
 // SNil asserts that the slice IS nil. If it is it panics/errors (default
-// Asserter) with the given message.
+// Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func SNil[S ~[]T, T any](s S, a ...any) {
 	if s != nil {
 		defMsg := assertionMsg + ": slice should be nil"
@@ -339,7 +366,10 @@ func SNil[S ~[]T, T any](s S, a ...any) {
 }
 
 // SNotNil asserts that the slice is not nil. If it is it panics/errors (default
-// Asserter) with the given message.
+// Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func SNotNil[S ~[]T, T any](s S, a ...any) {
 	if s == nil {
 		defMsg := assertionMsg + ": slice shouldn't be nil"
@@ -348,7 +378,10 @@ func SNotNil[S ~[]T, T any](s S, a ...any) {
 }
 
 // CNotNil asserts that the channel is not nil. If it is it panics/errors
-// (default Asserter) with the given message.
+// (default Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func CNotNil[C ~chan T, T any](c C, a ...any) {
 	if c == nil {
 		defMsg := assertionMsg + ": channel shouldn't be nil"
@@ -357,7 +390,10 @@ func CNotNil[C ~chan T, T any](c C, a ...any) {
 }
 
 // MNotNil asserts that the map is not nil. If it is it panics/errors (default
-// Asserter) with the given message.
+// Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 	if m == nil {
 		defMsg := assertionMsg + ": map shouldn't be nil"
@@ -368,6 +404,12 @@ func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 // NotEqual asserts that the values aren't equal. If they are it panics/errors
 // (according the current Asserter) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
+// Note, when asserter is [Plain], optional arguments are used to build a new
+// assert violation message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v' want (!= '%v')", val, want)
@@ -378,6 +420,9 @@ func NotEqual[T comparable](val, want T, a ...any) {
 // Equal asserts that the values are equal. If not it panics/errors (according
 // the current Asserter) with the auto-generated message. You can append the
 // generated got-want message by using optional message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
@@ -389,6 +434,9 @@ func Equal[T comparable](val, want T, a ...any) {
 // panics/errors (according the current Asserter) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
@@ -400,6 +448,9 @@ func DeepEqual(val, want any, a ...any) {
 // panics/errors (according the current Asserter) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note, it uses reflect.DeepEqual which means that also the types must be the
 // same:
@@ -417,6 +468,9 @@ func NotDeepEqual(val, want any, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func Len(obj string, length int, a ...any) {
@@ -432,6 +486,9 @@ func Len(obj string, length int, a ...any) {
 // it panics/errors (according the current Asserter) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
@@ -449,6 +506,9 @@ func Longer(s string, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func Shorter(str string, length int, a ...any) {
@@ -464,6 +524,9 @@ func Shorter(str string, length int, a ...any) {
 // panics/errors (according the current Asserter) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
@@ -481,6 +544,9 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
@@ -496,6 +562,9 @@ func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 // it panics/errors (according the current Asserter) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
@@ -513,6 +582,9 @@ func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
@@ -528,6 +600,9 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 // panics/errors (according the current Asserter) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
@@ -545,6 +620,9 @@ func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
@@ -560,6 +638,9 @@ func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 // panics/errors (according the current Asserter) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
@@ -577,6 +658,9 @@ func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
@@ -593,6 +677,9 @@ func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
@@ -605,7 +692,10 @@ func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
 }
 
 // MKeyExists asserts that the map key exists. If not it panics/errors (current
-// Asserter) with the given message.
+// Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U) {
 	var ok bool
 	val, ok = obj[key]
@@ -620,6 +710,9 @@ func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U)
 // NotEmpty asserts that the string is not empty. If it is, it panics/errors
 // (according the current Asserter) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
 		defMsg := assertionMsg + ": string shouldn't be empty"
@@ -630,6 +723,9 @@ func NotEmpty(obj string, a ...any) {
 // Empty asserts that the string is empty. If it is NOT, it panics/errors
 // (according the current Asserter) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func Empty(obj string, a ...any) {
 	if obj != "" {
 		defMsg := assertionMsg + ": string should be empty"
@@ -640,6 +736,9 @@ func Empty(obj string, a ...any) {
 // SNotEmpty asserts that the slice is not empty. If it is, it panics/errors
 // (according the current Asserter) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 //
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
@@ -658,6 +757,9 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 // You can append the generated got-want message by using optional message
 // arguments.
 //
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
 // Note! This is reasonably fast but not as fast as [That] because of lacking
 // inlining for the current implementation of Go's type parametric functions.
 func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
@@ -673,12 +775,12 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 //
-// Note. We recommend that you prefer [try.To]. They work exactly the same during
-// the test runs and you can use the same code for both: runtime and tests.
-// However, there are cases that you want assert that there is no error in cases
-// where fast fail and immediate stop of execution is wanted at runtime. With
-// asserts ([Production], [Development], [Debug]) you get the file location as
-// well.
+// Note. We recommend that you prefer [github.com/lainio/err2/try.To]. They work
+// exactly the same during the test runs and you can use the same code for both:
+// runtime and tests. However, there are cases that you want assert that there
+// is no error in cases where fast fail and immediate stop of execution is
+// wanted at runtime. With asserts ([Production], [Development], [Debug]) you
+// get the file location as well.
 func NoError(err error, a ...any) {
 	if err != nil {
 		defMsg := assertionMsg + conCatErrStr + err.Error()
@@ -686,9 +788,12 @@ func NoError(err error, a ...any) {
 	}
 }
 
-// Error asserts that the err is not nil. If it is it panics with the given
-// formatting string. Thanks to inlining, the performance penalty is equal to a
+// Error asserts that the err is not nil. If it is it panics and builds a
+// violation message. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func Error(err error, a ...any) {
 	if err == nil {
 		defMsg := "Error:" + assertionMsg + ": missing error"
@@ -696,9 +801,12 @@ func Error(err error, a ...any) {
 	}
 }
 
-// Zero asserts that the value is 0. If it is not it panics with the given
-// formatting string. Thanks to inlining, the performance penalty is equal to a
+// Zero asserts that the value is 0. If it is not it panics and builds a
+// violation message. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func Zero[T Number](val T, a ...any) {
 	if val != 0 {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
@@ -706,9 +814,12 @@ func Zero[T Number](val T, a ...any) {
 	}
 }
 
-// NotZero asserts that the value != 0. If it is not it panics with the given
-// formatting string. Thanks to inlining, the performance penalty is equal to a
+// NotZero asserts that the value != 0. If it is not it panics and builds a
+// violation message. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
 func NotZero[T Number](val T, a ...any) {
 	if val == 0 {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= 0)", val)
