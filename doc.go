@@ -82,7 +82,7 @@ practice still print their stack trace. The panic tracer's default values is
 	err2.SetPanicTracer(os.Stderr) // panic stack tracer's default is stderr
 	err2.SetErrorTracer(nil) // error stack tracer's default is nil
 
-Note, that both panic and error traces are optimized by err2 package. That means
+Note that both panic and error traces are optimized by err2 package. That means
 that the head of the stack trace isn't the panic function, but an actual line
 that caused it. It works for all three categories:
   - normal error values
@@ -112,7 +112,7 @@ And the following flags are supported (="default-value"):
 	-err2-trace="nil"
 	    A name of the stream currently supported stderr, stdout or nil
 
-Note, that you have called [SetErrorTracer] and others, before you call
+Note that you have called [SetErrorTracer] and others, before you call
 [flag.Parse]. This allows you set the defaults according your app's need and allow
 end-user change them during the runtime.
 

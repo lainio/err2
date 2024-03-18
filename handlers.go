@@ -60,7 +60,7 @@ func Reset(error) error { return nil }
 //		fmt.Println("ERROR:", err)
 //	}))
 //
-// Note, that since Err helper we have other helpers like [Stdout] that allows
+// Note that since Err helper we have other helpers like [Stdout] that allows
 // previous block be written as simple as:
 //
 //	defer err2.Catch(err2.Stdout)
