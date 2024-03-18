@@ -25,7 +25,7 @@ type defInd = uint32
 //
 //	assert.NotEmpty(c.PoolName, "pool name cannot be empty")
 //
-// Note, that Plain is only asserter that override auto-generated assertion
+// Note that Plain is only asserter that override auto-generated assertion
 // messages with given arguments like 'pool name cannot be empty'. Others add
 // given arguments at the end of the auto-generated assert message.
 //
@@ -56,7 +56,7 @@ type defInd = uint32
 //
 // [TestFull] asserter (test default). The TestFull asserter includes the caller
 // info and the call stack for unit testing, similarly like err2's error traces.
-// Note, that [PushTester] set's TestFull if it's not yet set.
+// Note that [PushTester] set's TestFull if it's not yet set.
 //
 // The call stack produced by the test asserts can be used over Go module
 // boundaries. For example, if your app and it's sub packages both use
@@ -64,7 +64,7 @@ type defInd = uint32
 // be automatically converted to test asserts. If any of the runtime asserts of
 // the sub packages fails during the app tests, the app test fails as well.
 //
-// Note, that the cross-module assertions produce long file names (path
+// Note that the cross-module assertions produce long file names (path
 // included), and some of the Go test result parsers cannot handle that. A
 // proper test result parser like [nvim-go] (fork) works very well. Also most of
 // the make result parsers can process the output properly and allow traverse of
@@ -179,7 +179,7 @@ const (
 // PushTester allows you to change the current default asserter by accepting it
 // as a second argument.
 //
-// Note, that the second argument, if given, changes the default asserter for
+// Note that the second argument, if given, changes the default asserter for
 // whole package. The argument is mainly for temporary development use and isn't
 // not preferred API usage.
 func PushTester(t testing.TB, a ...defInd) function {
@@ -241,7 +241,7 @@ func PopTester() {
 		msg = "test panic catch"
 	}
 
-	// First, print the call stack. Note, that we aren't support full error
+	// First, print the call stack. Note that we aren't support full error
 	// tracing with unit test logging. However, using it has proved the top
 	// level error stack as more enough. Even so that we could consider using
 	// it for normal error stack traces if it would be possible.
@@ -249,7 +249,7 @@ func PopTester() {
 	debug.PrintStackForTest(os.Stderr, stackLvl)
 
 	// Now that call stack errors are printed, if any. Let's print the actual
-	// line that caused the error, i.e., was throwing the error. Note, that we
+	// line that caused the error, i.e., was throwing the error. Note that we
 	// are here in the 'catch-function'.
 	const framesToSkip = 4 // how many fn calls there is before FuncName call
 	fatal("assertion catching: "+msg, framesToSkip)
@@ -837,15 +837,16 @@ func current() asserter {
 	return defAsserter[def]
 }
 
-// SetDefault set the current default asserter for assert pkg.
+// SetDefault sets the current default asserter for assert pkg. It also returns
+// the previous asserter.
 //
-// Note, that you should use this in TestMain function, and use Flag package to
+// Note that you should use this in TestMain function, and use [flag] package to
 // set it for the app. For the tests you can set it to panic about every
 // assertion fault, or to throw an error, or/and print the call stack
 // immediately when assert occurs. The err2 package helps you to catch and
 // report all types of the asserts.
 //
-// Note, that if you are using tracers you might get two call stacks, so test
+// Note that if you are using tracers you might get two call stacks, so test
 // what's best for your case.
 //
 // Tip. If our own packages (client packages for assert) have lots of parallel
@@ -854,15 +855,21 @@ func current() asserter {
 //
 //	func TestMain(m *testing.M) {
 //		SetDefault(assert.TestFull)
-func SetDefault(i defInd) defInd {
-	// pkg lvl lock to allow only one pkg client call this at the time
+func SetDefault(i defInd) (old defInd) {
+	// pkg lvl lock to allow only one pkg client call this at one of the time
+	// together with the indexing, i.e we don't need to switch asserter
+	// variable or pointer to it but just index to array they are stored.
+	// All of this make race detector happy at the client pkgs.
 	mu.Lock()
 	defer mu.Unlock()
 
-	// to make this fully thread safe the def var should be atomic, BUT it
-	// would be owerkill. We need only defaults to be set at once.
+	old = def
+	// theoretically, to make this fully thread safe the def var should be
+	// atomic, BUT it would be overkill. We need only defaults to be set at
+	// once. AND because we use indexing to actual asserter the thread-safety
+	// and performance are guaranteed,
 	def = i
-	return def
+	return
 }
 
 // mapDefInd runtime asserters, that's why test asserts are removed for now.

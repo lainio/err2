@@ -15,8 +15,8 @@ var (
 	clean   = regexp.MustCompile(`[^\w]`)
 )
 
-// DecamelRegexp return the given string as space delimeted. Note! it's slow. Use
-// Decamel instead.
+// DecamelRegexp return the given string as space delimeted. Note! It's slow.
+// Use [Decamel] instead. It's left here for learning purposes.
 func DecamelRegexp(str string) string {
 	str = clean.ReplaceAllString(str, " ")
 	str = uncamel.ReplaceAllString(str, ` $1`)
@@ -78,7 +78,7 @@ func Decamel(s string) string {
 // separated filename, and line number. If frame cannot be found ok is false.
 //
 // See more information from runtime.Caller. The skip tells how many stack
-// frames are skipped. Note, that FuncName calculates itself to skip frames.
+// frames are skipped. Note that FuncName calculates itself the skip frames.
 func FuncName(skip int, long bool) (n, fname string, ln int, ok bool) {
 	pc, file, ln, yes := runtime.Caller(skip + 1) // +1 skip ourself
 	if yes {

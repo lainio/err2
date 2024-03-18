@@ -114,11 +114,11 @@ func Handle(err *error, a ...any) {
 }
 
 // Catch is a convenient helper to those functions that doesn't return errors.
-// Note, that Catch always catch the panics. If you don't want to stop them
+// Note that Catch always catch the panics. If you don't want to stop them
 // (i.e., use of [recover]) you should add panic handler and continue panicking
 // there. There can be only one deferred Catch function per non error returning
-// function like main(). There is several ways to use the Catch function. And
-// always remember the [defer].
+// functions, i.e. goroutine functions like main(). There is several ways to use
+// the Catch function. And always remember the [defer].
 //
 // The deferred Catch is very convenient, because it makes your current
 // goroutine panic and error-safe. You can fine tune its 'global' behavior with
