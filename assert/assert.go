@@ -179,6 +179,14 @@ const (
 // PushTester allows you to change the current default asserter by accepting it
 // as a second argument.
 //
+// Note that you MUST call PushTester for sub-goroutines:
+//
+//	defer assert.PushTester(t)() // does the cleanup
+//	...
+//	go func() {
+//	   assert.PushTester(t) // left cleanup out! Leave it for the test, see ^
+//	   ...
+//
 // Note that the second argument, if given, changes the default asserter for
 // whole package. The argument is mainly for temporary development use and isn't
 // not preferred API usage.
@@ -190,13 +198,7 @@ func PushTester(t testing.TB, a ...defInd) function {
 		// it's good to keep the API as simple as possible
 		SetDefault(TestFull)
 	}
-	testers.Tx(func(m testersMap) {
-		rid := goid()
-		if _, ok := m[rid]; ok {
-			panic("PushTester is already called")
-		}
-		m[rid] = t
-	})
+	testers.Set(goid(), t)
 	return PopTester
 }
 
@@ -219,10 +221,7 @@ func PushTester(t testing.TB, a ...defInd) function {
 //
 //	defer assert.PushTester(t)()
 func PopTester() {
-	defer testers.Tx(func(m testersMap) {
-		goid := goid()
-		delete(m, goid)
-	})
+	defer testers.Del(goid())
 
 	r := recover()
 	if r == nil {
