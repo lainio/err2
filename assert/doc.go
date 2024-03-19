@@ -2,7 +2,8 @@
 Package assert includes runtime assertion helpers both for normal execution as
 well as a assertion package for Go's testing. What makes solution unique is its
 capable to support both modes with the same API. Only thing you need to do is to
-add a [PushTester] line at the beginning of your unit tests:
+add a [PushTester] line at the beginning of your unit tests and its
+sub-gouroutines:
 
 	func TestInvite(t *testing.T) {
 	     defer assert.PushTester(t)() // push testing variable t beginning of any test
@@ -12,7 +13,7 @@ add a [PushTester] line at the beginning of your unit tests:
 	     assert.Equal(alice.Len(), 1) // assert anything normally
 	     ...
 	     go func() {
-	          defer assert.PushTester(t)() // <-- Needs to do again for new goroutine
+	          assert.PushTester(t) // <-- Needs to do again for a new goroutine
 
 # Merge Runtime And Unit Test Assertions
 
