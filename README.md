@@ -10,24 +10,19 @@ and propagation** like other modern programming languages: **Zig**, Rust, Swift,
 etc. `err2` isn't an exception handling library, but an entirely orthogonal
 package with Go's existing error handling mechanism.
 
-```go 
+```go
 func CopyFile(src, dst string) (err error) {
 	defer err2.Handle(&err)
-
-	assert.NotEmpty(src)
-	assert.NotEmpty(dst)
 
 	r := try.To1(os.Open(src))
 	defer r.Close()
 
-	w, err := os.Create(dst)
-	if err != nil {
-		return fmt.Errorf("mixing traditional error checking: %w", err)
-	}
+	w := try.To1(os.Create(dst))
 	defer err2.Handle(&err, err2.Err(func(error) {
 		try.Out(os.Remove(dst)).Logf("cleaning error")
 	}))
 	defer w.Close()
+
 	try.To1(io.Copy(w, r))
 	return nil
 }
@@ -88,7 +83,7 @@ little error handling. But most importantly, it doesn't help developers with
 > resilience. -- Gregor Hohpe
 
 Automatic error propagation is crucial because it makes your code change
-tolerant. And, of course, it helps to make your code error-safe: 
+tolerant. And, of course, it helps to make your code error-safe:
 
 ![Never send a human to do a machine's job](https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
 
@@ -99,7 +94,7 @@ The err2 package is your automation buddy:
    line exactly similar as
    [Zig's `errdefer`](https://ziglang.org/documentation/master/#errdefer).
 2. It helps to check and transport errors to the nearest (the defer-stack) error
-   handler. 
+   handler.
 3. It helps us use design-by-contract type preconditions.
 4. It offers automatic stack tracing for every error, runtime error, or panic.
    If you are familiar with Zig, the `err2` error traces are same as Zig's.
@@ -124,7 +119,7 @@ This is the simplest form of `err2` automatic error handler:
 ```go
 func doSomething() (err error) {
     // below: if err != nil { return ftm.Errorf("%s: %w", CUR_FUNC_NAME, err) }
-    defer err2.Handle(&err) 
+    defer err2.Handle(&err)
 ```
 
 See more information from `err2.Handle`'s documentation. It supports several
@@ -250,7 +245,7 @@ notExist := try.Is(r2.err, plugin.ErrNotExist)
    happens: nearest `err2.Handle` gets it first.
 
 These `try.Is` functions help cleanup mesh idiomatic Go, i.e. mixing happy and
-error path, leads to. 
+error path, leads to.
 
 For more information see the examples in the documentation of both functions.
 
@@ -330,7 +325,7 @@ func TestWebOfTrustInfo(t *testing.T) {
 	assert.SLen(common, 2)
 
 	wot := dave.WebOfTrustInfo(eve.Node) //<- this includes asserts as well!!
-	// And if there's violations during the test run they are reported as 
+	// And if there's violations during the test run they are reported as
 	// test failures for this TestWebOfTrustInfo -test.
 
 	assert.Equal(0, wot.CommonInvider)
@@ -366,7 +361,7 @@ stack.**
 When you are using `err2` or `assert` packages, i.e., just importing them, you
 have an option to automatically support for err2 configuration flags through
 Go's standard `flag` package. See more information about err2 settings from
-[Error Stack Tracing](#error-stack-tracing) and [Asserters](#asserters). 
+[Error Stack Tracing](#error-stack-tracing) and [Asserters](#asserters).
 
 Now you can always deploy your applications and services with the simple
 end-user friendly error messages and no stack traces, **but you can switch them
@@ -423,10 +418,10 @@ support packages like `err2` and `glog` and their flags.
    ```go
    PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
        defer err2.Handle(&err)
-       
+
        // NOTE! Very important. Adds support for std flag pkg users: glog, err2
        goflag.Parse()
-       
+
        try.To(goflag.Set("logtostderr", "true"))
        handleViperFlags(cmd) // local helper with envs
        glog.CopyStandardLogTo("ERROR") // for err2
@@ -472,7 +467,7 @@ part of the algorithm itself.**
 **there are no performance penalty at all**. However, the mandatory use of the
 `defer` might prevent some code optimisations like function inlining. And still,
 we have cases where using the `err2` and `try` package simplify the algorithm so
-that it's faster than the return value if err != nil version. (**See the 
+that it's faster than the return value if err != nil version. (**See the
 benchmarks for `io.Copy` in the repo.**)
 
 If you have a performance-critical use case, we always recommend you to write
@@ -536,7 +531,7 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
   - allows building e.g. error handling middlewares
   - this is major feature because it allows building helpers/add-ons
 - automatic outputs aren't overwritten by given args, only with `assert.Plain`
-- Minor API fixes to still simplify it: 
+- Minor API fixes to still simplify it:
   - remove exported vars, obsolete types and funcs from `assert` pkg
   - `Result2.Def2()` sets only Val2
 - technical refactorings: variadic function calls only in API level
