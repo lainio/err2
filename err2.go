@@ -72,10 +72,10 @@ var Stdnull = &nullDev{}
 // a second argument:
 //
 //	defer err2.Handle(&err, func(err error) error {
-//		if rmErr := os.Remove(dst); rmErr != nil {
-//			return fmt.Errorf("%w: cleanup error: %w", err, rmErr)
-//		}
-//		return err
+//	     if rmErr := os.Remove(dst); rmErr != nil {
+//	          return fmt.Errorf("%w: cleanup error: %w", err, rmErr)
+//	     }
+//	     return err
 //	})
 //
 // You can have unlimited amount of error handlers. They are called if error
