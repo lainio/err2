@@ -18,9 +18,9 @@ import (
 
 type (
 	// we want these to be type aliases, so they are much nicer to use
-	PanicHandler = func(p any)
-	ErrorHandler = func(err error) error // this is only proper type that work
-	NilHandler   = func(err error) error // these two are the same
+	PanicFn = func(p any)
+	ErrorFn = func(err error) error // this is only proper type that work
+	NilFn   = func(err error) error // these two are the same
 
 	//CheckHandler = func(noerr bool, err error) error
 	CheckHandler = func(noerr bool)
@@ -41,13 +41,13 @@ type Info struct {
 	// These are called if handler.Process caller sets it. If they aren't set
 	// default implementations are used. NOTE. We have to use both which means
 	// that we get nilHandler call if recovery() is called by any other
-	// handler then we call still ErrorHandler and get the error from Any. It
+	// handler then we call still ErrorFn and get the error from Any. It
 	// goes for other way around: we get error but nilHandler is only one to
 	// set, we use that for the error (which is accessed from the closure).
-	ErrorHandler // If nil default implementation is used.
-	NilHandler   // If nil default (pre-defined here) implementation is used.
+	ErrorFn // If nil default implementation is used.
+	NilFn   // If nil default (pre-defined here) implementation is used.
 
-	PanicHandler // If nil panic() is called.
+	PanicFn // If nil panic() is called.
 
 	CheckHandler // this would be for cases where there isn't any error, but
 	// this should be the last defer.
@@ -55,6 +55,8 @@ type Info struct {
 	CallerName string
 
 	werr error
+
+	needErrorAnnotation bool
 }
 
 const (
@@ -77,8 +79,8 @@ func (i *Info) callNilHandler() {
 	if i.safeErr() != nil {
 		i.checkErrorTracer()
 	}
-	if i.NilHandler != nil {
-		*i.Err = i.NilHandler(i.werr)
+	if i.NilFn != nil {
+		*i.Err = i.NilFn(i.werr)
 		i.werr = *i.Err // remember change both our errors!
 	} else {
 		i.defaultNilHandler()
@@ -100,8 +102,16 @@ func (i *Info) checkErrorTracer() {
 
 func (i *Info) callErrorHandler() {
 	i.checkErrorTracer()
-	if i.ErrorHandler != nil {
-		*i.Err = i.ErrorHandler(i.Any.(error))
+	if i.ErrorFn != nil {
+		// we want to auto-annotate error first and exec ErrorFn then
+		i.werr = i.workError()
+		if i.needErrorAnnotation && i.werr != nil {
+			i.buildFmtErr()
+			*i.Err = i.ErrorFn(*i.Err)
+		} else {
+			*i.Err = i.ErrorFn(i.Any.(error))
+		}
+
 		i.werr = *i.Err // remember change both our errors!
 	} else {
 		i.defaultErrorHandler()
@@ -120,8 +130,8 @@ func (i *Info) checkPanicTracer() {
 
 func (i *Info) callPanicHandler() {
 	i.checkPanicTracer()
-	if i.PanicHandler != nil {
-		i.PanicHandler(i.Any)
+	if i.PanicFn != nil {
+		i.PanicFn(i.Any)
 	} else {
 		panic(i.Any)
 	}
@@ -153,8 +163,8 @@ func (i *Info) buildFmtErr() {
 }
 
 func (i *Info) safeCallErrorHandler() {
-	if i.ErrorHandler != nil {
-		*i.Err = i.ErrorHandler(i.werr)
+	if i.ErrorFn != nil {
+		*i.Err = i.ErrorFn(i.werr)
 	}
 }
 
@@ -172,8 +182,8 @@ func (i *Info) defaultNilHandler() {
 }
 
 func (i *Info) safeCallNilHandler() {
-	if i.NilHandler != nil {
-		*i.Err = i.NilHandler(i.werr)
+	if i.NilFn != nil {
+		*i.Err = i.NilFn(i.werr)
 	}
 }
 
@@ -221,8 +231,10 @@ func WorkToDo(r any, err *error) bool {
 	return (err != nil && *err != nil) || r != nil
 }
 
-func NoerrCallToDo(a ...any) (yes bool) {
-	//var yes bool
+// NoerrCallToDo returns if we have the _exception case_, aka, func (noerr bool)
+// where these handlers are called even normally only error handlers are called,
+// i.e. those which have error to handle.
+func NoerrCallToDo(a []any) (yes bool) {
 	if len(a) != 0 {
 		_, yes = a[0].(CheckHandler)
 	}
@@ -249,7 +261,7 @@ func Process(info *Info) {
 
 // PreProcess is currently used for err2 API like err2.Handle and .Catch.
 //   - replaces the Process
-func PreProcess(errPtr *error, info *Info, a ...any) error {
+func PreProcess(errPtr *error, info *Info, a []any) error {
 	// Bug in Go?
 	// start to use local error ptr only for optimization reasons.
 	// We get 3x faster defer handlers without unsing ptr to original err
@@ -265,29 +277,13 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 	const lvl = -1
 
 	if len(a) > 0 {
-		subProcess(info, a...)
+		subProcess(info, a)
 	} else {
-		fnName := "Handle" // default
-		if info.CallerName != "" {
-			fnName = info.CallerName
-		}
-		funcName, _, _, ok := debug.FuncName(debug.StackInfo{
-			PackageName: "",
-			FuncName:    fnName,
-			Level:       lvl,
-		})
-		if ok {
-			setFmter := fmtstore.Formatter()
-			if setFmter != nil {
-				info.Format = setFmter.Format(funcName)
-			} else {
-				info.Format = str.Decamel(funcName)
-			}
-		}
+		buildFormatStr(info, lvl)
 	}
-	defCatchCallMode := info.PanicHandler == nil && info.CallerName == "Catch"
+	defCatchCallMode := info.PanicFn == nil && info.CallerName == "Catch"
 	if defCatchCallMode {
-		info.PanicHandler = PanicNoop
+		info.PanicFn = PanicNoop
 	}
 
 	Process(info)
@@ -307,45 +303,91 @@ func PreProcess(errPtr *error, info *Info, a ...any) error {
 	return err
 }
 
-// firstArgIsString not used any more.
-func _(a ...any) bool {
-	if len(a) > 0 {
-		_, isStr := a[0].(string)
-		return isStr
+func buildFormatStr(info *Info, lvl int) {
+	if fs, ok := doBuildFormatStr(info, lvl); ok {
+		info.Format = fs
 	}
-	return false
 }
 
-func subProcess(info *Info, a ...any) {
-	switch len(a) {
-	case 2: // currently we support only this order of 2 handlers in Catch
-		processArg(info, 0, a...)
-		if _, ok := a[1].(PanicHandler); ok {
-			processArg(info, 1, a...)
+func doBuildFormatStr(info *Info, lvl int) (fs string, ok bool) {
+	fnName := "Handle"
+	if info.CallerName != "" {
+		fnName = info.CallerName
+	}
+	funcName, _, _, ok := debug.FuncName(debug.StackInfo{
+		PackageName: "",
+		FuncName:    fnName,
+		Level:       lvl,
+	})
+	if ok {
+		setFmter := fmtstore.Formatter()
+		if setFmter != nil {
+			return setFmter.Format(funcName), true
 		}
-	default:
-		processArg(info, 0, a...)
+		return str.Decamel(funcName), true
+	}
+	return
+}
+
+func subProcess(info *Info, a []any) {
+	// not that switch cannot be 0: see call side
+	switch len(a) {
+	case 0:
+		msg := `---
+programming error: subProcess: case 0:
+---`
+		fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
+	case 1:
+		processArg(info, 0, a)
+	default: // case 2, 3, ...
+		processArg(info, 0, a)
+		if _, ok := a[1].(PanicFn); ok {
+			processArg(info, 1, a)
+		} else if _, ok := a[1].(ErrorFn); ok {
+			// check second ^ and then change the rest by combining them to
+			// one that we set to proper places: ErrorFn and NilFn
+			errorFns, dis := ToErrorFns(a)
+			autoOn := !dis
+			hfn := Pipeline(errorFns)
+			info.ErrorFn = hfn
+			info.NilFn = hfn
+
+			if fs, ok := doBuildFormatStr(info, -1); autoOn && ok {
+				//println("fmt:", fs)
+				info.Format = fs
+				info.needErrorAnnotation = true
+			}
+		}
 	}
 }
 
-func processArg(info *Info, i int, a ...any) {
+func isAutoAnnotationFn(errorFns []ErrorFn) bool {
+	for _, f := range errorFns {
+		if f == nil {
+			return false
+		}
+	}
+	return true
+}
+
+func processArg(info *Info, i int, a []any) {
 	switch first := a[i].(type) {
 	case string:
 		info.Format = first
 		info.Args = a[i+1:]
-	case ErrorHandler: // err2.Catch uses this
-		info.ErrorHandler = first
-		info.NilHandler = first
-	case PanicHandler: // err2.Catch uses this
-		info.PanicHandler = first
+	case ErrorFn: // err2.Catch uses this
+		info.ErrorFn = first
+		info.NilFn = first
+	case PanicFn: // err2.Catch uses this
+		info.PanicFn = first
 	case CheckHandler:
 		info.CheckHandler = first
 	case nil:
-		info.NilHandler = NilNoop
+		info.NilFn = NilNoop
 	default:
 		// we don't panic here because we can already be in recovery, but lets
 		// try to show an RED error message at least.
-		const msg = `err2 fatal error:  
+		const msg = `err2 fatal error:
 ---
 unsupported handler function type: err2.Handle/Catch:
 see 'err2/scripts/README.md' and run auto-migration scripts for your repo
@@ -385,4 +427,38 @@ func LogOutput(lvl int, s string) (err error) {
 	}
 	fmt.Fprintln(w, s)
 	return nil
+}
+
+// Pipeline is a helper to call several error handlers in a sequence.
+//
+//	defer err2.Handle(&err, err2.Pipeline(err2.Log, MapToHTTPErr))
+func Pipeline(f []ErrorFn) ErrorFn {
+	return func(err error) error {
+		for _, handler := range f {
+			err = handler(err)
+		}
+		return err
+	}
+}
+
+func ToErrorFns(handlerFns []any) (hs []ErrorFn, dis bool) {
+	count := len(handlerFns)
+	hs = make([]ErrorFn, 0, count)
+	for _, a := range handlerFns {
+		autoAnnotationDisabling := a == nil
+		if !autoAnnotationDisabling {
+			if fn, ok := a.(ErrorFn); ok {
+				hs = append(hs, fn)
+			} else {
+				msg := `---
+assertion violation: your handlers should be 'func(error) error' type
+---`
+				fmt.Fprintln(os.Stderr, color.Red()+msg+color.Reset())
+				return nil, true
+			}
+		} else {
+			dis = autoAnnotationDisabling
+		}
+	}
+	return hs, dis
 }

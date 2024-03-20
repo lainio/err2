@@ -3,7 +3,7 @@
 // favorite editor and start to play with the main.go file. The comments on it
 // guide you.
 //
-// We have only a few examples built over the CopyFile and callRecur functions,
+// We have only a few examples built over the [CopyFile] and [CallRecur] functions,
 // but with them you can try all the important APIs from err2, try, and assert.
 // Just follow the comments and try suggested things :-)
 package main
@@ -90,7 +90,7 @@ func OrgCopyFile(src, dst string) (err error) {
 	return nil
 }
 
-func callRecur(d int) (err error) {
+func CallRecur(d int) (err error) {
 	defer err2.Handle(&err)
 
 	return doRecur(d)
@@ -111,13 +111,6 @@ func doRecur(d int) (err error) {
 func doPlayMain() {
 	// Keep here that you can play without changing imports
 	assert.That(true)
-
-	// If asserts are treated as panics instead of errors, you get the stack trace.
-	// you can try that by taking the next line out of the comment:
-	assert.SetDefault(assert.Development)
-
-	// same thing but one line assert msg
-	//assert.SetDefault(assert.Production)
 
 	// To see how automatic stack tracing works.
 	//err2.SetErrorTracer(os.Stderr)
@@ -143,7 +136,7 @@ func doPlayMain() {
 	doDoMain()
 	//try.To(doMain())
 
-	println("______===")
+	println("___ happy ending ===")
 }
 
 func doDoMain() {
@@ -151,23 +144,31 @@ func doDoMain() {
 }
 
 func doMain() (err error) {
+	// Example of Handle/Catch API where we can have multiple handlers.
+	// Note that this is a silly sample where logging is done trice and noops
+	// are used without a purpose. All of this is that you get an idea how you
+	// could use the error handlers and chain them together.
+
+	//defer err2.Handle(&err, err2.Noop, err2.Log, err2.Log)
+	//defer err2.Handle(&err, nil, err2.Noop, err2.Log)
+	//defer err2.Handle(&err, nil, err2.Log)
 	defer err2.Handle(&err)
 
 	// You can select any one of the try.To(CopyFile lines to play with and see
 	// how err2 works. Especially interesting is automatic stack tracing.
 	//
 	// source file exists, but the destination is not in high probability
-	try.To(CopyFile("main.go", "/notfound/path/file.bak"))
+	//try.To(OrgCopyFile("main.go", "/notfound/path/file.bak"))
 
 	// Both source and destination don't exist
-	//try.To(CopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
+	//try.To(OrgCopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
 
 	// 2nd argument is empty
-	//try.To(CopyFile("main.go", ""))
+	try.To(OrgCopyFile("main.go", ""))
 
 	// Next fn demonstrates how error and panic traces work, comment out all
 	// above CopyFile calls to play with:
-	try.To(callRecur(1))
+	try.To(CallRecur(1))
 
 	println("=== you cannot see this ===")
 	return nil

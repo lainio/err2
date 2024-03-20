@@ -2,6 +2,12 @@
 
 ### Version history
 
+##### 0.9.52
+- `err2.Stderr` helpers for `Catch/Handle` to direct auto-logging + snippets
+- `assert` package `Shorter` `Longer` helpers for automatic messages
+- `asserter` package remove deprecated slow reflection based funcs
+- cleanup and refactoring for sample apps
+
 ##### 0.9.51
 - `flag` package support to set `err2` and `assert` package configuration
 - `err2.Catch` default mode is to log error
@@ -17,7 +23,7 @@
   handlers
 
 ##### 0.9.40
-- Significant performance boost for: `defer err2.Handle/Catch()` 
+- Significant performance boost for: `defer err2.Handle/Catch()`
   - **3x faster happy path than the previous version, which is now equal to
     simplest `defer` function in the `err`-returning function** . (Please see
     the `defer` benchmarks in the `err2_test.go` and run `make bench_reca`)
@@ -67,7 +73,7 @@
   especially performance
 
 ##### 0.9.0
-- **Clean and simple API** 
+- **Clean and simple API**
 - Removing deprecated functions:
     - Only `err2.Handle` for error returning functions
     - Only `err2.Catch` for function that doesn't return error

@@ -10,8 +10,12 @@ func init() {
 }
 
 // SetFormatter sets the current formatter for the err2 package. The default
-// formatter.Decamel tries to process function names to human readable and the
-// idiomatic Go format, i.e. all lowercase, space delimiter, etc.
+// [formatter.Decamel] processes function names to human readable and the
+// idiomatic Go format, i.e. all lowercase, space delimiter, package names colon
+// separated. The example how a quite complex method name gives a proper error
+// message prefix:
+//
+//	"ssi.(*DIDAgent).CreateWallet" -> "ssi: didagent create wallet"
 //
 // Following line sets a noop formatter where errors are taken as function names
 // are in the call stack.
@@ -24,8 +28,8 @@ func SetFormatter(f formatter.Interface) {
 	fmtstore.SetFormatter(f)
 }
 
-// Returns the current formatter. See more information from SetFormatter and
-// formatter package.
+// Returns the current formatter. See more information from [SetFormatter] and
+// [formatter] package.
 func Formatter() formatter.Interface {
 	return fmtstore.Formatter()
 }

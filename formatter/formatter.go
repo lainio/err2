@@ -24,18 +24,18 @@ type Formatter struct {
 	DoFmt
 }
 
-var (
-	// Decamel is preimplemented and default formatter to produce human
-	// readable error strings from function names.
-	//   func CopyFile(..)  -> "copy file: file not exists"
-	//                          ^-------^ -> generated from CopyFile
-	Decamel = &Formatter{DoFmt: str.Decamel}
+// Decamel is preimplemented and default formatter to produce human
+// readable error strings from function names.
+//
+//	func CopyFile(..)  -> "copy file: file not exists"
+//	                       ^-------^ -> generated from 'func CopyFile'
+var Decamel = &Formatter{DoFmt: str.Decamel}
 
-	// Noop is preimplemented formatter that does nothing to function name.
-	//   func CopyFile(..)  -> "CopyFile: file not exists"
-	//                          ^------^ -> function name as it is: CopyFile
-	Noop = &Formatter{DoFmt: func(i string) string { return i }}
-)
+// Noop is preimplemented formatter that does nothing to function name.
+//
+//	func CopyFile(..)  -> "CopyFile: file not exists"
+//	                       ^------^ -> function name as it is: CopyFile
+var Noop = &Formatter{DoFmt: func(i string) string { return i }}
 
 // Format just calls function set in the DoFmt field.
 func (f *Formatter) Format(input string) string {

@@ -159,7 +159,9 @@ func FprintStack(w io.Writer, si StackInfo) {
 // frames we should go back (Level), and other fields tell how to find the
 // actual line where calculation should be started.
 func FuncName(si StackInfo) (n string, ln int, frame int, ok bool) {
-	stackBuf := bytes.NewBuffer(debug.Stack())
+	stack := debug.Stack()
+	//println(string(stack))
+	stackBuf := bytes.NewBuffer(stack)
 	return funcName(stackBuf, si)
 }
 

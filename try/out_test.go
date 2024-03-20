@@ -26,7 +26,7 @@ func ExampleOut1_copyFile() {
 
 		// If you prefer immediate error handling for some reason.
 		_ = try.Out1(io.Copy(w, r)).
-			Handle(io.EOF, func(err error) error {
+			Handle(io.EOF, func(error) error {
 				fmt.Println("err == io.EOF")
 				return nil // by returning nil we can reset the error
 				// return err // fallthru to next check if err != nil
@@ -81,19 +81,16 @@ func ExampleResult1_Logf() {
 		return try.Out1(strconv.Atoi(s)).Logf("not number").Catch(100)
 	}
 	num1 := countSomething("1")
-	num2 := countSomething("WRONG")
+	num2 := countSomething("BAD")
 	fmt.Printf("results: %d, %d", num1, num2)
 	err2.SetLogTracer(nil)
 
-	// Output: not number: strconv.Atoi: parsing "WRONG": invalid syntax
+	// Output: not number: strconv.Atoi: parsing "BAD": invalid syntax
 	// results: 1, 100
 }
 
 func TestResult2_Logf(t *testing.T) {
 	t.Parallel()
-	// Set log tracing to stdout that we can see it in Example output. In
-	// normal cases that would be a Logging stream or stderr.
-	err2.SetLogTracer(os.Stdout)
 
 	convTwoStr := func(s1, s2 string) (_ int, _ int, err error) {
 		defer err2.Handle(&err, nil)
@@ -101,11 +98,10 @@ func TestResult2_Logf(t *testing.T) {
 		return try.To1(strconv.Atoi(s1)), try.To1(strconv.Atoi(s2)), nil
 	}
 	countSomething := func(s1, s2 string) (int, int) {
-		v1, v2 := try.Out2(convTwoStr(s1, s2)).Logf("wrong number").Catch(1, 2)
+		v1, v2 := try.Out2(convTwoStr(s1, s2)).Logf("bad number").Catch(1, 2)
 		return v1 + v2, v2
 	}
-	num1, num2 := countSomething("1", "err")
-	fmt.Printf("results: %d, %d\n", num1, num2)
+	num1, num2 := countSomething("1", "bad")
 	test.RequireEqual(t, num2, 2)
 	test.RequireEqual(t, num1, 3)
 }
@@ -136,7 +132,7 @@ func ExampleResult1_Handle() {
 	callRead := func(in io.Reader, b []byte) (eof bool, n int) {
 		// we should use try.To1, but this is sample of try.Out.Handle
 		n = try.Out1(in.Read(b)).
-			Handle(io.EOF, func(err error) error {
+			Handle(io.EOF, func(error) error {
 				eof = true
 				return nil
 			}).       // our errors.Is == true, handler to get eof status

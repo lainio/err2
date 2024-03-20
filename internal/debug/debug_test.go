@@ -335,6 +335,7 @@ func TestFuncName(t *testing.T) {
 		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil, nil}}, "err2.ReturnW", 214, 6},
 		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil, nil}}, "err2.ReturnW", 214, 6},
 		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil, nil}}, "ssi.(*DIDAgent).AssertWallet", 146, 8},
+		{"pipeline", args{inputPipelineStack, StackInfo{"", "Handle", -1, nil, nil}}, "CopyFile", 29, 9},
 	}
 	for _, ttv := range tests {
 		tt := ttv
@@ -570,5 +571,36 @@ main.test0()
 	/home/god/go/src/github.com/lainio/ic/main.go:18 +0x64
 main.main()
 	/home/god/go/src/github.com/lainio/ic/main.go:74 +0x1d0
+`
+
+	inputPipelineStack = `goroutine 1 [running]:
+runtime/debug.Stack()
+        /usr/local/go/src/runtime/debug/stack.go:24 +0x64
+github.com/lainio/err2/internal/debug.FuncName({{0x0, 0x0}, {0x12f04a, 0x6}, 0xffffffffffffffff, 0x0, {0x0, 0x0, 0x0}})
+        /home/parallels/go/src/github.com/lainio/err2/internal/debug/debug.go:162 +0x44
+github.com/lainio/err2/internal/handler.doBuildFormatStr(0x4000121b58?, 0x9bc5c?)
+        /home/parallels/go/src/github.com/lainio/err2/internal/handler/handler.go:317 +0x7c
+github.com/lainio/err2/internal/handler.buildFormatStr(...)
+        /home/parallels/go/src/github.com/lainio/err2/internal/handler/handler.go:305
+github.com/lainio/err2/internal/handler.PreProcess(0x4000121d88, 0x4000121ba0, {0x0, 0x0, 0x0})
+        /home/parallels/go/src/github.com/lainio/err2/internal/handler/handler.go:280 +0xf8
+github.com/lainio/err2.Handle(0x4000121d88, {0x0, 0x0, 0x0})
+        /home/parallels/go/src/github.com/lainio/err2/err2.go:103 +0xd4
+panic({0x115f20?, 0x4000036660?})
+        /usr/local/go/src/runtime/panic.go:770 +0x124
+github.com/lainio/err2/try.To(...)
+        /home/parallels/go/src/github.com/lainio/err2/try/try.go:82
+github.com/lainio/err2/try.To1[...](...)
+        /home/parallels/go/src/github.com/lainio/err2/try/try.go:97
+main.CopyFile({0x12f23c?, 0x1609c?}, {0x132cef, 0x17})
+        /home/parallels/go/src/github.com/lainio/err2/samples/main-play.go:29 +0x254
+main.doMain()
+        /home/parallels/go/src/github.com/lainio/err2/samples/main-play.go:159 +0x68
+main.doDoMain(...)
+        /home/parallels/go/src/github.com/lainio/err2/samples/main-play.go:143
+main.doPlayMain()
+        /home/parallels/go/src/github.com/lainio/err2/samples/main-play.go:136 +0x68
+main.main()
+        /home/parallels/go/src/github.com/lainio/err2/samples/main.go:38 +0x15c
 `
 )
