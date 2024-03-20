@@ -14,7 +14,7 @@ import (
 // You can use it like this:
 //
 //	func main() {
-//		defer err2.Catch(err2.Stderr)
+//	     defer err2.Catch(err2.Stderr)
 func Stderr(err error) error {
 	if err == nil {
 		return nil
@@ -30,7 +30,7 @@ func Stderr(err error) error {
 // You can use it like this:
 //
 //	func main() {
-//		defer err2.Catch(err2.Stdout)
+//	     defer err2.Catch(err2.Stdout)
 func Stdout(err error) error {
 	if err == nil {
 		return nil
@@ -57,7 +57,7 @@ func Reset(error) error { return nil }
 // and don't want to use [SetLogTracer] and keep it to write to your logs.
 //
 //	defer err2.Catch(err2.Err(func(err error) {
-//		fmt.Println("ERROR:", err)
+//	     fmt.Println("ERROR:", err)
 //	}))
 //
 // Note that since Err helper we have other helpers like [Stdout] that allows
@@ -89,7 +89,7 @@ func Log(err error) error {
 // You can use it like this:
 //
 //	func myFunction() {
-//		defer err2.Handle(err2.Noop, err2.StderrNoReset)
+//	     defer err2.Handle(err2.Noop, err2.StderrNoReset)
 func StderrNoReset(err error) error {
 	if err == nil {
 		return nil
@@ -104,7 +104,7 @@ func StderrNoReset(err error) error {
 // You can use it like this:
 //
 //	func main() {
-//		defer err2.Catch(err2.StdoutNoReset)
+//	     defer err2.Catch(err2.StdoutNoReset)
 func StdoutNoReset(err error) error {
 	if err == nil {
 		return nil

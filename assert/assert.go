@@ -159,17 +159,17 @@ const (
 // be called at the beginning of every test. There is two way of doing it:
 //
 //	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) { // Shorter way, litle magic
-//			defer assert.PushTester(t)() // <- IMPORTANT! NOTE! (t)()
-//			...
-//			assert.That(something, "test won't work")
-//		})
-//		t.Run(tt.name, func(t *testing.T) { // Longer, explicit way, 2 lines
-//			assert.PushTester(t) // <- IMPORTANT!
-//			defer assert.PopTester()
-//			...
-//			assert.That(something, "test won't work")
-//		})
+//	     t.Run(tt.name, func(t *testing.T) { // Shorter way, litle magic
+//	          defer assert.PushTester(t)() // <- IMPORTANT! NOTE! (t)()
+//	          ...
+//	          assert.That(something, "test won't work")
+//	     })
+//	     t.Run(tt.name, func(t *testing.T) { // Longer, explicit way, 2 lines
+//	          assert.PushTester(t) // <- IMPORTANT!
+//	          defer assert.PopTester()
+//	          ...
+//	          assert.That(something, "test won't work")
+//	     })
 //	}
 //
 // Because PushTester returns [PopTester] it allows us to merge these two calls
@@ -184,8 +184,8 @@ const (
 //	defer assert.PushTester(t)() // does the cleanup
 //	...
 //	go func() {
-//	   assert.PushTester(t) // left cleanup out! Leave it for the test, see ^
-//	   ...
+//	     assert.PushTester(t) // left cleanup out! Leave it for the test, see ^
+//	     ...
 //
 // Note that the second argument, if given, changes the default asserter for
 // whole package. The argument is mainly for temporary development use and isn't
@@ -209,12 +209,12 @@ func PushTester(t testing.TB, a ...defInd) function {
 // You have two ways to call [PopTester]. With defer right after [PushTester]:
 //
 //	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			assert.PushTester(t) // <- important!
-//			defer assert.PopTester() // <- for good girls and not so bad boys
-//			...
-//			assert.That(something, "test won't work")
-//		})
+//	     t.Run(tt.name, func(t *testing.T) {
+//	          assert.PushTester(t) // <- important!
+//	          defer assert.PopTester() // <- for good girls and not so bad boys
+//	          ...
+//	          assert.That(something, "test won't work")
+//	     })
 //	}
 //
 // If you want, you can combine [PushTester] and PopTester to one-liner:
@@ -853,7 +853,7 @@ func current() asserter {
 // and set asserter only one in TestMain, or in init.
 //
 //	func TestMain(m *testing.M) {
-//		SetDefault(assert.TestFull)
+//	     SetDefault(assert.TestFull)
 func SetDefault(i defInd) (old defInd) {
 	// pkg lvl lock to allow only one pkg client call this at one of the time
 	// together with the indexing, i.e we don't need to switch asserter

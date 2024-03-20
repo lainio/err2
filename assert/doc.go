@@ -22,7 +22,7 @@ assertion line is written more from a runtime detection point of view, it catche
 all assert violations in the unit tests as well:
 
 	func (c Chain) Invite(...) {
-		assert.That(c.isLeaf(invitersKey), "only leaf can invite")
+	     assert.That(c.isLeaf(invitersKey), "only leaf can invite")
 
 If some assertion violation occurs in the deep call stack, they are still
 reported as a test failure. See the above code blocks. If assertion failure

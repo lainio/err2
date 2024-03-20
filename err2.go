@@ -91,9 +91,9 @@ var Stdnull = &nullDev{}
 // a panic handler. See the second handler below:
 //
 //	defer err2.Handle(&err,
-//	   err2.Err( func(error) { os.Remove(dst) }), // err2.Err() keeps it short
-//	   // below handler catches panics, but you can re-throw if needed
-//	   func(p any) {}
+//	     err2.Err( func(error) { os.Remove(dst) }), // err2.Err() keeps it short
+//	     // below handler catches panics, but you can re-throw if needed
+//	     func(p any) {}
 //	)
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
