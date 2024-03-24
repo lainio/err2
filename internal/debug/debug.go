@@ -105,7 +105,9 @@ func (si StackInfo) canPrint(s string, anchorLine, i int) (ok bool) {
 // runtime.Stack and processed to proper format to be shown in test output by
 // starting from stackLevel.
 func PrintStackForTest(w io.Writer, stackLevel int) {
-	stackBuf := bytes.NewBuffer(debug.Stack())
+	stack := debug.Stack()
+	//println(string(stack))
+	stackBuf := bytes.NewBuffer(stack)
 	printStackForTest(stackBuf, w, stackLevel)
 }
 
