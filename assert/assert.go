@@ -228,29 +228,32 @@ func PopTester() {
 		return
 	}
 
+	var stackLvl = 5     // amount of functions before we're here
+	var framesToSkip = 3 // how many fn calls there is before FuncName call
+
 	var msg string
 	switch t := r.(type) {
 	case string:
 		msg = t
 	case runtime.Error:
+		stackLvl--     // move stack trace cursor
+		framesToSkip++ // see fatal(), skip 1 more when runtime panics
 		msg = t.Error()
 	case error:
 		msg = t.Error()
 	default:
-		msg = "test panic catch"
+		msg = fmt.Sprintf("panic: %v", t)
 	}
 
 	// First, print the call stack. Note that we aren't support full error
 	// tracing with unit test logging. However, using it has proved the top
 	// level error stack as more enough. Even so that we could consider using
 	// it for normal error stack traces if it would be possible.
-	const stackLvl = 6 // amount of functions before we're here
 	debug.PrintStackForTest(os.Stderr, stackLvl)
 
 	// Now that call stack errors are printed, if any. Let's print the actual
 	// line that caused the error, i.e., was throwing the error. Note that we
 	// are here in the 'catch-function'.
-	const framesToSkip = 4 // how many fn calls there is before FuncName call
 	fatal("assertion catching: "+msg, framesToSkip)
 }
 
