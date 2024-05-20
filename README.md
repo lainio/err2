@@ -244,7 +244,7 @@ notExist := try.Is(r2.err, plugin.ErrNotExist)
 3. Finally, it calls `try.To` for the non nil error, and we already know what then
    happens: nearest `err2.Handle` gets it first.
 
-These `try.Is` functions help cleanup mesh idiomatic Go, i.e. mixing happy and
+These `try.Is` functions help cleanup mess idiomatic Go, i.e. mixing happy and
 error path, leads to.
 
 For more information see the examples in the documentation of both functions.
