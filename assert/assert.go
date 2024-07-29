@@ -367,6 +367,30 @@ func SNil[S ~[]T, T any](s S, a ...any) {
 	}
 }
 
+// CNil asserts that the channel is nil. If it is not it panics/errors
+// (default Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+func CNil[C ~chan T, T any](c C, a ...any) {
+	if c != nil {
+		defMsg := assertionMsg + ": channel shouldn't be nil"
+		current().reportAssertionFault(defMsg, a)
+	}
+}
+
+// MNil asserts that the map is nil. If it is not it panics/errors (default
+// Asserter) the auto-generated (args appended) message.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+func MNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
+	if m != nil {
+		defMsg := assertionMsg + ": map should be nil"
+		current().reportAssertionFault(defMsg, a)
+	}
+}
+
 // SNotNil asserts that the slice is not nil. If it is it panics/errors (default
 // Asserter) the auto-generated (args appended) message.
 //
@@ -735,6 +759,24 @@ func Empty(obj string, a ...any) {
 	}
 }
 
+// SEmpty asserts that the slice is empty. If it is NOT, it panics/errors
+// (according the current Asserter) with the auto-generated message. You can
+// append the generated got-want message by using optional message arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
+// Note! This is reasonably fast but not as fast as [That] because of lacking
+// inlining for the current implementation of Go's type parametric functions.
+func SEmpty[S ~[]T, T any](obj S, a ...any) {
+	l := len(obj)
+
+	if l != 0 {
+		defMsg := assertionMsg + ": slice should be empty"
+		current().reportAssertionFault(defMsg, a)
+	}
+}
+
 // SNotEmpty asserts that the slice is not empty. If it is, it panics/errors
 // (according the current Asserter) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
@@ -749,6 +791,26 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 
 	if l == 0 {
 		defMsg := assertionMsg + ": slice shouldn't be empty"
+		current().reportAssertionFault(defMsg, a)
+	}
+}
+
+// MEmpty asserts that the map is empty. If it is NOT, it panics/errors
+// (according the current Asserter) with the auto-generated message. You can
+// append the generated got-want message by using optional message arguments.
+// You can append the generated got-want message by using optional message
+// arguments.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+//
+// Note! This is reasonably fast but not as fast as [That] because of lacking
+// inlining for the current implementation of Go's type parametric functions.
+func MEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
+	l := len(obj)
+
+	if l != 0 {
+		defMsg := assertionMsg + ": map should be empty"
 		current().reportAssertionFault(defMsg, a)
 	}
 }
