@@ -191,6 +191,36 @@ func ExampleSShorter() {
 	// Output: sample: assert_test.go:186: ExampleSShorter.func1(): assertion violation: got '1', should be shorter than '0': optional message (test_str)
 }
 
+func ExampleLess() {
+	sample := func(b int8) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.Equal(b, 1) // ok
+		assert.Less(b, 2)  // ok
+		assert.Less(b, 1)  // not ok
+		return err
+	}
+	var b int8 = 1
+	err := sample(b)
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:200: ExampleLess.func1(): assertion violation: got '1', want >= '1'
+}
+
+func ExampleGreater() {
+	sample := func(b int8) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.Equal(b, 2)   // ok
+		assert.Greater(b, 1) // ok
+		assert.Greater(b, 2) // not ok
+		return err
+	}
+	var b int8 = 2
+	err := sample(b)
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:215: ExampleGreater.func1(): assertion violation: got '2', want <= '2'
+}
+
 func assertZero(i int) {
 	assert.Zero(i)
 }

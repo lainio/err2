@@ -865,6 +865,32 @@ func Error(err error, a ...any) {
 	}
 }
 
+// Greater asserts that the value is greater than want. If it is not it panics
+// and builds a violation message. Thanks to inlining, the performance penalty
+// is equal to a single 'if-statement' that is almost nothing.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+func Greater[T Number](val, want T, a ...any) {
+	if val <= want {
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want <= '%v'", val, want)
+		current().reportAssertionFault(defMsg, a)
+	}
+}
+
+// Less asserts that the value is less than want. If it is not it panics and
+// builds a violation message. Thanks to inlining, the performance penalty is
+// equal to a single 'if-statement' that is almost nothing.
+//
+// Note that when [Plain] asserter is used ([SetDefault]), optional arguments
+// are used to override the auto-generated assert violation message.
+func Less[T Number](val, want T, a ...any) {
+	if val >= want {
+		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want >= '%v'", val, want)
+		current().reportAssertionFault(defMsg, a)
+	}
+}
+
 // Zero asserts that the value is 0. If it is not it panics and builds a
 // violation message. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
