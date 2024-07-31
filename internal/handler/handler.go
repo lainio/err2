@@ -60,6 +60,12 @@ type Info struct {
 }
 
 const (
+	// Wrapping is best default because we can be in the situation where we
+	// have received meaningful sentinel error which we need to wrap, even
+	// automatically. If we'd have used %v (no wrapping) we would lose the
+	// sentinel error info and we couldn't use annotation for this error.
+	// However, we should think about this more later from performance point of
+	// view.
 	wrapError = ": %w"
 )
 
