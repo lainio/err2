@@ -497,10 +497,10 @@ We have used the `err2` and `assert` packages in several projects. The results
 have been so far very encouraging:
 
 - If you forget to use handler, but you use checks from the package, you will
-get panics (and optionally stack traces) if an error occurs. That is much better
-than getting unrelated panic somewhere else in the code later. There have also
-been cases when code reports error correctly because the 'upper' handler catches
-it.
+get panics on errors (and optimized stack traces that can be suppressed). That
+is much better than getting unrelated panic somewhere else in the code later.
+There have also been cases when code reports error correctly because the 'upper'
+handler catches it.
 
 - Because the use of `err2.Handle` is so easy, error messages are much better
 and informative. When using `err2.Handle`'s automatic annotation your error
