@@ -1,9 +1,16 @@
+// package test should be renamed to require. Maybe we could try 1st gopls and
+// then idea? TODO:
 package test
 
 import (
 	"fmt"
 	"testing"
 )
+
+// TODO: why we have 2 Require functions? If we'll use type assertion for the
+// first argument and decide that if it's a string and maybe search % marks we
+// could have only one function? Or we count v count: if 1 no format, if >1
+// format.
 
 // Require fails the test if the condition is false.
 func Require(tb testing.TB, condition bool, v ...interface{}) {
