@@ -11,6 +11,7 @@ PKGS := $(PKG_ERR2) $(PKG_ASSERT) $(PKG_TRY) $(PKG_DEBUG) $(PKG_HANDLER) $(PKG_S
 
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
+MAX_LINE ?= 80
 GO ?= go
 TEST_ARGS ?= -benchmem
 # -"gcflags '-N -l'" both optimization & inlining disabled
@@ -105,6 +106,12 @@ bench_x:
 
 vet: | test
 	$(GO) vet $(PKGS)
+
+fmt:
+	@golines -t 5 -w -m $(MAX_LINE) --ignore-generated .
+
+dry-fmt:
+	@golines -t 5 --dry-run -m $(MAX_LINE) --ignore-generated .
 
 gofmt:
 	@echo Checking code is gofmted
