@@ -64,7 +64,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 		defer func() {
 			test.Require(t, handlerCalled)
 		}()
-		// This is the handler we are thesting!
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(noerr bool) {
 			handlerCalled = noerr
 		})
@@ -86,7 +86,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 			return err
 		})
 
-		// This is the handler we are thesting!
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(noerr bool) {
 			handlerCalled = noerr
 		})
@@ -101,16 +101,18 @@ func TestHandle_noerrHandler(t *testing.T) {
 		defer func() {
 			test.Require(t, !handlerCalled)
 		}()
+
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(err error) error {
+			test.Require(t, !handlerCalled)
 			handlerCalled = false
 			test.Require(t, true, "error should be handled")
 			return err
 		})
 
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, noerr)
-			handlerCalled = noerr
+		// This is the handler we are testing! AND it's not called in error.
+		defer err2.Handle(&err, func(bool) {
+			test.Require(t, false, "when error this is not called")
 		})
 
 		try.To1(throw())
@@ -122,13 +124,15 @@ func TestHandle_noerrHandler(t *testing.T) {
 			err               error
 			finalAnnotatedErr = fmt.Errorf("err: %v", errStringInThrow)
 			handlerCalled     bool
+			callCount         int
 		)
 		defer func() {
 			test.Require(t, !handlerCalled)
+			test.Require(t, callCount == 2)
 			test.RequireEqual(t, err.Error(), finalAnnotatedErr.Error())
 		}()
 
-		// This is the handler we are thesting!
+		// This is the handler we are testing! AND it's not called in error.
 		defer err2.Handle(&err, func(noerr bool) {
 			test.Require(t, false, "if error occurs/reset, this cannot happen")
 			handlerCalled = noerr
@@ -138,11 +142,15 @@ func TestHandle_noerrHandler(t *testing.T) {
 		// and it's not nil
 		defer err2.Handle(&err, func(er error) error {
 			test.Require(t, er != nil, "er val: ", er, err)
+			test.Require(t, callCount == 1, "this is called in sencond")
+			callCount++
 			return er
 		})
 
 		defer err2.Handle(&err, func(err error) error {
 			// this should not be called, so lets try to fuckup things...
+			test.Require(t, callCount == 0, "this is called in first")
+			callCount++
 			handlerCalled = false
 			test.Require(t, err != nil)
 			return finalAnnotatedErr
@@ -158,7 +166,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 			test.Require(t, handlerCalled)
 		}()
 
-		// This is the handler we are thesting!
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(noerr bool) {
 			test.Require(t, noerr)
 			handlerCalled = noerr
@@ -181,8 +189,9 @@ func TestHandle_noerrHandler(t *testing.T) {
 			test.Require(t, handlerCalled)
 		}()
 
-		// This is the handler we are thesting!
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(noerr bool) {
+			test.Require(t, true)
 			test.Require(t, noerr)
 			handlerCalled = noerr
 		})
@@ -214,7 +223,7 @@ func TestHandle_noerrHandler(t *testing.T) {
 			test.Require(t, errHandlerCalled)
 		}()
 
-		// This is the handler we are thesting!
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(noerr bool) {
 			test.Require(t, true) // we are here, for debugging
 			test.Require(t, noerr)
@@ -261,8 +270,9 @@ func TestHandle_noerrHandler(t *testing.T) {
 			return err
 		})
 
-		// This is the handler we are thesting!
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(noerr bool) {
+			test.Require(t, true, "this must be called")
 			test.Require(t, noerr)
 			handlerCalled = noerr
 		})
