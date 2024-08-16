@@ -3,8 +3,8 @@ package str_test
 import (
 	"testing"
 
+	"github.com/lainio/err2/internal/require"
 	"github.com/lainio/err2/internal/str"
-	"github.com/lainio/err2/internal/test"
 )
 
 const (
@@ -43,7 +43,7 @@ func TestCamel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := str.DecamelRegexp(tt.args.s)
-			test.RequireEqual(t, got, tt.want)
+			require.Equal(t, got, tt.want)
 		})
 	}
 }
@@ -76,7 +76,7 @@ func TestDecamel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := str.Decamel(tt.args.s)
-			test.RequireEqual(t, got, tt.want)
+			require.Equal(t, got, tt.want)
 		})
 	}
 }
