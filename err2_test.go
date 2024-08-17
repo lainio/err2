@@ -1,6 +1,7 @@
 package err2_test
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,18 +15,17 @@ import (
 
 const errStringInThrow = "this is an ERROR"
 
-func throw() (string, error) {
-	return "", fmt.Errorf(errStringInThrow)
-}
+var (
+	errToTest = errors.New(errStringInThrow)
+)
+
+func throw() (string, error)   { return "", errToTest }
+func noThrow() (string, error) { return "test", nil }
+func noErr() error             { return nil }
 
 func twoStrNoThrow() (string, string, error)        { return "test", "test", nil }
 func intStrNoThrow() (int, string, error)           { return 1, "test", nil }
 func boolIntStrNoThrow() (bool, int, string, error) { return true, 1, "test", nil }
-func noThrow() (string, error)                      { return "test", nil }
-
-func noErr() error {
-	return nil
-}
 
 func TestTry_noError(t *testing.T) {
 	t.Parallel()
