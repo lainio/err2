@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2/internal/handler"
-	"github.com/lainio/err2/internal/test"
+	"github.com/lainio/err2/internal/require"
 	"github.com/lainio/err2/internal/x"
 )
 
@@ -121,11 +121,11 @@ func TestProcess(t *testing.T) {
 			if handler.WorkToDo(tt.args.Any, tt.args.Err) {
 				handler.Process(&tt.args.Info)
 
-				test.RequireEqual(t, panicHandlerCalled, tt.want.panicCalled)
-				test.RequireEqual(t, errorHandlerCalled, tt.want.errorCalled)
-				test.RequireEqual(t, nilHandlerCalled, tt.want.nilCalled)
+				require.Equal(t, panicHandlerCalled, tt.want.panicCalled)
+				require.Equal(t, errorHandlerCalled, tt.want.errorCalled)
+				require.Equal(t, nilHandlerCalled, tt.want.nilCalled)
 
-				test.RequireEqual(t, myErrVal.Error(), tt.want.errStr)
+				require.Equal(t, myErrVal.Error(), tt.want.errStr)
 			}
 			resetCalled()
 		})
@@ -152,13 +152,13 @@ func TestPreProcess_debug(t *testing.T) {
 	// and that's what error stack tracing is all about
 	Handle()
 
-	test.Require(t, !panicHandlerCalled)
-	test.Require(t, !errorHandlerCalled)
-	test.Require(t, !nilHandlerCalled)
+	require.ThatNot(t, panicHandlerCalled)
+	require.ThatNot(t, errorHandlerCalled)
+	require.ThatNot(t, nilHandlerCalled)
 
 	// See the name of this test function. Decamel it + error
 	const want = "testing: t runner: error"
-	test.RequireEqual(t, myErrVal.Error(), want)
+	require.Equal(t, myErrVal.Error(), want)
 
 	resetCalled()
 }
@@ -243,11 +243,11 @@ func TestPreProcess(t *testing.T) {
 
 				err = handler.PreProcess(&err, &tt.args.Info, tt.args.a)
 
-				test.RequireEqual(t, panicHandlerCalled, tt.want.panicCalled)
-				test.RequireEqual(t, errorHandlerCalled, tt.want.errorCalled)
-				test.RequireEqual(t, nilHandlerCalled, tt.want.nilCalled)
+				require.Equal(t, panicHandlerCalled, tt.want.panicCalled)
+				require.Equal(t, errorHandlerCalled, tt.want.errorCalled)
+				require.Equal(t, nilHandlerCalled, tt.want.nilCalled)
 
-				test.RequireEqual(t, err.Error(), tt.want.errStr)
+				require.Equal(t, err.Error(), tt.want.errStr)
 			}
 			resetCalled()
 		})
