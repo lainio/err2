@@ -268,7 +268,7 @@ func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
 }
 
 func wrapStr() string {
-	return ": %w"
+	return handler.WrapError
 }
 
 func (o *Result) logf(lvl int, a []any) *Result {
