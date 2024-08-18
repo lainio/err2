@@ -9,9 +9,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 
 	"github.com/lainio/err2"
 	"github.com/lainio/err2/assert"
@@ -90,22 +92,23 @@ func OrgCopyFile(src, dst string) (err error) {
 	return nil
 }
 
-func CallRecur(d int) (err error) {
+func CallRecur(d int) (ret int, err error) {
 	defer err2.Handle(&err)
 
 	return doRecur(d)
 }
 
-func doRecur(d int) (err error) {
+func doRecur(d int) (ret int, err error) {
 	d--
 	if d >= 0 {
 		// Keep below to show how asserts work
-		assert.NotZero(d)
+		//assert.NotZero(d)
 		// Comment out the above assert statement to simulate runtime-error
-		fmt.Println(10 / d)
-		return doRecur(d)
+		ret = 10 / d
+		fmt.Println(ret)
+		//return doRecur(d)
 	}
-	return fmt.Errorf("root error")
+	return ret, fmt.Errorf("root error")
 }
 
 func doPlayMain() {
@@ -136,7 +139,7 @@ func doPlayMain() {
 	doDoMain()
 	//try.To(doMain())
 
-	println("___ happy ending ===")
+	fmt.Println("___ happy ending ===")
 }
 
 func doDoMain() {
@@ -163,13 +166,20 @@ func doMain() (err error) {
 	// Both source and destination don't exist
 	//try.To(OrgCopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
 
-	// 2nd argument is empty
-	try.To(OrgCopyFile("main.go", ""))
+	// to play with real args:
+	try.To(CopyFile(flag.Arg(0), flag.Arg(1)))
 
-	// Next fn demonstrates how error and panic traces work, comment out all
-	// above CopyFile calls to play with:
-	try.To(CallRecur(1))
+	if len(flag.Args()) > 0 {
+		// Next fn demonstrates how error and panic traces work, comment out all
+		// above CopyFile calls to play with:
+		argument := try.To1(strconv.Atoi(flag.Arg(0)))
+		ret := try.To1(CallRecur(argument))
+		fmt.Println("ret val:", ret)
+	} else {
+		// 2nd argument is empty to assert
+		try.To(OrgCopyFile("main.go", ""))
+	}
 
-	println("=== you cannot see this ===")
+	fmt.Println("=== you cannot see this ===")
 	return nil
 }
