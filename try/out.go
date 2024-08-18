@@ -43,6 +43,9 @@ type (
 //
 //	error sending response: UDP not listening
 func (o *Result) Logf(a ...any) *Result {
+	if o.Err == nil {
+		return o
+	}
 	return o.logf(logfFrameLvl, a)
 }
 
@@ -57,6 +60,9 @@ func (o *Result) Logf(a ...any) *Result {
 //
 //	error sending response: UDP not listening
 func (o *Result1[T]) Logf(a ...any) *Result1[T] {
+	if o.Err == nil {
+		return o
+	}
 	o.Result.logf(logfFrameLvl, a)
 	return o
 }
@@ -72,6 +78,9 @@ func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 //
 //	error sending response: UDP not listening
 func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
+	if o.Err == nil {
+		return o
+	}
 	o.Result.logf(logfFrameLvl, a)
 	return o
 }
@@ -277,9 +286,6 @@ func wrapStr() string {
 }
 
 func (o *Result) logf(lvl int, a []any) *Result {
-	if o.Err == nil {
-		return o
-	}
 	s := o.Err.Error()
 	if len(a) != 0 {
 		f, isFormat := a[0].(string)
