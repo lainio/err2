@@ -97,6 +97,11 @@ func (o *Result) Handle(a ...any) *Result {
 	if o.Err == nil {
 		return o
 	}
+	o.transportErr(a)
+	return o
+}
+
+func (o *Result) transportErr(a []any) {
 	noArguments := len(a) == 0
 	if noArguments {
 		panic(o.Err)
@@ -117,11 +122,11 @@ func (o *Result) Handle(a ...any) *Result {
 			}
 		}
 	}
-	// someone of the handler functions might reset the error value.
+
+	// some of the handler functions might reset the error value.
 	if o.Err != nil {
 		panic(o.Err)
 	}
-	return o
 }
 
 // Handle allows you to add an error handler to [try.Out] handler chain. Handle

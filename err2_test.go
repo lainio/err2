@@ -844,6 +844,12 @@ func BenchmarkTryVarCall(b *testing.B) {
 	}
 }
 
+func BenchmarkTryOut_ErrVarNoRetval(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		try.Out(noErr()).Handle()
+	}
+}
+
 func BenchmarkTryOut_ErrVar(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, err := noThrow()
@@ -860,6 +866,14 @@ func BenchmarkTryOut_LogStringGenerics(b *testing.B) {
 func BenchmarkTryOut_StringGenerics(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = try.Out1(noThrow()).Handle().Val1
+	}
+}
+
+func BenchmarkTryOut_StringGenericsNoVal(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.Out1(noThrow()).Logf("test").Val1
+		r := try.Out1(noThrow()).Handle()
+		_ = r.Val1
 	}
 }
 
