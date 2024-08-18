@@ -65,6 +65,9 @@ tinline_handler:
 bench:
 	$(GO) test $(TEST_ARGS) -bench=. $(PKGS)
 
+bench_T:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkT_.*' $(PKG_ERR2)
+
 bench_goid:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkGoid' $(PKG_ASSERT)
 
