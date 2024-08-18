@@ -247,6 +247,8 @@ func IsNotEnabled(err error) bool {
 //	try.T(f.Close)("annotations")
 func T(err error) func(fs string, a ...any) {
 	return func(fs string, a ...any) {
+		// NOTE if block cannot be refactored 'because it wouldn't inline
+		// then this whole function!
 		if err != nil {
 			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
 			panic(er)
@@ -259,6 +261,8 @@ func T(err error) func(fs string, a ...any) {
 //	f := try.T1(os.Open("filename")("cannot open cfg file")
 func T1[T any](v T, err error) func(fs string, a ...any) T {
 	return func(fs string, a ...any) T {
+		// NOTE if block cannot be refactored 'because it wouldn't inline
+		// then this whole function!
 		if err != nil {
 			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
 			panic(er)
@@ -270,6 +274,8 @@ func T1[T any](v T, err error) func(fs string, a ...any) T {
 // T2 is similar as [To2] but it let's you to annotate a possible error at place.
 func T2[T, U any](v T, u U, err error) func(fs string, a ...any) (T, U) {
 	return func(fs string, a ...any) (T, U) {
+		// NOTE if block cannot be refactored 'because it wouldn't inline
+		// then this whole function!
 		if err != nil {
 			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
 			panic(er)
@@ -281,6 +287,8 @@ func T2[T, U any](v T, u U, err error) func(fs string, a ...any) (T, U) {
 // T3 is similar as [To3] but it let's you to annotate a possible error at place.
 func T3[T, U, V any](v1 T, v2 U, v3 V, err error) func(fs string, a ...any) (T, U, V) {
 	return func(fs string, a ...any) (T, U, V) {
+		// NOTE if block cannot be refactored 'because it wouldn't inline
+		// then this whole function!
 		if err != nil {
 			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
 			panic(er)
