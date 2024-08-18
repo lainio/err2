@@ -65,9 +65,11 @@ package try
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/lainio/err2"
+	"github.com/lainio/err2/internal/handler"
 )
 
 // To is a helper function to call functions which returns an error value and
@@ -238,4 +240,51 @@ func IsNotRecoverable(err error) bool {
 // [err2.ErrNotEnabled].
 func IsNotEnabled(err error) bool {
 	return Is(err, err2.ErrNotEnabled)
+}
+
+// T is similar as [To] but it let's you to annotate a possible error at place.
+//
+//	try.T(f.Close)("annotations")
+func T(err error) func(fs string, a ...any) {
+	return func(fs string, a ...any) {
+		if err != nil {
+			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
+			panic(er)
+		}
+	}
+}
+
+// T1 is similar as [To1] but it let's you to annotate a possible error at place.
+//
+//	f := try.T1(os.Open("filename")("cannot open cfg file")
+func T1[T any](v T, err error) func(fs string, a ...any) T {
+	return func(fs string, a ...any) T {
+		if err != nil {
+			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
+			panic(er)
+		}
+		return v
+	}
+}
+
+// T2 is similar as [To2] but it let's you to annotate a possible error at place.
+func T2[T, U any](v T, u U, err error) func(fs string, a ...any) (T, U) {
+	return func(fs string, a ...any) (T, U) {
+		if err != nil {
+			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
+			panic(er)
+		}
+		return v, u
+	}
+}
+
+// T3 is similar as [To3] but it let's you to annotate a possible error at place.
+func T3[T, U, V any](v1 T, v2 U, v3 V, err error) func(fs string, a ...any) (T, U, V) {
+	return func(fs string, a ...any) (T, U, V) {
+		if err != nil {
+			er := fmt.Errorf(fs+handler.WrapError, append(a[1:], err)...)
+			panic(er)
+		}
+		return v1, v2, v3
+	}
 }

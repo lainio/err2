@@ -33,6 +33,11 @@ func TestTry_noError(t *testing.T) {
 	try.To2(twoStrNoThrow())
 	try.To2(intStrNoThrow())
 	try.To3(boolIntStrNoThrow())
+
+	_ = try.T1(noThrow())("test")
+	_, _ = try.T2(twoStrNoThrow())("test %d", 1)
+	_, _ = try.T2(intStrNoThrow())("test %d", 2)
+	_, _, _ = try.T3(boolIntStrNoThrow())("test %d",3)
 }
 
 func TestDefault_Error(t *testing.T) {
@@ -814,22 +819,9 @@ func BenchmarkTry_ErrVar(b *testing.B) {
 	}
 }
 
-func BenchmarkTryOut_ErrVar(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		_, err := noThrow()
-		try.Out(err).Handle()
-	}
-}
-
 func BenchmarkTry_StringGenerics(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = try.To1(noThrow())
-	}
-}
-
-func BenchmarkTryOut_StringGenerics(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		_ = try.Out1(noThrow()).Handle()
 	}
 }
 
@@ -849,6 +841,38 @@ func BenchmarkTryVarCall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		err := noErr()
 		try.To(err)
+	}
+}
+
+func BenchmarkTryOut_ErrVar(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_, err := noThrow()
+		try.Out(err).Handle()
+	}
+}
+
+func BenchmarkTryOut_LogStringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.Out1(noThrow()).Logf("test").Val1
+	}
+}
+
+func BenchmarkTryOut_StringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.Out1(noThrow()).Handle().Val1
+	}
+}
+
+func BenchmarkT_ErrVar(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_, err := noThrow()
+		try.T(err)("test")
+	}
+}
+
+func BenchmarkT_StringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.T1(noThrow())("test")
 	}
 }
 
