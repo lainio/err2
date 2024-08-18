@@ -37,7 +37,7 @@ func TestTry_noError(t *testing.T) {
 	_ = try.T1(noThrow())("test")
 	_, _ = try.T2(twoStrNoThrow())("test %d", 1)
 	_, _ = try.T2(intStrNoThrow())("test %d", 2)
-	_, _, _ = try.T3(boolIntStrNoThrow())("test %d",3)
+	try.T3(boolIntStrNoThrow())("test %d", 3) // linter says: _, _, _,
 }
 
 func TestDefault_Error(t *testing.T) {
