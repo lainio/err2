@@ -62,11 +62,17 @@ inline_handler:
 tinline_handler:
 	$(GO) test -c -gcflags=-m=2 $(PKG_HANDLER) 2>&1 | ag 'inlin'
 
+inline_assert:
+	$(GO) test -c -gcflags=-m=2 $(PKG_ASSERT) 2>&1 | ag 'inlin' 
+
 bench:
 	$(GO) test $(TEST_ARGS) -bench=. $(PKGS)
 
 bench_T:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkT_.*' $(PKG_ERR2)
+
+bench_zero:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkZero.*' $(PKG_ASSERT)
 
 bench_goid:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkGoid' $(PKG_ASSERT)
