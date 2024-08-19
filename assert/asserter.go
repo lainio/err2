@@ -86,6 +86,36 @@ func (asserter asserter) reportAssertionFault(defaultMsg string, a []any) {
 	}
 }
 
+func (asserter asserter) newReportAssertionFault(defaultMsg string, a []any) {
+	if asserter.hasStackTrace() {
+		if asserter.isUnitTesting() {
+			// Note. that the assert in the test function is printed in
+			// reportPanic below
+			const stackLvl = 4 // amount of functions before we're here
+			debug.PrintStackForTest(os.Stderr, stackLvl)
+		} else {
+			// amount of functions before we're here, which is different
+			// between runtime (this) and test-run (above)
+			const stackLvl = 1
+			debug.PrintStack(stackLvl)
+		}
+	}
+	if asserter.hasCallerInfo() {
+		defaultMsg = asserter.newCallerInfo(defaultMsg)
+	}
+	if len(a) > 0 {
+		if format, ok := a[0].(string); ok {
+			allowDefMsg := !asserter.isErrorOnly() && defaultMsg != ""
+			f := x.Whom(allowDefMsg, defaultMsg+conCatErrStr+format, format)
+			asserter.reportPanic(fmt.Sprintf(f, a[1:]...))
+		} else {
+			asserter.reportPanic(fmt.Sprintln(append([]any{defaultMsg}, a...)))
+		}
+	} else {
+		asserter.reportPanic(defaultMsg)
+	}
+}
+
 func (asserter asserter) reportPanic(s string) {
 	if asserter.isUnitTesting() && asserter.hasCallerInfo() {
 		fmt.Fprintln(os.Stderr, officialTestOutputPrefix+s)
@@ -133,6 +163,24 @@ func (asserter asserter) callerInfo(msg string) (info string) {
 	}
 
 	const framesToSkip = 3 // how many fn calls there is before FuncName call
+	includePath := asserter.isUnitTesting()
+	funcName, filename, line, ok := str.FuncName(framesToSkip, includePath)
+	if ok {
+		info = fmt.Sprintf(ourFmtStr,
+			filename, line,
+			funcName, msg)
+	}
+
+	return
+}
+
+func (asserter asserter) newCallerInfo(msg string) (info string) {
+	ourFmtStr := shortFmtStr
+	if asserter.hasFormattedCallerInfo() {
+		ourFmtStr = longFmtStr
+	}
+
+	const framesToSkip = 4 // how many fn calls there is before FuncName call
 	includePath := asserter.isUnitTesting()
 	funcName, filename, line, ok := str.FuncName(framesToSkip, includePath)
 	if ok {

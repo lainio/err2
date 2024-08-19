@@ -899,9 +899,13 @@ func Less[T Number](val, want T, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Zero[T Number](val T, a ...any) {
 	if val != 0 {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
-		current().reportAssertionFault(defMsg, a)
+		doZero(val, a)
 	}
+}
+
+func doZero[T Number](val T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
+	current().newReportAssertionFault(defMsg, a)
 }
 
 // NotZero asserts that the value != 0. If it is not it panics and builds a
