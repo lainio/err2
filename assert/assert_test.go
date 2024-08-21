@@ -106,7 +106,7 @@ func ExampleSNotEmpty() {
 	}
 	err := sample([]byte{})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:104: ExampleSNotEmpty.func1(): assertion violation: slice shouldn't be empty
+	// Output: sample: assert_test.go:104: ExampleSNotEmpty.func1(): assertion violation: slice should not be empty
 }
 
 func ExampleNotEmpty() {
@@ -234,6 +234,55 @@ func ExampleNotZero() {
 	// Output: sample: assert_test.go:228: ExampleNotZero.func1(): assertion violation: got '0', want (!= 0)
 }
 
+func BenchmarkMKeyExists(b *testing.B) {
+	bs := map[int]int{0:0, 1:1}
+	for n := 0; n < b.N; n++ {
+		assert.MKeyExists(bs, 1)
+	}
+}
+
+func BenchmarkMNotEmpty(b *testing.B) {
+	bs := map[int]int{0:0, 1:1}
+	for n := 0; n < b.N; n++ {
+		assert.MNotEmpty(bs)
+	}
+}
+
+func BenchmarkMEmpty(b *testing.B) {
+	bs := map[int]int{}
+	for n := 0; n < b.N; n++ {
+		assert.MEmpty(bs)
+	}
+}
+
+func BenchmarkNotEmpty(b *testing.B) {
+	bs := "not empty"
+	for n := 0; n < b.N; n++ {
+		assert.NotEmpty(bs)
+	}
+}
+
+func BenchmarkEmpty(b *testing.B) {
+	bs := ""
+	for n := 0; n < b.N; n++ {
+		assert.Empty(bs)
+	}
+}
+
+func BenchmarkSEmpty(b *testing.B) {
+	bs := []int{}
+	for n := 0; n < b.N; n++ {
+		assert.SEmpty(bs)
+	}
+}
+
+func BenchmarkSNotEmpty(b *testing.B) {
+	bs := []byte{0}
+	for n := 0; n < b.N; n++ {
+		assert.SNotEmpty(bs)
+	}
+}
+
 func BenchmarkSNotNil(b *testing.B) {
 	bs := []byte{0}
 	for n := 0; n < b.N; n++ {
@@ -255,10 +304,15 @@ func BenchmarkThat(b *testing.B) {
 	}
 }
 
-func BenchmarkNotEmpty(b *testing.B) {
-	str := "test"
+func BenchmarkGreater(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		assert.NotEmpty(str)
+		assert.Greater(1, 0)
+	}
+}
+
+func BenchmarkLess(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		assert.Less(0, 1)
 	}
 }
 
@@ -271,6 +325,12 @@ func BenchmarkZero(b *testing.B) {
 func BenchmarkNotZero(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		assert.NotZero(n + 1)
+	}
+}
+
+func BenchmarkError(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		assert.Error(err2.ErrNotAccess)
 	}
 }
 
@@ -303,6 +363,15 @@ func BenchmarkSLen(b *testing.B) {
 	d := []byte{1, 2}
 	for n := 0; n < b.N; n++ {
 		assert.SLen(d, 2)
+	}
+}
+
+func BenchmarkCLen(b *testing.B) {
+	d := make(chan byte, 2)
+	d <- byte(1)
+	d <- byte(1)
+	for n := 0; n < b.N; n++ {
+		assert.CLen(d, 2)
 	}
 }
 

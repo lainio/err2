@@ -266,7 +266,7 @@ func tester() (t testing.TB) {
 // Note that when [Plain] asserter is used ([SetDefault]), optional arguments
 // are used to override the auto-generated assert violation message.
 func NotImplemented(a ...any) {
-	current().reportAssertionFault("not implemented", a)
+	current().reportAssertionFault(0, "not implemented", a)
 }
 
 // ThatNot asserts that the term is NOT true. If is it panics with the given
@@ -278,7 +278,7 @@ func NotImplemented(a ...any) {
 func ThatNot(term bool, a ...any) {
 	if term {
 		defMsg := assertionMsg
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -291,7 +291,7 @@ func ThatNot(term bool, a ...any) {
 func That(term bool, a ...any) {
 	if !term {
 		defMsg := assertionMsg
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -303,7 +303,7 @@ func That(term bool, a ...any) {
 func NotNil[P ~*T, T any](p P, a ...any) {
 	if p == nil {
 		defMsg := assertionMsg + ": pointer shouldn't be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -315,7 +315,7 @@ func NotNil[P ~*T, T any](p P, a ...any) {
 func Nil[T any](p *T, a ...any) {
 	if p != nil {
 		defMsg := assertionMsg + ": pointer should be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -333,7 +333,7 @@ func Nil[T any](p *T, a ...any) {
 func INil(i any, a ...any) {
 	if i != nil {
 		defMsg := assertionMsg + ": interface should be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -351,7 +351,7 @@ func INil(i any, a ...any) {
 func INotNil(i any, a ...any) {
 	if i == nil {
 		defMsg := assertionMsg + ": interface shouldn't be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -363,7 +363,7 @@ func INotNil(i any, a ...any) {
 func SNil[S ~[]T, T any](s S, a ...any) {
 	if s != nil {
 		defMsg := assertionMsg + ": slice should be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -375,7 +375,7 @@ func SNil[S ~[]T, T any](s S, a ...any) {
 func CNil[C ~chan T, T any](c C, a ...any) {
 	if c != nil {
 		defMsg := assertionMsg + ": channel shouldn't be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -387,7 +387,7 @@ func CNil[C ~chan T, T any](c C, a ...any) {
 func MNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 	if m != nil {
 		defMsg := assertionMsg + ": map should be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -399,7 +399,7 @@ func MNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 func SNotNil[S ~[]T, T any](s S, a ...any) {
 	if s == nil {
 		defMsg := assertionMsg + ": slice shouldn't be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -411,7 +411,7 @@ func SNotNil[S ~[]T, T any](s S, a ...any) {
 func CNotNil[C ~chan T, T any](c C, a ...any) {
 	if c == nil {
 		defMsg := assertionMsg + ": channel shouldn't be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -423,7 +423,7 @@ func CNotNil[C ~chan T, T any](c C, a ...any) {
 func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 	if m == nil {
 		defMsg := assertionMsg + ": map shouldn't be nil"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -456,12 +456,12 @@ func Equal[T comparable](val, want T, a ...any) {
 
 func doShouldBeEqual[T comparable](val, want T, a []any) {
 	defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
-	current().newReportAssertionFault(defMsg, a)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 func doShouldNotBeEqual[T comparable](val, want T, a []any) {
 	defMsg := fmt.Sprintf(assertionMsg+": got '%v' want (!= '%v')", val, want)
-	current().reportAssertionFault(defMsg, a)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // DeepEqual asserts that the (whatever) values are equal. If not it
@@ -474,7 +474,7 @@ func doShouldNotBeEqual[T comparable](val, want T, a []any) {
 func DeepEqual(val, want any, a ...any) {
 	if !reflect.DeepEqual(val, want) {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -493,7 +493,7 @@ func DeepEqual(val, want any, a ...any) {
 func NotDeepEqual(val, want any, a ...any) {
 	if reflect.DeepEqual(val, want) {
 		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= '%v')", val, want)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -530,7 +530,7 @@ func Longer(s string, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -549,7 +549,7 @@ func Shorter(str string, length int, a ...any) {
 
 	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -586,7 +586,7 @@ func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -605,7 +605,7 @@ func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 
 	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -642,7 +642,7 @@ func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -661,7 +661,7 @@ func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 
 	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -680,7 +680,7 @@ func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 
 	if l != length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -699,7 +699,7 @@ func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 
 	if l <= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -718,7 +718,7 @@ func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
 
 	if l >= length {
 		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -732,10 +732,14 @@ func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U)
 	val, ok = obj[key]
 
 	if !ok {
-		defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
-		current().reportAssertionFault(defMsg, a)
+		doMKeyExists(key, a)
 	}
 	return val
+}
+
+func doMKeyExists[T comparable](key T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // NotEmpty asserts that the string is not empty. If it is, it panics/errors
@@ -747,7 +751,7 @@ func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U)
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
 		defMsg := assertionMsg + ": string shouldn't be empty"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -760,7 +764,7 @@ func NotEmpty(obj string, a ...any) {
 func Empty(obj string, a ...any) {
 	if obj != "" {
 		defMsg := assertionMsg + ": string should be empty"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -777,8 +781,7 @@ func SEmpty[S ~[]T, T any](obj S, a ...any) {
 	l := len(obj)
 
 	if l != 0 {
-		defMsg := assertionMsg + ": slice should be empty"
-		current().reportAssertionFault(defMsg, a)
+		doEmptyNamed("", "slice", a)
 	}
 }
 
@@ -795,8 +798,7 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
-		defMsg := assertionMsg + ": slice shouldn't be empty"
-		current().reportAssertionFault(defMsg, a)
+		doEmptyNamed("not", "slice", a)
 	}
 }
 
@@ -815,8 +817,7 @@ func MEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	l := len(obj)
 
 	if l != 0 {
-		defMsg := assertionMsg + ": map should be empty"
-		current().reportAssertionFault(defMsg, a)
+		doEmptyNamed("", "map", a)
 	}
 }
 
@@ -835,9 +836,14 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
-		defMsg := assertionMsg + ": map shouldn't be empty"
-		current().reportAssertionFault(defMsg, a)
+		doEmptyNamed("not", "map", a)
 	}
+}
+
+func doEmptyNamed(not, name string, a []any) {
+	not = x.Whom(not == "not", " not ", "")
+	defMsg := assertionMsg + ": " + name + " should" + not + "be empty"
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // NoError asserts that the error is nil. If is not it panics with the given
@@ -853,7 +859,7 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 func NoError(err error, a ...any) {
 	if err != nil {
 		defMsg := assertionMsg + conCatErrStr + err.Error()
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -866,7 +872,7 @@ func NoError(err error, a ...any) {
 func Error(err error, a ...any) {
 	if err == nil {
 		defMsg := "Error:" + assertionMsg + ": missing error"
-		current().reportAssertionFault(defMsg, a)
+		current().reportAssertionFault(0, defMsg, a)
 	}
 }
 
@@ -878,9 +884,13 @@ func Error(err error, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Greater[T Number](val, want T, a ...any) {
 	if val <= want {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want <= '%v'", val, want)
-		current().reportAssertionFault(defMsg, a)
+		doGreater(val, want, a)
 	}
+}
+
+func doGreater[T Number](val, want T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want <= '%v'", val, want)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // Less asserts that the value is less than want. If it is not it panics and
@@ -891,9 +901,13 @@ func Greater[T Number](val, want T, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Less[T Number](val, want T, a ...any) {
 	if val >= want {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want >= '%v'", val, want)
-		current().reportAssertionFault(defMsg, a)
+		doLess(val, want, a)
 	}
+}
+
+func doLess[T Number](val, want T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want >= '%v'", val, want)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // Zero asserts that the value is 0. If it is not it panics and builds a
@@ -910,7 +924,7 @@ func Zero[T Number](val T, a ...any) {
 
 func doZero[T Number](val T, a []any) {
 	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
-	current().newReportAssertionFault(defMsg, a)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // NotZero asserts that the value != 0. If it is not it panics and builds a
@@ -927,7 +941,7 @@ func NotZero[T Number](val T, a ...any) {
 
 func doNotZero[T Number](val T, a []any) {
 	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= 0)", val)
-	current().newReportAssertionFault(defMsg, a)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // current returns a current default asserter used for package-level

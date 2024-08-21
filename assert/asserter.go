@@ -56,52 +56,28 @@ const officialTestOutputPrefix = "    "
 // and correct assert messages, and we can add information to it if we want to.
 // If asserter is Plain (isErrorOnly()) user wants to override automatic assert
 // messgages with our given, usually simple message.
-func (asserter asserter) reportAssertionFault(defaultMsg string, a []any) {
+func (asserter asserter) reportAssertionFault(
+	extraInd int,
+	defaultMsg string,
+	a []any,
+) {
 	if asserter.hasStackTrace() {
 		if asserter.isUnitTesting() {
 			// Note. that the assert in the test function is printed in
 			// reportPanic below
-			const stackLvl = 5 // amount of functions before we're here
+			const StackLvl = 5 // amount of functions before we're here
+			stackLvl := StackLvl + extraInd
 			debug.PrintStackForTest(os.Stderr, stackLvl)
 		} else {
 			// amount of functions before we're here, which is different
 			// between runtime (this) and test-run (above)
-			const stackLvl = 2
+			const StackLvl = 2
+			stackLvl := StackLvl + extraInd
 			debug.PrintStack(stackLvl)
 		}
 	}
 	if asserter.hasCallerInfo() {
-		defaultMsg = asserter.callerInfo(defaultMsg)
-	}
-	if len(a) > 0 {
-		if format, ok := a[0].(string); ok {
-			allowDefMsg := !asserter.isErrorOnly() && defaultMsg != ""
-			f := x.Whom(allowDefMsg, defaultMsg+conCatErrStr+format, format)
-			asserter.reportPanic(fmt.Sprintf(f, a[1:]...))
-		} else {
-			asserter.reportPanic(fmt.Sprintln(append([]any{defaultMsg}, a...)))
-		}
-	} else {
-		asserter.reportPanic(defaultMsg)
-	}
-}
-
-func (asserter asserter) newReportAssertionFault(defaultMsg string, a []any) {
-	if asserter.hasStackTrace() {
-		if asserter.isUnitTesting() {
-			// Note. that the assert in the test function is printed in
-			// reportPanic below
-			const stackLvl = 4 // amount of functions before we're here
-			debug.PrintStackForTest(os.Stderr, stackLvl)
-		} else {
-			// amount of functions before we're here, which is different
-			// between runtime (this) and test-run (above)
-			const stackLvl = 1
-			debug.PrintStack(stackLvl)
-		}
-	}
-	if asserter.hasCallerInfo() {
-		defaultMsg = asserter.newCallerInfo(defaultMsg)
+		defaultMsg = asserter.callerInfo(defaultMsg, extraInd)
 	}
 	if len(a) > 0 {
 		if format, ok := a[0].(string); ok {
@@ -156,31 +132,14 @@ Assertion Fault at:
 
 var shortFmtStr = `%s:%d: %s(): %s`
 
-func (asserter asserter) callerInfo(msg string) (info string) {
+func (asserter asserter) callerInfo(msg string, extraInd int) (info string) {
 	ourFmtStr := shortFmtStr
 	if asserter.hasFormattedCallerInfo() {
 		ourFmtStr = longFmtStr
 	}
 
-	const framesToSkip = 3 // how many fn calls there is before FuncName call
-	includePath := asserter.isUnitTesting()
-	funcName, filename, line, ok := str.FuncName(framesToSkip, includePath)
-	if ok {
-		info = fmt.Sprintf(ourFmtStr,
-			filename, line,
-			funcName, msg)
-	}
-
-	return
-}
-
-func (asserter asserter) newCallerInfo(msg string) (info string) {
-	ourFmtStr := shortFmtStr
-	if asserter.hasFormattedCallerInfo() {
-		ourFmtStr = longFmtStr
-	}
-
-	const framesToSkip = 4 // how many fn calls there is before FuncName call
+	const ToSkip = 3
+	framesToSkip := ToSkip + extraInd // how many fn calls there is before FuncName call
 	includePath := asserter.isUnitTesting()
 	funcName, filename, line, ok := str.FuncName(framesToSkip, includePath)
 	if ok {
