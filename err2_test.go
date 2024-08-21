@@ -35,9 +35,9 @@ func TestTry_noError(t *testing.T) {
 	try.To3(boolIntStrNoThrow())
 
 	_ = try.T1(noThrow())("test")
-	_, _ = try.T2(twoStrNoThrow())("test %d", 1)
-	_, _ = try.T2(intStrNoThrow())("test %d", 2)
-	try.T3(boolIntStrNoThrow())("test %d", 3) // linter says: _, _, _,
+	_, _ = try.T2(twoStrNoThrow())("test")
+	_, _ = try.T2(intStrNoThrow())("test")
+	try.T3(boolIntStrNoThrow())("test") // linter says: _, _, _,
 }
 
 func TestDefault_Error(t *testing.T) {
@@ -887,6 +887,12 @@ func BenchmarkT_ErrVar(b *testing.B) {
 func BenchmarkT_StringGenerics(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = try.T1(noThrow())("test")
+	}
+}
+
+func BenchmarkT_IntStringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_, _ = try.T2(intStrNoThrow())("test")
 	}
 }
 
