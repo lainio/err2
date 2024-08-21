@@ -221,20 +221,17 @@ func ExampleGreater() {
 	// Output: sample: assert_test.go:215: ExampleGreater.func1(): assertion violation: got '2', want <= '2'
 }
 
-func assertZero(i int) {
-	assert.Zero(i)
-}
+func ExampleNotZero() {
+	sample := func(b int8) (err error) {
+		defer err2.Handle(&err, "sample")
 
-func assertZeroGen(i int) {
-	assert.Equal(i, 0)
-}
-
-func assertMLen(b map[byte]byte, l int) {
-	assert.MLen(b, l)
-}
-
-func assertEqualInt2(b int) {
-	assert.Equal(b, 2)
+		assert.NotZero(b)
+		return err
+	}
+	var b int8
+	err := sample(b)
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:228: ExampleNotZero.func1(): assertion violation: got '0', want (!= 0)
 }
 
 func BenchmarkSNotNil(b *testing.B) {
@@ -267,13 +264,19 @@ func BenchmarkNotEmpty(b *testing.B) {
 
 func BenchmarkZero(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		assertZero(0)
+		assert.Zero(0)
+	}
+}
+
+func BenchmarkNotZero(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		assert.NotZero(n + 1)
 	}
 }
 
 func BenchmarkEqual(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		assertZeroGen(0)
+		assert.Equal(n, n)
 	}
 }
 
@@ -292,7 +295,7 @@ func BenchmarkAsserter_TrueIfVersion(b *testing.B) {
 func BenchmarkMLen(b *testing.B) {
 	d := map[byte]byte{1: 1, 2: 2}
 	for n := 0; n < b.N; n++ {
-		assertMLen(d, 2)
+		assert.MLen(d, 2)
 	}
 }
 
@@ -317,10 +320,17 @@ func BenchmarkSLen_thatVersion(b *testing.B) {
 	}
 }
 
+func BenchmarkNotEqualInt(b *testing.B) {
+	const d = 2
+	for n := 0; n < b.N; n++ {
+		assert.NotEqual(d, 3)
+	}
+}
+
 func BenchmarkEqualInt(b *testing.B) {
 	const d = 2
 	for n := 0; n < b.N; n++ {
-		assertEqualInt2(d)
+		assert.Equal(d, 2)
 	}
 }
 

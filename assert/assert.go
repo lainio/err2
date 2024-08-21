@@ -438,8 +438,7 @@ func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 // assert violation message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v' want (!= '%v')", val, want)
-		current().reportAssertionFault(defMsg, a)
+		doShouldNotBeEqual(val, want, a)
 	}
 }
 
@@ -451,9 +450,18 @@ func NotEqual[T comparable](val, want T, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Equal[T comparable](val, want T, a ...any) {
 	if want != val {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
-		current().reportAssertionFault(defMsg, a)
+		doShouldBeEqual(val, want, a)
 	}
+}
+
+func doShouldBeEqual[T comparable](val, want T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, val, want)
+	current().newReportAssertionFault(defMsg, a)
+}
+
+func doShouldNotBeEqual[T comparable](val, want T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": got '%v' want (!= '%v')", val, want)
+	current().reportAssertionFault(defMsg, a)
 }
 
 // DeepEqual asserts that the (whatever) values are equal. If not it
@@ -503,8 +511,7 @@ func Len(obj string, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		doShouldBeEqual(l, length, a)
 	}
 }
 
@@ -560,8 +567,7 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		doShouldBeEqual(l, length, a)
 	}
 }
 
@@ -617,8 +623,7 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		current().reportAssertionFault(defMsg, a)
+		doShouldBeEqual(l, length, a)
 	}
 }
 
@@ -916,9 +921,13 @@ func doZero[T Number](val T, a []any) {
 // are used to override the auto-generated assert violation message.
 func NotZero[T Number](val T, a ...any) {
 	if val == 0 {
-		defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= 0)", val)
-		current().reportAssertionFault(defMsg, a)
+		doNotZero(val, a)
 	}
+}
+
+func doNotZero[T Number](val T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (!= 0)", val)
+	current().newReportAssertionFault(defMsg, a)
 }
 
 // current returns a current default asserter used for package-level
