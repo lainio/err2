@@ -235,14 +235,14 @@ func ExampleNotZero() {
 }
 
 func BenchmarkMKeyExists(b *testing.B) {
-	bs := map[int]int{0:0, 1:1}
+	bs := map[int]int{0: 0, 1: 1}
 	for n := 0; n < b.N; n++ {
 		assert.MKeyExists(bs, 1)
 	}
 }
 
 func BenchmarkMNotEmpty(b *testing.B) {
-	bs := map[int]int{0:0, 1:1}
+	bs := map[int]int{0: 0, 1: 1}
 	for n := 0; n < b.N; n++ {
 		assert.MNotEmpty(bs)
 	}
