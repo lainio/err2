@@ -269,6 +269,20 @@ func BenchmarkEmpty(b *testing.B) {
 	}
 }
 
+func BenchmarkLonger(b *testing.B) {
+	bs := "tst"
+	for n := 0; n < b.N; n++ {
+		assert.Longer(bs, 2)
+	}
+}
+
+func BenchmarkShorter(b *testing.B) {
+	bs := "1"
+	for n := 0; n < b.N; n++ {
+		assert.Shorter(bs, 2)
+	}
+}
+
 func BenchmarkSEmpty(b *testing.B) {
 	bs := []int{}
 	for n := 0; n < b.N; n++ {
@@ -290,10 +304,66 @@ func BenchmarkSNotNil(b *testing.B) {
 	}
 }
 
+func BenchmarkMNotNil(b *testing.B) {
+	var bs = map[int]int{0: 0}
+	for n := 0; n < b.N; n++ {
+		assert.MNotNil(bs)
+	}
+}
+
+func BenchmarkCNotNil(b *testing.B) {
+	var bs = make(chan int)
+	for n := 0; n < b.N; n++ {
+		assert.CNotNil(bs)
+	}
+}
+
+func BenchmarkINotNil(b *testing.B) {
+	var bs any = err2.ErrNotAccess
+	for n := 0; n < b.N; n++ {
+		assert.INotNil(bs)
+	}
+}
+
+func BenchmarkINil(b *testing.B) {
+	var bs any
+	for n := 0; n < b.N; n++ {
+		assert.INil(bs)
+	}
+}
+
+func BenchmarkNil(b *testing.B) {
+	var bs *int
+	for n := 0; n < b.N; n++ {
+		assert.Nil(bs)
+	}
+}
+
 func BenchmarkNotNil(b *testing.B) {
 	bs := new(int)
 	for n := 0; n < b.N; n++ {
 		assert.NotNil(bs)
+	}
+}
+
+func BenchmarkSNil(b *testing.B) {
+	var bs []int
+	for n := 0; n < b.N; n++ {
+		assert.SNil(bs)
+	}
+}
+
+func BenchmarkMNil(b *testing.B) {
+	var bs map[int]int
+	for n := 0; n < b.N; n++ {
+		assert.MNil(bs)
+	}
+}
+
+func BenchmarkCNil(b *testing.B) {
+	var bs chan int
+	for n := 0; n < b.N; n++ {
+		assert.CNil(bs)
 	}
 }
 
@@ -359,6 +429,20 @@ func BenchmarkMLen(b *testing.B) {
 	}
 }
 
+func BenchmarkMShorter(b *testing.B) {
+	d := map[byte]byte{1: 1, 2: 2}
+	for n := 0; n < b.N; n++ {
+		assert.MShorter(d, 4)
+	}
+}
+
+func BenchmarkMLonger(b *testing.B) {
+	d := map[byte]byte{1: 1, 2: 2}
+	for n := 0; n < b.N; n++ {
+		assert.MLonger(d, 1)
+	}
+}
+
 func BenchmarkSLen(b *testing.B) {
 	d := []byte{1, 2}
 	for n := 0; n < b.N; n++ {
@@ -366,12 +450,44 @@ func BenchmarkSLen(b *testing.B) {
 	}
 }
 
+func BenchmarkSShorter(b *testing.B) {
+	d := []byte{1, 2}
+	for n := 0; n < b.N; n++ {
+		assert.SShorter(d, 3)
+	}
+}
+
+func BenchmarkSLonger(b *testing.B) {
+	d := []byte{1, 2}
+	for n := 0; n < b.N; n++ {
+		assert.SLonger(d, 1)
+	}
+}
+
 func BenchmarkCLen(b *testing.B) {
-	d := make(chan byte, 2)
-	d <- byte(1)
-	d <- byte(1)
+	d := make(chan int, 2)
+	d <- int(1)
+	d <- int(1)
 	for n := 0; n < b.N; n++ {
 		assert.CLen(d, 2)
+	}
+}
+
+func BenchmarkCShorter(b *testing.B) {
+	d := make(chan int, 2)
+	d <- int(1)
+	d <- int(1)
+	for n := 0; n < b.N; n++ {
+		assert.CShorter(d, 3)
+	}
+}
+
+func BenchmarkCLonger(b *testing.B) {
+	d := make(chan int, 2)
+	d <- int(1)
+	d <- int(1)
+	for n := 0; n < b.N; n++ {
+		assert.CLonger(d, 1)
 	}
 }
 

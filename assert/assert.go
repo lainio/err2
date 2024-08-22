@@ -529,9 +529,13 @@ func Longer(s string, length int, a ...any) {
 	l := len(s)
 
 	if l <= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doLonger(l, length, a)
 	}
+}
+
+func doLonger(l int, length int, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // Shorter asserts that the length of the string is shorter to the given. If not
@@ -548,9 +552,13 @@ func Shorter(str string, length int, a ...any) {
 	l := len(str)
 
 	if l >= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doShorter(l, length, a)
 	}
+}
+
+func doShorter(l int, length int, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // SLen asserts that the length of the slice is equal to the given. If not it
@@ -585,8 +593,7 @@ func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
 	if l <= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doLonger(l, length, a)
 	}
 }
 
@@ -604,8 +611,7 @@ func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 	l := len(obj)
 
 	if l >= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doShorter(l, length, a)
 	}
 }
 
@@ -641,8 +647,7 @@ func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
 	if l <= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doLonger(l, length, a)
 	}
 }
 
@@ -660,8 +665,7 @@ func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 	l := len(obj)
 
 	if l >= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doShorter(l, length, a)
 	}
 }
 
@@ -679,8 +683,7 @@ func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
 
 	if l != length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doShouldBeEqual(l, length, a)
 	}
 }
 
@@ -698,8 +701,7 @@ func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
 
 	if l <= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantLongerFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doLonger(l, length, a)
 	}
 }
 
@@ -717,8 +719,7 @@ func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
 	l := len(obj)
 
 	if l >= length {
-		defMsg := fmt.Sprintf(assertionMsg+gotWantShorterFmt, l, length)
-		current().reportAssertionFault(0, defMsg, a)
+		doShorter(l, length, a)
 	}
 }
 
@@ -737,7 +738,7 @@ func MKeyExists[M ~map[T]U, T comparable, U any](obj M, key T, a ...any) (val U)
 	return val
 }
 
-func doMKeyExists[T comparable](key T, a []any) {
+func doMKeyExists(key any, a []any) {
 	defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
 	current().reportAssertionFault(1, defMsg, a)
 }
