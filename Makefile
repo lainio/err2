@@ -71,6 +71,15 @@ bench:
 bench_T:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkT_.*' $(PKG_ERR2)
 
+bench_S:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkS.*' $(PKG_ASSERT)
+
+bench_M:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkM.*' $(PKG_ASSERT)
+
+bench_C:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkC.*' $(PKG_ASSERT)
+
 bench_zero:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkZero.*' $(PKG_ASSERT)
 
