@@ -126,9 +126,11 @@ vet: | test
 	$(GO) vet $(PKGS)
 
 fmt:
+	@echo "Pretty formatting with golines"
 	@golines -t 5 -w -m $(MAX_LINE) --ignore-generated .
 
 dry-fmt:
+	@echo "--dry-run: Pretty formatting with golines"
 	@golines -t 5 --dry-run -m $(MAX_LINE) --ignore-generated .
 
 gofmt:
