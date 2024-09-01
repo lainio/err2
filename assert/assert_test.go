@@ -82,7 +82,7 @@ func ExampleEqual() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:80: ExampleEqual.func1(): assertion violation: got '2', want '3'
+	// Output: sample: assert_test.go:80: ExampleEqual.func1(): assert equal: got '2', want '3'
 }
 
 func ExampleSLen() {
@@ -94,7 +94,7 @@ func ExampleSLen() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:92: ExampleSLen.func1(): assertion violation: got '2', want '3'
+	// Output: sample: assert_test.go:92: ExampleSLen.func1(): assert len: got '2', want '3'
 }
 
 func ExampleSNotEmpty() {
