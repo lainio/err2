@@ -57,7 +57,11 @@ func Benchmark_CopyBufferOur(b *testing.B) {
 
 // myCopyBuffer is copy/paste from Go std lib to remove noice and measure only a
 // loop
-func myCopyBuffer(dst io.Writer, src io.Reader, buf []byte) (written int64, err error) {
+func myCopyBuffer(
+	dst io.Writer,
+	src io.Reader,
+	buf []byte,
+) (written int64, err error) {
 	for {
 		nr, er := src.Read(buf)
 		if nr > 0 {

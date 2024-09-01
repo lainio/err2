@@ -38,7 +38,9 @@ var (
 	PackageRegexp = regexp.MustCompile(`lainio/err2[a-zA-Z0-9_/.\[\]]*\(`)
 
 	// we want to check that this is not our package
-	packageRegexp = regexp.MustCompile(`^github\.com/lainio/err2[a-zA-Z0-9_/.\[\]]*\(`)
+	packageRegexp = regexp.MustCompile(
+		`^github\.com/lainio/err2[a-zA-Z0-9_/.\[\]]*\(`,
+	)
 
 	// testing package exluding regexps:
 	testingPkgRegexp  = regexp.MustCompile(`^testing\.`)
@@ -77,7 +79,8 @@ func (si StackInfo) needToCalcFnNameAnchor() bool {
 // isLvlOnly return true if all fields are nil and Level != 0 that should be
 // used then.
 func (si StackInfo) isLvlOnly() bool {
-	return si.Level != 0 && si.Regexp == nil && si.PackageName == "" && si.FuncName == ""
+	return si.Level != 0 && si.Regexp == nil && si.PackageName == "" &&
+		si.FuncName == ""
 }
 
 func (si StackInfo) canPrint(s string, anchorLine, i int) (ok bool) {
