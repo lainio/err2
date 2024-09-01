@@ -164,7 +164,8 @@ func (asserter asserter) hasStackTrace() bool {
 }
 
 func (asserter asserter) hasCallerInfo() bool {
-	return asserter&asserterCallerInfo != 0 || asserter.hasFormattedCallerInfo()
+	return asserter&asserterCallerInfo != 0 ||
+		asserter.hasFormattedCallerInfo()
 }
 
 func (asserter asserter) hasFormattedCallerInfo() bool {

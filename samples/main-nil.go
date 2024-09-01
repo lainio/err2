@@ -35,18 +35,26 @@ func doMainAll() {
 
 	logger.Info("=== 1. preferred successful status output ===")
 	doMain1()
-	logger.Info("=== 2. err2.Handle(NilThenerr, func(noerr)) and try.To successful status ===")
+	logger.Info(
+		"=== 2. err2.Handle(NilThenerr, func(noerr)) and try.To successful status ===",
+	)
 	doMain2()
-	logger.Info("=== 3. err2.Handle(NilThenerr, func(noerr)) and try.Out successful status ===")
+	logger.Info(
+		"=== 3. err2.Handle(NilThenerr, func(noerr)) and try.Out successful status ===",
+	)
 	doMain3()
 
 	logger.Info("=== ERROR status versions ===")
 	myErr = errAddNode
 	logger.Info("=== 1. preferred successful status output ===")
 	doMain1()
-	logger.Info("=== 2. err2.Handle(NilThenerr, func(noerr)) and try.To successful status ===")
+	logger.Info(
+		"=== 2. err2.Handle(NilThenerr, func(noerr)) and try.To successful status ===",
+	)
 	doMain2()
-	logger.Info("=== 3. err2.Handle(NilThenerr, func(noerr)) and try.Out successful status ===")
+	logger.Info(
+		"=== 3. err2.Handle(NilThenerr, func(noerr)) and try.Out successful status ===",
+	)
 	doMain3()
 }
 

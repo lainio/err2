@@ -33,7 +33,11 @@ func init() {
 	Log.SetTracer(nil)
 
 	flag.Var(&Log, "err2-log", "`stream` for logging: nil -> log pkg")
-	flag.Var(&Error, "err2-trace", "`stream` for error tracing: stderr, stdout")
+	flag.Var(
+		&Error,
+		"err2-trace",
+		"`stream` for error tracing: stderr, stdout",
+	)
 	flag.Var(&Panic, "err2-panic-trace", "`stream` for panic tracing")
 }
 
