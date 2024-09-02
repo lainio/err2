@@ -18,7 +18,7 @@ func ExampleThat() {
 	}
 	err := sample()
 	fmt.Printf("%v", err)
-	// Output: testing: run example: assert_test.go:16: ExampleThat.func1(): assertion violation: optional message
+	// Output: testing: run example: assert_test.go:16: ExampleThat.func1(): assertion failure: optional message
 }
 
 func ExampleNotNil() {
@@ -31,7 +31,7 @@ func ExampleNotNil() {
 	var b *byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:28: ExampleNotNil.func1(): assertion violation: pointer shouldn't be nil
+	// Output: sample: assert_test.go:28: ExampleNotNil.func1(): assertion failure: pointer shouldn't be nil
 }
 
 func ExampleMNotNil() {
@@ -44,7 +44,7 @@ func ExampleMNotNil() {
 	var b map[string]byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:41: ExampleMNotNil.func1(): assertion violation: map shouldn't be nil
+	// Output: sample: assert_test.go:41: ExampleMNotNil.func1(): assertion failure: map shouldn't be nil
 }
 
 func ExampleCNotNil() {
@@ -57,7 +57,7 @@ func ExampleCNotNil() {
 	var c chan byte
 	err := sample(c)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:54: ExampleCNotNil.func1(): assertion violation: channel shouldn't be nil
+	// Output: sample: assert_test.go:54: ExampleCNotNil.func1(): assertion failure: channel shouldn't be nil
 }
 
 func ExampleSNotNil() {
@@ -70,7 +70,7 @@ func ExampleSNotNil() {
 	var b []byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:67: ExampleSNotNil.func1(): assertion violation: slice shouldn't be nil
+	// Output: sample: assert_test.go:67: ExampleSNotNil.func1(): assertion failure: slice shouldn't be nil
 }
 
 func ExampleEqual() {
@@ -82,7 +82,7 @@ func ExampleEqual() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:80: ExampleEqual.func1(): assert equal: got '2', want '3'
+	// Output: sample: assert_test.go:80: ExampleEqual.func1(): assertion failure: equal: got '2', want '3'
 }
 
 func ExampleSLen() {
@@ -94,7 +94,7 @@ func ExampleSLen() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:92: ExampleSLen.func1(): assert len: got '2', want '3'
+	// Output: sample: assert_test.go:92: ExampleSLen.func1(): assertion failure: length: got '2', want '3'
 }
 
 func ExampleSNotEmpty() {
@@ -106,20 +106,20 @@ func ExampleSNotEmpty() {
 	}
 	err := sample([]byte{})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:104: ExampleSNotEmpty.func1(): assertion violation: slice should not be empty
+	// Output: sample: assert_test.go:104: ExampleSNotEmpty.func1(): assertion failure: slice should not be empty
 }
 
 func ExampleNotEmpty() {
 	sample := func(b string) (err error) {
 		defer err2.Handle(&err, "sample")
 
-		assert.Empty(b)
-		assert.NotEmpty(b)
+		assert.Empty(b)    // OK
+		assert.NotEmpty(b) // not OK
 		return err
 	}
 	err := sample("")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:117: ExampleNotEmpty.func1(): assertion violation: string shouldn't be empty
+	// Output: sample: assert_test.go:117: ExampleNotEmpty.func1(): assertion failure: string shouldn't be empty
 }
 
 func ExampleMKeyExists() {
@@ -129,14 +129,14 @@ func ExampleMKeyExists() {
 		m := map[string]string{
 			"1": "one",
 		}
-		v := assert.MKeyExists(m, "1")
-		assert.Equal(v, "one")
-		_ = assert.MKeyExists(m, b)
+		v := assert.MKeyExists(m, "1") // OK, 1 --> one
+		assert.Equal(v, "one")         // OK
+		_ = assert.MKeyExists(m, b)    // fails with b = 2
 		return err
 	}
 	err := sample("2")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:134: ExampleMKeyExists.func1(): assertion violation: key '2' doesn't exist
+	// Output: sample: assert_test.go:134: ExampleMKeyExists.func1(): assertion failure: key '2' doesn't exist
 }
 
 func ExampleZero() {
@@ -149,7 +149,7 @@ func ExampleZero() {
 	var b int8 = 1 // we want sample to assert the violation.
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:146: ExampleZero.func1(): assertion violation: got '1', want (== '0')
+	// Output: sample: assert_test.go:146: ExampleZero.func1(): assertion failure: got '1', want (== '0')
 }
 
 func ExampleSLonger() {
@@ -162,7 +162,7 @@ func ExampleSLonger() {
 	}
 	err := sample([]byte{01}) // len = 1
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:160: ExampleSLonger.func1(): assertion violation: got '1', should be longer than '1'
+	// Output: sample: assert_test.go:160: ExampleSLonger.func1(): assertion failure: got '1', should be longer than '1'
 }
 
 func ExampleMShorter() {
@@ -175,7 +175,7 @@ func ExampleMShorter() {
 	}
 	err := sample(map[byte]byte{01: 01}) // len = 1
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:172: ExampleMShorter.func1(): assertion violation: got '1', should be shorter than '1'
+	// Output: sample: assert_test.go:172: ExampleMShorter.func1(): assertion failure: got '1', should be shorter than '1'
 }
 
 func ExampleSShorter() {
@@ -188,7 +188,7 @@ func ExampleSShorter() {
 	}
 	err := sample([]byte{01}) // len = 1
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:186: ExampleSShorter.func1(): assertion violation: got '1', should be shorter than '0': optional message (test_str)
+	// Output: sample: assert_test.go:186: ExampleSShorter.func1(): assertion failure: got '1', should be shorter than '0': optional message (test_str)
 }
 
 func ExampleLess() {
@@ -203,7 +203,7 @@ func ExampleLess() {
 	var b int8 = 1
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:200: ExampleLess.func1(): assertion violation: got '1', want >= '1'
+	// Output: sample: assert_test.go:200: ExampleLess.func1(): assertion failure: got '1', want >= '1'
 }
 
 func ExampleGreater() {
@@ -218,7 +218,7 @@ func ExampleGreater() {
 	var b int8 = 2
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:215: ExampleGreater.func1(): assertion violation: got '2', want <= '2'
+	// Output: sample: assert_test.go:215: ExampleGreater.func1(): assertion failure: got '2', want <= '2'
 }
 
 func ExampleNotZero() {
@@ -231,7 +231,34 @@ func ExampleNotZero() {
 	var b int8
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:228: ExampleNotZero.func1(): assertion violation: got '0', want (!= 0)
+	// Output: sample: assert_test.go:228: ExampleNotZero.func1(): assertion failure: got '0', want (!= 0)
+}
+
+func ExampleMLen() {
+	sample := func(b map[int]byte) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.MLen(b, 3)
+		return err
+	}
+	err := sample(map[int]byte{1: 1, 2: 2})
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:241: ExampleMLen.func1(): assertion failure: length: got '2', want '3'
+}
+
+func ExampleCLen() {
+	sample := func(b chan int) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		assert.CLen(b, 3)
+		return err
+	}
+	d := make(chan int, 2)
+	d <- int(1)
+	d <- int(1)
+	err := sample(d)
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:253: ExampleCLen.func1(): assertion failure: length: got '2', want '3'
 }
 
 func BenchmarkMKeyExists(b *testing.B) {

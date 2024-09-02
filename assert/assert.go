@@ -147,10 +147,10 @@ var (
 )
 
 const (
-	assertionMsg         = "assertion violation"
-	assertionEqualMsg    = "assert equal"
-	assertionNotEqualMsg = "assert not equal"
-	assertionLenMsg      = "assert len"
+	assertionMsg         = "assertion failure"
+	assertionEqualMsg    = "assertion failure: equal"
+	assertionNotEqualMsg = "assertion failure: not equal"
+	assertionLenMsg      = "assertion failure: length"
 
 	gotWantFmt        = ": got '%v', want '%v'"
 	gotWantLongerFmt  = ": got '%v', should be longer than '%v'"
@@ -270,7 +270,7 @@ func tester() (t testing.TB) {
 // Note that when [Plain] asserter is used ([SetDefault]), optional arguments
 // are used to override the auto-generated assert violation message.
 func NotImplemented(a ...any) {
-	current().reportAssertionFault(0, "not implemented", a)
+	current().reportAssertionFault(0, assertionMsg+": not implemented", a)
 }
 
 // ThatNot asserts that the term is NOT true. If is it panics with the given
@@ -378,7 +378,7 @@ func SNil[S ~[]T, T any](s S, a ...any) {
 // are used to override the auto-generated assert violation message.
 func CNil[C ~chan T, T any](c C, a ...any) {
 	if c != nil {
-		defMsg := assertionMsg + ": channel shouldn't be nil"
+		defMsg := assertionMsg + ": channel should be nil"
 		current().reportAssertionFault(0, defMsg, a)
 	}
 }
