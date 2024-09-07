@@ -401,6 +401,21 @@ func BenchmarkThat(b *testing.B) {
 	}
 }
 
+func BenchmarkZeroX(b *testing.B) {
+	assert.SetDefaultX(assert.Production)
+	const zero = 0
+	for n := 0; n < b.N; n++ {
+		assert.ZeroX(zero)
+	}
+}
+
+func BenchmarkZero(b *testing.B) {
+	const zero = 0
+	for n := 0; n < b.N; n++ {
+		assert.Zero(zero)
+	}
+}
+
 func BenchmarkGreater(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		assert.Greater(1, 0)
@@ -413,15 +428,10 @@ func BenchmarkLess(b *testing.B) {
 	}
 }
 
-func BenchmarkZero(b *testing.B) {
+func BenchmarkErrorX(b *testing.B) {
+	assert.SetDefaultX(assert.Production)
 	for n := 0; n < b.N; n++ {
-		assert.Zero(0)
-	}
-}
-
-func BenchmarkNotZero(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		assert.NotZero(n + 1)
+		assert.ErrorX(err2.ErrNotAccess)
 	}
 }
 

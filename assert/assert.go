@@ -137,6 +137,8 @@ func init() {
 }
 
 type (
+	mapAsserter = map[int]asserter
+
 	testersMap = map[int]testing.TB
 	function   = func()
 )
@@ -144,6 +146,8 @@ type (
 var (
 	// testers must be set if assertion package is used for the unit testing.
 	testers = x.NewRWMap[testersMap]()
+
+	asserterMap = x.NewRWMap[mapAsserter]()
 )
 
 const (
@@ -284,6 +288,38 @@ func ThatNot(term bool, a ...any) {
 		defMsg := assertionMsg
 		current().reportAssertionFault(0, defMsg, a)
 	}
+}
+
+func ThatX(term bool, a ...any) {
+	if !term {
+		thatXDo(a)
+	}
+}
+
+func ZeroX[T Number](val T, a ...any) {
+	if val != 0 {
+		doZeroX(val, a)
+	}
+}
+
+func doZeroX[T Number](val T, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
+	currentX().reportAssertionFault(1, defMsg, a)
+}
+
+func thatXDo(a []any) {
+	defMsg := assertionMsg
+	currentX().reportAssertionFault(1, defMsg, a)
+}
+
+func currentX() asserter {
+	// we need thread local storage, maybe we'll implement that to x.package?
+	// study `tester` and copy ideas from it.
+	return asserterMap.Get(goid())
+}
+
+func SetDefaultX(i defInd) {
+	asserterMap.Set(goid(), defAsserter[i])
 }
 
 // That asserts that the term is true. If not it panics with the given
@@ -884,9 +920,24 @@ func NoError(err error, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Error(err error, a ...any) {
 	if err == nil {
-		defMsg := "Error:" + assertionMsg + ": missing error"
-		current().reportAssertionFault(0, defMsg, a)
+		doErrorX(a)
 	}
+}
+
+func ErrorX(err error, a ...any) {
+	if err == nil {
+		doError(a)
+	}
+}
+
+func doErrorX(a []any) {
+	defMsg := "Error:" + assertionMsg + ": missing error"
+	currentX().reportAssertionFault(0, defMsg, a)
+}
+
+func doError(a []any) {
+	defMsg := "Error:" + assertionMsg + ": missing error"
+	current().reportAssertionFault(0, defMsg, a)
 }
 
 // Greater asserts that the value is greater than want. If it is not it panics
