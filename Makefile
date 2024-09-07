@@ -80,6 +80,12 @@ bench_M:
 bench_C:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkC.*' $(PKG_ASSERT)
 
+bench_nil:
+	$(GO) test $(TEST_ARGS) -bench='Benchmark.*Nil' $(PKG_ASSERT)
+
+bench_empty:
+	$(GO) test $(TEST_ARGS) -bench='Benchmark.*Empty' $(PKG_ASSERT)
+
 bench_zero:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkZero.*' $(PKG_ASSERT)
 
@@ -96,7 +102,7 @@ bench_go:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkTry_StringGenerics' $(PKG_ERR2)
 
 bench_that:
-	$(GO) test $(TEST_ARGS) -bench='BenchmarkThat.*' $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench='Benchmark.*That.*' $(PKG_ASSERT)
 
 bench_copy:
 	$(GO) test $(TEST_ARGS) -bench='Benchmark_CopyBuffer' $(PKG_TRY)
