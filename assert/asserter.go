@@ -95,7 +95,7 @@ func (asserter asserter) reportAssertionFault(
 func (asserter asserter) reportPanic(s string) {
 	if asserter.isUnitTesting() && asserter.hasCallerInfo() {
 		fmt.Fprintln(os.Stderr, officialTestOutputPrefix+s)
-		tester().FailNow()
+		tester().FailNow() // TODO: tester
 	} else if asserter.isUnitTesting() {
 		const framesToSkip = 4 // how many fn calls there is before FuncName call
 		fatal(s, framesToSkip)
@@ -119,7 +119,7 @@ func fatal(s string, framesToSkip int) {
 	}
 	// test output goes thru stderr, no need for t.Log(), test Fail needs it.
 	fmt.Fprintln(os.Stderr, officialTestOutputPrefix+info)
-	tester().FailNow()
+	tester().FailNow() // TODO: tester
 }
 
 var longFmtStr = `
@@ -175,5 +175,5 @@ func (asserter asserter) hasFormattedCallerInfo() bool {
 // isUnitTesting is expensive because it calls tester(). think carefully where
 // to use it
 func (asserter asserter) isUnitTesting() bool {
-	return asserter&asserterUnitTesting != 0 && tester() != nil
+	return asserter&asserterUnitTesting != 0 && tester() != nil // TODO: tester
 }
