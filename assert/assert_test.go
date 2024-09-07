@@ -31,7 +31,7 @@ func ExampleNotNil() {
 	var b *byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:28: ExampleNotNil.func1(): assertion failure: pointer shouldn't be nil
+	// Output: sample: assert_test.go:28: ExampleNotNil.func1(): assertion failure: pointer should not be nil
 }
 
 func ExampleMNotNil() {
@@ -44,7 +44,7 @@ func ExampleMNotNil() {
 	var b map[string]byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:41: ExampleMNotNil.func1(): assertion failure: map shouldn't be nil
+	// Output: sample: assert_test.go:41: ExampleMNotNil.func1(): assertion failure: map should not be nil
 }
 
 func ExampleCNotNil() {
@@ -57,7 +57,7 @@ func ExampleCNotNil() {
 	var c chan byte
 	err := sample(c)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:54: ExampleCNotNil.func1(): assertion failure: channel shouldn't be nil
+	// Output: sample: assert_test.go:54: ExampleCNotNil.func1(): assertion failure: channel should not be nil
 }
 
 func ExampleSNotNil() {
@@ -70,7 +70,7 @@ func ExampleSNotNil() {
 	var b []byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:67: ExampleSNotNil.func1(): assertion failure: slice shouldn't be nil
+	// Output: sample: assert_test.go:67: ExampleSNotNil.func1(): assertion failure: slice should not be nil
 }
 
 func ExampleEqual() {
@@ -119,7 +119,7 @@ func ExampleNotEmpty() {
 	}
 	err := sample("")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:117: ExampleNotEmpty.func1(): assertion failure: string shouldn't be empty
+	// Output: sample: assert_test.go:117: ExampleNotEmpty.func1(): assertion failure: string should not be empty
 }
 
 func ExampleMKeyExists() {
@@ -401,8 +401,16 @@ func BenchmarkThat(b *testing.B) {
 	}
 }
 
+func BenchmarkThatX(b *testing.B) {
+	assert.SetTLS(assert.Production)
+	const four = 4
+	for n := 0; n < b.N; n++ {
+		assert.That(four == 2+2)
+	}
+}
+
 func BenchmarkZeroX(b *testing.B) {
-	assert.SetDefaultX(assert.Production)
+	assert.SetTLS(assert.Production)
 	const zero = 0
 	for n := 0; n < b.N; n++ {
 		assert.ZeroX(zero)

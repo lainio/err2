@@ -151,6 +151,8 @@ var (
 )
 
 const (
+	assertionNot = "not"
+
 	assertionMsg         = "assertion failure"
 	assertionEqualMsg    = "assertion failure: equal"
 	assertionNotEqualMsg = "assertion failure: not equal"
@@ -285,14 +287,7 @@ func NotImplemented(a ...any) {
 // are used to override the auto-generated assert violation message.
 func ThatNot(term bool, a ...any) {
 	if term {
-		defMsg := assertionMsg
-		current().reportAssertionFault(0, defMsg, a)
-	}
-}
-
-func ThatX(term bool, a ...any) {
-	if !term {
-		thatXDo(a)
+		doThat(a)
 	}
 }
 
@@ -307,15 +302,20 @@ func doZeroX[T Number](val T, a []any) {
 	currentX().reportAssertionFault(1, defMsg, a)
 }
 
-func thatXDo(a []any) {
-	defMsg := assertionMsg
-	currentX().reportAssertionFault(1, defMsg, a)
-}
-
-func currentX() asserter {
+func currentX() (curAsserter asserter) {
 	// we need thread local storage, maybe we'll implement that to x.package?
 	// study `tester` and copy ideas from it.
-	return asserterMap.Get(goid())
+	tlsID := goid()
+	asserterMap.Rx(func(m map[int]asserter) {
+		aster, found := m[tlsID]
+		if found {
+			curAsserter = aster
+		} else {
+			// use pkg lvl asserter if asserter is not set
+			curAsserter = defAsserter[def]
+		}
+	})
+	return curAsserter
 }
 
 func SetDefaultX(i defInd) {
@@ -330,9 +330,13 @@ func SetDefaultX(i defInd) {
 // are used to override the auto-generated assert violation message.
 func That(term bool, a ...any) {
 	if !term {
-		defMsg := assertionMsg
-		current().reportAssertionFault(0, defMsg, a)
+		doThat(a)
 	}
+}
+
+func doThat(a []any) {
+	defMsg := assertionMsg
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // NotNil asserts that the pointer IS NOT nil. If it is it panics/errors (default
@@ -342,8 +346,7 @@ func That(term bool, a ...any) {
 // are used to override the auto-generated assert violation message.
 func NotNil[P ~*T, T any](p P, a ...any) {
 	if p == nil {
-		defMsg := assertionMsg + ": pointer shouldn't be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("not", "pointer", "nil", a)
 	}
 }
 
@@ -354,8 +357,7 @@ func NotNil[P ~*T, T any](p P, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Nil[T any](p *T, a ...any) {
 	if p != nil {
-		defMsg := assertionMsg + ": pointer should be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("", "pointer", "nil", a)
 	}
 }
 
@@ -372,8 +374,7 @@ func Nil[T any](p *T, a ...any) {
 // [the interface type]: https://go.dev/doc/faq#nil_error
 func INil(i any, a ...any) {
 	if i != nil {
-		defMsg := assertionMsg + ": interface should be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("", "interface", "nil", a)
 	}
 }
 
@@ -390,8 +391,7 @@ func INil(i any, a ...any) {
 // [the interface type]: https://go.dev/doc/faq#nil_error
 func INotNil(i any, a ...any) {
 	if i == nil {
-		defMsg := assertionMsg + ": interface shouldn't be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("not", "interface", "nil", a)
 	}
 }
 
@@ -402,8 +402,7 @@ func INotNil(i any, a ...any) {
 // are used to override the auto-generated assert violation message.
 func SNil[S ~[]T, T any](s S, a ...any) {
 	if s != nil {
-		defMsg := assertionMsg + ": slice should be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("", "slice", "nil", a)
 	}
 }
 
@@ -414,8 +413,7 @@ func SNil[S ~[]T, T any](s S, a ...any) {
 // are used to override the auto-generated assert violation message.
 func CNil[C ~chan T, T any](c C, a ...any) {
 	if c != nil {
-		defMsg := assertionMsg + ": channel should be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("", "channel", "nil", a)
 	}
 }
 
@@ -426,8 +424,7 @@ func CNil[C ~chan T, T any](c C, a ...any) {
 // are used to override the auto-generated assert violation message.
 func MNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 	if m != nil {
-		defMsg := assertionMsg + ": map should be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("", "map", "nil", a)
 	}
 }
 
@@ -438,8 +435,7 @@ func MNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 // are used to override the auto-generated assert violation message.
 func SNotNil[S ~[]T, T any](s S, a ...any) {
 	if s == nil {
-		defMsg := assertionMsg + ": slice shouldn't be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("not", "slice", "nil", a)
 	}
 }
 
@@ -450,8 +446,7 @@ func SNotNil[S ~[]T, T any](s S, a ...any) {
 // are used to override the auto-generated assert violation message.
 func CNotNil[C ~chan T, T any](c C, a ...any) {
 	if c == nil {
-		defMsg := assertionMsg + ": channel shouldn't be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("not", "channel", "nil", a)
 	}
 }
 
@@ -462,8 +457,7 @@ func CNotNil[C ~chan T, T any](c C, a ...any) {
 // are used to override the auto-generated assert violation message.
 func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 	if m == nil {
-		defMsg := assertionMsg + ": map shouldn't be nil"
-		current().reportAssertionFault(0, defMsg, a)
+		doNamed("not", "map", "nil", a)
 	}
 }
 
@@ -799,8 +793,7 @@ func doMKeyExists(key any, a []any) {
 // are used to override the auto-generated assert violation message.
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
-		defMsg := assertionMsg + ": string shouldn't be empty"
-		current().reportAssertionFault(0, defMsg, a)
+		doEmpty("string", "not ", a)
 	}
 }
 
@@ -812,9 +805,13 @@ func NotEmpty(obj string, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Empty(obj string, a ...any) {
 	if obj != "" {
-		defMsg := assertionMsg + ": string should be empty"
-		current().reportAssertionFault(0, defMsg, a)
+		doEmpty("string", "", a)
 	}
+}
+
+func doEmpty(tname, notStr string, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": %s should %sbe empty", tname, notStr)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // SEmpty asserts that the slice is empty. If it is NOT, it panics/errors
@@ -830,7 +827,7 @@ func SEmpty[S ~[]T, T any](obj S, a ...any) {
 	l := len(obj)
 
 	if l != 0 {
-		doEmptyNamed("", "slice", a)
+		doNamed("", "slice", "empty", a)
 	}
 }
 
@@ -847,7 +844,7 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
-		doEmptyNamed("not", "slice", a)
+		doNamed("not", "slice", "empty", a)
 	}
 }
 
@@ -866,7 +863,7 @@ func MEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	l := len(obj)
 
 	if l != 0 {
-		doEmptyNamed("", "map", a)
+		doNamed("", "map", "empty", a)
 	}
 }
 
@@ -885,13 +882,19 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	l := len(obj)
 
 	if l == 0 {
-		doEmptyNamed("not", "map", a)
+		doNamed("not", "map", "empty", a)
 	}
 }
 
 func doEmptyNamed(not, name string, a []any) {
-	not = x.Whom(not == "not", " not ", "")
+	not = x.Whom(not == assertionNot, " not ", "")
 	defMsg := assertionMsg + ": " + name + " should" + not + "be empty"
+	current().reportAssertionFault(1, defMsg, a)
+}
+
+func doNamed(not, tname, got string, a []any) {
+	not = x.Whom(not == assertionNot, " not ", "")
+	defMsg := assertionMsg + ": " + tname + " should" + not + "be " + got
 	current().reportAssertionFault(1, defMsg, a)
 }
 
@@ -1014,8 +1017,20 @@ func doNotZero[T Number](val T, a []any) {
 // Note, this indexing stuff is done because of race detection to work on client
 // packages. And, yes, we have tested it. This is fastest way to make it without
 // locks HERE. Only the setting the index is secured with the mutex.
-func current() asserter {
-	return defAsserter[def]
+func current() (curAsserter asserter) {
+	// we need thread local storage, maybe we'll implement that to x.package?
+	// study `tester` and copy ideas from it.
+	tlsID := goid()
+	asserterMap.Rx(func(m map[int]asserter) {
+		aster, found := m[tlsID]
+		if found {
+			curAsserter = aster
+		} else {
+			// use pkg lvl asserter if asserter is not set
+			curAsserter = defAsserter[def]
+		}
+	})
+	return curAsserter
 }
 
 // SetDefault sets the current default asserter for assert pkg. It also returns
@@ -1051,6 +1066,16 @@ func SetDefault(i defInd) (old defInd) {
 	// and performance are guaranteed,
 	def = i
 	return
+}
+
+// SetTLS set asserter index for the current thread (Tread Local Storage). That
+// allows us to have multiple different asserter in use in the same app running.
+// Let's say that in some function and its sub-functions want to return plain
+// error messages instead of the panic asserts, they can use following:
+//
+//	assert.SetTLS(assert.Plain)
+func SetTLS(i defInd) {
+	asserterMap.Set(goid(), defAsserter[i])
 }
 
 // mapDefInd runtime asserters, that's why test asserts are removed for now.
