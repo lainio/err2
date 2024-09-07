@@ -6,13 +6,14 @@ import (
 	"os"
 
 	"github.com/lainio/err2"
+	"github.com/lainio/err2/assert"
 )
 
 var (
 	mode = flag.String(
 		"mode",
 		"play",
-		"runs the wanted playground: db, play, nil",
+		"runs the wanted playground: db, play, nil, assert",
 	)
 	isErr = flag.Bool("err", false, "tells if we want to have an error")
 )
@@ -40,7 +41,13 @@ func main() {
 		doMain2()
 	case "play":
 		doPlayMain()
+	case "assert":
+		doAssertMain()
 	default:
 		err2.Throwf("unknown (%v) playground given", *mode)
 	}
+}
+
+func doAssertMain() {
+	assert.That(false)
 }
