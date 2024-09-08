@@ -762,7 +762,7 @@ func doMKeyExists(key any, a []any) {
 // are used to override the auto-generated assert violation message.
 func NotEmpty(obj string, a ...any) {
 	if obj == "" {
-		doEmpty("string", "not ", a)
+		doNamed("not", "string", "empty", a)
 	}
 }
 
@@ -774,13 +774,8 @@ func NotEmpty(obj string, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Empty(obj string, a ...any) {
 	if obj != "" {
-		doEmpty("string", "", a)
+		doNamed("", "string", "empty", a)
 	}
-}
-
-func doEmpty(tname, notStr string, a []any) {
-	defMsg := fmt.Sprintf(assertionMsg+": %s should %sbe empty", tname, notStr)
-	current().reportAssertionFault(1, defMsg, a)
 }
 
 // SEmpty asserts that the slice is empty. If it is NOT, it panics/errors
