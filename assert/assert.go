@@ -291,37 +291,6 @@ func ThatNot(term bool, a ...any) {
 	}
 }
 
-func ZeroX[T Number](val T, a ...any) {
-	if val != 0 {
-		doZeroX(val, a)
-	}
-}
-
-func doZeroX[T Number](val T, a []any) {
-	defMsg := fmt.Sprintf(assertionMsg+": got '%v', want (== '0')", val)
-	currentX().reportAssertionFault(1, defMsg, a)
-}
-
-func currentX() (curAsserter asserter) {
-	// we need thread local storage, maybe we'll implement that to x.package?
-	// study `tester` and copy ideas from it.
-	tlsID := goid()
-	asserterMap.Rx(func(m map[int]asserter) {
-		aster, found := m[tlsID]
-		if found {
-			curAsserter = aster
-		} else {
-			// use pkg lvl asserter if asserter is not set
-			curAsserter = defAsserter[def]
-		}
-	})
-	return curAsserter
-}
-
-func SetDefaultX(i defInd) {
-	asserterMap.Set(goid(), defAsserter[i])
-}
-
 // That asserts that the term is true. If not it panics with the given
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
@@ -886,12 +855,6 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 	}
 }
 
-func doEmptyNamed(not, name string, a []any) {
-	not = x.Whom(not == assertionNot, " not ", "")
-	defMsg := assertionMsg + ": " + name + " should" + not + "be empty"
-	current().reportAssertionFault(1, defMsg, a)
-}
-
 func doNamed(not, tname, got string, a []any) {
 	not = x.Whom(not == assertionNot, " not ", "")
 	defMsg := assertionMsg + ": " + tname + " should" + not + "be " + got
@@ -923,24 +886,13 @@ func NoError(err error, a ...any) {
 // are used to override the auto-generated assert violation message.
 func Error(err error, a ...any) {
 	if err == nil {
-		doErrorX(a)
-	}
-}
-
-func ErrorX(err error, a ...any) {
-	if err == nil {
 		doError(a)
 	}
 }
 
-func doErrorX(a []any) {
-	defMsg := "Error:" + assertionMsg + ": missing error"
-	currentX().reportAssertionFault(0, defMsg, a)
-}
-
 func doError(a []any) {
 	defMsg := "Error:" + assertionMsg + ": missing error"
-	current().reportAssertionFault(0, defMsg, a)
+	current().reportAssertionFault(1, defMsg, a)
 }
 
 // Greater asserts that the value is greater than want. If it is not it panics
@@ -1011,12 +963,14 @@ func doNotZero[T Number](val T, a []any) {
 	current().reportAssertionFault(1, defMsg, a)
 }
 
-// current returns a current default asserter used for package-level
-// functions like assert.That().
+// current returns a current default asserter used for assert functions like
+// assert.That() in this gorounine.
 //
-// Note, this indexing stuff is done because of race detection to work on client
+// NOTE this indexing stuff is done because of race detection to work on client
 // packages. And, yes, we have tested it. This is fastest way to make it without
 // locks HERE. Only the setting the index is secured with the mutex.
+//
+// NOTE that since our TLS [asserterMap] we still continue to use indexing.
 func current() (curAsserter asserter) {
 	// we need thread local storage, maybe we'll implement that to x.package?
 	// study `tester` and copy ideas from it.
@@ -1068,14 +1022,20 @@ func SetDefault(i defInd) (old defInd) {
 	return
 }
 
-// SetTLS set asserter index for the current thread (Tread Local Storage). That
-// allows us to have multiple different asserter in use in the same app running.
-// Let's say that in some function and its sub-functions want to return plain
-// error messages instead of the panic asserts, they can use following:
+// SetAsserter set asserter index for the current thread (Tread Local
+// Storage). That allows us to have multiple different asserter in use in the
+// same app running. Let's say that in some function and its sub-functions want
+// to return plain error messages instead of the panic asserts, they can use
+// following:
 //
-//	assert.SetTLS(assert.Plain)
-func SetTLS(i defInd) {
+//	assert.SetAsserter(assert.Plain)
+func SetAsserter(i defInd) func() {
 	asserterMap.Set(goid(), defAsserter[i])
+	return popCurrentAsserter
+}
+
+func popCurrentAsserter() {
+	asserterMap.Del(goid())
 }
 
 // mapDefInd runtime asserters, that's why test asserts are removed for now.

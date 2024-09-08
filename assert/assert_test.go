@@ -268,6 +268,18 @@ func BenchmarkMKeyExists(b *testing.B) {
 	}
 }
 
+func BenchmarkMKeyExistsOKIdiom(b *testing.B) {
+	bs := map[int]int{0: 0, 1: 1}
+	found := false
+	for n := 0; n < b.N; n++ {
+		_, ok := bs[1]
+		if ok {
+			found = ok 
+		}
+	}
+	_ = found
+}
+
 func BenchmarkMNotEmpty(b *testing.B) {
 	bs := map[int]int{0: 0, 1: 1}
 	for n := 0; n < b.N; n++ {
@@ -401,22 +413,6 @@ func BenchmarkThat(b *testing.B) {
 	}
 }
 
-func BenchmarkThatX(b *testing.B) {
-	assert.SetTLS(assert.Production)
-	const four = 4
-	for n := 0; n < b.N; n++ {
-		assert.That(four == 2+2)
-	}
-}
-
-func BenchmarkZeroX(b *testing.B) {
-	assert.SetTLS(assert.Production)
-	const zero = 0
-	for n := 0; n < b.N; n++ {
-		assert.ZeroX(zero)
-	}
-}
-
 func BenchmarkZero(b *testing.B) {
 	const zero = 0
 	for n := 0; n < b.N; n++ {
@@ -433,13 +429,6 @@ func BenchmarkGreater(b *testing.B) {
 func BenchmarkLess(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		assert.Less(0, 1)
-	}
-}
-
-func BenchmarkErrorX(b *testing.B) {
-	assert.SetDefaultX(assert.Production)
-	for n := 0; n < b.N; n++ {
-		assert.ErrorX(err2.ErrNotAccess)
 	}
 }
 
