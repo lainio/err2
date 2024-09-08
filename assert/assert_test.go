@@ -261,6 +261,22 @@ func ExampleCLen() {
 	// Output: sample: assert_test.go:253: ExampleCLen.func1(): assertion failure: length: got '2', want '3'
 }
 
+func ExampleThatNot() {
+	sample := func() (err error) {
+		defer err2.Handle(&err)
+
+		assert.ThatNot(true, "overrides if Plain asserter")
+		return err
+	}
+
+	// set asserter for this thread/goroutine only, we want plain errors
+	defer assert.SetAsserter(assert.Plain)()
+
+	err := sample()
+	fmt.Printf("%v", err)
+	// Output: testing: run example: overrides if Plain asserter
+}
+
 func BenchmarkMKeyExists(b *testing.B) {
 	bs := map[int]int{0: 0, 1: 1}
 	for n := 0; n < b.N; n++ {

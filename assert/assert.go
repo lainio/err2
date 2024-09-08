@@ -967,8 +967,6 @@ func doNotZero[T Number](val T, a []any) {
 //
 // NOTE that since our TLS [asserterMap] we still continue to use indexing.
 func current() (curAsserter asserter) {
-	// we need thread local storage, maybe we'll implement that to x.package?
-	// study `tester` and copy ideas from it.
 	tlsID := goid()
 	asserterMap.Rx(func(m map[int]asserter) {
 		aster, found := m[tlsID]
@@ -1023,9 +1021,16 @@ func SetDefault(i defInd) (old defInd) {
 // to return plain error messages instead of the panic asserts, they can use
 // following:
 //
-//	assert.SetAsserter(assert.Plain)
+//	defer assert.SetAsserter(assert.Plain)()
 func SetAsserter(i defInd) func() {
-	asserterMap.Set(goid(), defAsserter[i])
+	// get pkg lvl asserter
+	curAsserter := defAsserter[def]
+	// ..  to check if we are doing unit tests
+	if !curAsserter.isUnitTesting() {
+		// .. allow TLS specific asserter. NOTE see current()
+		curGoRID := goid()
+		asserterMap.Set(curGoRID, defAsserter[i])
+	}
 	return popCurrentAsserter
 }
 
