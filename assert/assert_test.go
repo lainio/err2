@@ -274,7 +274,7 @@ func BenchmarkMKeyExistsOKIdiom(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_, ok := bs[1]
 		if ok {
-			found = ok 
+			found = ok
 		}
 	}
 	_ = found
