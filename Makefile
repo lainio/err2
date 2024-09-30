@@ -157,6 +157,12 @@ test_cov: test_cov_out
 	go tool cover -html=coverage.txt -o=coverage.html
 	firefox ./coverage.html 1>&- 2>&-  &
 
+test_cov_pc_assert:
+	go tool cover -func=coverage.txt | ag assert
+
+test_cov_pc:
+	go tool cover -func=coverage.txt
+
 lint:
 	@golangci-lint run
 
