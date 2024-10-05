@@ -160,11 +160,14 @@ test_cov: test_cov_out
 test_cov_pc_assert:
 	go tool cover -func=coverage.txt | ag assert
 
+test_cov_zero:
+	go tool cover -func=coverage.txt | ag '\:\s*[A-Z]+.*\s+0\.0%'
+
+test_cov_assert_zero:
+	go tool cover -func=coverage.txt | ag 'assert\/.*\:\s*[A-Z]+.*\s+0\.0%'
+
 test_cov_pc:
 	go tool cover -func=coverage.txt
 
 lint:
 	@golangci-lint run
-
-.PHONY:	check
-
