@@ -13,7 +13,7 @@ sub-gouroutines:
 	     assert.Equal(alice.Len(), 1) // assert anything normally
 	     ...
 	     go func() {
-	          assert.PushTester(t) // <-- Needs to do again for a new goroutine
+	          assert.PushTester(t)() // <-- Needs to do again for a new goroutine
 
 # Merge Runtime And Unit Test Assertions
 
