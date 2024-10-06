@@ -851,7 +851,7 @@ func MNotEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 }
 
 func doNamed(not, tname, got string, a []any) {
-	not = x.Whom(not == assertionNot, " not ", "")
+	not = x.Whom(not == assertionNot, " not ", " ")
 	defMsg := assertionMsg + ": " + tname + " should" + not + "be " + got
 	current().reportAssertionFault(1, defMsg, a)
 }
@@ -965,15 +965,15 @@ func doNotZero[T Number](val T, a []any) {
 // packages. And, yes, we have tested it. This is fastest way to make it without
 // locks HERE. Only the setting the index is secured with the mutex.
 //
-// NOTE that since our TLS [asserterMap] we still continue to use indexing.
+// NOTE that since our GLS [asserterMap] we still continue to use indexing.
 func current() (curAsserter asserter) {
-	tlsID := goid()
+	glsID := goid()
 	asserterMap.Rx(func(m map[int]asserter) {
-		aster, found := m[tlsID]
+		aster, found := m[glsID]
 		if found {
 			curAsserter = aster
 		} else {
-			// use pkg lvl asserter if asserter is not set
+			// use pkg lvl asserter if asserter is not set for gorounine.
 			curAsserter = defAsserter[def]
 		}
 	})
@@ -1015,11 +1015,12 @@ func SetDefault(i defInd) (old defInd) {
 	return
 }
 
-// SetAsserter set asserter index for the current thread (Tread Local
-// Storage). That allows us to have multiple different asserter in use in the
-// same app running. Let's say that in some function and its sub-functions want
-// to return plain error messages instead of the panic asserts, they can use
-// following:
+// SetAsserter set asserter for the current GLS (Gorounine Local Storage). That
+// allows us to have multiple different [asserter] in use in the same process.
+//
+// Let's say that in some function you want to return plain error messages
+// instead of the panic asserts, you can use following in the top-level
+// function:
 //
 //	defer assert.SetAsserter(assert.Plain)()
 func SetAsserter(i defInd) func() {
