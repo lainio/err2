@@ -52,9 +52,12 @@ raise up quality of our software.
 The assert package offers a convenient way to set preconditions to code which
 allow us detect programming errors and API violations faster. Still allowing
 production-time error handling if needed. And everything is automatic. You can
-set asserter with [SetDefault] function or --asserter flag if Go's flag package is
-in use. This allows developer, operator and every-day user share the exact same
-binary but get the error messages and diagnostic they need.
+set gorountinen specific asserter with [PushAsserter] function.
+
+You can set the assert package's default asserter with [SetDefault] or
+-asserter flag if Go's flag package is in use. This allows developer, operator
+and every-day user share the exact same binary but get the error messages and
+diagnostic they need.
 
 	// Production asserter adds formatted caller info to normal errors.
 	// Information is transported thru error values when err2.Handle is in use.
@@ -75,15 +78,12 @@ And assert package's configuration flags are inserted.
 
 # Performance
 
-[assert.That]'s performance is equal to the if-statement thanks for inlining. And
-the most of the generics-based versions are about the equally fast. Practice has
-thought that we should prefer other than [assert.That] because by using detailed
-version like [assert.Shorter] we get precise error messages automatically. Some
-also prefer readability of specific asserters.
+The performance of the assert functions are equal to the if-statement thanks for
+inlining. All of the generics-based versions are the equally fast!
 
-If your algorithm is performance-critical please run `make bench` in the err2
-repo and decide case by case. Also you can make an issue or even PR if you would
-like to have something similar like [glog.V] function.
+We should prefer specialized versions like [assert.Equal] that we get precise
+and readable error messages automatically. Error messagas follow Go idiom of
+'got xx, want yy'. And we still can annotate error message if we want.
 
 # Naming
 
