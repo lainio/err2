@@ -282,7 +282,7 @@ func ExampleThatNot() {
 	}
 
 	// Set a specific asserter for this goroutine only, we want plain errors
-	defer assert.SetAsserter(assert.Plain)()
+	defer assert.PushAsserter(assert.Plain)()
 
 	err := sample()
 	fmt.Printf("%v", err)

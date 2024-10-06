@@ -1015,15 +1015,15 @@ func SetDefault(i defInd) (old defInd) {
 	return
 }
 
-// SetAsserter set asserter for the current GLS (Gorounine Local Storage). That
+// PushAsserter set asserter for the current GLS (Gorounine Local Storage). That
 // allows us to have multiple different [asserter] in use in the same process.
 //
 // Let's say that in some function you want to return plain error messages
 // instead of the panic asserts, you can use following in the top-level
 // function:
 //
-//	defer assert.SetAsserter(assert.Plain)()
-func SetAsserter(i defInd) func() {
+//	defer assert.PushAsserter(assert.Plain)()
+func PushAsserter(i defInd) func() {
 	// get pkg lvl asserter
 	curAsserter := defAsserter[def]
 	// ..  to check if we are doing unit tests
@@ -1032,10 +1032,15 @@ func SetAsserter(i defInd) func() {
 		curGoRID := goid()
 		asserterMap.Set(curGoRID, defAsserter[i])
 	}
-	return popCurrentAsserter
+	return PopAsserter
 }
 
-func popCurrentAsserter() {
+// PopAsserter pops current gorounine specific asserter from packages memory.
+// Gorounine specific asserter can be set with [PushAsserter].
+//
+// When gorounine asserter isn't set package's default asserter is used. See
+// [SetDefault] for more information.
+func PopAsserter() {
 	asserterMap.Del(goid())
 }
 
