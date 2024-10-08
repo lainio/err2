@@ -29,15 +29,6 @@ func (db *Database) MoneyTransfer(from, to *Account, amount int) (err error) {
 	})
 
 	try.To(from.ReserveBalance(tx, amount))
-
-	defer err2.Handle(
-		&err,
-		func(err error) error { // optional, following sample's wording
-			err = fmt.Errorf("cannot %w", err)
-			return err
-		},
-	)
-
 	try.To(from.Withdraw(tx, amount))
 	try.To(to.Deposit(tx, amount))
 	try.To(tx.Commit())
