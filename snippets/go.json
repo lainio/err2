@@ -35,6 +35,11 @@
 			"body": "defer err2.Handle(&err, func(err error) error {\n\t$0\n})\n",
 			"description": "Snippet for err2.Handle(&err, func(err error) error {})"
 		},
+		"defer assert.PushAsserter(asserter.Plain)()": {
+			"prefix": "apu",
+			"body": "defer assert.PushAsserter(${1:asserter.Plain})()\n",
+			"description": "Snippet for 1-liner pushing AND poping asserter.Plain"
+		},
 		"defer assert.PushTester(t)()": {
 			"prefix": "aspa",
 			"body": "defer assert.PushTester(${1:t})()\n",
