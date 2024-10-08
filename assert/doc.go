@@ -25,7 +25,7 @@ all assert violations in the unit tests as well:
 	     assert.That(c.isLeaf(invitersKey), "only leaf can invite")
 
 If some assertion violation occurs in the deep call stack, they are still
-reported as a test failure. See the above code blocks. If assertion failure
+reported as test failures. See the above code blocks. If assertion failure
 happens somewhere inside the Invite function's call stack, it's still reported
 correctly as a test failure of the TestInvite unit test. It doesn't matter how
 deep the recursion is or if parallel test runs are performed. The failure report
@@ -35,12 +35,14 @@ chapter.
 # Call Stack Traversal During Tests
 
 The Assert package allows us to track assertion violations over the package and
-even module boundaries. When an assertion fails during the unit testing, the
-whole call stack is brought to unit test logs. And some help with your IDE, such
-as transferring output to a location list, for example, in Neovim/Vim. For
-example, you can find a proper test result parser like [nvim-go] (fork)
+module boundaries. When an assertion fails during the unit testing, the whole
+call stack is brought to unit test logs. And some help with your IDE, such as
+transferring output to a location list in Neovim/Vim. For example, you can find
+a compatible test result parser for Neovim from this plugin [nvim-go] (fork).
 
-With a sizeable multi-repo environment, this has proven to be valuable.
+The call stack traversal has proven to be very valuable for package and module
+development in Go, especially when following TDD and fast development feedback
+cycles.
 
 # Why Runtime Asserts Are So Important?
 
@@ -52,12 +54,12 @@ raise up quality of our software.
 The assert package offers a convenient way to set preconditions to code which
 allow us detect programming errors and API violations faster. Still allowing
 production-time error handling if needed. And everything is automatic. You can
-set gorountinen specific asserter with [PushAsserter] function.
+set goroutine specific asserter with [PushAsserter] function.
 
-You can set the assert package's default asserter with [SetDefault] or
--asserter flag if Go's flag package is in use. This allows developer, operator
-and every-day user share the exact same binary but get the error messages and
-diagnostic they need.
+The assert package's default asserter you can set with [SetDefault] or -asserter
+flag if Go's flag package (or similar) is in use. This allows developer,
+operator and every-day user share the exact same binary but get the error
+messages and diagnostic they need.
 
 	// Production asserter adds formatted caller info to normal errors.
 	// Information is transported thru error values when err2.Handle is in use.
