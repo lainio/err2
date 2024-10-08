@@ -54,18 +54,23 @@ raise up quality of our software.
 The assert package offers a convenient way to set preconditions to code which
 allow us detect programming errors and API violations faster. Still allowing
 production-time error handling if needed. And everything is automatic. You can
-set goroutine specific asserter with [PushAsserter] function.
+set a goroutine specific [Asserter] with [PushAsserter] function.
 
-The assert package's default asserter you can set with [SetDefault] or -asserter
-flag if Go's flag package (or similar) is in use. This allows developer,
-operator and every-day user share the exact same binary but get the error
-messages and diagnostic they need.
+The assert package's default [Asserter] you can set with [SetDefault] or
+-asserter flag if Go's flag package (or similar) is in use. This allows
+developer, operator and every-day user share the exact same binary but get the
+error messages and diagnostic they need.
 
 	// Production asserter adds formatted caller info to normal errors.
 	// Information is transported thru error values when err2.Handle is in use.
 	assert.SetDefault(assert.Production)
 
 Please see the code examples for more information.
+
+Note that if an [Asserter] is set for a goroutine level, it cannot be changed
+with the -asserter flag or [SetDefault]. The GLS [Asserter] is used for a
+reason, so it's good that even a unit test asserter won't override it in those
+cases.
 
 # Flag Package Support
 
