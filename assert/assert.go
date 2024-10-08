@@ -14,7 +14,7 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type defInd = uint32
+type Asserter = uint32
 
 // Asserters are the way to set what kind of messages assert package outputs if
 // assertion is violated.
@@ -25,18 +25,18 @@ type defInd = uint32
 //
 //	assert.NotEmpty(c.PoolName, "pool name cannot be empty")
 //
-// Note that Plain is only asserter that override auto-generated assertion
+// Note that Plain is only [Asserter] that override auto-generated assertion
 // messages with given arguments like 'pool name cannot be empty'. Others add
 // given arguments at the end of the auto-generated assert message.
 //
-// [Production] (pkg's default) is the best asserter for most cases. The
+// [Production] (pkg's default) is the best [Asserter] for most cases. The
 // assertion violations are treated as Go error values. And only a pragmatic
 // caller info is included into the error values like source filename, line
 // number, and caller function, all in one line:
 //
 //	copy file: main.go:37: CopyFile(): assertion violation: string shouldn't be empty
 //
-// [Development] is the best asserter for development use. The assertion
+// [Development] is the best [Asserter] for development use. The assertion
 // violations are treated as Go error values. And a formatted caller info is
 // included to the error message like source filename , line number, and caller
 // function. Everything in a noticeable multi-line message:
@@ -47,14 +47,14 @@ type defInd = uint32
 //	assertion violation: string shouldn't be empty
 //	--------------------------------
 //
-// [Test] minimalistic asserter for unit test use. More pragmatic is the
-// [TestFull] asserter (test default).
+// [Test] minimalistic [Asserter] for unit test use. More pragmatic is the
+// [TestFull] [Asserter] (test default).
 //
-// Use this asserter if your IDE/editor doesn't support full file names and it
+// Use this [Asserter] if your IDE/editor doesn't support full file names and it
 // relies a relative path (Go standard). You can use this also if you need
 // temporary problem solving for your programming environment.
 //
-// [TestFull] asserter (test default). The TestFull asserter includes the caller
+// [TestFull] [Asserter] (test default). The TestFull [Asserter] includes the caller
 // info and the call stack for unit testing, similarly like err2's error traces.
 // Note that [PushTester] set's TestFull if it's not yet set.
 //
@@ -70,7 +70,7 @@ type defInd = uint32
 // the make result parsers can process the output properly and allow traverse of
 // locations of the error trace.
 //
-// [Debug] asserter transforms assertion violations to panic calls where panic
+// [Debug] [Asserter] transforms assertion violations to panic calls where panic
 // object's type is string, i.e., err2 package treats it as a normal panic, not
 // an error.
 //
@@ -86,7 +86,7 @@ type defInd = uint32
 //
 // [nvim-go]: https://github.com/lainio/nvim-go
 const (
-	Plain defInd = 0 + iota
+	Plain Asserter = 0 + iota
 	Production
 	Development
 	Test
@@ -118,7 +118,7 @@ var (
 	//  TestFull
 	//  Debug
 	defAsserter = []asserter{plain, prod, dev, test, testFull, dbg}
-	def         defInd
+	def         Asserter
 
 	// mu is package lvl Mutex that is used to cool down race detector of
 	// client pkgs, i.e. packages that use us can use -race flag in their test
@@ -165,7 +165,7 @@ const (
 	conCatErrStr = ": "
 )
 
-// PushTester sets the current testing context for default asserter. This must
+// PushTester sets the current testing context for default [Asserter]. This must
 // be called at the beginning of every test. There is two way of doing it:
 //
 //	for _, tt := range tests {
@@ -186,7 +186,7 @@ const (
 // to one line. See the first t.Run call above. See more information in
 // [PopTester].
 //
-// PushTester allows you to change the current default asserter by accepting it
+// PushTester allows you to change the current default [Asserter] by accepting it
 // as a second argument.
 //
 // Note that you MUST call PushTester for sub-goroutines:
@@ -197,10 +197,10 @@ const (
 //	     assert.PushTester(t)()
 //	     ...
 //
-// Note that the second argument, if given, changes the default asserter for
+// Note that the second argument, if given, changes the default [Asserter] for
 // whole package. The argument is mainly for temporary development use and isn't
 // not preferred API usage.
-func PushTester(t testing.TB, a ...defInd) function {
+func PushTester(t testing.TB, a ...Asserter) function {
 	if len(a) > 0 {
 		SetDefault(a[0])
 	} else if current()&asserterUnitTesting == 0 {
@@ -273,7 +273,7 @@ func tester() (t testing.TB) {
 
 // NotImplemented always panics with 'not implemented' assertion message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func NotImplemented(a ...any) {
@@ -284,7 +284,7 @@ func NotImplemented(a ...any) {
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func ThatNot(term bool, a ...any) {
@@ -297,7 +297,7 @@ func ThatNot(term bool, a ...any) {
 // formatting string. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func That(term bool, a ...any) {
@@ -312,9 +312,9 @@ func doThat(a []any) {
 }
 
 // NotNil asserts that the pointer IS NOT nil. If it is it panics/errors (default
-// Asserter) the auto-generated (args appended) message.
+// [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func NotNil[P ~*T, T any](p P, a ...any) {
@@ -324,9 +324,9 @@ func NotNil[P ~*T, T any](p P, a ...any) {
 }
 
 // Nil asserts that the pointer IS nil. If it is not it panics/errors (default
-// Asserter) the auto-generated (args appended) message.
+// [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func Nil[T any](p *T, a ...any) {
@@ -336,9 +336,9 @@ func Nil[T any](p *T, a ...any) {
 }
 
 // INil asserts that the interface value IS nil. If it is it panics/errors
-// (default Asserter) the auto-generated (args appended) message.
+// (default [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -354,9 +354,9 @@ func INil(i any, a ...any) {
 }
 
 // INotNil asserts that the interface value is NOT nil. If it is it
-// panics/errors (default Asserter) the auto-generated (args appended) message.
+// panics/errors (default [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -372,9 +372,9 @@ func INotNil(i any, a ...any) {
 }
 
 // SNil asserts that the slice IS nil. If it is it panics/errors (default
-// Asserter) the auto-generated (args appended) message.
+// [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func SNil[S ~[]T, T any](s S, a ...any) {
@@ -384,9 +384,9 @@ func SNil[S ~[]T, T any](s S, a ...any) {
 }
 
 // CNil asserts that the channel is nil. If it is not it panics/errors
-// (default Asserter) the auto-generated (args appended) message.
+// (default [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func CNil[C ~chan T, T any](c C, a ...any) {
@@ -396,9 +396,9 @@ func CNil[C ~chan T, T any](c C, a ...any) {
 }
 
 // MNil asserts that the map is nil. If it is not it panics/errors (default
-// Asserter) the auto-generated (args appended) message.
+// [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func MNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
@@ -408,9 +408,9 @@ func MNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 }
 
 // SNotNil asserts that the slice is not nil. If it is it panics/errors (default
-// Asserter) the auto-generated (args appended) message.
+// [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func SNotNil[S ~[]T, T any](s S, a ...any) {
@@ -420,9 +420,9 @@ func SNotNil[S ~[]T, T any](s S, a ...any) {
 }
 
 // CNotNil asserts that the channel is not nil. If it is it panics/errors
-// (default Asserter) the auto-generated (args appended) message.
+// (default [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func CNotNil[C ~chan T, T any](c C, a ...any) {
@@ -432,9 +432,9 @@ func CNotNil[C ~chan T, T any](c C, a ...any) {
 }
 
 // MNotNil asserts that the map is not nil. If it is it panics/errors (default
-// Asserter) the auto-generated (args appended) message.
+// [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
@@ -444,14 +444,14 @@ func MNotNil[M ~map[T]U, T comparable, U any](m M, a ...any) {
 }
 
 // NotEqual asserts that the values aren't equal. If they are it panics/errors
-// (according the current Asserter) with the auto-generated message. You can
+// (according the current [Asserter]) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
-// Note, when asserter is [Plain], optional arguments are used to build a new
+// Note, when [Asserter] is [Plain], optional arguments are used to build a new
 // assert violation message.
 func NotEqual[T comparable](val, want T, a ...any) {
 	if want == val {
@@ -460,10 +460,10 @@ func NotEqual[T comparable](val, want T, a ...any) {
 }
 
 // Equal asserts that the values are equal. If not it panics/errors (according
-// the current Asserter) with the auto-generated message. You can append the
+// the current [Asserter]) with the auto-generated message. You can append the
 // generated got-want message by using optional message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func Equal[T comparable](val, want T, a ...any) {
@@ -483,11 +483,11 @@ func doShouldNotBeEqual[T comparable](aname string, val, want T, a []any) {
 }
 
 // DeepEqual asserts that the (whatever) values are equal. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func DeepEqual(val, want any, a ...any) {
@@ -498,11 +498,11 @@ func DeepEqual(val, want any, a ...any) {
 }
 
 // NotDeepEqual asserts that the (whatever) values are equal. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -522,11 +522,11 @@ func NotDeepEqual(val, want any, a ...any) {
 }
 
 // Len asserts that the length of the string is equal to the given. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -541,11 +541,11 @@ func Len(obj string, length int, a ...any) {
 }
 
 // Longer asserts that the length of the string is longer to the given. If not
-// it panics/errors (according the current Asserter) with the auto-generated
+// it panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -565,11 +565,11 @@ func doLonger(l int, length int, a []any) {
 }
 
 // Shorter asserts that the length of the string is shorter to the given. If not
-// it panics/errors (according the current Asserter) with the auto-generated
+// it panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -589,11 +589,11 @@ func doShorter(l int, length int, a []any) {
 }
 
 // SLen asserts that the length of the slice is equal to the given. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -608,11 +608,11 @@ func SLen[S ~[]T, T any](obj S, length int, a ...any) {
 }
 
 // SLonger asserts that the length of the slice is equal to the given. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -627,11 +627,11 @@ func SLonger[S ~[]T, T any](obj S, length int, a ...any) {
 }
 
 // SShorter asserts that the length of the slice is equal to the given. If not
-// it panics/errors (according the current Asserter) with the auto-generated
+// it panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -646,11 +646,11 @@ func SShorter[S ~[]T, T any](obj S, length int, a ...any) {
 }
 
 // MLen asserts that the length of the map is equal to the given. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -665,11 +665,11 @@ func MLen[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 }
 
 // MLonger asserts that the length of the map is longer to the given. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -684,11 +684,11 @@ func MLonger[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 }
 
 // MShorter asserts that the length of the map is shorter to the given. If not
-// it panics/errors (according the current Asserter) with the auto-generated
+// it panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -703,11 +703,11 @@ func MShorter[M ~map[T]U, T comparable, U any](obj M, length int, a ...any) {
 }
 
 // CLen asserts that the length of the chan is equal to the given. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -722,11 +722,11 @@ func CLen[C ~chan T, T any](obj C, length int, a ...any) {
 }
 
 // CLonger asserts that the length of the chan is longer to the given. If not it
-// panics/errors (according the current Asserter) with the auto-generated
+// panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -741,11 +741,11 @@ func CLonger[C ~chan T, T any](obj C, length int, a ...any) {
 }
 
 // CShorter asserts that the length of the chan is shorter to the given. If not
-// it panics/errors (according the current Asserter) with the auto-generated
+// it panics/errors (according the current [Asserter]) with the auto-generated
 // message. You can append the generated got-want message by using optional
 // message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -760,9 +760,9 @@ func CShorter[C ~chan T, T any](obj C, length int, a ...any) {
 }
 
 // MKeyExists asserts that the map key exists. If not it panics/errors (current
-// Asserter) the auto-generated (args appended) message.
+// [Asserter]) the auto-generated (args appended) message.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func MKeyExists[M ~map[T]U, T comparable, U any](
@@ -785,10 +785,10 @@ func doMKeyExists(key any, a []any) {
 }
 
 // NotEmpty asserts that the string is not empty. If it is, it panics/errors
-// (according the current Asserter) with the auto-generated message. You can
+// (according the current [Asserter]) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func NotEmpty(obj string, a ...any) {
@@ -798,10 +798,10 @@ func NotEmpty(obj string, a ...any) {
 }
 
 // Empty asserts that the string is empty. If it is NOT, it panics/errors
-// (according the current Asserter) with the auto-generated message. You can
+// (according the current [Asserter]) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func Empty(obj string, a ...any) {
@@ -811,10 +811,10 @@ func Empty(obj string, a ...any) {
 }
 
 // SEmpty asserts that the slice is empty. If it is NOT, it panics/errors
-// (according the current Asserter) with the auto-generated message. You can
+// (according the current [Asserter]) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -829,10 +829,10 @@ func SEmpty[S ~[]T, T any](obj S, a ...any) {
 }
 
 // SNotEmpty asserts that the slice is not empty. If it is, it panics/errors
-// (according the current Asserter) with the auto-generated message. You can
+// (according the current [Asserter]) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -847,12 +847,12 @@ func SNotEmpty[S ~[]T, T any](obj S, a ...any) {
 }
 
 // MEmpty asserts that the map is empty. If it is NOT, it panics/errors
-// (according the current Asserter) with the auto-generated message. You can
+// (according the current [Asserter]) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 // You can append the generated got-want message by using optional message
 // arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -867,12 +867,12 @@ func MEmpty[M ~map[T]U, T comparable, U any](obj M, a ...any) {
 }
 
 // MNotEmpty asserts that the map is not empty. If it is, it panics/errors
-// (according the current Asserter) with the auto-generated message. You can
+// (according the current [Asserter]) with the auto-generated message. You can
 // append the generated got-want message by using optional message arguments.
 // You can append the generated got-want message by using optional message
 // arguments.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 //
@@ -913,7 +913,7 @@ func NoError(err error, a ...any) {
 // violation message. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func Error(err error, a ...any) {
@@ -931,7 +931,7 @@ func doError(a []any) {
 // and builds a violation message. Thanks to inlining, the performance penalty
 // is equal to a single 'if-statement' that is almost nothing.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func Greater[T Number](val, want T, a ...any) {
@@ -949,7 +949,7 @@ func doGreater[T Number](val, want T, a []any) {
 // builds a violation message. Thanks to inlining, the performance penalty is
 // equal to a single 'if-statement' that is almost nothing.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func Less[T Number](val, want T, a ...any) {
@@ -967,7 +967,7 @@ func doLess[T Number](val, want T, a []any) {
 // violation message. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func Zero[T Number](val T, a ...any) {
@@ -985,7 +985,7 @@ func doZero[T Number](val T, a []any) {
 // violation message. Thanks to inlining, the performance penalty is equal to a
 // single 'if-statement' that is almost nothing.
 //
-// Note that when [Plain] asserter is used ([PushAsserter] or even
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func NotZero[T Number](val T, a ...any) {
@@ -999,7 +999,7 @@ func doNotZero[T Number](val T, a []any) {
 	current().reportAssertionFault(1, defMsg, a)
 }
 
-// current returns a current default asserter used for assert functions like
+// current returns a current default [Asserter] used for assert functions like
 // assert.That() in this gorounine.
 //
 // NOTE this indexing stuff is done because of race detection to work on client
@@ -1021,8 +1021,8 @@ func current() (curAsserter asserter) {
 	return curAsserter
 }
 
-// SetDefault sets the current default asserter for assert pkg. It also returns
-// the previous asserter.
+// SetDefault sets the current default [Asserter] for assert pkg. It also
+// returns the previous [Asserter].
 //
 // Note that you should use this in TestMain function, and use [flag] package to
 // set it for the app. For the tests you can set it to panic about every
@@ -1034,12 +1034,12 @@ func current() (curAsserter asserter) {
 // what's best for your case.
 //
 // Tip. If our own packages (client packages for assert) have lots of parallel
-// testing and race detection, please try to use same asserter for all of them
-// and set asserter only one in TestMain, or in init.
+// testing and race detection, please try to use same [Asserter] for all of them
+// and set [Asserter] only one in TestMain, or in init.
 //
 //	func TestMain(m *testing.M) {
 //	     SetDefault(assert.TestFull)
-func SetDefault(i defInd) (old defInd) {
+func SetDefault(i Asserter) (old Asserter) {
 	// pkg lvl lock to allow only one pkg client call this at one of the time
 	// together with the indexing, i.e we don't need to switch asserter
 	// variable or pointer to it but just index to array they are stored.
@@ -1056,15 +1056,16 @@ func SetDefault(i defInd) (old defInd) {
 	return
 }
 
-// PushAsserter set asserter for the current GLS (Gorounine Local Storage). That
-// allows us to have multiple different [asserter] in use in the same process.
+// PushAsserter set [Asserter] for the current GLS (Gorounine Local Storage).
+// That allows us to have multiple different [Asserter] in use in the same
+// process.
 //
 // Let's say that in some function you want to return plain error messages
 // instead of the panic asserts, you can use following in the top-level
 // function:
 //
 //	defer assert.PushAsserter(assert.Plain)()
-func PushAsserter(i defInd) func() {
+func PushAsserter(i Asserter) func() {
 	// get pkg lvl asserter
 	curAsserter := defAsserter[def]
 	// ..  to check if we are doing unit tests
@@ -1076,17 +1077,17 @@ func PushAsserter(i defInd) func() {
 	return PopAsserter
 }
 
-// PopAsserter pops current gorounine specific asserter from packages memory.
-// Gorounine specific asserter can be set with [PushAsserter].
+// PopAsserter pops current gorounine specific [Asserter] from packages memory.
+// Gorounine specific [Asserter] can be set with [PushAsserter].
 //
-// When gorounine asserter isn't set package's default asserter is used. See
+// When gorounine [Asserter] isn't set package's default [Asserter] is used. See
 // [SetDefault] for more information.
 func PopAsserter() {
 	asserterMap.Del(goid())
 }
 
 // mapDefInd runtime asserters, that's why test asserts are removed for now.
-var mapDefInd = map[string]defInd{
+var mapDefInd = map[string]Asserter{
 	"Plain": Plain,
 	"Prod":  Production,
 	"Dev":   Development,
@@ -1095,7 +1096,7 @@ var mapDefInd = map[string]defInd{
 	"Debug": Debug,
 }
 
-var mapDefIndToString = map[defInd]string{
+var mapDefIndToString = map[Asserter]string{
 	Plain:       "Plain",
 	Production:  "Prod",
 	Development: "Dev",
@@ -1108,7 +1109,7 @@ func defaultAsserterString() string {
 	return mapDefIndToString[def]
 }
 
-func newDefInd(v string) defInd {
+func newDefInd(v string) Asserter {
 	ind, found := mapDefInd[v]
 	if !found {
 		return Plain
