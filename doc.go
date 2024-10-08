@@ -75,7 +75,7 @@ programmatically (before [flag.Parse] if you are using that):
 	 or
 	err2.SetPanicTracer(log.Writer()) // panic stack trace to std logger
 
-Note. Since [Catch]'s default mode is to recover from panics, it's a good
+Note that since [Catch]'s default mode is to recover from panics, it's a good
 practice still print their stack trace. The panic tracer's default values is
 [os.Stderr]. The default error tracer is nil.
 
