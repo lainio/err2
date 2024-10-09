@@ -2,6 +2,18 @@
 
 ### Version history
 
+##### 1.0.0
+- **Finally! We are very happy, and thanks to all who have helped!**
+- Lots of documentation updates and cleanups for version 1.0.0
+- `Catch/Handle` take unlimited amount error handler functions
+  - allows building e.g. error handling middlewares
+  - this is major feature because it allows building helpers/add-ons
+- automatic outputs aren't overwritten by given args, only with `assert.Plain`
+- Minor API fixes to still simplify it:
+  - remove exported vars, obsolete types and funcs from `assert` pkg
+  - `Result2.Def2()` sets only `Val2`
+- technical refactorings: variadic function calls only in API level
+
 ##### 0.9.52
 - `err2.Stderr` helpers for `Catch/Handle` to direct auto-logging + snippets
 - `assert` package `Shorter` `Longer` helpers for automatic messages

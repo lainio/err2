@@ -524,14 +524,14 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.0.0
-- **Finally! We are very happy, and thanks to all who have helped!**
-- Lots of documentation updates and cleanups for version 1.0.0
-- `Catch/Handle` take unlimited amount error handler functions
-  - allows building e.g. error handling middlewares
-  - this is major feature because it allows building helpers/add-ons
-- automatic outputs aren't overwritten by given args, only with `assert.Plain`
-- Minor API fixes to still simplify it:
-  - remove exported vars, obsolete types and funcs from `assert` pkg
-  - `Result2.Def2()` sets only `Val2`
-- technical refactorings: variadic function calls only in API level
+##### 1.1.0
+- `assert` package:
+    - bug fix: call stack traversal during unit testing in some situations
+    - **all generics-based functions are inline expansed**
+    - *performance* is now *same as if-statements for all functions*
+    - new assert functions: `MNil`, `CNil`, `Less`, `Greater`
+    - all assert messages flow Go idiom: `got want`
+    - `Asserter` can be set per goroutine: `PushAsserter`
+- `try` package:
+    - new check functions: `T`, `T1`, `T2`, `T3`, for quick refactoring to annotate an error locally
+    - **all functions are inline expansed**: if-statement equal performance
