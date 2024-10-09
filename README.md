@@ -493,6 +493,9 @@ help:
 - and most importantly, **it keeps your code more refactorable** because you
   don't have to repeat yourself.
 
+<details>
+<summary>Learnings...>
+
 ## Learnings by so far
 
 We have used the `err2` and `assert` packages in several projects. The results
@@ -514,6 +517,8 @@ been much easier.** There is an excellent [blog post](https://jesseduffield.com/
 about the issues you are facing with Go's error handling without the help of
 the err2 package.
 
+</details><br/>
+
 ## Support And Contributions
 
 The package has been in experimental mode quite long time. Since the Go generics
@@ -531,8 +536,8 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
     - bug fix: call stack traversal during unit testing in some situations
     - **all generics-based functions are inline expansed**
     - *performance* is now *same as if-statements for all functions*
-    - new assert functions: `MNil`, `CNil`, `Less`, `Greater`
-    - all assert messages flow Go idiom: `got want`
+    - new assert functions: `MNil`, `CNil`, `Less`, `Greater`, etc.
+    - all assert messages follow Go idiom: `got, want`
     - `Asserter` can be set per goroutine: `PushAsserter`
 - `try` package:
     - new check functions: `T`, `T1`, `T2`, `T3`, for quick refactoring to annotate an error locally
