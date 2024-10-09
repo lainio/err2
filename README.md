@@ -494,7 +494,7 @@ help:
   don't have to repeat yourself.
 
 <details>
-<summary>Learnings...>
+<summary>Learnings...</summary>
 
 ## Learnings by so far
 
