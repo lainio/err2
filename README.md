@@ -64,13 +64,14 @@ func CopyFile(src, dst string) (err error) {
 All of the listed above **without any performance penalty**! You are welcome to
 run `benchmarks` in the project repo and see yourself.
 
-Please note that many benchmarks run 'too fast' according to the common Go
-benchmarking rules, i.e., compiler optimizations
-([inlining](https://en.wikipedia.org/wiki/Inline_expansion)) are working so well
-that there are no meaningful results. But for this type of package, where **we
-compete with if-statements, that's precisely what we hope to achieve.** The
-whole package is written toward that goal. Especially with parametric
-polymorphism, it's been quite the effort.
+> [!IMPORTANT]
+> Most of the benchmarks run 'too fast' according to the common Go
+> benchmarking rules, i.e., compiler optimizations
+> ([inlining](https://en.wikipedia.org/wiki/Inline_expansion)) are working so
+> well that there are no meaningful results. But for this type of package, where
+> **we compete with if-statements, that's precisely what we hope to achieve.**
+> The whole package is written toward that goal. Especially with parametric
+> polymorphism, it's been quite the effort.
 
 ## Automatic Error Propagation
 
@@ -79,11 +80,8 @@ little error handling. But most importantly, it doesn't help developers with
 **automatic** error propagation, which would have the same benefits as, e.g.,
 **automated** garbage collection or automatic testing:
 
-> Automation is not just about efficiency but primarily about repeatability and
-> resilience. -- Gregor Hohpe
-
-Automatic error propagation is crucial because it makes your code change
-tolerant. And, of course, it helps to make your code error-safe:
+Automatic error propagation is crucial because it makes your *code change
+tolerant*. And, of course, it helps to make your code error-safe:
 
 ![Never send a human to do a machine's job](https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
 
@@ -160,9 +158,10 @@ If no `Tracer` is set no stack tracing is done. This is the default because in
 the most cases proper error messages are enough and panics are handled
 immediately by a programmer.
 
-> Note. Since v0.9.5 you can set these tracers through Go's standard flag
-> package just by adding `flag.Parse()` to your program. See more information
-> from [Automatic Flags](#automatic-flags).
+> [!NOTE]
+> Since v0.9.5 you can set these asserters through Go's standard flag package
+> just by adding `flag.Parse()` to your program. See more information from
+> [Automatic Flags](#automatic-flags).
 
 [Read the package documentation for more
 information](https://pkg.go.dev/github.com/lainio/err2).
@@ -236,13 +235,15 @@ notExist := try.Is(r2.err, plugin.ErrNotExist)
 // real errors are cought and the returned boolean tells if value
 // dosen't exist returned as `plugin.ErrNotExist`
 ```
-**Note.** Any other error than `plugin.ErrNotExist` is treated as an real error:
-1. `try.Is` function first checks `if err == nil`, and if yes, it returns
-   `false`.
-2. Then it checks if `errors.Is(err, plugin.ErrNotExist)` and if yes, it returns
-   `true`.
-3. Finally, it calls `try.To` for the non nil error, and we already know what then
-   happens: nearest `err2.Handle` gets it first.
+
+> [!NOTE] 
+> Any other error than `plugin.ErrNotExist` is treated as an real error:
+> 1. `try.Is` function first checks `if err == nil`, and if yes, it returns
+>    `false`.
+> 2. Then it checks if `errors.Is(err, plugin.ErrNotExist)` and if yes, it returns
+>    `true`.
+> 3. Finally, it calls `try.To` for the non nil error, and we already know what then
+>    happens: nearest `err2.Handle` gets it first.
 
 These `try.Is` functions help cleanup mess idiomatic Go, i.e. mixing happy and
 error path, leads to.
@@ -293,9 +294,10 @@ error messages as simple as possible. And by offering option to turn additional
 information on, which allows super users and developers get more technical
 information when needed.
 
-> Note. Since v0.9.5 you can set these asserters through Go's standard flag
-> package just by adding `flag.Parse()` to your program. See more information
-> from [Automatic Flags](#automatic-flags).
+> [!NOTE]
+> Since v0.9.5 you can set these asserters through Go's standard flag package
+> just by adding `flag.Parse()` to your program. See more information from
+> [Automatic Flags](#automatic-flags).
 
 #### Assertion Package for Runtime Use
 
