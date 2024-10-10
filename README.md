@@ -294,13 +294,13 @@ The `assert` package is meant to be used for *design-by-contract-* type of
 development where you set pre- and post-conditions for *all* of your functions,
 *including test functions*. These asserts are as fast as if-statements.
 
-<details>
-<summary>Fast Clean Code</summary>
-<br/>
-
 > [!IMPORTANT]
 > It works *both runtime and for tests.* And even better, same asserts work in
 > both running modes.
+
+<details>
+<summary>Fast Clean Code</summary>
+<br/>
 
 Asserts are not meant to replace the normal error checking but speed up the
 incremental hacking cycle like TDD. The default mode is to return an `error`
