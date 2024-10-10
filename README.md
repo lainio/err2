@@ -147,14 +147,16 @@ own purposes.
 
 #### Error Stack Tracing
 
-The err2 offers optional stack tracing. It's automatic and optimized. Optimized
-means that the call stack is processed before output. That means that stack
-trace starts from where the actual error/panic is occurred, not where the error
-is caught. You don't need to search for the line where the pointer was nil or
-received an error. That line is in the first one you are seeing:
+The err2 offers optional stack tracing. It's *automatic* and *optimized*. 
 
 <details>
 <summary>The example of the optimized call stack:</summary>
+
+Optimized means that the call stack is processed before output. That means that
+stack trace *starts from where the actual error/panic is occurred*, not where
+the error or panic is caught. You don't need to search for the line where the
+pointer was nil or received an error. That line is in the first one you are
+seeing:
 
 ```sh
 ---
@@ -214,37 +216,51 @@ but not without an error handler (`err2.Handle`). However, you can put your
 error handlers where ever you want in your call stack. That can be handy in the
 internal packages and certain types of algorithms.
 
+<details>
+<summary>Immediate Error Handling Options</summary>
+<br/>
+
 In cases where you want to handle the error immediately after the function call
-return you can use Go's default `if` statement. However, we encourage you to use
-the `errdefer` concept, `defer err2.Handle(&err)` for all of your error
-handling.
+return you can use Go's default `if` statement. However, `defer err2.Handle(&err)`
+for all of your error handling.
 
 Nevertheless, there might be cases where you might want to:
 1. Suppress the error and use some default value.
+   ```go
+   b := try.Out1(strconv.Atoi(s)).Catch(100)
+   ```
 1. Just write logging output and continue without breaking the execution.
+   ```go
+   b := try.Out1(strconv.Atoi(s)).Logf("%s => 100", s)
+   ```
 1. Annotate the specific error value even when you have a general error handler.
-1. You want to handle the specific error value, let's say, at the same line
-   or statement.
+   You are already familiar with `try.To` functions. There's *fast* annotation
+   versions `try.T` which can be used as shown below:
+   ```go
+   b := try.T1(io.ReadAll(r))("cfg file read")
+   // where original were, for example:
+   b := try.To1(io.ReadAll(r))
+   ```
+1. You want to handle the specific error value, let's say, at the same line or
+   statement. In below, the function `doSomething` returns an error value. If it
+   returns `ErrNotSoBad`, we just suppress it. All the other errors are send to
+   the current error handler and be handled there, but are annotated with
+   'fatal' prefix before that.
+   ```go
+   try.Out(doSomething()).Handle(ErrNotSoBad, err2.Reset).Handle("fatal")
+   ```
 
-The `err2/try` package offers other helpers based on the DSL concept
-where the DSL's domain is error-handling. It's based on functions `try.Out`,
-`try.Out1`, and `try.Out2`, which return instances of types `Result`, `Result1`,
-and `Result2`. The `try.Result` is similar to other programming languages,
-i.e., discriminated union. Please see more from its documentation.
-
-Now we could have the following:
-
-```go
-b := try.Out1(strconv.Atoi(s)).Logf("%s => 100", s).Catch(100)
-```
-
-The previous statement tries to convert incoming string value `s`, but if it
-doesn't succeed, it writes a warning to logs and uses the default value (100).
-The logging result includes the original error message as well.
+The `err2/try` package offers other helpers based on the error-handling
+language/API. It's based on functions `try.Out`, `try.Out1`, and `try.Out2`,
+which return instances of types `Result`, `Result1`, and `Result2`. The
+`try.Result` is similar to other programming languages, i.e., discriminated
+union. Please see more from its documentation.
 
 It's easy to see that panicking about the errors at the start of the development
 is far better than not checking errors at all. But most importantly, `err2/try`
 **keeps the code readable.**
+
+</details>
 
 #### Filters for non-errors like io.EOF
 
@@ -275,17 +291,31 @@ For more information see the examples in the documentation of both functions.
 ## Assertion
 
 The `assert` package is meant to be used for *design-by-contract-* type of
-development where you set pre- and post-conditions for your functions. It's not
-meant to replace the normal error checking but speed up the incremental hacking
-cycle. The default mode is to return an `error` value that includes a formatted
-and detailed assertion violation message. A developer gets immediate and proper
-feedback, allowing cleanup of the code and APIs before the release.
+development where you set pre- and post-conditions for *all* of your functions,
+*including test functions*. These asserts are as fast as if-statements.
+
+<details>
+<summary>Fast Clean Code</summary>
+<br/>
+
+> [!IMPORTANT]
+> It works *both runtime and for tests.* And even better, same asserts work in
+> both running modes.
+
+Asserts are not meant to replace the normal error checking but speed up the
+incremental hacking cycle like TDD. The default mode is to return an `error`
+value that includes a formatted and detailed assertion violation message. A
+developer gets immediate and proper feedback independently of the running mode,
+allowing very fast feedback cycles.
+
+</details>
 
 #### Asserters
 
 The assert package offers a few pre-build *asserters*, which are used to
-configure how the assert package deals with assert violations. The line below
-exemplifies how the default asserter is set in the package.
+configure *how the assert package deals with assert violations*. The line below
+exemplifies how the default asserter is set in the package. (See the
+documentation for more information about asserters.)
 
 ```go
 assert.SetDefault(assert.Production)
@@ -325,7 +355,8 @@ automatic testing as well.
 
 #### Assertion Package for Unit Testing
 
-The same asserts can be used **and shared** during the unit tests.
+The same asserts can be used **and shared** during the unit tests over module
+boundaries.
 
 <details>
 <summary>The unit test code example:</summary>
@@ -555,9 +586,10 @@ the err2 package.
 
 ## Support And Contributions
 
-The package has been in experimental mode quite long time. Since the Go generics
-we are transiting towards more official mode. Currently we offer support by
-GitHub Discussions. Naturally, any issues and contributions are welcome as well!
+The package was in experimental mode quite long time. Since the Go generics we
+did transit to official mode. Currently we offer support by GitHub Issues and
+Discussions. Naturally, we appreciate all feedback and contributions are
+very welcome!
 
 ## Roadmap
 
