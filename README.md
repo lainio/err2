@@ -69,7 +69,10 @@ func CopyFile(src, dst string) (err error) {
 All of the listed above **without any performance penalty**! You are welcome to
 run `benchmarks` in the project repo and see yourself.
 
-> [!IMPORTANT]
+<details>
+<summary><b>It's too fast!</b></summary>
+<br/>
+
 > Most of the benchmarks run 'too fast' according to the common Go
 > benchmarking rules, i.e., compiler optimizations
 > ([inlining](https://en.wikipedia.org/wiki/Inline_expansion)) are working so
@@ -77,6 +80,8 @@ run `benchmarks` in the project repo and see yourself.
 > **we compete with if-statements, that's precisely what we hope to achieve.**
 > The whole package is written toward that goal. Especially with parametric
 > polymorphism, it's been quite the effort.
+
+</details>
 
 ## Automatic Error Propagation
 
@@ -218,7 +223,7 @@ error handlers where ever you want in your call stack. That can be handy in the
 internal packages and certain types of algorithms.
 
 <details>
-<summary>Immediate Error Handling Options</summary>
+<summary><b>Immediate Error Handling Options</b></summary>
 <br/>
 
 In cases where you want to handle the error immediately after the function call
@@ -305,7 +310,7 @@ development where you set pre- and post-conditions for *all* of your functions,
 #### Asserters
 
 <details>
-<summary>Fast Clean Code with Asserters</summary>
+<summary><b>Fast Clean Code with Asserters</b></summary>
 <br/>
 
 Asserts are not meant to replace the normal error checking but speed up the
@@ -365,7 +370,6 @@ boundaries.
 <details>
 <summary>The unit test code example:</summary>
 
-
 ```go
 func TestWebOfTrustInfo(t *testing.T) {
 	defer assert.PushTester(t)()
@@ -418,7 +422,7 @@ You can deploy your applications and services with the simple *end-user friendly
 error messages and no stack traces.*
 
 <details>
-<summary>You can switch them on when ever you need them again.</summary>
+<summary>You can switch them on whenever you need them again.</summary>
 <br/>
 
 Let's say you have build CLI (`your-app`) tool with the support for Go's flag
@@ -504,11 +508,12 @@ Flags:
 ## Code Snippets
 
 <details>
-<summary>Most of the repetitive code blocks are offered as code snippets.</summary>
+<summary>Code snippets as learning helpers.</summary>
 <br/>
 
-They are in `./snippets` in VC code format, which is well supported e.g. neovim,
-etc.
+The snippets are in `./snippets` and in VC code format, which is well supported
+e.g. neovim, etc. They are proven to be useful tool especially when you are
+starting to use the err2 and its sub-packages.
 
 The snippets must be installed manually to your preferred IDE/editor. During the
 installation you can modify the according your style or add new ones. We would
