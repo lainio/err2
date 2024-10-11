@@ -62,7 +62,7 @@ func CopyFile(src, dst string) (err error) {
 - The `err2` (main) package includes declarative error handling functions.
 - The `try` package offers error checking functions.
 - The `assert` package implements assertion helpers for **both** unit-testing
-  and *design-by-contract*.
+  and *design-by-contract* with the *same API and cross-usage*.
 
 ## Performance
 
@@ -302,8 +302,10 @@ development where you set pre- and post-conditions for *all* of your functions,
 > It works *both runtime and for tests.* And even better, same asserts work in
 > both running modes.
 
+#### Asserters
+
 <details>
-<summary>Fast Clean Code</summary>
+<summary>Fast Clean Code with Asserters</summary>
 <br/>
 
 Asserts are not meant to replace the normal error checking but speed up the
@@ -311,10 +313,6 @@ incremental hacking cycle like TDD. The default mode is to return an `error`
 value that includes a formatted and detailed assertion violation message. A
 developer gets immediate and proper feedback independently of the running mode,
 allowing very fast feedback cycles.
-
-</details>
-
-#### Asserters
 
 The assert package offers a few pre-build *asserters*, which are used to
 configure *how the assert package deals with assert violations*. The line below
@@ -335,6 +333,8 @@ defer assert.PushAsserter(assert.Plain)()
 
 This is especially good if you want to use assert functions for CLI's flag
 validation or you want your app behave like legacy Go programs.
+
+</details>
 
 > [!NOTE]
 > Since v0.9.5 you can set these asserters through Go's standard flag package
