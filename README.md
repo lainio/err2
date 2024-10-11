@@ -5,7 +5,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/lainio/err2)](https://pkg.go.dev/mod/github.com/lainio/err2)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lainio/err2?style=flat-square)](https://goreportcard.com/report/github.com/lainio/err2)
 
-<img src="https://github.com/lainio/err2/raw/bench-tests/logo/logo.png" width="100">
+<img src="https://github.com/lainio/err2/raw/master/logo/logo.png" width="100">
 
 ----
 
