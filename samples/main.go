@@ -6,10 +6,16 @@ import (
 	"os"
 
 	"github.com/lainio/err2"
+	"github.com/lainio/err2/assert"
 )
 
 var (
-	mode  = flag.String("mode", "play", "runs the wanted playground: db, play, nil")
+	mode = flag.String(
+		"mode",
+		"play",
+		"runs the wanted playground: db, play, nil, assert,"+
+			"\nassert-keep (= uses assert.Debug in GLS)",
+	)
 	isErr = flag.Bool("err", false, "tells if we want to have an error")
 )
 
@@ -36,7 +42,28 @@ func main() {
 		doMain2()
 	case "play":
 		doPlayMain()
+	case "assert":
+		doAssertMainKeepGLSAsserter(false)
+	case "assert-keep":
+		doAssertMainKeepGLSAsserter(true)
 	default:
 		err2.Throwf("unknown (%v) playground given", *mode)
+	}
+}
+
+func doAssertMainKeepGLSAsserter(keep bool) {
+	asserterPusher(keep)
+	asserterTester()
+}
+
+func asserterTester() {
+	//defer assert.PushAsserter(assert.Development)()
+	assert.That(false)
+}
+
+func asserterPusher(keep bool) {
+	pop := assert.PushAsserter(assert.Debug)
+	if !keep { // if not keep we free
+		pop()
 	}
 }

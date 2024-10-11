@@ -1,6 +1,7 @@
 package err2_test
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -8,24 +9,24 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
-	"github.com/lainio/err2/internal/test"
+	"github.com/lainio/err2/internal/require"
 	"github.com/lainio/err2/try"
 )
 
 const errStringInThrow = "this is an ERROR"
 
-func throw() (string, error) {
-	return "", fmt.Errorf(errStringInThrow)
-}
+var (
+	errToTest = errors.New(errStringInThrow)
+)
 
-func twoStrNoThrow() (string, string, error)        { return "test", "test", nil }
-func intStrNoThrow() (int, string, error)           { return 1, "test", nil }
+func throw() (string, error)   { return "", errToTest }
+func noThrow() (string, error) { return "test", nil }
+func noErr() error             { return nil }
+
+func twoStrNoThrow() (string, string, error) { return "test", "test", nil }
+func intStrNoThrow() (int, string, error)    { return 1, "test", nil }
+
 func boolIntStrNoThrow() (bool, int, string, error) { return true, 1, "test", nil }
-func noThrow() (string, error)                      { return "test", nil }
-
-func noErr() error {
-	return nil
-}
 
 func TestTry_noError(t *testing.T) {
 	t.Parallel()
@@ -33,6 +34,11 @@ func TestTry_noError(t *testing.T) {
 	try.To2(twoStrNoThrow())
 	try.To2(intStrNoThrow())
 	try.To3(boolIntStrNoThrow())
+
+	_ = try.T1(noThrow())("test")
+	_, _ = try.T2(twoStrNoThrow())("test")
+	_, _ = try.T2(intStrNoThrow())("test")
+	try.T3(boolIntStrNoThrow())("test") // linter says: _, _, _,
 }
 
 func TestDefault_Error(t *testing.T) {
@@ -57,115 +63,136 @@ func TestTry_Error(t *testing.T) {
 
 func TestHandle_noerrHandler(t *testing.T) {
 	t.Parallel()
-	t.Run("noerr handler in ONLY one and NO error happens", func(t *testing.T) {
-		t.Parallel()
-		var err error
-		var handlerCalled bool
-		defer func() {
-			test.Require(t, handlerCalled)
-		}()
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			handlerCalled = noerr
-		})
+	t.Run(
+		"noerr handler in ONLY one and NO error happens",
+		func(t *testing.T) {
+			t.Parallel()
+			var err error
+			var handlerCalled bool
+			defer func() {
+				require.That(t, handlerCalled)
+			}()
+			// This is the handler we are testing!
+			defer err2.Handle(&err, func(noerr bool) {
+				handlerCalled = noerr
+			})
 
-		try.To(noErr())
-	})
+			try.To(noErr())
+		},
+	)
 
-	t.Run("noerr handler is the last and NO error happens", func(t *testing.T) {
-		t.Parallel()
-		var err error
-		var handlerCalled bool
-		defer func() {
-			test.Require(t, handlerCalled)
-		}()
-		defer err2.Handle(&err, func(err error) error {
-			// this should not be called, so lets try to fuckup things...
-			handlerCalled = false
-			test.Require(t, false)
-			return err
-		})
+	t.Run(
+		"noerr handler is the last and NO error happens",
+		func(t *testing.T) {
+			t.Parallel()
+			var err error
+			var handlerCalled bool
+			defer func() {
+				require.That(t, handlerCalled)
+			}()
+			defer err2.Handle(&err, func(err error) error {
+				// this should not be called, so lets try to fuckup things...
+				handlerCalled = false
+				require.That(t, false)
+				return err
+			})
 
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			handlerCalled = noerr
-		})
+			// This is the handler we are testing!
+			defer err2.Handle(&err, func(noerr bool) {
+				handlerCalled = noerr
+			})
 
-		try.To(noErr())
-	})
+			try.To(noErr())
+		},
+	)
 
 	t.Run("noerr handler is the last and error happens", func(t *testing.T) {
 		t.Parallel()
 		var err error
 		var handlerCalled bool
 		defer func() {
-			test.Require(t, !handlerCalled)
+			require.ThatNot(t, handlerCalled)
 		}()
+
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(err error) error {
+			require.ThatNot(t, handlerCalled)
 			handlerCalled = false
-			test.Require(t, true, "error should be handled")
+			require.That(t, true, "error should be handled")
 			return err
 		})
 
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, noerr)
-			handlerCalled = noerr
+		// This is the handler we are testing! AND it's not called in error.
+		defer err2.Handle(&err, func(bool) {
+			require.That(t, false, "when error this is not called")
 		})
 
 		try.To1(throw())
 	})
 
-	t.Run("noerr is first and error happens with many handlers", func(t *testing.T) {
-		t.Parallel()
-		var (
-			err               error
-			finalAnnotatedErr = fmt.Errorf("err: %v", errStringInThrow)
-			handlerCalled     bool
-		)
-		defer func() {
-			test.Require(t, !handlerCalled)
-			test.RequireEqual(t, err.Error(), finalAnnotatedErr.Error())
-		}()
+	t.Run(
+		"noerr is first and error happens with many handlers",
+		func(t *testing.T) {
+			t.Parallel()
+			var (
+				err               error
+				finalAnnotatedErr = fmt.Errorf("err: %v", errStringInThrow)
+				handlerCalled     bool
+				callCount         int
+			)
+			defer func() {
+				require.ThatNot(t, handlerCalled)
+				require.Equal(t, callCount, 2)
+				require.Equal(t, err.Error(), finalAnnotatedErr.Error())
+			}()
 
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, false, "if error occurs/reset, this cannot happen")
-			handlerCalled = noerr
-		})
+			// This is the handler we are testing! AND it's not called in error.
+			defer err2.Handle(&err, func(noerr bool) {
+				require.That(
+					t,
+					false,
+					"if error occurs/reset, this cannot happen",
+				)
+				handlerCalled = noerr
+			})
 
-		// important! test that our handler doesn't change the current error
-		// and it's not nil
-		defer err2.Handle(&err, func(er error) error {
-			test.Require(t, er != nil, "er val: ", er, err)
-			return er
-		})
+			// important! test that our handler doesn't change the current error
+			// and it's not nil
+			defer err2.Handle(&err, func(er error) error {
+				require.That(t, er != nil, "er val: ", er, err)
+				require.Equal(t, callCount, 1, "this is called in sencond")
+				callCount++
+				return er
+			})
 
-		defer err2.Handle(&err, func(err error) error {
-			// this should not be called, so lets try to fuckup things...
-			handlerCalled = false
-			test.Require(t, err != nil)
-			return finalAnnotatedErr
-		})
-		try.To1(throw())
-	})
+			defer err2.Handle(&err, func(err error) error {
+				// this should not be called, so lets try to fuckup things...
+				require.Equal(t, callCount, 0, "this is called in first")
+				callCount++
+				handlerCalled = false
+				require.That(t, err != nil)
+				return finalAnnotatedErr
+			})
+			try.To1(throw())
+		},
+	)
 
 	t.Run("noerr handler is first and NO error happens", func(t *testing.T) {
 		t.Parallel()
 		var err error
 		var handlerCalled bool
 		defer func() {
-			test.Require(t, handlerCalled)
+			require.That(t, handlerCalled)
 		}()
 
-		// This is the handler we are thesting!
+		// This is the handler we are testing!
 		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, noerr)
+			require.That(t, noerr)
 			handlerCalled = noerr
 		})
 
 		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, false, "no error to handle!")
+			require.That(t, false, "no error to handle!")
 			// this should not be called, so lets try to fuckup things...
 			handlerCalled = false // see first deferred function
 			return err
@@ -173,108 +200,119 @@ func TestHandle_noerrHandler(t *testing.T) {
 		try.To(noErr())
 	})
 
-	t.Run("noerr handler is first of MANY and NO error happens", func(t *testing.T) {
-		t.Parallel()
-		var err error
-		var handlerCalled bool
-		defer func() {
-			test.Require(t, handlerCalled)
-		}()
+	t.Run(
+		"noerr handler is first of MANY and NO error happens",
+		func(t *testing.T) {
+			t.Parallel()
+			var err error
+			var handlerCalled bool
+			defer func() {
+				require.That(t, handlerCalled)
+			}()
 
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, noerr)
-			handlerCalled = noerr
-		})
+			// This is the handler we are testing!
+			defer err2.Handle(&err, func(noerr bool) {
+				require.That(t, true)
+				require.That(t, noerr)
+				handlerCalled = noerr
+			})
 
-		defer err2.Handle(&err)
+			defer err2.Handle(&err)
 
-		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, false, "no error to handle!")
-			// this should not be called, so lets try to fuckup things...
-			handlerCalled = false // see first deferred function
-			return err
-		})
+			defer err2.Handle(&err, func(err error) error {
+				require.That(t, false, "no error to handle!")
+				// this should not be called, so lets try to fuckup things...
+				handlerCalled = false // see first deferred function
+				return err
+			})
 
-		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, false, "no error to handle!")
-			// this should not be called, so lets try to fuckup things...
-			handlerCalled = false // see first deferred function
-			return err
-		})
-		try.To(noErr())
-	})
+			defer err2.Handle(&err, func(err error) error {
+				require.That(t, false, "no error to handle!")
+				// this should not be called, so lets try to fuckup things...
+				handlerCalled = false // see first deferred function
+				return err
+			})
+			try.To(noErr())
+		},
+	)
 
-	t.Run("noerr handler is first of MANY and error happens UNTIL RESET", func(t *testing.T) {
-		t.Parallel()
-		var err error
-		var noerrHandlerCalled, errHandlerCalled bool
-		defer func() {
-			test.Require(t, noerrHandlerCalled)
-			test.Require(t, errHandlerCalled)
-		}()
+	t.Run(
+		"noerr handler is first of MANY and error happens UNTIL RESET",
+		func(t *testing.T) {
+			t.Parallel()
+			var err error
+			var noerrHandlerCalled, errHandlerCalled bool
+			defer func() {
+				require.That(t, noerrHandlerCalled)
+				require.That(t, errHandlerCalled)
+			}()
 
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, true) // we are here, for debugging
-			test.Require(t, noerr)
-			noerrHandlerCalled = noerr
-		})
+			// This is the handler we are testing!
+			defer err2.Handle(&err, func(noerr bool) {
+				require.That(t, true) // we are here, for debugging
+				require.That(t, noerr)
+				noerrHandlerCalled = noerr
+			})
 
-		// this is the err handler that -- RESETS -- the error to nil
-		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, err != nil) // helps fast debugging
+			// this is the err handler that -- RESETS -- the error to nil
+			defer err2.Handle(&err, func(err error) error {
+				require.That(t, err != nil) // helps fast debugging
 
-			// this should not be called, so lets try to fuckup things...
-			noerrHandlerCalled = false // see first deferred function
-			// keep the track that we have been here
-			errHandlerCalled = true // see first deferred function
-			return nil
-		})
+				// this should not be called, so lets try to fuckup things...
+				noerrHandlerCalled = false // see first deferred function
+				// keep the track that we have been here
+				errHandlerCalled = true // see first deferred function
+				return nil
+			})
 
-		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, err != nil) // helps fast debugging
-			// this should not be called, so lets try to fuckup things...
-			noerrHandlerCalled = false // see first deferred function
+			defer err2.Handle(&err, func(err error) error {
+				require.That(t, err != nil) // helps fast debugging
+				// this should not be called, so lets try to fuckup things...
+				noerrHandlerCalled = false // see first deferred function
 
-			errHandlerCalled = true // see first deferred function
-			return err
-		})
-		try.To1(throw())
-	})
+				errHandlerCalled = true // see first deferred function
+				return err
+			})
+			try.To1(throw())
+		},
+	)
 
-	t.Run("noerr handler is middle of MANY and NO error happens", func(t *testing.T) {
-		t.Parallel()
-		var err error
-		var handlerCalled bool
-		defer func() {
-			test.Require(t, handlerCalled)
-		}()
+	t.Run(
+		"noerr handler is middle of MANY and NO error happens",
+		func(t *testing.T) {
+			t.Parallel()
+			var err error
+			var handlerCalled bool
+			defer func() {
+				require.That(t, handlerCalled)
+			}()
 
-		defer err2.Handle(&err)
-		defer err2.Handle(&err)
+			defer err2.Handle(&err)
+			defer err2.Handle(&err)
 
-		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, false, "no error to handle!")
-			// this should not be called, so lets try to fuckup things...
-			handlerCalled = false // see first deferred function
-			return err
-		})
+			defer err2.Handle(&err, func(err error) error {
+				require.That(t, false, "no error to handle!")
+				// this should not be called, so lets try to fuckup things...
+				handlerCalled = false // see first deferred function
+				return err
+			})
 
-		// This is the handler we are thesting!
-		defer err2.Handle(&err, func(noerr bool) {
-			test.Require(t, noerr)
-			handlerCalled = noerr
-		})
+			// This is the handler we are testing!
+			defer err2.Handle(&err, func(noerr bool) {
+				require.That(t, true, "this must be called")
+				require.That(t, noerr)
+				handlerCalled = noerr
+			})
 
-		defer err2.Handle(&err, func(err error) error {
-			test.Require(t, false, "no error to handle!")
-			// this should not be called, so lets try to fuckup things...
-			handlerCalled = false // see first deferred function
-			return err
-		})
-		try.To(noErr())
-	})
+			defer err2.Handle(&err, func(err error) error {
+				require.That(t, false, "no error to handle!")
+				// this should not be called, so lets try to fuckup things...
+				handlerCalled = false // see first deferred function
+				return err
+			})
+			try.To(noErr())
+		},
+	)
 }
 
 func TestPanickingCatchAll(t *testing.T) {
@@ -338,7 +376,11 @@ func TestPanickingCatchAll(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			defer func() {
-				test.Require(t, recover() == nil, "panics should NOT carry on")
+				require.That(
+					t,
+					recover() == nil,
+					"panics should NOT carry on",
+				)
 			}()
 			tt.args.f()
 		})
@@ -382,7 +424,11 @@ func TestPanickingCarryOn_Handle(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			defer func() {
-				test.Require(t, recover() != nil, "panics should went thru when not our errors")
+				require.That(
+					t,
+					recover() != nil,
+					"panics should went thru when not our errors",
+				)
 			}()
 			tt.args.f()
 		})
@@ -508,12 +554,12 @@ func TestPanicking_Handle(t *testing.T) {
 			defer func() {
 				r := recover()
 				if tt.wants == nil {
-					test.Require(t, r != nil, "wants err, then panic")
+					require.That(t, r != nil, "wants err, then panic")
 				}
 			}()
 			err := tt.args.f()
 			if err != nil {
-				test.RequireEqual(t, err.Error(), tt.wants.Error())
+				require.Equal(t, err.Error(), tt.wants.Error())
 			}
 		})
 	}
@@ -554,7 +600,11 @@ func TestPanicking_Catch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			defer func() {
-				test.Require(t, recover() == nil, "panics should NOT carry on")
+				require.That(
+					t,
+					recover() == nil,
+					"panics should NOT carry on",
+				)
 			}()
 			tt.args.f()
 		})
@@ -573,7 +623,7 @@ func TestCatch_Error(t *testing.T) {
 func Test_TryOutError(t *testing.T) {
 	t.Parallel()
 	defer err2.Catch(func(err error) error {
-		test.RequireEqual(t, err.Error(), "fails: test: this is an ERROR",
+		require.Equal(t, err.Error(), "fails: test: this is an ERROR",
 			"=> we should catch right error str here")
 		return err
 	})
@@ -583,7 +633,7 @@ func Test_TryOutError(t *testing.T) {
 	// let's test try.Out1() and it's throw capabilities here, even try.To1()
 	// is the preferred way.
 	retVal = try.Out1(noThrow()).Handle().Val1
-	test.Require(t, retVal == "test", "if no error happens, we get value")
+	require.Equal(t, retVal, "test", "if no error happens, we get value")
 
 	_ = try.Out1(throw()).Handle("fails: %v", retVal).Val1
 	t.Fail() // If everything works in Handle we are never here.
@@ -615,11 +665,11 @@ func TestCatch_Panic(t *testing.T) {
 func TestSetErrorTracer(t *testing.T) {
 	t.Parallel()
 	w := err2.ErrorTracer()
-	test.Require(t, w == nil, "error tracer should be nil")
+	require.That(t, w == nil, "error tracer should be nil")
 	var w1 io.Writer
 	err2.SetErrorTracer(w1)
 	w = err2.ErrorTracer()
-	test.Require(t, w == nil, "error tracer should be nil")
+	require.That(t, w == nil, "error tracer should be nil")
 }
 
 func ExampleCatch_withFmt() {
@@ -804,22 +854,9 @@ func BenchmarkTry_ErrVar(b *testing.B) {
 	}
 }
 
-func BenchmarkTryOut_ErrVar(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		_, err := noThrow()
-		try.Out(err).Handle()
-	}
-}
-
 func BenchmarkTry_StringGenerics(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		_ = try.To1(noThrow())
-	}
-}
-
-func BenchmarkTryOut_StringGenerics(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		_ = try.Out1(noThrow()).Handle()
 	}
 }
 
@@ -839,6 +876,58 @@ func BenchmarkTryVarCall(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		err := noErr()
 		try.To(err)
+	}
+}
+
+func BenchmarkTryOut_ErrVarNoRetval(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		try.Out(noErr()).Handle()
+	}
+}
+
+func BenchmarkTryOut_ErrVar(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_, err := noThrow()
+		try.Out(err).Handle()
+	}
+}
+
+func BenchmarkTryOut_LogStringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.Out1(noThrow()).Logf("test").Val1
+	}
+}
+
+func BenchmarkTryOut_StringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.Out1(noThrow()).Handle().Val1
+	}
+}
+
+func BenchmarkTryOut_StringGenericsNoVal(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.Out1(noThrow()).Logf("test").Val1
+		r := try.Out1(noThrow()).Handle()
+		_ = r.Val1
+	}
+}
+
+func BenchmarkT_ErrVar(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_, err := noThrow()
+		try.T(err)("test")
+	}
+}
+
+func BenchmarkT_StringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = try.T1(noThrow())("test")
+	}
+}
+
+func BenchmarkT_IntStringGenerics(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_, _ = try.T2(intStrNoThrow())("test")
 	}
 }
 

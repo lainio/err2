@@ -43,6 +43,9 @@ type (
 //
 //	error sending response: UDP not listening
 func (o *Result) Logf(a ...any) *Result {
+	if o.Err == nil {
+		return o
+	}
 	return o.logf(logfFrameLvl, a)
 }
 
@@ -57,6 +60,9 @@ func (o *Result) Logf(a ...any) *Result {
 //
 //	error sending response: UDP not listening
 func (o *Result1[T]) Logf(a ...any) *Result1[T] {
+	if o.Err == nil {
+		return o
+	}
 	o.Result.logf(logfFrameLvl, a)
 	return o
 }
@@ -72,6 +78,9 @@ func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 //
 //	error sending response: UDP not listening
 func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
+	if o.Err == nil {
+		return o
+	}
 	o.Result.logf(logfFrameLvl, a)
 	return o
 }
@@ -97,6 +106,11 @@ func (o *Result) Handle(a ...any) *Result {
 	if o.Err == nil {
 		return o
 	}
+	o.transportErr(a)
+	return o
+}
+
+func (o *Result) transportErr(a []any) {
 	noArguments := len(a) == 0
 	if noArguments {
 		panic(o.Err)
@@ -117,11 +131,11 @@ func (o *Result) Handle(a ...any) *Result {
 			}
 		}
 	}
-	// someone of the handler functions might reset the error value.
+
+	// some of the handler functions might reset the error value.
 	if o.Err != nil {
 		panic(o.Err)
 	}
-	return o
 }
 
 // Handle allows you to add an error handler to [try.Out] handler chain. Handle
@@ -264,17 +278,17 @@ func Out1[T any](v T, err error) *Result1[T] {
 //	x, y := try.Out2(convTwoStr(s1, s2)).Logf("bad number").Catch(1, 2)
 //	y := try.Out2(convTwoStr(s1, s2)).Handle().Val2
 func Out2[T any, U any](v1 T, v2 U, err error) *Result2[T, U] {
-	return &Result2[T, U]{Val2: v2, Result1: Result1[T]{Val1: v1, Result: Result{Err: err}}}
+	return &Result2[T, U]{
+		Val2:    v2,
+		Result1: Result1[T]{Val1: v1, Result: Result{Err: err}},
+	}
 }
 
 func wrapStr() string {
-	return ": %w"
+	return handler.WrapError
 }
 
 func (o *Result) logf(lvl int, a []any) *Result {
-	if o.Err == nil {
-		return o
-	}
 	s := o.Err.Error()
 	if len(a) != 0 {
 		f, isFormat := a[0].(string)

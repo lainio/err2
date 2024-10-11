@@ -60,14 +60,31 @@ Or you might just want to change it later to error return:
 
 Please see the documentation and examples of [Result], [Result1], and [Result2]
 types and their methods.
+
+# try.T — Checking and Annotation
+
+The try package offers functions [T], [T1], [T2], and [T3] to allow fast
+incremental code refactoring. For example, if you want to add an error check
+specific annotation to the error check already done with [To1]:
+
+	try.To1(io.Copy(w, r))
+
+you can easily change it to [T1] and give extra message added to the error:
+
+	try.T1(io.Copy(w, r))("error during stream copy")
+
+The T functions are offered mainly to allow faste feedback loop to play with the
+error messages and see what works the best.
 */
 package try
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/lainio/err2"
+	"github.com/lainio/err2/internal/handler"
 )
 
 // To is a helper function to call functions which returns an error value and
@@ -238,4 +255,53 @@ func IsNotRecoverable(err error) bool {
 // [err2.ErrNotEnabled].
 func IsNotEnabled(err error) bool {
 	return Is(err, err2.ErrNotEnabled)
+}
+
+// T is similar as [To] but it let's you to annotate a possible error at place.
+//
+//	try.T(f.Close)("annotations")
+func T(err error) func(fs string) {
+	return func(fs string) {
+		if err == nil {
+			return
+		}
+		panic(annotateErr(err, fs))
+	}
+}
+
+// T1 is similar as [To1] but it let's you to annotate a possible error at place.
+//
+//	f := try.T1(os.Open("filename")("cannot open cfg file")
+func T1[T any](v T, err error) func(fs string) T {
+	return func(fs string) T {
+		if err == nil {
+			return v
+		}
+		panic(annotateErr(err, fs))
+	}
+}
+
+// T2 is similar as [To2] but it let's you to annotate a possible error at place.
+func T2[T, U any](v T, u U, err error) func(fs string) (T, U) {
+	return func(fs string) (T, U) {
+		if err == nil {
+			return v, u
+		}
+		panic(annotateErr(err, fs))
+	}
+
+}
+
+func annotateErr(err error, fs string) error {
+	return fmt.Errorf(fs+handler.WrapError, err)
+}
+
+// T3 is similar as [To3] but it let's you to annotate a possible error at place.
+func T3[T, U, V any](v1 T, v2 U, v3 V, err error) func(fs string) (T, U, V) {
+	return func(fs string) (T, U, V) {
+		if err == nil {
+			return v1, v2, v3
+		}
+		panic(annotateErr(err, fs))
+	}
 }

@@ -11,6 +11,7 @@ PKGS := $(PKG_ERR2) $(PKG_ASSERT) $(PKG_TRY) $(PKG_DEBUG) $(PKG_HANDLER) $(PKG_S
 
 SRCDIRS := $(shell go list -f '{{.Dir}}' $(PKGS))
 
+MAX_LINE ?= 80
 GO ?= go
 TEST_ARGS ?= -benchmem
 # -"gcflags '-N -l'" both optimization & inlining disabled
@@ -61,8 +62,32 @@ inline_handler:
 tinline_handler:
 	$(GO) test -c -gcflags=-m=2 $(PKG_HANDLER) 2>&1 | ag 'inlin'
 
+inline_assert:
+	$(GO) test -c -gcflags=-m=2 $(PKG_ASSERT) 2>&1 | ag 'inlin' 
+
 bench:
 	$(GO) test $(TEST_ARGS) -bench=. $(PKGS)
+
+bench_T:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkT_.*' $(PKG_ERR2)
+
+bench_S:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkS.*' $(PKG_ASSERT)
+
+bench_M:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkM.*' $(PKG_ASSERT)
+
+bench_C:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkC.*' $(PKG_ASSERT)
+
+bench_nil:
+	$(GO) test $(TEST_ARGS) -bench='Benchmark.*Nil' $(PKG_ASSERT)
+
+bench_empty:
+	$(GO) test $(TEST_ARGS) -bench='Benchmark.*Empty' $(PKG_ASSERT)
+
+bench_zero:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkZero.*' $(PKG_ASSERT)
 
 bench_goid:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkGoid' $(PKG_ASSERT)
@@ -77,7 +102,7 @@ bench_go:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkTry_StringGenerics' $(PKG_ERR2)
 
 bench_that:
-	$(GO) test $(TEST_ARGS) -bench='BenchmarkThat.*' $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench='Benchmark.*That.*' $(PKG_ASSERT)
 
 bench_copy:
 	$(GO) test $(TEST_ARGS) -bench='Benchmark_CopyBuffer' $(PKG_TRY)
@@ -106,6 +131,14 @@ bench_x:
 vet: | test
 	$(GO) vet $(PKGS)
 
+fmt:
+	@echo "Pretty formatting with golines"
+	@golines -t 5 -w -m $(MAX_LINE) --ignore-generated .
+
+dry-fmt:
+	@echo "--dry-run: Pretty formatting with golines"
+	@golines -t 5 --dry-run -m $(MAX_LINE) --ignore-generated .
+
 gofmt:
 	@echo Checking code is gofmted
 	@test -z "$(shell gofmt -s -l -d -e $(SRCDIRS) | tee /dev/stderr)"
@@ -124,8 +157,17 @@ test_cov: test_cov_out
 	go tool cover -html=coverage.txt -o=coverage.html
 	firefox ./coverage.html 1>&- 2>&-  &
 
+test_cov_pc_assert:
+	go tool cover -func=coverage.txt | ag assert
+
+test_cov_zero: test_cov_out
+	go tool cover -func=coverage.txt | ag '\:\s*[A-Z]+.*\s+0\.0%'
+
+test_cov_assert_zero: test_cov_out
+	go tool cover -func=coverage.txt | ag 'assert\/.*\:\s*[A-Z]+.*\s+0\.0%'
+
+test_cov_pc:
+	go tool cover -func=coverage.txt
+
 lint:
 	@golangci-lint run
-
-.PHONY:	check
-

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lainio/err2/internal/test"
+	"github.com/lainio/err2/internal/require"
 )
 
 func TestFullName(t *testing.T) {
@@ -21,17 +21,28 @@ func TestFullName(t *testing.T) {
 	}
 	tests := []ttest{
 		{"all empty", args{StackInfo{"", "", 0, nil, nil}}, ""},
-		{"namespaces", args{StackInfo{"lainio/err2", "", 0, nil, nil}}, "lainio/err2"},
-		{"both", args{StackInfo{"lainio/err2", "try", 0, nil, nil}}, "lainio/err2.try"},
-		{"short both", args{StackInfo{"err2", "Handle", 0, nil, nil}}, "err2.Handle"},
+		{
+			"namespaces",
+			args{StackInfo{"lainio/err2", "", 0, nil, nil}},
+			"lainio/err2",
+		},
+		{
+			"both",
+			args{StackInfo{"lainio/err2", "try", 0, nil, nil}},
+			"lainio/err2.try",
+		},
+		{
+			"short both",
+			args{StackInfo{"err2", "Handle", 0, nil, nil}},
+			"err2.Handle",
+		},
 		{"func", args{StackInfo{"", "try", 0, nil, nil}}, "try"},
 	}
 	for _, ttv := range tests {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			test.Requiref(t, tt.retval == tt.fullName(), "must be equal: %s",
-				tt.retval)
+			require.Equal(t, tt.retval, tt.fullName())
 		})
 	}
 }
@@ -83,7 +94,7 @@ func TestIsAnchor(t *testing.T) {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			test.Require(t, tt.retval == tt.isAnchor(tt.input), "equal")
+			require.Equal(t, tt.retval, tt.isAnchor(tt.input))
 		})
 	}
 }
@@ -129,7 +140,7 @@ func TestIsFuncAnchor(t *testing.T) {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			test.Require(t, tt.retval == tt.isFuncAnchor(tt.input), "equal")
+			require.Equal(t, tt.retval, tt.isFuncAnchor(tt.input))
 		})
 	}
 }
@@ -150,7 +161,7 @@ func TestFnLNro(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			output := fnLNro(tt.input)
-			test.Require(t, output == tt.output, output)
+			require.Equal(t, output, tt.output)
 		})
 	}
 }
@@ -165,25 +176,43 @@ func TestFnName(t *testing.T) {
 	tests := []ttest{
 		{"panic", "panic({0x102ed30c0, 0x1035910f0})",
 			"panic"},
-		{"our namespace", "github.com/lainio/err2/internal/debug.FprintStack({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
-			"debug.FprintStack"},
-		{"our namespace and func1", "github.com/lainio/err2/internal/debug.FprintStack.func1({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
-			"debug.FprintStack"},
-		{"our double namespace", "github.com/lainio/err2/internal/handler.Info.callPanicHandler({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
-			"handler.Info.callPanicHandler"},
-		{"our handler process", "github.com/lainio/err2/internal/handler.Process.func1({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
-			"handler.Process"},
-		{"our handler process and more anonymous funcs", "github.com/lainio/err2/internal/handler.Process.func1.2({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
-			"handler.Process"},
-		{"method and package name", "github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).AssertWallet(...)",
-			"ssi.(*DIDAgent).AssertWallet"},
+		{
+			"our namespace",
+			"github.com/lainio/err2/internal/debug.FprintStack({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
+			"debug.FprintStack",
+		},
+		{
+			"our namespace and func1",
+			"github.com/lainio/err2/internal/debug.FprintStack.func1({0x102ff7e88, 0x14000010020}, {{0x0, 0x0}, {0x102c012b8, 0x6}, 0x1, 0x140000bcb40})",
+			"debug.FprintStack",
+		},
+		{
+			"our double namespace",
+			"github.com/lainio/err2/internal/handler.Info.callPanicHandler({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
+			"handler.Info.callPanicHandler",
+		},
+		{
+			"our handler process",
+			"github.com/lainio/err2/internal/handler.Process.func1({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
+			"handler.Process",
+		},
+		{
+			"our handler process and more anonymous funcs",
+			"github.com/lainio/err2/internal/handler.Process.func1.2({{0x102ed30c0, 0x1035910f0}, {0x102ff7e88, 0x14000010020}, 0x0, 0x140018643e0, 0x0})",
+			"handler.Process",
+		},
+		{
+			"method and package name",
+			"github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).AssertWallet(...)",
+			"ssi.(*DIDAgent).AssertWallet",
+		},
 	}
 	for _, ttv := range tests {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			output := fnName(tt.input)
-			test.Require(t, output == tt.output, output)
+			require.Equal(t, output, tt.output)
 		})
 	}
 }
@@ -210,7 +239,7 @@ func TestStackPrint_noLimits(t *testing.T) {
 				FuncName:    "",
 				Level:       0,
 			})
-			test.Require(t, tt.input == w.String(), "")
+			require.Equal(t, tt.input, w.String())
 		})
 	}
 }
@@ -238,8 +267,8 @@ func TestStackPrintForTest(t *testing.T) {
 			// print(tt.output)
 			// println("------")
 			// print(w.String())
-			test.Requiref(t, a == b, "%d %d", a, b)
-			test.Require(t, tt.output == w.String(), w.String())
+			require.Equal(t, a, b)
+			require.Equal(t, tt.output, w.String())
 		})
 	}
 }
@@ -256,15 +285,52 @@ func TestCalcAnchor(t *testing.T) {
 		anchor int
 	}
 	tests := []ttest{
-		{"macOS from test using regexp", args{inputFromMac, StackInfo{"", "panic(", 1, PackageRegexp, nil}}, 12},
+		{
+			"macOS from test using regexp",
+			args{
+				inputFromMac,
+				StackInfo{"", "panic(", 1, PackageRegexp, nil},
+			},
+			12,
+		},
 		{"short", args{input, StackInfo{"", "panic(", 0, nil, nil}}, 6},
-		{"short error stack", args{inputByError, StackInfo{"", "panic(", 0, PackageRegexp, nil}}, 4},
-		{"short and nolimit", args{input, StackInfo{"", "", 0, nil, nil}}, nilAnchor},
-		{"short and only LVL is 2", args{input, StackInfo{"", "", 2, nil, nil}}, 2},
+		{
+			"short error stack",
+			args{
+				inputByError,
+				StackInfo{"", "panic(", 0, PackageRegexp, nil},
+			},
+			4,
+		},
+		{
+			"short and nolimit",
+			args{input, StackInfo{"", "", 0, nil, nil}},
+			nilAnchor,
+		},
+		{
+			"short and only LVL is 2",
+			args{input, StackInfo{"", "", 2, nil, nil}},
+			2,
+		},
 		{"medium", args{input1, StackInfo{"", "panic(", 0, nil, nil}}, 10},
-		{"from test using panic", args{inputFromTest, StackInfo{"", "panic(", 0, nil, nil}}, 8},
-		{"from test", args{inputFromTest, StackInfo{"", "panic(", 0, PackageRegexp, nil}}, 14},
-		{"macOS from test using panic", args{inputFromMac, StackInfo{"", "panic(", 0, nil, nil}}, 12},
+		{
+			"from test using panic",
+			args{inputFromTest, StackInfo{"", "panic(", 0, nil, nil}},
+			8,
+		},
+		{
+			"from test",
+			args{
+				inputFromTest,
+				StackInfo{"", "panic(", 0, PackageRegexp, nil},
+			},
+			14,
+		},
+		{
+			"macOS from test using panic",
+			args{inputFromMac, StackInfo{"", "panic(", 0, nil, nil}},
+			12,
+		},
 	}
 	for _, ttv := range tests {
 		tt := ttv
@@ -272,8 +338,7 @@ func TestCalcAnchor(t *testing.T) {
 			t.Parallel()
 			r := strings.NewReader(tt.input)
 			anchor := calcAnchor(r, tt.StackInfo)
-			test.Requiref(t, tt.anchor == anchor, "not equal: %d != %d, got",
-				tt.anchor, anchor)
+			require.Equal(t, tt.anchor, anchor)
 		})
 	}
 }
@@ -290,15 +355,51 @@ func TestStackPrint_limit(t *testing.T) {
 		output string
 	}
 	tests := []ttest{
-		{"real test trace", args{inputFromTest, StackInfo{"", "", 8, nil, exludeRegexps}}, outputFromTest},
-		{"only level 4", args{input1, StackInfo{"", "", 4, nil, nil}}, output1},
-		{"short", args{input, StackInfo{"err2", "Returnw(", 0, nil, nil}}, output},
-		{"medium", args{input1, StackInfo{"err2", "Returnw(", 0, nil, nil}}, output1},
-		{"medium level 2", args{input1, StackInfo{"err2", "Returnw(", 2, nil, nil}}, output12},
-		{"medium level 0", args{input1, StackInfo{"err2", "Returnw(", 0, nil, nil}}, output1},
-		{"medium panic", args{input1, StackInfo{"", "panic(", 0, nil, nil}}, output1panic},
-		{"long", args{input2, StackInfo{"err2", "Handle(", 0, nil, nil}}, output2},
-		{"long lvl 2", args{input2, StackInfo{"err2", "Handle(", 3, nil, nil}}, output23},
+		{
+			"real test trace",
+			args{inputFromTest, StackInfo{"", "", 8, nil, exludeRegexps}},
+			outputFromTest,
+		},
+		{
+			"only level 4",
+			args{input1, StackInfo{"", "", 4, nil, nil}},
+			output1,
+		},
+		{
+			"short",
+			args{input, StackInfo{"err2", "Returnw(", 0, nil, nil}},
+			output,
+		},
+		{
+			"medium",
+			args{input1, StackInfo{"err2", "Returnw(", 0, nil, nil}},
+			output1,
+		},
+		{
+			"medium level 2",
+			args{input1, StackInfo{"err2", "Returnw(", 2, nil, nil}},
+			output12,
+		},
+		{
+			"medium level 0",
+			args{input1, StackInfo{"err2", "Returnw(", 0, nil, nil}},
+			output1,
+		},
+		{
+			"medium panic",
+			args{input1, StackInfo{"", "panic(", 0, nil, nil}},
+			output1panic,
+		},
+		{
+			"long",
+			args{input2, StackInfo{"err2", "Handle(", 0, nil, nil}},
+			output2,
+		},
+		{
+			"long lvl 2",
+			args{input2, StackInfo{"err2", "Handle(", 3, nil, nil}},
+			output23,
+		},
 	}
 	for _, ttv := range tests {
 		tt := ttv
@@ -309,10 +410,10 @@ func TestStackPrint_limit(t *testing.T) {
 			stackPrint(r, w, tt.StackInfo)
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(w.String(), "\n")
-			test.Requiref(t, len(ins) > len(outs),
+			require.Thatf(t, len(ins) > len(outs),
 				"input length:%d should be greater:%d", len(ins), len(outs))
-			a, b := tt.output, w.String()
-			test.Requiref(t, a == b, "a: %v != b: %v", a, b)
+			b, a := tt.output, w.String()
+			require.Equal(t, a, b)
 		})
 	}
 }
@@ -331,26 +432,56 @@ func TestFuncName(t *testing.T) {
 		outFrame int
 	}
 	tests := []ttest{
-		{"basic", args{input2, StackInfo{"", "Handle", 1, nil, nil}}, "err2.ReturnW", 214, 6},
-		{"basic lvl 3", args{input2, StackInfo{"", "Handle", 3, nil, nil}}, "err2.ReturnW", 214, 6},
-		{"basic lvl 2", args{input2, StackInfo{"lainio/err2", "Handle", 1, nil, nil}}, "err2.ReturnW", 214, 6},
-		{"method", args{inputFromTest, StackInfo{"", "Handle", 1, nil, nil}}, "ssi.(*DIDAgent).AssertWallet", 146, 8},
-		{"pipeline", args{inputPipelineStack, StackInfo{"", "Handle", -1, nil, nil}}, "CopyFile", 29, 9},
+		{
+			"basic",
+			args{input2, StackInfo{"", "Handle", 1, nil, nil}},
+			"err2.ReturnW",
+			214,
+			6,
+		},
+		{
+			"basic lvl 3",
+			args{input2, StackInfo{"", "Handle", 3, nil, nil}},
+			"err2.ReturnW",
+			214,
+			6,
+		},
+		{
+			"basic lvl 2",
+			args{input2, StackInfo{"lainio/err2", "Handle", 1, nil, nil}},
+			"err2.ReturnW",
+			214,
+			6,
+		},
+		{
+			"method",
+			args{inputFromTest, StackInfo{"", "Handle", 1, nil, nil}},
+			"ssi.(*DIDAgent).AssertWallet",
+			146,
+			8,
+		},
+		{
+			"pipeline",
+			args{inputPipelineStack, StackInfo{"", "Handle", -1, nil, nil}},
+			"CopyFile",
+			29,
+			9,
+		},
 	}
 	for _, ttv := range tests {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			r := strings.NewReader(tt.input)
-			name, ln, fr, ok := funcName(r, StackInfo{
+			name, ln, fr, found := funcName(r, StackInfo{
 				PackageName: tt.PackageName,
 				FuncName:    tt.FuncName,
 				Level:       tt.Level,
 			})
-			test.Require(t, ok, "not found")
-			test.Requiref(t, tt.output == name, "not equal %v", name)
-			test.Requiref(t, ln == tt.outln, "ln must be equal %d == %d", ln, tt.outln)
-			test.RequireEqual(t, fr, tt.outFrame)
+			require.That(t, found)
+			require.Equal(t, tt.output, name)
+			require.Equal(t, ln, tt.outln)
+			require.Equal(t, fr, tt.outFrame)
 		})
 	}
 }

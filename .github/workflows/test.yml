@@ -5,39 +5,39 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v2
+      uses: golangci/golangci-lint-action@v5
       with:
         version: latest
         args: --timeout=5m
   test:
     strategy:
       matrix:
-        go-version: [1.18.x, 1.19.x, 1.20.x, 1.21.x]
+        go-version: [1.18.x, 1.19.x, 1.20.x, 1.21.x, 1.22.x]
         os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - name: setup go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: test
       run: make test
   test-cov:
     runs-on: ubuntu-latest
     steps:
     - name: setup
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: 1.19.x
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: test
       run: make test_cov_out
     - name: upload
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v4
       with:
         files: ./coverage.txt

@@ -60,7 +60,13 @@ type Info struct {
 }
 
 const (
-	wrapError = ": %w"
+	// Wrapping is best default because we can be in the situation where we
+	// have received meaningful sentinel error which we need to wrap, even
+	// automatically. If we'd have used %v (no wrapping) we would lose the
+	// sentinel error info and we couldn't use annotation for this error.
+	// However, we should think about this more later from performance point of
+	// view.
+	WrapError = ": %w"
 )
 
 func PanicNoop(any)           {}
@@ -220,7 +226,7 @@ func (i *Info) safeErr() error {
 // wrapStr returns always wrap string that means we are using "%w" to chain
 // errors to be able to use errors.Is and errors.As functions form Go stl.
 func (i *Info) wrapStr() string {
-	return wrapError
+	return WrapError
 }
 
 // WorkToDo returns if there is something to process. This is offered for

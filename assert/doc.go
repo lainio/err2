@@ -13,7 +13,7 @@ sub-gouroutines:
 	     assert.Equal(alice.Len(), 1) // assert anything normally
 	     ...
 	     go func() {
-	          assert.PushTester(t) // <-- Needs to do again for a new goroutine
+	          assert.PushTester(t)() // <-- Needs to do again for a new goroutine
 
 # Merge Runtime And Unit Test Assertions
 
@@ -25,7 +25,7 @@ all assert violations in the unit tests as well:
 	     assert.That(c.isLeaf(invitersKey), "only leaf can invite")
 
 If some assertion violation occurs in the deep call stack, they are still
-reported as a test failure. See the above code blocks. If assertion failure
+reported as test failures. See the above code blocks. If assertion failure
 happens somewhere inside the Invite function's call stack, it's still reported
 correctly as a test failure of the TestInvite unit test. It doesn't matter how
 deep the recursion is or if parallel test runs are performed. The failure report
@@ -35,12 +35,14 @@ chapter.
 # Call Stack Traversal During Tests
 
 The Assert package allows us to track assertion violations over the package and
-even module boundaries. When an assertion fails during the unit testing, the
-whole call stack is brought to unit test logs. And some help with your IDE, such
-as transferring output to a location list, for example, in Neovim/Vim. For
-example, you can find a proper test result parser like [nvim-go] (fork)
+module boundaries. When an assertion fails during the unit testing, the whole
+call stack is brought to unit test logs. And some help with your IDE, such as
+transferring output to a location list in Neovim/Vim. For example, you can find
+a compatible test result parser for Neovim from this plugin [nvim-go] (fork).
 
-With a sizeable multi-repo environment, this has proven to be valuable.
+The call stack traversal has proven to be very valuable for package and module
+development in Go, especially when following TDD and fast development feedback
+cycles.
 
 # Why Runtime Asserts Are So Important?
 
@@ -52,15 +54,23 @@ raise up quality of our software.
 The assert package offers a convenient way to set preconditions to code which
 allow us detect programming errors and API violations faster. Still allowing
 production-time error handling if needed. And everything is automatic. You can
-set asserter with [SetDefault] function or --asserter flag if Go's flag package is
-in use. This allows developer, operator and every-day user share the exact same
-binary but get the error messages and diagnostic they need.
+set a goroutine specific [Asserter] with [PushAsserter] function.
+
+The assert package's default [Asserter] you can set with [SetDefault] or
+-asserter flag if Go's flag package (or similar) is in use. This allows
+developer, operator and every-day user share the exact same binary but get the
+error messages and diagnostic they need.
 
 	// Production asserter adds formatted caller info to normal errors.
 	// Information is transported thru error values when err2.Handle is in use.
 	assert.SetDefault(assert.Production)
 
 Please see the code examples for more information.
+
+Note that if an [Asserter] is set for a goroutine level, it cannot be changed
+with the -asserter flag or [SetDefault]. The GLS [Asserter] is used for a
+reason, so it's good that even a unit test asserter won't override it in those
+cases.
 
 # Flag Package Support
 
@@ -75,15 +85,12 @@ And assert package's configuration flags are inserted.
 
 # Performance
 
-[assert.That]'s performance is equal to the if-statement thanks for inlining. And
-the most of the generics-based versions are about the equally fast. Practice has
-thought that we should prefer other than [assert.That] because by using detailed
-version like [assert.Shorter] we get precise error messages automatically. Some
-also prefer readability of specific asserters.
+The performance of the assert functions are equal to the if-statement thanks for
+inlining. All of the generics-based versions are the equally fast!
 
-If your algorithm is performance-critical please run `make bench` in the err2
-repo and decide case by case. Also you can make an issue or even PR if you would
-like to have something similar like [glog.V] function.
+We should prefer specialized versions like [assert.Equal] that we get precise
+and readable error messages automatically. Error messagas follow Go idiom of
+'got xx, want yy'. And we still can annotate error message if we want.
 
 # Naming
 

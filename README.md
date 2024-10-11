@@ -1,9 +1,13 @@
+# err2
+
 [![test](https://github.com/lainio/err2/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/lainio/err2/actions/workflows/test.yml)
 ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.18-61CFDD.svg?style=flat-square)
 [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/lainio/err2)](https://pkg.go.dev/mod/github.com/lainio/err2)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lainio/err2?style=flat-square)](https://goreportcard.com/report/github.com/lainio/err2)
 
-# err2
+<img src="https://github.com/lainio/err2/raw/master/logo/logo.png" width="100">
+
+----
 
 The package extends Go's error handling with **fully automatic error checking
 and propagation** like other modern programming languages: **Zig**, Rust, Swift,
@@ -28,6 +32,8 @@ func CopyFile(src, dst string) (err error) {
 }
 ```
 
+----
+
 `go get github.com/lainio/err2`
 
 - [Structure](#structure)
@@ -37,7 +43,6 @@ func CopyFile(src, dst string) (err error) {
   - [Error Stack Tracing](#error-stack-tracing)
 - [Error Checks](#error-checks)
   - [Filters for non-errors like io.EOF](#filters-for-non-errors-like-ioeof)
-- [Backwards Compatibility Promise for the API](#backwards-compatibility-promise-for-the-api)
 - [Assertion](#assertion)
   - [Asserters](#asserters)
   - [Assertion Package for Runtime Use](#assertion-package-for-runtime-use)
@@ -48,7 +53,7 @@ func CopyFile(src, dst string) (err error) {
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
 - [Support And Contributions](#support-and-contributions)
-- [Roadmap](#roadmap)
+- [History](#history)
 
 
 ## Structure
@@ -57,37 +62,38 @@ func CopyFile(src, dst string) (err error) {
 - The `err2` (main) package includes declarative error handling functions.
 - The `try` package offers error checking functions.
 - The `assert` package implements assertion helpers for **both** unit-testing
-  and *design-by-contract*.
+  and *design-by-contract* with the *same API and cross-usage*.
 
 ## Performance
 
 All of the listed above **without any performance penalty**! You are welcome to
 run `benchmarks` in the project repo and see yourself.
 
-Please note that many benchmarks run 'too fast' according to the common Go
-benchmarking rules, i.e., compiler optimizations
-([inlining](https://en.wikipedia.org/wiki/Inline_expansion)) are working so well
-that there are no meaningful results. But for this type of package, where **we
-compete with if-statements, that's precisely what we hope to achieve.** The
-whole package is written toward that goal. Especially with parametric
-polymorphism, it's been quite the effort.
+<details>
+<summary><b>It's too fast!</b></summary>
+<br/>
+
+> Most of the benchmarks run 'too fast' according to the common Go
+> benchmarking rules, i.e., compiler optimizations
+> ([inlining](https://en.wikipedia.org/wiki/Inline_expansion)) are working so
+> well that there are no meaningful results. But for this type of package, where
+> **we compete with if-statements, that's precisely what we hope to achieve.**
+> The whole package is written toward that goal. Especially with parametric
+> polymorphism, it's been quite the effort.
+
+</details>
 
 ## Automatic Error Propagation
 
-The current version of Go tends to produce too much error checking and too
-little error handling. But most importantly, it doesn't help developers with
-**automatic** error propagation, which would have the same benefits as, e.g.,
-**automated** garbage collection or automatic testing:
-
-> Automation is not just about efficiency but primarily about repeatability and
-> resilience. -- Gregor Hohpe
-
-Automatic error propagation is crucial because it makes your code change
-tolerant. And, of course, it helps to make your code error-safe:
+Automatic error propagation is crucial because it makes your *code change
+tolerant*. And, of course, it helps to make your code error-safe.
 
 ![Never send a human to do a machine's job](https://www.magicalquote.com/wp-content/uploads/2013/10/Never-send-a-human-to-do-a-machines-job.jpg)
 
-The err2 package is your automation buddy:
+
+<details>
+<summary>The err2 package is your automation buddy:</summary>
+<br/>
 
 1. It helps to declare error handlers with `defer`. If you're familiar with [Zig
    language](https://ziglang.org/), you can think `defer err2.Handle(&err,...)`
@@ -103,40 +109,62 @@ You can use all of them or just the other. However, if you use `try` for error
 checks, you must remember to use Go's `recover()` by yourself, or your error
 isn't transformed to an `error` return value at any point.
 
-## Error handling
+</details>
 
-The `err2` relies on Go's declarative programming structure `defer`. The
-`err2` helps to set deferred functions (error handlers) which are only called if
-`err != nil`.
+## Error Handling
 
-Every function which uses err2 for error-checking should have at least one error
-handler. The current function panics if there are no error handlers and an error
-occurs. However, if *any* function above in the call stack has an err2 error
-handler, it will catch the error.
+The err2 relies on Go's declarative programming structure `defer`. The
+err2 helps to set deferred error handlers which are only called if an error
+occurs.
 
-This is the simplest form of `err2` automatic error handler:
+This is the simplest form of an automatic error handler:
 
 ```go
 func doSomething() (err error) {
-    // below: if err != nil { return ftm.Errorf("%s: %w", CUR_FUNC_NAME, err) }
     defer err2.Handle(&err)
 ```
 
+<details>
+<summary>The explanation of the above code and its error handler:</summary>
+<br/>
+
+Simplest rule for err2 error handlers are:
+1. Use named error return value: `(..., err error)`
+1. Add at least one error handler at the beginning of your function (see the
+   above code block). *Handlers are called only if error ≠ nil.*
+1. Use `err2.handle` functions different calling schemes to achieve needed
+   behaviour. For example, without no extra arguments `err2.Handle`
+   automatically annotates your errors by building annotations string from the
+   function's current name: `doSomething → "do something:"`. Default is decamel
+   and add spaces. See `err2.SetFormatter` for more information.
+1. Every function which uses err2 for error-checking should have at least one
+   error handler. The current function panics if there are no error handlers and
+   an error occurs. However, if *any* function above in the call stack has an
+   err2 error handler, it will catch the error.
+
 See more information from `err2.Handle`'s documentation. It supports several
 error-handling scenarios. And remember that you can have as many error handlers
-per function as you need, as well as you can chain error handling functions per
+per function as you need. You can also chain error handling functions per
 `err2.Handle` that allows you to build new error handling middleware for your
 own purposes.
 
+</details>
+
 #### Error Stack Tracing
 
-The err2 offers optional stack tracing. It's automatic and optimized. Optimized
-means that the call stack is processed before output. That means that stack
-trace starts from where the actual error/panic is occurred, not where the error
-is caught. You don't need to search for the line where the pointer was nil or
-received an error. That line is in the first one you are seeing:
+The err2 offers optional stack tracing. It's *automatic* and *optimized*. 
 
-```console
+<details>
+<summary>The example of the optimized call stack:</summary>
+<br/>
+
+Optimized means that the call stack is processed before output. That means that
+stack trace *starts from where the actual error/panic is occurred*, not where
+the error or panic is caught. You don't need to search for the line where the
+pointer was nil or received an error. That line is in the first one you are
+seeing:
+
+```
 ---
 runtime error: index out of range [0] with length 0
 ---
@@ -146,6 +174,8 @@ main.test2({0x0, 0x0, 0x40XXXXXf00?}, 0x2?)
 main.main()
 	/home/.../go/src/github.com/lainio/ic/main.go:77 +0x248
 ```
+
+</details>
 
 Just set the `err2.SetErrorTracer` or `err2.SetPanicTracer` to the stream you
 want traces to be written:
@@ -160,9 +190,10 @@ If no `Tracer` is set no stack tracing is done. This is the default because in
 the most cases proper error messages are enough and panics are handled
 immediately by a programmer.
 
-> Note. Since v0.9.5 you can set these tracers through Go's standard flag
-> package just by adding `flag.Parse()` to your program. See more information
-> from [Automatic Flags](#automatic-flags).
+> [!NOTE]
+> Since v0.9.5 you can set *tracers* through Go's standard flag package just by
+> adding `flag.Parse()` call to your source code. See more information from
+> [Automatic Flags](#automatic-flags).
 
 [Read the package documentation for more
 information](https://pkg.go.dev/github.com/lainio/err2).
@@ -191,37 +222,54 @@ but not without an error handler (`err2.Handle`). However, you can put your
 error handlers where ever you want in your call stack. That can be handy in the
 internal packages and certain types of algorithms.
 
+<details>
+<summary><b>Immediate Error Handling Options</b></summary>
+<br/>
+
 In cases where you want to handle the error immediately after the function call
-return you can use Go's default `if` statement. However, we encourage you to use
-the `errdefer` concept, `defer err2.Handle(&err)` for all of your error
-handling.
+you can use Go's default `if` statement. However, we recommend you to use 
+`defer err2.Handle(&err)` for all of your error handling, because it keeps your
+code modifiable, refactorable, and skimmable.
 
 Nevertheless, there might be cases where you might want to:
-1. Suppress the error and use some default value.
-1. Just write a logline and continue without a break.
+1. Suppress the error and use some default value. In next, use 100 if `Atoi`
+   fails:
+   ```go
+   b := try.Out1(strconv.Atoi(s)).Catch(100)
+   ```
+1. Just write logging output and continue without breaking the execution. In
+   next, add log if `Atoi` fails.
+   ```go
+   b := try.Out1(strconv.Atoi(s)).Logf("%s => 100", s).Catch(100)
+   ```
 1. Annotate the specific error value even when you have a general error handler.
-1. You want to handle the specific error value, let's say, at the same line
-   or statement.
+   You are already familiar with `try.To` functions. There's *fast* annotation
+   versions `try.T` which can be used as shown below:
+   ```go
+   b := try.T1(io.ReadAll(r))("cfg file read")
+   // where original were, for example:
+   b := try.To1(io.ReadAll(r))
+   ```
+1. You want to handle the specific error value at the same line or statement. In
+   below, the function `doSomething` returns an error value. If it returns
+   `ErrNotSoBad`, we just suppress it. All the other errors are send to the
+   current error handler and will be handled there, but are also annotated with
+   'fatal' prefix before that here.
+   ```go
+   try.Out(doSomething()).Handle(ErrNotSoBad, err2.Reset).Handle("fatal")
+   ```
 
-The `err2/try` package offers other helpers based on the DSL concept
-where the DSL's domain is error-handling. It's based on functions `try.Out`,
-`try.Out1`, and `try.Out2`, which return instances of types `Result`, `Result1`,
-and `Result2`. The `try.Result` is similar to other programming languages,
-i.e., discriminated union. Please see more from its documentation.
-
-Now we could have the following:
-
-```go
-b := try.Out1(strconv.Atoi(s)).Logf("%s => 100", s).Catch(100)
-```
-
-The previous statement tries to convert incoming string value `s`, but if it
-doesn't succeed, it writes a warning to logs and uses the default value (100).
-The logging result includes the original error message as well.
+The `err2/try` package offers other helpers based on the error-handling
+language/API. It's based on functions `try.Out`, `try.Out1`, and `try.Out2`,
+which return instances of types `Result`, `Result1`, and `Result2`. The
+`try.Result` is similar to other programming languages, i.e., discriminated
+union. Please see more from its documentation.
 
 It's easy to see that panicking about the errors at the start of the development
 is far better than not checking errors at all. But most importantly, `err2/try`
 **keeps the code readable.**
+
+</details>
 
 #### Filters for non-errors like io.EOF
 
@@ -230,72 +278,74 @@ actual errors we have functions like `try.Is` and even `try.IsEOF` for
 convenience.
 
 With these you can write code where error is translated to boolean value:
+
 ```go
 notExist := try.Is(r2.err, plugin.ErrNotExist)
 
 // real errors are cought and the returned boolean tells if value
 // dosen't exist returned as `plugin.ErrNotExist`
 ```
-**Note.** Any other error than `plugin.ErrNotExist` is treated as an real error:
-1. `try.Is` function first checks `if err == nil`, and if yes, it returns
-   `false`.
-2. Then it checks if `errors.Is(err, plugin.ErrNotExist)` and if yes, it returns
-   `true`.
-3. Finally, it calls `try.To` for the non nil error, and we already know what then
-   happens: nearest `err2.Handle` gets it first.
 
-These `try.Is` functions help cleanup mesh idiomatic Go, i.e. mixing happy and
-error path, leads to.
+> [!NOTE] 
+> Any other error than `plugin.ErrNotExist` is treated as an real error:
+> 1. `try.Is` function first checks `if err == nil`, and if yes, it returns
+>    `false`.
+> 2. Then it checks if `errors.Is(err, plugin.ErrNotExist)` and if yes, it returns
+>    `true`.
+> 3. Finally, it calls `try.To` for the non nil error, and we already know what then
+>    happens: nearest `err2.Handle` gets it first.
 
 For more information see the examples in the documentation of both functions.
-
-## Backwards Compatibility Promise for the API
-
-The `err2` package's API will be **backward compatible**. Before version
-1.0.0 is released, the API changes occasionally, but **we promise to offer
-automatic conversion scripts for your repos to update them for the latest API.**
-We also mark functions deprecated before they become obsolete. Usually, one
-released version before. We have tested this with a large code base in our
-systems, and it works wonderfully.
-
-More information can be found in the `scripts/` directory [readme
-file](./scripts/README.md).
 
 ## Assertion
 
 The `assert` package is meant to be used for *design-by-contract-* type of
-development where you set pre- and post-conditions for your functions. It's not
-meant to replace the normal error checking but speed up the incremental hacking
-cycle. The default mode is to return an `error` value that includes a formatted
-and detailed assertion violation message. A developer gets immediate and proper
-feedback, allowing cleanup of the code and APIs before the release.
+development where you set pre- and post-conditions for *all* of your functions,
+*including test functions*. These asserts are as fast as if-statements when not
+triggered.
+
+> [!IMPORTANT]
+> It works *both runtime and for tests.* And even better, same asserts work in
+> both running modes.
 
 #### Asserters
 
+<details>
+<summary><b>Fast Clean Code with Asserters</b></summary>
+<br/>
+
+Asserts are not meant to replace the normal error checking but speed up the
+incremental hacking cycle like TDD. The default mode is to return an `error`
+value that includes a formatted and detailed assertion violation message. A
+developer gets immediate and proper feedback independently of the running mode,
+allowing very fast feedback cycles.
+
 The assert package offers a few pre-build *asserters*, which are used to
-configure how the assert package deals with assert violations. The line below
-exemplifies how the default asserter is set in the package.
+configure *how the assert package deals with assert violations*. The line below
+exemplifies how the default asserter is set in the package. (See the
+documentation for more information about asserters.)
 
 ```go
 assert.SetDefault(assert.Production)
 ```
 
 If you want to suppress the caller info (source file name, line number, etc.)
-and get just the plain panics from the asserts, you should set the
-default asserter with the following line:
+from certain asserts, you can do that per a goroutine or a function. You should
+set the asserter with the following line for the current function:
 
 ```go
-assert.SetDefault(assert.Debug)
+defer assert.PushAsserter(assert.Plain)()
 ```
 
-For certain type of programs this is the best way. It allows us to keep all the
-error messages as simple as possible. And by offering option to turn additional
-information on, which allows super users and developers get more technical
-information when needed.
+This is especially good if you want to use assert functions for CLI's flag
+validation or you want your app behave like legacy Go programs.
 
-> Note. Since v0.9.5 you can set these asserters through Go's standard flag
-> package just by adding `flag.Parse()` to your program. See more information
-> from [Automatic Flags](#automatic-flags).
+</details>
+
+> [!NOTE]
+> Since v0.9.5 you can set these asserters through Go's standard flag package
+> just by adding `flag.Parse()` to your program. See more information from
+> [Automatic Flags](#automatic-flags).
 
 #### Assertion Package for Runtime Use
 
@@ -303,10 +353,10 @@ Following is example of use of the assert package:
 
 ```go
 func marshalAttestedCredentialData(json []byte, data *protocol.AuthenticatorData) []byte {
-	assert.SLen(data.AttData.AAGUID, 16, "wrong AAGUID length")
-	assert.NotEmpty(data.AttData.CredentialID, "empty credential id")
-	assert.SNotEmpty(data.AttData.CredentialPublicKey, "empty credential public key")
-	...
+     assert.SLen(data.AttData.AAGUID, 16, "wrong AAGUID length")
+     assert.NotEmpty(data.AttData.CredentialID, "empty credential id")
+     assert.SNotEmpty(data.AttData.CredentialPublicKey, "empty credential public key")
+     ...
 ```
 
 We have now described design-by-contract for development and runtime use. What
@@ -315,7 +365,11 @@ automatic testing as well.
 
 #### Assertion Package for Unit Testing
 
-The same asserts can be used **and shared** during the unit tests:
+The same asserts can be used **and shared** during the unit tests over module
+boundaries.
+
+<details>
+<summary>The unit test code example:</summary>
 
 ```go
 func TestWebOfTrustInfo(t *testing.T) {
@@ -343,6 +397,8 @@ of the actual Test function, **it's reported as a standard test failure.** That
 means we don't need to open our internal pre- and post-conditions just for
 testing.
 
+</details>
+
 **We can share the same assertions between runtime and test execution.**
 
 The err2 `assert` package integration to the Go `testing` package is completed at
@@ -363,9 +419,12 @@ have an option to automatically support for err2 configuration flags through
 Go's standard `flag` package. See more information about err2 settings from
 [Error Stack Tracing](#error-stack-tracing) and [Asserters](#asserters).
 
-Now you can always deploy your applications and services with the simple
-end-user friendly error messages and no stack traces, **but you can switch them
-on when ever you need**.
+You can deploy your applications and services with the simple *end-user friendly
+error messages and no stack traces.*
+
+<details>
+<summary>You can switch them on whenever you need them again.</summary>
+<br/>
 
 Let's say you have build CLI (`your-app`) tool with the support for Go's flag
 package, and the app returns an error. Let's assume you're a developer. You can
@@ -387,11 +446,16 @@ That adds more information to the assertion statement, which in default is in
 production (`Prod`) mode, i.e., outputs a single-line assertion message.
 
 All you need to do is to add `flag.Parse` to your `main` function.
+</details>
 
 #### Support for Cobra Flags
 
 If you are using [cobra](https://github.com/spf13/cobra) you can still easily
 support packages like `err2` and `glog` and their flags.
+
+<details>
+<summary>Add cobra support:</summary>
+<br/>
 
 1. Add std flag package to imports in `cmd/root.go`:
 
@@ -440,16 +504,28 @@ Flags:
       ...
 ```
 
+</details>
+
 ## Code Snippets
 
-Most of the repetitive code blocks are offered as code snippets. They are in
-`./snippets` in VC code format, which is well supported e.g. neovim, etc.
+<details>
+<summary>Code snippets as learning helpers.</summary>
+<br/>
+
+The snippets are in `./snippets` and in VC code format, which is well supported
+e.g. neovim, etc. They are proven to be useful tool especially when you are
+starting to use the err2 and its sub-packages.
 
 The snippets must be installed manually to your preferred IDE/editor. During the
 installation you can modify the according your style or add new ones. We would
 prefer if you could contribute some of the back to the err2 package.
+</details>
 
 ## Background
+
+<details>
+<summary>Why this repo exists?</summary>
+<br/>
 
 `err2` implements similar error handling mechanism as drafted in the original
 [check/handle
@@ -490,17 +566,21 @@ help:
   background) to projects,
 - and most importantly, **it keeps your code more refactorable** because you
   don't have to repeat yourself.
+</details>
 
 ## Learnings by so far
 
-We have used the `err2` and `assert` packages in several projects. The results
-have been so far very encouraging:
+<details>
+<summary>We have used the err2 and assert packages in several projects. </summary>
+<br/>
+
+The results have been so far very encouraging:
 
 - If you forget to use handler, but you use checks from the package, you will
-get panics (and optionally stack traces) if an error occurs. That is much better
-than getting unrelated panic somewhere else in the code later. There have also
-been cases when code reports error correctly because the 'upper' handler catches
-it.
+get panics on errors (and optimized stack traces that can be suppressed). That
+is much better than getting unrelated panic somewhere else in the code later.
+There have also been cases when code reports error correctly because the 'upper'
+handler catches it.
 
 - Because the use of `err2.Handle` is so easy, error messages are much better
 and informative. When using `err2.Handle`'s automatic annotation your error
@@ -512,26 +592,29 @@ been much easier.** There is an excellent [blog post](https://jesseduffield.com/
 about the issues you are facing with Go's error handling without the help of
 the err2 package.
 
+</details>
+
 ## Support And Contributions
 
-The package has been in experimental mode quite long time. Since the Go generics
-we are transiting towards more official mode. Currently we offer support by
-GitHub Discussions. Naturally, any issues and contributions are welcome as well!
+The package was in experimental mode quite long time. Since the Go generics we
+did transit to official mode. Currently we offer support by GitHub Issues and
+Discussions. Naturally, we appreciate all feedback and contributions are
+very welcome!
 
-## Roadmap
+## History
 
 Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.0.0
-- **Finally! We are very happy, and thanks to all who have helped!**
-- Lots of documentation updates and cleanups for version 1.0.0
-- `Catch/Handle` take unlimited amount error handler functions
-  - allows building e.g. error handling middlewares
-  - this is major feature because it allows building helpers/add-ons
-- automatic outputs aren't overwritten by given args, only with `assert.Plain`
-- Minor API fixes to still simplify it:
-  - remove exported vars, obsolete types and funcs from `assert` pkg
-  - `Result2.Def2()` sets only `Val2`
-- technical refactorings: variadic function calls only in API level
+##### 1.1.0
+- `assert` package:
+    - bug fix: call stack traversal during unit testing in some situations
+    - **all generics-based functions are inline expansed**
+    - *performance* is now *same as if-statements for all functions*
+    - new assert functions: `MNil`, `CNil`, `Less`, `Greater`, etc.
+    - all assert messages follow Go idiom: `got, want`
+    - `Asserter` can be set per goroutine: `PushAsserter`
+- `try` package:
+    - new check functions: `T`, `T1`, `T2`, `T3`, for quick refactoring from `To` functions to annotate an error locally
+    - **all functions are inline expansed**: if-statement equal performance
