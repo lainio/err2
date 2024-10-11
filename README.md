@@ -130,7 +130,7 @@ Simplest rule for err2 error handlers are:
 1. Use `err2.handle` functions different calling schemes to achieve needed
    behaviour. For example, without no extra arguments `err2.Handle`
    automatically annotates your errors by building annotations string from the
-   function's current name: `doSomething → "do something"`. Default is decamel
+   function's current name: `doSomething → "do something:"`. Default is decamel
    and add spaces. See `err2.SetFormatter` for more information.
 1. Every function which uses err2 for error-checking should have at least one
    error handler. The current function panics if there are no error handlers and
@@ -139,7 +139,7 @@ Simplest rule for err2 error handlers are:
 
 See more information from `err2.Handle`'s documentation. It supports several
 error-handling scenarios. And remember that you can have as many error handlers
-per function as you need, as well as you can chain error handling functions per
+per function as you need. You can also chain error handling functions per
 `err2.Handle` that allows you to build new error handling middleware for your
 own purposes.
 
@@ -151,6 +151,7 @@ The err2 offers optional stack tracing. It's *automatic* and *optimized*.
 
 <details>
 <summary>The example of the optimized call stack:</summary>
+<br/>
 
 Optimized means that the call stack is processed before output. That means that
 stack trace *starts from where the actual error/panic is occurred*, not where
@@ -158,7 +159,7 @@ the error or panic is caught. You don't need to search for the line where the
 pointer was nil or received an error. That line is in the first one you are
 seeing:
 
-```sh
+```
 ---
 runtime error: index out of range [0] with length 0
 ---
@@ -169,7 +170,7 @@ main.main()
 	/home/.../go/src/github.com/lainio/ic/main.go:77 +0x248
 ```
 
-</details><br/>
+</details>
 
 Just set the `err2.SetErrorTracer` or `err2.SetPanicTracer` to the stream you
 want traces to be written:
@@ -185,8 +186,8 @@ the most cases proper error messages are enough and panics are handled
 immediately by a programmer.
 
 > [!NOTE]
-> Since v0.9.5 you can set these asserters through Go's standard flag package
-> just by adding `flag.Parse()` to your program. See more information from
+> Since v0.9.5 you can set *tracers* through Go's standard flag package just by
+> adding `flag.Parse()` call to your source code. See more information from
 > [Automatic Flags](#automatic-flags).
 
 [Read the package documentation for more
@@ -221,17 +222,20 @@ internal packages and certain types of algorithms.
 <br/>
 
 In cases where you want to handle the error immediately after the function call
-return you can use Go's default `if` statement. However, `defer err2.Handle(&err)`
-for all of your error handling.
+you can use Go's default `if` statement. However, we recommend you to use 
+`defer err2.Handle(&err)` for all of your error handling, because it keeps your
+code modifiable, refactorable, and skimmable.
 
 Nevertheless, there might be cases where you might want to:
-1. Suppress the error and use some default value.
+1. Suppress the error and use some default value. In next, use 100 if `Atoi`
+   fails:
    ```go
    b := try.Out1(strconv.Atoi(s)).Catch(100)
    ```
-1. Just write logging output and continue without breaking the execution.
+1. Just write logging output and continue without breaking the execution. In
+   next, add log if `Atoi` fails.
    ```go
-   b := try.Out1(strconv.Atoi(s)).Logf("%s => 100", s)
+   b := try.Out1(strconv.Atoi(s)).Logf("%s => 100", s).Catch(100)
    ```
 1. Annotate the specific error value even when you have a general error handler.
    You are already familiar with `try.To` functions. There's *fast* annotation
@@ -241,11 +245,11 @@ Nevertheless, there might be cases where you might want to:
    // where original were, for example:
    b := try.To1(io.ReadAll(r))
    ```
-1. You want to handle the specific error value, let's say, at the same line or
-   statement. In below, the function `doSomething` returns an error value. If it
-   returns `ErrNotSoBad`, we just suppress it. All the other errors are send to
-   the current error handler and be handled there, but are annotated with
-   'fatal' prefix before that.
+1. You want to handle the specific error value at the same line or statement. In
+   below, the function `doSomething` returns an error value. If it returns
+   `ErrNotSoBad`, we just suppress it. All the other errors are send to the
+   current error handler and will be handled there, but are also annotated with
+   'fatal' prefix before that here.
    ```go
    try.Out(doSomething()).Handle(ErrNotSoBad, err2.Reset).Handle("fatal")
    ```
@@ -388,7 +392,7 @@ of the actual Test function, **it's reported as a standard test failure.** That
 means we don't need to open our internal pre- and post-conditions just for
 testing.
 
-</details><br/>
+</details>
 
 **We can share the same assertions between runtime and test execution.**
 
