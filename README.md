@@ -53,7 +53,7 @@ func CopyFile(src, dst string) (err error) {
 - [Background](#background)
 - [Learnings by so far](#learnings-by-so-far)
 - [Support And Contributions](#support-and-contributions)
-- [Roadmap](#roadmap)
+- [History](#history)
 
 
 ## Structure
@@ -301,7 +301,8 @@ For more information see the examples in the documentation of both functions.
 
 The `assert` package is meant to be used for *design-by-contract-* type of
 development where you set pre- and post-conditions for *all* of your functions,
-*including test functions*. These asserts are as fast as if-statements.
+*including test functions*. These asserts are as fast as if-statements when not
+triggered.
 
 > [!IMPORTANT]
 > It works *both runtime and for tests.* And even better, same asserts work in
@@ -600,7 +601,7 @@ did transit to official mode. Currently we offer support by GitHub Issues and
 Discussions. Naturally, we appreciate all feedback and contributions are
 very welcome!
 
-## Roadmap
+## History
 
 Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
@@ -615,5 +616,5 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
     - all assert messages follow Go idiom: `got, want`
     - `Asserter` can be set per goroutine: `PushAsserter`
 - `try` package:
-    - new check functions: `T`, `T1`, `T2`, `T3`, for quick refactoring to annotate an error locally
+    - new check functions: `T`, `T1`, `T2`, `T3`, for quick refactoring from `To` functions to annotate an error locally
     - **all functions are inline expansed**: if-statement equal performance
