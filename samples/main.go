@@ -13,7 +13,8 @@ var (
 	mode = flag.String(
 		"mode",
 		"play",
-		"runs the wanted playground: db, play, nil, assert",
+		"runs the wanted playground: db, play, nil, assert,"+
+			"\nassert-keep (= uses assert.Debug in GLS)",
 	)
 	isErr = flag.Bool("err", false, "tells if we want to have an error")
 )
@@ -42,15 +43,15 @@ func main() {
 	case "play":
 		doPlayMain()
 	case "assert":
-		doAssertMain(false)
+		doAssertMainKeepGLSAsserter(false)
 	case "assert-keep":
-		doAssertMain(true)
+		doAssertMainKeepGLSAsserter(true)
 	default:
 		err2.Throwf("unknown (%v) playground given", *mode)
 	}
 }
 
-func doAssertMain(keep bool) {
+func doAssertMainKeepGLSAsserter(keep bool) {
 	asserterPusher(keep)
 	asserterTester()
 }
@@ -62,7 +63,7 @@ func asserterTester() {
 
 func asserterPusher(keep bool) {
 	pop := assert.PushAsserter(assert.Debug)
-	if keep {
+	if !keep { // if not keep we free
 		pop()
 	}
 }
