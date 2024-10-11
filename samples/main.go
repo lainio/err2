@@ -42,12 +42,27 @@ func main() {
 	case "play":
 		doPlayMain()
 	case "assert":
-		doAssertMain()
+		doAssertMain(false)
+	case "assert-keep":
+		doAssertMain(true)
 	default:
 		err2.Throwf("unknown (%v) playground given", *mode)
 	}
 }
 
-func doAssertMain() {
+func doAssertMain(keep bool) {
+	asserterPusher(keep)
+	asserterTester()
+}
+
+func asserterTester() {
+	//defer assert.PushAsserter(assert.Development)()
 	assert.That(false)
+}
+
+func asserterPusher(keep bool) {
+	pop := assert.PushAsserter(assert.Debug)
+	if keep {
+		pop()
+	}
 }
