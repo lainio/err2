@@ -1065,14 +1065,32 @@ func SetDefault(i Asserter) (old Asserter) {
 // function:
 //
 //	defer assert.PushAsserter(assert.Plain)()
-func PushAsserter(i Asserter) func() {
+func PushAsserter(i Asserter) (retFn function) {
+	var (
+		prevFound    bool
+		prevAsserter asserter
+	)
+
 	// get pkg lvl asserter
 	curAsserter := defAsserter[def]
 	// ..  to check if we are doing unit tests
 	if !curAsserter.isUnitTesting() {
-		// .. allow TLS specific asserter. NOTE see current()
+		// .. allow GLS specific asserter. NOTE see current()
 		curGoRID := goid()
-		asserterMap.Set(curGoRID, defAsserter[i])
+		//asserterMap.Set(curGoRID, defAsserter[i])
+		asserterMap.Tx(func(m map[int]asserter) {
+			cur, found := m[curGoRID]
+			if found {
+				prevAsserter = cur
+				prevFound = found
+			}
+			m[curGoRID] = defAsserter[i]
+		})
+	}
+	if prevFound {
+		return func() {
+			asserterMap.Set(goid(), prevAsserter)
+		}
 	}
 	return PopAsserter
 }
