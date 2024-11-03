@@ -64,10 +64,9 @@ func ClassicCopyFile(src, dst string) error {
 	return nil
 }
 
-// OrgCopyFile copies the source file to the given destination. If any error occurs it
+// TryCopyFile copies the source file to the given destination. If any error occurs it
 // returns an error value describing the reason.
-func OrgCopyFile(src, dst string) (err error) {
-	defer err2.Handle(&err) // automatic error message: see err2.Formatter
+func TryCopyFile(src, dst string) {
 	// You can out-comment above handler line(s) to see what happens.
 
 	// You'll learn that call stacks are for every function level 'catch'
@@ -79,17 +78,13 @@ func OrgCopyFile(src, dst string) (err error) {
 	r := try.To1(os.Open(src))
 	defer r.Close()
 
-	w, err := os.Create(dst)
-	if err != nil {
-		return fmt.Errorf("mixing traditional error checking: %w", err)
-	}
+	w:= try.To1(os.Create(dst))
 	defer err2.Handle(&err, func(err error) error {
 		try.Out(os.Remove(dst)).Logf("cleaning error")
 		return err
 	})
 	defer w.Close()
 	try.To1(io.Copy(w, r))
-	return nil
 }
 
 func CallRecur(d int) (ret int, err error) {
@@ -161,13 +156,13 @@ func doMain() (err error) {
 	// how err2 works. Especially interesting is automatic stack tracing.
 	//
 	// source file exists, but the destination is not in high probability
-	//try.To(OrgCopyFile("main.go", "/notfound/path/file.bak"))
+	//TryCopyFile("main.go", "/notfound/path/file.bak")
 
 	// Both source and destination don't exist
-	//try.To(OrgCopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
+	//TryCopyFile("/notfound/path/file.go", "/notfound/path/file.bak")
 
 	// to play with real args:
-	try.To(CopyFile(flag.Arg(0), flag.Arg(1)))
+	TryCopyFile(flag.Arg(0), flag.Arg(1))
 
 	if len(flag.Args()) > 0 {
 		// Next fn demonstrates how error and panic traces work, comment out all
@@ -177,7 +172,7 @@ func doMain() (err error) {
 		fmt.Println("ret val:", ret)
 	} else {
 		// 2nd argument is empty to assert
-		try.To(OrgCopyFile("main.go", ""))
+		TryCopyFile("main.go", "")
 	}
 
 	fmt.Println("=== you cannot see this ===")
