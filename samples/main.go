@@ -14,7 +14,8 @@ var (
 		"mode",
 		"play",
 		"runs the wanted playground: db, play, nil, assert,"+
-			"\nassert-keep (= uses assert.Debug in GLS)",
+			"\nassert-keep (= uses assert.Debug in GLS),"+
+			"\nplay-recursion (= runs recursion example)",
 	)
 	isErr = flag.Bool("err", false, "tells if we want to have an error")
 )
@@ -40,7 +41,7 @@ func main() {
 		doMain1()
 	case "nil2":
 		doMain2()
-	case "play":
+	case "play", "play-recursion":
 		doPlayMain()
 	case "assert":
 		doAssertMainKeepGLSAsserter(false)
