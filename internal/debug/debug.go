@@ -26,6 +26,8 @@ type StackInfo struct {
 
 	// these are used to filter out specific lines from output
 	ExlRegexp []*regexp.Regexp
+
+	PrintFirstOnly bool
 }
 
 var (
@@ -39,14 +41,19 @@ var (
 
 	// we want to check that this is not our package
 	packageRegexp = regexp.MustCompile(
-		`^github\.com/lainio/err2[a-zA-Z0-9_/.\[\]]*\(`,
+		`^github\.com/lainio/err2[a-zA-Z0-9_/\.\[\]\@]*\(`,
 	)
 
 	// testing package exluding regexps:
 	testingPkgRegexp  = regexp.MustCompile(`^testing\.`)
 	testingFileRegexp = regexp.MustCompile(`^.*\/src\/testing\/testing\.go`)
 
-	exludeRegexps = []*regexp.Regexp{testingPkgRegexp, testingFileRegexp}
+	exludeRegexps    = []*regexp.Regexp{testingPkgRegexp, testingFileRegexp}
+	exludeRegexpsAll = []*regexp.Regexp{
+		testingPkgRegexp,
+		testingFileRegexp,
+		packageRegexp,
+	}
 )
 
 func (si StackInfo) fullName() string {
@@ -89,7 +96,11 @@ func (si StackInfo) canPrint(s string, anchorLine, i int) (ok bool) {
 		// printed from call stack.
 		anchorLine = 0
 	}
-	ok = i >= 2*si.Level+anchorLine
+	if si.PrintFirstOnly {
+		ok = i >= 2*si.Level+anchorLine && i < 2*si.Level+anchorLine+2
+	} else {
+		ok = i >= 2*si.Level+anchorLine
+	}
 
 	if si.ExlRegexp == nil {
 		return ok
@@ -271,7 +282,7 @@ func stackPrint(r io.Reader, w io.Writer, si StackInfo) {
 		line := scanner.Text()
 
 		// we can print a line if we didn't find anything, i.e. anchorLine is
-		// nilAnchor, which means that our start is not limited by then anchor
+		// nilAnchor, which means that our start is not limited by the anchor
 		canPrint := anchorLine == nilAnchor
 		// if it's not nilAnchor we need to check it more carefully
 		if !canPrint {

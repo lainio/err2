@@ -78,7 +78,7 @@ func TryCopyFile(src, dst string) {
 	r := try.To1(os.Open(src))
 	defer r.Close()
 
-	w:= try.To1(os.Create(dst))
+	w := try.To1(os.Create(dst))
 	defer err2.Handle(&err, func(err error) error {
 		try.Out(os.Remove(dst)).Logf("cleaning error")
 		return err
@@ -94,16 +94,35 @@ func CallRecur(d int) (ret int, err error) {
 }
 
 func doRecur(d int) (ret int, err error) {
-	d--
 	if d >= 0 {
 		// Keep below to show how asserts work
 		//assert.NotZero(d)
 		// Comment out the above assert statement to simulate runtime-error
 		ret = 10 / d
-		fmt.Println(ret)
+		fmt.Println("ret:", ret)
 		//return doRecur(d)
 	}
 	return ret, fmt.Errorf("root error")
+}
+
+type runMode int
+
+const (
+	runModePlay runMode = iota
+	runModePlayRec
+)
+
+func (rm runMode) String() string {
+	return []string{"play", "play-recursion"}[rm]
+}
+
+var rMode runMode
+
+func setRunMode() {
+	playRec := runModePlayRec
+	if *mode == playRec.String() {
+		rMode = runModePlayRec
+	}
 }
 
 func doPlayMain() {
@@ -122,11 +141,7 @@ func doPlayMain() {
 	// errors are caught without specific handlers.
 	defer err2.Catch(err2.Stderr)
 
-	// If you don't want to use tracers or you just need a proper error handler
-	// here.
-	//	defer err2.Catch(func(err error) {
-	//		fmt.Println("ERROR:", err)
-	//	})
+	setRunMode()
 
 	// by calling one of these you can test how automatic logging in above
 	// catch works correctly: the last source of error check is shown in line
@@ -161,18 +176,22 @@ func doMain() (err error) {
 	// Both source and destination don't exist
 	//TryCopyFile("/notfound/path/file.go", "/notfound/path/file.bak")
 
-	// to play with real args:
-	TryCopyFile(flag.Arg(0), flag.Arg(1))
-
 	if len(flag.Args()) > 0 {
-		// Next fn demonstrates how error and panic traces work, comment out all
-		// above CopyFile calls to play with:
-		argument := try.To1(strconv.Atoi(flag.Arg(0)))
-		ret := try.To1(CallRecur(argument))
-		fmt.Println("ret val:", ret)
+		if rMode == runModePlayRec {
+			// Next fn demonstrates how error and panic traces work, comment
+			// out all above CopyFile calls to play with:
+			argument := try.To1(strconv.Atoi(flag.Arg(0)))
+			ret := try.To1(CallRecur(argument))
+			fmt.Println("ret val:", ret)
+		} else {
+			// to play with real args:
+			//TryCopyFile(flag.Arg(0), flag.Arg(1))
+			try.To(CopyFile(flag.Arg(0), flag.Arg(1)))
+		}
 	} else {
 		// 2nd argument is empty to assert
-		TryCopyFile("main.go", "")
+		//TryCopyFile("main.go", "")
+		try.To(CopyFile("main.go", ""))
 	}
 
 	fmt.Println("=== you cannot see this ===")

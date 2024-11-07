@@ -94,11 +94,20 @@ func (i *Info) callNilHandler() {
 }
 
 func (i *Info) checkErrorTracer() {
+	errRet := false
+	if i.ErrorTracer == nil {
+		i.ErrorTracer = tracer.ErrRet.Tracer()
+		errRet = true
+	}
 	if i.ErrorTracer == nil {
 		i.ErrorTracer = tracer.Error.Tracer()
+		errRet = false
 	}
 	if i.ErrorTracer != nil {
-		si := stackPrologueError
+		si := stackPrologueErrRet
+		if !errRet {
+			si = stackPrologueError
+		}
 		if i.Any == nil {
 			i.Any = i.safeErr()
 		}
@@ -405,16 +414,27 @@ see 'err2/scripts/README.md' and run auto-migration scripts for your repo
 func printStack(w io.Writer, si debug.StackInfo, msg any) {
 	fmt.Fprintf(w, "---\n%v\n---\n", msg)
 	debug.FprintStack(w, si)
+	if si.PrintFirstOnly {
+		fmt.Fprintln(w, "")
+	}
 }
 
 var (
-	// stackPrologueRuntime = newSI("", "panic(", 1)
-	stackPrologueError = newErrSI()
-	stackProloguePanic = newSI("", "panic(", 1)
+	stackPrologueError  = newErrSIOld()
+	stackPrologueErrRet = newErrSI()
+	stackProloguePanic  = newSI("", "panic(", 1)
 )
 
-func newErrSI() debug.StackInfo {
+func newErrSIOld() debug.StackInfo {
 	return debug.StackInfo{Regexp: debug.PackageRegexp, Level: 1}
+}
+
+func newErrSI() debug.StackInfo {
+	return debug.StackInfo{
+		Level:          1,
+		Regexp:         debug.PackageRegexp,
+		PrintFirstOnly: true,
+	}
 }
 
 func newSI(pn, fn string, lvl int) debug.StackInfo {

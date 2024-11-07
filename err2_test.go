@@ -672,6 +672,16 @@ func TestSetErrorTracer(t *testing.T) {
 	require.That(t, w == nil, "error tracer should be nil")
 }
 
+func TestSetErrRetTracer(t *testing.T) {
+	t.Parallel()
+	w := err2.ErrRetTracer()
+	require.That(t, w == nil, "error return tracer should be nil")
+	var w1 io.Writer
+	err2.SetErrRetTracer(w1)
+	w = err2.ErrRetTracer()
+	require.That(t, w == nil, "error return tracer should be nil")
+}
+
 func ExampleCatch_withFmt() {
 	// Set default logger to stdout for this example
 	oldLogW := err2.LogTracer()
