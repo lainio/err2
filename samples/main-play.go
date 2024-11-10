@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 
@@ -99,7 +100,7 @@ func doRecur(d int) (ret int, err error) {
 		//assert.NotZero(d)
 		// Comment out the above assert statement to simulate runtime-error
 		ret = 10 / d
-		fmt.Println("ret:", ret)
+		log.Println("ret:", ret)
 		//return doRecur(d)
 	}
 	return ret, fmt.Errorf("root error")
