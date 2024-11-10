@@ -104,9 +104,9 @@ func (i *Info) checkErrorTracer() {
 		errRet = false
 	}
 	if i.ErrorTracer != nil {
-		si := stackPrologueErrRet
-		if !errRet {
-			si = stackPrologueError
+		si := stackPrologueError
+		if errRet {
+			si = stackPrologueErrRet
 		}
 		if i.Any == nil {
 			i.Any = i.safeErr()

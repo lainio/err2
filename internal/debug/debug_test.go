@@ -380,15 +380,15 @@ func TestStackPrint_limit(t *testing.T) {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			r := strings.NewReader(tt.input)
-			w := new(bytes.Buffer)
-			stackPrint(r, w, tt.StackInfo)
+			readStack := strings.NewReader(tt.input)
+			writeStack := new(bytes.Buffer)
+			stackPrint(readStack, writeStack, tt.StackInfo)
 			ins := strings.Split(tt.input, "\n")
-			outs := strings.Split(w.String(), "\n")
+			outs := strings.Split(writeStack.String(), "\n")
 			require.Thatf(t, len(ins) > len(outs),
 				"input length:%d should be greater:%d", len(ins), len(outs))
-			b, a := tt.output, w.String()
-			require.Equal(t, a, b)
+			wantResult, gotResult := tt.output, writeStack.String()
+			require.Equal(t, gotResult, wantResult)
 		})
 	}
 }
