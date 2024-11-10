@@ -25,6 +25,10 @@ func DecamelRegexp(str string) string {
 	return str
 }
 
+func DecamelRmTryPrefix(s string) string {
+	return strings.ReplaceAll(Decamel(s), "try ", "")
+}
+
 // Decamel return the given string as space delimeted. It's optimized to split
 // and decamel function names returned from Go call stacks. For more information
 // see its test cases.

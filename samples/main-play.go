@@ -190,8 +190,8 @@ func doMain() (err error) {
 		}
 	} else {
 		// 2nd argument is empty to assert
-		//TryCopyFile("main.go", "")
-		try.To(CopyFile("main.go", ""))
+		TryCopyFile("main.go", "")
+		//try.To(CopyFile("main.go", ""))
 	}
 
 	fmt.Println("=== you cannot see this ===")

@@ -24,8 +24,24 @@ type Formatter struct {
 	DoFmt
 }
 
-// Decamel is preimplemented and default formatter to produce human
-// readable error strings from function names.
+// DecamelAndRmTryPrefix is pre-implemented formatter to produce human readable
+// error strings from function names. It's similar to [Decamel] but also removes
+// try-prefixes from function names:
+//
+//	func TryCopyFile(..)  -> "copy file: file not exists"
+//	                          ^-------^ -> generated from 'func TryCopyFile'
+//
+// It's convenient helper for those who wants to write compact functions by
+// following convention to always add 'Try' prefix to those functions that can
+// throw errors thru panics. Fox example, if you're using helpers like
+// [github.com/lainio/err2/assert.That] and [github.com/lainio/err2/try.To] but
+// you don't want to handle errors in your current function, it's still good
+// practice to use convention to mark that function to throw errors. However, we
+// suggest that you don't do that in your packages public API functions.
+var DecamelAndRmTryPrefix = &Formatter{DoFmt: str.DecamelRmTryPrefix}
+
+// Decamel is pre-implemented and default formatter to produce human readable
+// error strings from function names.
 //
 //	func CopyFile(..)  -> "copy file: file not exists"
 //	                       ^-------^ -> generated from 'func CopyFile'
