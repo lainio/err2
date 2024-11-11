@@ -2,6 +2,18 @@
 
 ### Version history
 
+##### 1.1.0
+- `assert` package:
+    - bug fix: call stack traversal during unit testing in some situations
+    - **all generics-based functions are inline expansed**
+    - *performance* is now *same as if-statements for all functions*
+    - new assert functions: `MNil`, `CNil`, `Less`, `Greater`, etc.
+    - all assert messages follow Go idiom: `got, want`
+    - `Asserter` can be set per goroutine: `PushAsserter`
+- `try` package:
+    - new check functions: `T`, `T1`, `T2`, `T3`, for quick refactoring from `To` functions to annotate an error locally
+    - **all functions are inline expansed**: if-statement equal performance
+
 ##### 1.0.0
 - **Finally! We are very happy, and thanks to all who have helped!**
 - Lots of documentation updates and cleanups for version 1.0.0

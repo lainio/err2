@@ -103,7 +103,8 @@ tolerant*. And, of course, it helps to make your code error-safe.
    handler.
 3. It helps us use design-by-contract type preconditions.
 4. It offers automatic stack tracing for every error, runtime error, or panic.
-   If you are familiar with Zig, the `err2` error traces are same as Zig's.
+   If you are familiar with Zig, the `err2` error return traces are same as
+   Zig's.
 
 You can use all of them or just the other. However, if you use `try` for error
 checks, you must remember to use Go's `recover()` by yourself, or your error
@@ -152,7 +153,11 @@ own purposes.
 
 #### Error Stack Tracing
 
-The err2 offers optional stack tracing. It's *automatic* and *optimized*. 
+The err2 offers optional stack tracing in two different formats:
+1. Optimized call stacks (`-err2-trace`)
+1. Error return traces similar to Zig (`-err2-ret-trace`)
+
+Both are *automatic* and fully *optimized*. 
 
 <details>
 <summary>The example of the optimized call stack:</summary>
@@ -177,11 +182,13 @@ main.main()
 
 </details>
 
-Just set the `err2.SetErrorTracer` or `err2.SetPanicTracer` to the stream you
-want traces to be written:
+Just set the `err2.SetErrorTracer`, `err2.SetErrRetTracer` or
+`err2.SetPanicTracer` to the stream you want traces to be written:
 
 ```go
 err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
+// or, for example:
+err2.SetErrRetTracer(os.Stderr) // write error return trace (like Zig)
 // or, for example:
 err2.SetPanicTracer(log.Writer()) // stack panic trace to std logger
 ```
@@ -382,12 +389,12 @@ func TestWebOfTrustInfo(t *testing.T) {
 	// And if there's violations during the test run they are reported as
 	// test failures for this TestWebOfTrustInfo -test.
 
-	assert.Equal(0, wot.CommonInvider)
-	assert.Equal(1, wot.Hops)
+	assert.Equal(wot.CommonInvider, 0)
+	assert.Equal(wot.Hops, 1)
 
 	wot = NewWebOfTrust(bob.Node, carol.Node)
-	assert.Equal(-1, wot.CommonInvider)
-	assert.Equal(-1, wot.Hops)
+	assert.Equal(wot.CommonInvider, hop.NotConnected)
+	assert.Equal(wot.Hops, hop.NotConnected)
 	...
 ```
 
@@ -592,6 +599,15 @@ been much easier.** There is an excellent [blog post](https://jesseduffield.com/
 about the issues you are facing with Go's error handling without the help of
 the err2 package.
 
+- If you don't want to bubble up error from every function, we have learned that
+`Try` prefix convention is pretty cool way to solve limitations of Go
+programming language help to make your code more skimmable. If your internal
+functions normally would be something like `func CopyFile(s, t string) (err
+error)`, you can replace them with `func TryCopyFile(s, t string)`, where `Try`
+prefix remind you that the function throws errors. You can decide at what level
+of the call stack you will catch them with `err2.Handle` or `err2.Catch`,
+depending your case and API.
+
 </details>
 
 ## Support And Contributions
@@ -607,14 +623,10 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.1.0
-- `assert` package:
-    - bug fix: call stack traversal during unit testing in some situations
-    - **all generics-based functions are inline expansed**
-    - *performance* is now *same as if-statements for all functions*
-    - new assert functions: `MNil`, `CNil`, `Less`, `Greater`, etc.
-    - all assert messages follow Go idiom: `got, want`
-    - `Asserter` can be set per goroutine: `PushAsserter`
-- `try` package:
-    - new check functions: `T`, `T1`, `T2`, `T3`, for quick refactoring from `To` functions to annotate an error locally
-    - **all functions are inline expansed**: if-statement equal performance
+##### 1.2.0
+- Now `-err2-ret-trace` and `err2.SetErrRetTracer` gives us *error return traces*
+  which are even more readable than `-err2-trace`, `err2.SetErrorTracer` with
+  long error return traces
+- A new automatic error formatter/generator added for `TryCopyFile` convention
+- New features for `sample/` to demonstrate latest features
+- Extended documentation

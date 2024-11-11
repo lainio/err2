@@ -1,8 +1,9 @@
 /*
-Package try is a package for [To], [To1], and [To2] functions that implement the error
-checking. [To] functions check 'if err != nil' and if it throws the err to the
-error handlers, which are implemented by the err2 package. More information
-about err2 and try packager roles can be seen in the FileCopy example:
+Package try is a package for error checking with the functions: [To], [To1], and
+[To2]. These functions check the last given error argument isn't nil, i.e., 'if
+err != nil' and if it is, it throws the err to the error handlers. More
+information about err2 and try packages roles can be seen in the FileCopy
+example:
 
 	...
 	r := try.To1(os.Open(src))

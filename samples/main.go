@@ -7,6 +7,7 @@ import (
 
 	"github.com/lainio/err2"
 	"github.com/lainio/err2/assert"
+	"github.com/lainio/err2/formatter"
 )
 
 var (
@@ -14,7 +15,8 @@ var (
 		"mode",
 		"play",
 		"runs the wanted playground: db, play, nil, assert,"+
-			"\nassert-keep (= uses assert.Debug in GLS)",
+			"\nassert-keep (= uses assert.Debug in GLS),"+
+			"\nplay-recursion (= runs recursion example)",
 	)
 	isErr = flag.Bool("err", false, "tells if we want to have an error")
 )
@@ -23,6 +25,10 @@ func init() {
 	// highlight that this is before flag.Parse to allow it to work properly.
 	err2.SetLogTracer(os.Stderr) // for import
 	err2.SetLogTracer(nil)
+
+	// select which one you want to play with
+	err2.SetFormatter(formatter.DecamelAndRmTryPrefix)
+	// err2.SetFormatter(formatter.Decamel)
 }
 
 func main() {
@@ -40,7 +46,7 @@ func main() {
 		doMain1()
 	case "nil2":
 		doMain2()
-	case "play":
+	case "play", "play-recursion":
 		doPlayMain()
 	case "assert":
 		doAssertMainKeepGLSAsserter(false)

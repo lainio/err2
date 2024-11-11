@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 
@@ -64,10 +65,9 @@ func ClassicCopyFile(src, dst string) error {
 	return nil
 }
 
-// OrgCopyFile copies the source file to the given destination. If any error occurs it
+// TryCopyFile copies the source file to the given destination. If any error occurs it
 // returns an error value describing the reason.
-func OrgCopyFile(src, dst string) (err error) {
-	defer err2.Handle(&err) // automatic error message: see err2.Formatter
+func TryCopyFile(src, dst string) {
 	// You can out-comment above handler line(s) to see what happens.
 
 	// You'll learn that call stacks are for every function level 'catch'
@@ -79,17 +79,13 @@ func OrgCopyFile(src, dst string) (err error) {
 	r := try.To1(os.Open(src))
 	defer r.Close()
 
-	w, err := os.Create(dst)
-	if err != nil {
-		return fmt.Errorf("mixing traditional error checking: %w", err)
-	}
+	w := try.To1(os.Create(dst))
 	defer err2.Handle(&err, func(err error) error {
 		try.Out(os.Remove(dst)).Logf("cleaning error")
 		return err
 	})
 	defer w.Close()
 	try.To1(io.Copy(w, r))
-	return nil
 }
 
 func CallRecur(d int) (ret int, err error) {
@@ -99,16 +95,35 @@ func CallRecur(d int) (ret int, err error) {
 }
 
 func doRecur(d int) (ret int, err error) {
-	d--
 	if d >= 0 {
 		// Keep below to show how asserts work
 		//assert.NotZero(d)
 		// Comment out the above assert statement to simulate runtime-error
 		ret = 10 / d
-		fmt.Println(ret)
+		log.Println("ret:", ret)
 		//return doRecur(d)
 	}
 	return ret, fmt.Errorf("root error")
+}
+
+type runMode int
+
+const (
+	runModePlay runMode = iota
+	runModePlayRec
+)
+
+func (rm runMode) String() string {
+	return []string{"play", "play-recursion"}[rm]
+}
+
+var rMode runMode
+
+func setRunMode() {
+	playRec := runModePlayRec
+	if *mode == playRec.String() {
+		rMode = runModePlayRec
+	}
 }
 
 func doPlayMain() {
@@ -127,11 +142,7 @@ func doPlayMain() {
 	// errors are caught without specific handlers.
 	defer err2.Catch(err2.Stderr)
 
-	// If you don't want to use tracers or you just need a proper error handler
-	// here.
-	//	defer err2.Catch(func(err error) {
-	//		fmt.Println("ERROR:", err)
-	//	})
+	setRunMode()
 
 	// by calling one of these you can test how automatic logging in above
 	// catch works correctly: the last source of error check is shown in line
@@ -161,23 +172,27 @@ func doMain() (err error) {
 	// how err2 works. Especially interesting is automatic stack tracing.
 	//
 	// source file exists, but the destination is not in high probability
-	//try.To(OrgCopyFile("main.go", "/notfound/path/file.bak"))
+	//TryCopyFile("main.go", "/notfound/path/file.bak")
 
 	// Both source and destination don't exist
-	//try.To(OrgCopyFile("/notfound/path/file.go", "/notfound/path/file.bak"))
-
-	// to play with real args:
-	try.To(CopyFile(flag.Arg(0), flag.Arg(1)))
+	//TryCopyFile("/notfound/path/file.go", "/notfound/path/file.bak")
 
 	if len(flag.Args()) > 0 {
-		// Next fn demonstrates how error and panic traces work, comment out all
-		// above CopyFile calls to play with:
-		argument := try.To1(strconv.Atoi(flag.Arg(0)))
-		ret := try.To1(CallRecur(argument))
-		fmt.Println("ret val:", ret)
+		if rMode == runModePlayRec {
+			// Next fn demonstrates how error and panic traces work, comment
+			// out all above CopyFile calls to play with:
+			argument := try.To1(strconv.Atoi(flag.Arg(0)))
+			ret := try.To1(CallRecur(argument))
+			fmt.Println("ret val:", ret)
+		} else {
+			// to play with real args:
+			//TryCopyFile(flag.Arg(0), flag.Arg(1))
+			try.To(CopyFile(flag.Arg(0), flag.Arg(1)))
+		}
 	} else {
 		// 2nd argument is empty to assert
-		try.To(OrgCopyFile("main.go", ""))
+		TryCopyFile("main.go", "")
+		//try.To(CopyFile("main.go", ""))
 	}
 
 	fmt.Println("=== you cannot see this ===")

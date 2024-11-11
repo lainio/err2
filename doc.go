@@ -1,6 +1,6 @@
 /*
-Package err2 provides three main functionality:
- 1. err2 package includes helper functions for error handling & automatic error
+Package err2 is error handling solution including three main functionality:
+ 1. err2 package offers helper functions for error handling & automatic error
     stack tracing
  2. [github.com/lainio/err2/try] sub-package is for error checking
  3. [github.com/lainio/err2/assert] sub-package is for design-by-contract and

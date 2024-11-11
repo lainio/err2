@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
-	"github.com/lainio/err2/internal/require"
+	"github.com/lainio/err2/internal/except"
 	"github.com/lainio/err2/try"
 )
 
@@ -102,8 +102,8 @@ func TestResult2_Logf(t *testing.T) {
 		return v1 + v2, v2
 	}
 	num1, num2 := countSomething("1", "bad")
-	require.Equal(t, num2, 2)
-	require.Equal(t, num1, 3)
+	except.Equal(t, num2, 2)
+	except.Equal(t, num1, 3)
 }
 
 func TestResult_Handle(t *testing.T) {
@@ -121,10 +121,10 @@ func TestResult_Handle(t *testing.T) {
 		return nil
 	}
 	err := callFn(1)
-	require.That(t, err == nil, "no error when Out.Handle sets it nil")
+	except.That(t, err == nil, "no error when Out.Handle sets it nil")
 
 	err = callFn(0)
-	require.That(t, err != nil, "want error when Out.Handle sets it the same")
+	except.That(t, err != nil, "want error when Out.Handle sets it the same")
 }
 
 func ExampleResult1_Handle() {

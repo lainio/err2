@@ -8,7 +8,19 @@ import (
 
 // ErrorTracer returns current [io.Writer] for automatic error stack tracing.
 // The default value is nil.
+//
+// See [SetErrRetTracer] and [SetErrorTracer] for more information of the two
+// different error tracing systems.
 func ErrorTracer() io.Writer {
+	return tracer.Error.Tracer()
+}
+
+// ErrRetTracer returns current [io.Writer] for automatic error return stack
+// tracing. The default value is nil.
+//
+// See [SetErrRetTracer] and [SetErrorTracer] for more information of the two
+// different error tracing systems.
+func ErrRetTracer() io.Writer {
 	return tracer.Error.Tracer()
 }
 
@@ -36,16 +48,34 @@ func LogTracer() io.Writer {
 // Error trace is almost the same format as Go's standard call stack but it may
 // have multiple sections because every [Handle] and [Catch] prints it. If an
 // error happens in a deep call stack, the error trace includes various parts.
-// The principle is similar to [Zig Error Return Traces], where you see how
-// error bubbles up. However, our error trace is a combination of error return
-// traces and stack traces because we get all the needed information at once.
+// If you prefer similar to [Zig Error Return Traces], where you see how
+// error bubbles up, you should use [SetErrRetTrace].
+//
+// Remember that you can reset these with [flag] package support. See
+// documentation of err2 package's flag section.
+func SetErrorTracer(w io.Writer) {
+	tracer.Error.SetTracer(w)
+}
+
+// SetErrRetTracer sets a [io.Writer] for automatic error return stack tracing.
+// The err2 default is nil. Note that any function that has deferred [Handle] or
+// [Catch] is capable to print error return stack trace:
+//
+//	func CopyFile(src, dst string) (err error) {
+//	     defer err2.Handle(&err) // <- makes error trace printing decision
+//
+// Error return trace is almost the same format as Go's standard call stack but
+// it may have multiple sections because every [Handle] and [Catch] prints it.
+// If an error happens in a deep call stack, the error return trace includes
+// various parts. The principle is similar to [Zig Error Return Traces], where
+// you see how error bubbles up.
 //
 // Remember that you can reset these with [flag] package support. See
 // documentation of err2 package's flag section.
 //
 // [Zig Error Return Traces]: https://ziglang.org/documentation/master/#Error-Return-Traces
-func SetErrorTracer(w io.Writer) {
-	tracer.Error.SetTracer(w)
+func SetErrRetTracer(w io.Writer) {
+	tracer.ErrRet.SetTracer(w)
 }
 
 // SetPanicTracer sets a [io.Writer] for automatic panic stack tracing. The err2

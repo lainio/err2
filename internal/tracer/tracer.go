@@ -19,12 +19,14 @@ type writer struct {
 }
 
 var (
-	Error value
-	Panic value
-	Log   value
+	Error  value
+	Panic  value
+	Log    value
+	ErrRet value
 )
 
 func init() {
+	ErrRet.SetTracer(nil)
 	Error.SetTracer(nil)
 	// Because we stop panics as default, we need to output as default
 	Panic.SetTracer(os.Stderr)
@@ -39,6 +41,11 @@ func init() {
 		"`stream` for error tracing: stderr, stdout",
 	)
 	flag.Var(&Panic, "err2-panic-trace", "`stream` for panic tracing")
+	flag.Var(
+		&ErrRet,
+		"err2-ret-trace",
+		"`stream` for error return tracing: stderr, stdout",
+	)
 }
 
 func (v *value) Tracer() io.Writer {

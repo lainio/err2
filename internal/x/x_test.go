@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/lainio/err2/internal/require"
+	"github.com/lainio/err2/internal/except"
 )
 
 var (
@@ -52,30 +52,30 @@ func TestSwap(t *testing.T) {
 		var (
 			lhs, rhs = 1, 2 // these are ints as default
 		)
-		require.Equal(t, lhs, 1)
-		require.Equal(t, rhs, 2)
+		except.Equal(t, lhs, 1)
+		except.Equal(t, rhs, 2)
 		Swap(&lhs, &rhs)
-		require.Equal(t, lhs, 2)
-		require.Equal(t, rhs, 1)
+		except.Equal(t, lhs, 2)
+		except.Equal(t, rhs, 1)
 	}
 	{
 		var (
 			lhs, rhs float64 = 1, 2
 		)
-		require.Equal(t, lhs, 1)
-		require.Equal(t, rhs, 2)
+		except.Equal(t, lhs, 1)
+		except.Equal(t, rhs, 2)
 		Swap(&lhs, &rhs)
-		require.Equal(t, lhs, 2)
-		require.Equal(t, rhs, 1)
+		except.Equal(t, lhs, 2)
+		except.Equal(t, rhs, 1)
 	}
 }
 
 func TestSReverse(t *testing.T) {
 	t.Parallel()
 	SReverse(lengths)
-	require.That(t, reflect.DeepEqual(lengths, reverseLengths))
+	except.That(t, reflect.DeepEqual(lengths, reverseLengths))
 	SReverse(lengths) // it's reverse now turn it to original
-	require.That(t, reflect.DeepEqual(lengths, original))
+	except.That(t, reflect.DeepEqual(lengths, original))
 }
 
 func BenchmarkSSReverse(b *testing.B) {
