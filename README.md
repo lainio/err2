@@ -389,12 +389,12 @@ func TestWebOfTrustInfo(t *testing.T) {
 	// And if there's violations during the test run they are reported as
 	// test failures for this TestWebOfTrustInfo -test.
 
-	assert.Equal(0, wot.CommonInvider)
-	assert.Equal(1, wot.Hops)
+	assert.Equal(wot.CommonInvider, 0)
+	assert.Equal(wot.Hops, 1)
 
 	wot = NewWebOfTrust(bob.Node, carol.Node)
-	assert.Equal(-1, wot.CommonInvider)
-	assert.Equal(-1, wot.Hops)
+	assert.Equal(wot.CommonInvider, hop.NotConnected)
+	assert.Equal(wot.Hops, hop.NotConnected)
 	...
 ```
 
@@ -628,4 +628,5 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
   which are even more readable than `-err2-trace`, `err2.SetErrorTracer` with
   long error return traces
 - A new automatic error formatter/generator added for `TryCopyFile` convention
-- Better documentation
+- New features for `sample/` to demonstrate latest features
+- Extended documentation
