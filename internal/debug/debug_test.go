@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lainio/err2/internal/require"
+	"github.com/lainio/err2/internal/except"
 )
 
 func TestFullName(t *testing.T) {
@@ -42,7 +42,7 @@ func TestFullName(t *testing.T) {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			require.Equal(t, tt.retval, tt.fullName())
+			except.Equal(t, tt.retval, tt.fullName())
 		})
 	}
 }
@@ -94,7 +94,7 @@ func TestIsAnchor(t *testing.T) {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			require.Equal(t, tt.retval, tt.isAnchor(tt.input))
+			except.Equal(t, tt.retval, tt.isAnchor(tt.input))
 		})
 	}
 }
@@ -140,7 +140,7 @@ func TestIsFuncAnchor(t *testing.T) {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			require.Equal(t, tt.retval, tt.isFuncAnchor(tt.input))
+			except.Equal(t, tt.retval, tt.isFuncAnchor(tt.input))
 		})
 	}
 }
@@ -161,7 +161,7 @@ func TestFnLNro(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			output := fnLNro(tt.input)
-			require.Equal(t, output, tt.output)
+			except.Equal(t, output, tt.output)
 		})
 	}
 }
@@ -212,7 +212,7 @@ func TestFnName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			output := fnName(tt.input)
-			require.Equal(t, output, tt.output)
+			except.Equal(t, output, tt.output)
 		})
 	}
 }
@@ -239,7 +239,7 @@ func TestStackPrint_noLimits(t *testing.T) {
 				FuncName:    "",
 				Level:       0,
 			})
-			require.Equal(t, tt.input, w.String())
+			except.Equal(t, tt.input, w.String())
 		})
 	}
 }
@@ -267,8 +267,8 @@ func TestStackPrintForTest(t *testing.T) {
 			// print(tt.output)
 			// println("------")
 			// print(w.String())
-			require.Equal(t, a, b)
-			require.Equal(t, tt.output, w.String())
+			except.Equal(t, a, b)
+			except.Equal(t, tt.output, w.String())
 		})
 	}
 }
@@ -346,7 +346,7 @@ func TestCalcAnchor(t *testing.T) {
 			t.Parallel()
 			r := strings.NewReader(tt.input)
 			anchor := calcAnchor(r, tt.StackInfo)
-			require.Equal(t, tt.anchor, anchor)
+			except.Equal(t, tt.anchor, anchor)
 		})
 	}
 }
@@ -385,10 +385,10 @@ func TestStackPrint_limit(t *testing.T) {
 			stackPrint(readStack, writeStack, tt.StackInfo)
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(writeStack.String(), "\n")
-			require.Thatf(t, len(ins) > len(outs),
+			except.Thatf(t, len(ins) > len(outs),
 				"input length:%d should be greater:%d", len(ins), len(outs))
 			wantResult, gotResult := tt.output, writeStack.String()
-			require.Equal(t, gotResult, wantResult)
+			except.Equal(t, gotResult, wantResult)
 		})
 	}
 }
@@ -460,10 +460,10 @@ func TestStackPrint_OneFunction(t *testing.T) {
 			stackPrint(r, w, tt.StackInfo)
 			ins := strings.Split(tt.input, "\n")
 			outs := strings.Split(w.String(), "\n")
-			require.Thatf(t, len(ins) > len(outs),
+			except.Thatf(t, len(ins) > len(outs),
 				"input length:%d should be greater:%d", len(ins), len(outs))
 			b, a := tt.output, w.String()
-			require.Equal(t, a, b)
+			except.Equal(t, a, b)
 		})
 	}
 }
@@ -528,10 +528,10 @@ func TestFuncName(t *testing.T) {
 				FuncName:    tt.FuncName,
 				Level:       tt.Level,
 			})
-			require.That(t, found)
-			require.Equal(t, tt.output, name)
-			require.Equal(t, ln, tt.outln)
-			require.Equal(t, fr, tt.outFrame)
+			except.That(t, found)
+			except.Equal(t, tt.output, name)
+			except.Equal(t, ln, tt.outln)
+			except.Equal(t, fr, tt.outFrame)
 		})
 	}
 }
