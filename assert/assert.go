@@ -1021,24 +1021,17 @@ func current() (curAsserter asserter) {
 	return curAsserter
 }
 
-// SetDefault sets the current default [Asserter] for assert pkg. It also
-// returns the previous [Asserter].
+// SetDefault sets the new default [Asserter] for the assert pkg instance you're
+// currently using. It also returns the previous [Asserter]. The default
+// asserter is [Production] that's best for most use cases and packages.
 //
-// Note that you should use this in TestMain function, and use [flag] package to
-// set it for the app. For the tests you can set it to panic about every
-// assertion fault, or to throw an error, or/and print the call stack
-// immediately when assert occurs. The err2 package helps you to catch and
-// report all types of the asserts.
+// Note that for most cases [PushAsserter] is most suitable. [PushAsserter]
+// allows you to set [Asserter] per goroutine or function, i.e., until you pop
+// the asserter out, and the assert package uses the current default [Asserter]
+// set by [SetDefault].
 //
-// Note that if you are using tracers you might get two call stacks, so test
-// what's best for your case.
-//
-// Tip. If our own packages (client packages for assert) have lots of parallel
-// testing and race detection, please try to use same [Asserter] for all of them
-// and set [Asserter] only one in TestMain, or in init.
-//
-//	func TestMain(m *testing.M) {
-//	     SetDefault(assert.TestFull)
+// Note that if you are using tracers you might get overlapping call stacks, so
+// test what's best for your case.
 func SetDefault(i Asserter) (old Asserter) {
 	// pkg lvl lock to allow only one pkg client call this at one of the time
 	// together with the indexing, i.e we don't need to switch asserter
