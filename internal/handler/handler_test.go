@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/lainio/err2/internal/except"
+	"github.com/lainio/err2/internal/expect"
 	"github.com/lainio/err2/internal/handler"
 	"github.com/lainio/err2/internal/x"
 )
@@ -121,11 +121,11 @@ func TestProcess(t *testing.T) {
 			if handler.WorkToDo(tt.args.Any, tt.args.Err) {
 				handler.Process(&tt.args.Info)
 
-				except.Equal(t, panicHandlerCalled, tt.want.panicCalled)
-				except.Equal(t, errorHandlerCalled, tt.want.errorCalled)
-				except.Equal(t, nilHandlerCalled, tt.want.nilCalled)
+				expect.Equal(t, panicHandlerCalled, tt.want.panicCalled)
+				expect.Equal(t, errorHandlerCalled, tt.want.errorCalled)
+				expect.Equal(t, nilHandlerCalled, tt.want.nilCalled)
 
-				except.Equal(t, myErrVal.Error(), tt.want.errStr)
+				expect.Equal(t, myErrVal.Error(), tt.want.errStr)
 			}
 			resetCalled()
 		})
@@ -152,13 +152,13 @@ func TestPreProcess_debug(t *testing.T) {
 	// and that's what error stack tracing is all about
 	Handle()
 
-	except.ThatNot(t, panicHandlerCalled)
-	except.ThatNot(t, errorHandlerCalled)
-	except.ThatNot(t, nilHandlerCalled)
+	expect.ThatNot(t, panicHandlerCalled)
+	expect.ThatNot(t, errorHandlerCalled)
+	expect.ThatNot(t, nilHandlerCalled)
 
 	// See the name of this test function. Decamel it + error
 	const want = "testing: t runner: error"
-	except.Equal(t, myErrVal.Error(), want)
+	expect.Equal(t, myErrVal.Error(), want)
 
 	resetCalled()
 }
@@ -243,11 +243,11 @@ func TestPreProcess(t *testing.T) {
 
 				err = handler.PreProcess(&err, &tt.args.Info, tt.args.a)
 
-				except.Equal(t, panicHandlerCalled, tt.want.panicCalled)
-				except.Equal(t, errorHandlerCalled, tt.want.errorCalled)
-				except.Equal(t, nilHandlerCalled, tt.want.nilCalled)
+				expect.Equal(t, panicHandlerCalled, tt.want.panicCalled)
+				expect.Equal(t, errorHandlerCalled, tt.want.errorCalled)
+				expect.Equal(t, nilHandlerCalled, tt.want.nilCalled)
 
-				except.Equal(t, err.Error(), tt.want.errStr)
+				expect.Equal(t, err.Error(), tt.want.errStr)
 			}
 			resetCalled()
 		})

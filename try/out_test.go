@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
-	"github.com/lainio/err2/internal/except"
+	"github.com/lainio/err2/internal/expect"
 	"github.com/lainio/err2/try"
 )
 
@@ -102,8 +102,8 @@ func TestResult2_Logf(t *testing.T) {
 		return v1 + v2, v2
 	}
 	num1, num2 := countSomething("1", "bad")
-	except.Equal(t, num2, 2)
-	except.Equal(t, num1, 3)
+	expect.Equal(t, num2, 2)
+	expect.Equal(t, num1, 3)
 }
 
 func TestResult_Handle(t *testing.T) {
@@ -121,10 +121,10 @@ func TestResult_Handle(t *testing.T) {
 		return nil
 	}
 	err := callFn(1)
-	except.That(t, err == nil, "no error when Out.Handle sets it nil")
+	expect.That(t, err == nil, "no error when Out.Handle sets it nil")
 
 	err = callFn(0)
-	except.That(t, err != nil, "want error when Out.Handle sets it the same")
+	expect.That(t, err != nil, "want error when Out.Handle sets it the same")
 }
 
 func ExampleResult1_Handle() {

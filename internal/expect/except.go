@@ -1,4 +1,4 @@
-package except
+package expect
 
 import (
 	"fmt"
