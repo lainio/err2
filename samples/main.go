@@ -19,16 +19,13 @@ var (
 			"\nplay-recursion (= runs recursion example)",
 	)
 	isErr = flag.Bool("err", false, "tells if we want to have an error")
+	rmTry = flag.Bool("rm-try", false, "remove Try prefix from errors")
 )
 
 func init() {
 	// highlight that this is before flag.Parse to allow it to work properly.
 	err2.SetLogTracer(os.Stderr) // for import
 	err2.SetLogTracer(nil)
-
-	// select which one you want to play with
-	err2.SetFormatter(formatter.DecamelAndRmTryPrefix)
-	// err2.SetFormatter(formatter.Decamel)
 }
 
 func main() {
@@ -36,6 +33,12 @@ func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 
 	flag.Parse()
+
+	if *rmTry {
+		// select which one you want to play with
+		err2.SetFormatter(formatter.DecamelAndRmTryPrefix)
+		// err2.SetFormatter(formatter.Decamel)
+	}
 
 	switch *mode {
 	case "db":
