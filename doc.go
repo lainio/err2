@@ -108,14 +108,14 @@ tracer API:
 The err2 package supports Go's flags. All you need to do is to call [flag.Parse].
 And the following flags are supported (="default-value"):
 
-	-err2-log="nil"
-	    A name of the stream currently supported stderr, stdout or nil
-	-err2-panic-trace="stderr"
-	    A name of the stream currently supported stderr, stdout or nil
+	-err2-log stream
+	      stream for logging: nil -> log pkg
+	-err2-panic-trace stream
+	      stream for panic tracing (default stderr)
 	-err2-ret-trace stream
-	   stream for error return tracing: stderr, stdout
-	-err2-trace="nil"
-	    A name of the stream currently supported stderr, stdout or nil
+	      stream for error return tracing: stderr, stdout
+	-err2-trace stream
+	      stream for error tracing: stderr, stdout
 
 Note that you have called [SetErrorTracer] and others, before you call
 [flag.Parse]. This allows you set the defaults according your app's need and allow
