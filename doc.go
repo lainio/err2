@@ -71,7 +71,9 @@ err2 offers optional stack tracing. And yes, it's fully automatic. Just call
 at the beginning your app, e.g. main function, or set the tracers
 programmatically (before [flag.Parse] if you are using that):
 
-	err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
+	err2.SetErrRmTracer(os.Stderr)    // write error return trace to stderr
+	 or
+	err2.SetErrorTracer(os.Stderr)    // write error stack trace to stderr
 	 or
 	err2.SetPanicTracer(log.Writer()) // panic stack trace to std logger
 
@@ -80,7 +82,8 @@ practice still print their stack trace. The panic tracer's default values is
 [os.Stderr]. The default error tracer is nil.
 
 	err2.SetPanicTracer(os.Stderr) // panic stack tracer's default is stderr
-	err2.SetErrorTracer(nil) // error stack tracer's default is nil
+	err2.SetErrRetTracer(nil)      // error return tracer's default is nil
+	err2.SetErrorTracer(nil)       // error stack tracer's default is nil
 
 Note that both panic and error traces are optimized by err2 package. That means
 that the head of the stack trace isn't the panic function, but an actual line
@@ -109,6 +112,8 @@ And the following flags are supported (="default-value"):
 	    A name of the stream currently supported stderr, stdout or nil
 	-err2-panic-trace="stderr"
 	    A name of the stream currently supported stderr, stdout or nil
+	-err2-ret-trace stream
+	   stream for error return tracing: stderr, stdout
 	-err2-trace="nil"
 	    A name of the stream currently supported stderr, stdout or nil
 
