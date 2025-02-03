@@ -2,6 +2,14 @@
 
 ### Version history
 
+##### 1.2.0
+- Now `-err2-ret-trace` and `err2.SetErrRetTracer` gives us *error return traces*
+  which are even more readable than `-err2-trace`, `err2.SetErrorTracer` with
+  long error return traces
+- A new automatic error formatter/generator added for `TryCopyFile` convention
+- New features for `sample/` to demonstrate latest features
+- Extended documentation
+
 ##### 1.1.0
 - `assert` package:
     - bug fix: call stack traversal during unit testing in some situations

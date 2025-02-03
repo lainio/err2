@@ -623,10 +623,6 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.2.0
-- Now `-err2-ret-trace` and `err2.SetErrRetTracer` gives us *error return traces*
-  which are even more readable than `-err2-trace`, `err2.SetErrorTracer` with
-  long error return traces
-- A new automatic error formatter/generator added for `TryCopyFile` convention
-- New features for `sample/` to demonstrate latest features
-- Extended documentation
+##### 1.2.1
+- Refactoring & optimization
+- Updated documentation
