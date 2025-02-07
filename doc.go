@@ -71,7 +71,7 @@ err2 offers optional stack tracing. And yes, it's fully automatic. Just call
 at the beginning your app, e.g. main function, or set the tracers
 programmatically (before [flag.Parse] if you are using that):
 
-	err2.SetErrRmTracer(os.Stderr)    // write error return trace to stderr
+	err2.SetErrRetTracer(os.Stderr)   // write error return trace to stderr
 	 or
 	err2.SetErrorTracer(os.Stderr)    // write error stack trace to stderr
 	 or
