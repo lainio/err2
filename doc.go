@@ -71,7 +71,9 @@ err2 offers optional stack tracing. And yes, it's fully automatic. Just call
 at the beginning your app, e.g. main function, or set the tracers
 programmatically (before [flag.Parse] if you are using that):
 
-	err2.SetErrorTracer(os.Stderr) // write error stack trace to stderr
+	err2.SetErrRetTracer(os.Stderr)   // write error return trace to stderr
+	 or
+	err2.SetErrorTracer(os.Stderr)    // write error stack trace to stderr
 	 or
 	err2.SetPanicTracer(log.Writer()) // panic stack trace to std logger
 
@@ -80,7 +82,8 @@ practice still print their stack trace. The panic tracer's default values is
 [os.Stderr]. The default error tracer is nil.
 
 	err2.SetPanicTracer(os.Stderr) // panic stack tracer's default is stderr
-	err2.SetErrorTracer(nil) // error stack tracer's default is nil
+	err2.SetErrRetTracer(nil)      // error return tracer's default is nil
+	err2.SetErrorTracer(nil)       // error stack tracer's default is nil
 
 Note that both panic and error traces are optimized by err2 package. That means
 that the head of the stack trace isn't the panic function, but an actual line
@@ -105,12 +108,14 @@ tracer API:
 The err2 package supports Go's flags. All you need to do is to call [flag.Parse].
 And the following flags are supported (="default-value"):
 
-	-err2-log="nil"
-	    A name of the stream currently supported stderr, stdout or nil
-	-err2-panic-trace="stderr"
-	    A name of the stream currently supported stderr, stdout or nil
-	-err2-trace="nil"
-	    A name of the stream currently supported stderr, stdout or nil
+	-err2-log stream
+	      stream for logging: nil -> log pkg
+	-err2-panic-trace stream
+	      stream for panic tracing (default stderr)
+	-err2-ret-trace stream
+	      stream for error return tracing: stderr, stdout
+	-err2-trace stream
+	      stream for error tracing: stderr, stdout
 
 Note that you have called [SetErrorTracer] and others, before you call
 [flag.Parse]. This allows you set the defaults according your app's need and allow

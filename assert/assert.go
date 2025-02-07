@@ -1062,6 +1062,7 @@ func PushAsserter(i Asserter) (retFn function) {
 	var (
 		prevFound    bool
 		prevAsserter asserter
+		currentGID   int
 	)
 
 	// get pkg lvl asserter
@@ -1069,20 +1070,15 @@ func PushAsserter(i Asserter) (retFn function) {
 	// ..  to check if we are doing unit tests
 	if !curAsserter.isUnitTesting() {
 		// .. allow GLS specific asserter. NOTE see current()
-		curGoRID := goid()
-		//asserterMap.Set(curGoRID, defAsserter[i])
+		currentGID = goid()
 		asserterMap.Tx(func(m map[int]asserter) {
-			cur, found := m[curGoRID]
-			if found {
-				prevAsserter = cur
-				prevFound = found
-			}
-			m[curGoRID] = defAsserter[i]
+			prevAsserter, prevFound = m[currentGID]
+			m[currentGID] = defAsserter[i]
 		})
 	}
 	if prevFound {
 		return func() {
-			asserterMap.Set(goid(), prevAsserter)
+			asserterMap.Set(currentGID, prevAsserter)
 		}
 	}
 	return PopAsserter

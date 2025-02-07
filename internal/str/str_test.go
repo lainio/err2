@@ -3,7 +3,7 @@ package str_test
 import (
 	"testing"
 
-	"github.com/lainio/err2/internal/except"
+	"github.com/lainio/err2/internal/expect"
 	"github.com/lainio/err2/internal/str"
 )
 
@@ -49,7 +49,7 @@ func TestCamel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := str.DecamelRegexp(tt.args.s)
-			except.Equal(t, got, tt.want)
+			expect.Equal(t, got, tt.want)
 		})
 	}
 }
@@ -106,7 +106,7 @@ func TestDecamel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := str.Decamel(tt.args.s)
-			except.Equal(t, got, tt.want)
+			expect.Equal(t, got, tt.want)
 		})
 	}
 }
@@ -182,7 +182,7 @@ func TestDecamelRmTryPrefix(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := str.DecamelRmTryPrefix(tt.args.s)
-			except.Equal(t, got, tt.want)
+			expect.Equal(t, got, tt.want)
 		})
 	}
 }

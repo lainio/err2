@@ -62,7 +62,7 @@ linters:
     #    - errorlint
     #    - exhaustive
     #    - exhaustivestruct
-    - exportloopref
+    # - exportloopref -> copyloopvar # but we are using go 1.18 
     #    - forbidigo
     #    - forcetypeassert
     - funlen
@@ -92,6 +92,7 @@ linters:
     - ineffassign
     #    - ireturn
     #    - lll
+    # - copyloopvar # we have go 1.18
     - makezero
     - misspell
     - nakedret

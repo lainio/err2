@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
-	"github.com/lainio/err2/internal/except"
+	"github.com/lainio/err2/internal/expect"
 	"github.com/lainio/err2/internal/handler"
 )
 
@@ -93,17 +93,17 @@ func TestHandlers(t *testing.T) {
 			t.Parallel()
 			anys := tt.args.f
 
-			except.That(t, anys != nil, "cannot be nil")
+			expect.That(t, anys != nil, "cannot be nil")
 			fns, dis := handler.ToErrorFns(anys)
-			except.That(t, fns != nil, "cannot be nil")
-			except.Equal(t, dis, tt.dis, "disabled wanted")
+			expect.That(t, fns != nil, "cannot be nil")
+			expect.Equal(t, dis, tt.dis, "disabled wanted")
 
 			errHandler := handler.Pipeline(fns)
 			err := errHandler(err2.ErrNotFound)
 			if err == nil {
-				except.That(t, tt.want == nil)
+				expect.That(t, tt.want == nil)
 			} else {
-				except.Equal(t, err.Error(), tt.want.Error())
+				expect.Equal(t, err.Error(), tt.want.Error())
 			}
 		})
 	}

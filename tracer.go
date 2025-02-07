@@ -31,9 +31,9 @@ func PanicTracer() io.Writer {
 	return tracer.Panic.Tracer()
 }
 
-// LogTracer returns a current [io.Writer] for the explicit [try.Result.Logf]
-// function and automatic logging used in [Handle] and [Catch]. The
-// default value is nil.
+// LogTracer returns a current [io.Writer] for the explicit
+// [github.com/lainio/err2/try.Result.Logf] function and automatic logging used
+// in [Handle] and [Catch]. The default value is nil.
 func LogTracer() io.Writer {
 	return tracer.Log.Tracer()
 }
@@ -49,7 +49,7 @@ func LogTracer() io.Writer {
 // have multiple sections because every [Handle] and [Catch] prints it. If an
 // error happens in a deep call stack, the error trace includes various parts.
 // If you prefer similar to [Zig Error Return Traces], where you see how
-// error bubbles up, you should use [SetErrRetTrace].
+// error bubbles up, you should use [SetErrRetTracer].
 //
 // Remember that you can reset these with [flag] package support. See
 // documentation of err2 package's flag section.
@@ -93,13 +93,14 @@ func SetPanicTracer(w io.Writer) {
 	tracer.Panic.SetTracer(w)
 }
 
-// SetLogTracer sets a current [io.Writer] for the explicit [try.Result.Logf]
-// function and automatic logging used in [Handle] and [Catch]. The
-// default is nil and then err2 uses std log package for logging.
+// SetLogTracer sets a current [io.Writer] for the explicit
+// [github.com/lainio/err2/try.Result.Logf] function and automatic logging used
+// in [Handle] and [Catch]. The default is nil and then err2 uses std log
+// package for logging.
 //
-// You can use the std log package to redirect other logging packages like [glog]
-// to automatically work with the err2 package. For the [glog], add this line at
-// the beginning of your app:
+// You can use the std log package to redirect other logging packages like
+// [github.com/golang/glog] to automatically work with the err2 package. For the
+// [github.com/golang/glog], add this line at the beginning of your app:
 //
 //	glog.CopyStandardLogTo("INFO")
 //
