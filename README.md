@@ -624,5 +624,5 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 ### Latest Release
 
 ##### 1.2.1
-- Refactoring & optimization
+- Optimization and Refactoring 
 - Updated documentation
