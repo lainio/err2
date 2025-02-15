@@ -112,7 +112,7 @@ linters:
     - staticcheck
     - stylecheck
     #    - tagliatelle
-    - tenv
+    - usetesting
     #    - testpackage
     #    - thelper
     - tparallel
