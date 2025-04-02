@@ -2,6 +2,10 @@
 
 ### Version history
 
+##### 1.2.1
+- Optimization and Refactoring 
+- Updated documentation
+
 ##### 1.2.0
 - Now `-err2-ret-trace` and `err2.SetErrRetTracer` gives us *error return traces*
   which are even more readable than `-err2-trace`, `err2.SetErrorTracer` with

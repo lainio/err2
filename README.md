@@ -623,6 +623,6 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.2.1
-- Optimization and Refactoring 
+##### 1.2.2
+- Bug Fix (issue-27): automatic error annotation works now for try.T functions
 - Updated documentation

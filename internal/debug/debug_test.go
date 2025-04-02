@@ -206,6 +206,36 @@ func TestFnName(t *testing.T) {
 			"github.com/findy-network/findy-agent/agent/ssi.(*DIDAgent).AssertWallet(...)",
 			"ssi.(*DIDAgent).AssertWallet",
 		},
+		{
+			"try.T simple",
+			"main.TCopyFile.T.func(...)",
+			"TCopyFile",
+		},
+		{
+			"try.T simple A",
+			"main.TCopyFile.T.func3(...)",
+			"TCopyFile",
+		},
+		{
+			"try.T1",
+			"ssi.TCopyFile.T1[...].func3(...)",
+			"ssi.TCopyFile",
+		},
+		{
+			"try.T1",
+			"main.TCopyFile.T1[...].func3(...)",
+			"TCopyFile",
+		},
+		{
+			"try.T2 in not main pkg",
+			"github.com/findy-network/findy-agent/agent/ssi.TCopyFile.T2[...].func3(...)",
+			"ssi.TCopyFile",
+		},
+		{
+			"try.T3",
+			"main.TCopyFile.T3[...].func3(...)",
+			"TCopyFile",
+		},
 	}
 	for _, ttv := range tests {
 		tt := ttv

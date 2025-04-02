@@ -88,6 +88,23 @@ func TryCopyFile(src, dst string) {
 	try.To1(io.Copy(w, r))
 }
 
+func AnnotativeCopyFile(src, dst string) (err error) {
+	defer err2.Handle(&err)
+
+	r := try.T1(os.Open(src))("failed")
+	defer r.Close()
+
+	w := try.T1(os.Create(dst))("failed")
+	defer err2.Handle(&err, func(err error) error {
+		try.Out(os.Remove(dst)).Logf()
+		return err
+	})
+	defer w.Close()
+
+	try.T1(io.Copy(w, r))("failed")
+	return nil
+}
+
 func CallRecur(d int) (ret int, err error) {
 	defer err2.Handle(&err)
 
@@ -191,8 +208,10 @@ func doMain() (err error) {
 		}
 	} else {
 		// 2nd argument is empty to assert
-		TryCopyFile("main.go", "")
-		//try.To(CopyFile("main.go", ""))
+		//TryCopyFile("main.go", "")
+
+		// testing try.T function removal from annotation
+		try.To(AnnotativeCopyFile("main.go", ""))
 	}
 
 	fmt.Println("=== you cannot see this ===")
