@@ -261,6 +261,10 @@ func IsNotEnabled(err error) bool {
 // T is similar as [To] but it let's you to annotate a possible error at place.
 //
 //	try.T(f.Close)("annotations")
+//
+// Note that T is a helper, which means that you start with it randomly. You
+// start with [To] and end up using T if you really need to add context
+// related to a specific error check, which is a very rare case.
 func T(err error) func(fs string) {
 	return func(fs string) {
 		if err == nil {
@@ -273,6 +277,10 @@ func T(err error) func(fs string) {
 // T1 is similar as [To1] but it let's you to annotate a possible error at place.
 //
 //	f := try.T1(os.Open("filename")("cannot open cfg file")
+//
+// Note that T1 is a helper, which means that you start with it randomly. You
+// start with [To1] and end up using T1 if you really need to add context
+// related to a specific error check, which is a very rare case.
 func T1[T any](v T, err error) func(fs string) T {
 	return func(fs string) T {
 		if err == nil {
@@ -283,6 +291,10 @@ func T1[T any](v T, err error) func(fs string) T {
 }
 
 // T2 is similar as [To2] but it let's you to annotate a possible error at place.
+//
+// Note that T2 is a helper, which means that you start with it randomly. You
+// start with [To2] and end up using T2 if you really need to add context
+// related to a specific error check, which is a very rare case.
 func T2[T, U any](v T, u U, err error) func(fs string) (T, U) {
 	return func(fs string) (T, U) {
 		if err == nil {
@@ -298,6 +310,10 @@ func annotateErr(err error, fs string) error {
 }
 
 // T3 is similar as [To3] but it let's you to annotate a possible error at place.
+//
+// Note that T3 is a helper, which means that you start with it randomly. You
+// start with [To3] and end up using T3 if you really need to add context
+// related to a specific error check, which is a very rare case.
 func T3[T, U, V any](v1 T, v2 U, v3 V, err error) func(fs string) (T, U, V) {
 	return func(fs string) (T, U, V) {
 		if err == nil {
