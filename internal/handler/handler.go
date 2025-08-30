@@ -74,6 +74,15 @@ func NilNoop(err error) error { return err }
 
 // func ErrorNoop(err error) {}
 
+// updateBothErrors updates both i.Err and i.werr to keep them in sync.
+func (i *Info) updateBothErrors(errPtr *error) {
+	if errPtr == nil {
+		panic("updateBothErrors: errPtr cannot be nil")
+	}
+	i.Err = errPtr
+	i.werr = *errPtr
+}
+
 func (i *Info) callNilHandler() {
 	if i.CheckHandler != nil && i.safeErr() == nil {
 		i.CheckHandler(true)
@@ -86,8 +95,8 @@ func (i *Info) callNilHandler() {
 		i.checkErrorTracer()
 	}
 	if i.NilFn != nil {
-		*i.Err = i.NilFn(i.werr)
-		i.werr = *i.Err // remember change both our errors!
+		result := i.NilFn(i.werr)
+		i.updateBothErrors(&result)
 	} else {
 		i.defaultNilHandler()
 	}
@@ -120,14 +129,16 @@ func (i *Info) callErrorHandler() {
 	if i.ErrorFn != nil {
 		// we want to auto-annotate error first and exec ErrorFn then
 		i.werr = i.workError()
+		var result error
+
 		if i.needErrorAnnotation && i.werr != nil {
 			i.buildFmtErr()
-			*i.Err = i.ErrorFn(*i.Err)
+			result = i.ErrorFn(*i.Err)
 		} else {
-			*i.Err = i.ErrorFn(i.Any.(error))
+			result = i.ErrorFn(i.Any.(error))
 		}
 
-		i.werr = *i.Err // remember change both our errors!
+		i.updateBothErrors(&result)
 	} else {
 		i.defaultErrorHandler()
 	}
@@ -165,8 +176,8 @@ func (i *Info) workError() (err error) {
 }
 
 func (i *Info) fmtErr() {
-	*i.Err = fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, i.werr)...)
-	i.werr = *i.Err // remember change both our errors!
+	result := fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, i.werr)...)
+	i.updateBothErrors(&result)
 }
 
 func (i *Info) buildFmtErr() {
@@ -282,8 +293,7 @@ func PreProcess(errPtr *error, info *Info, a []any) error {
 	// We get 3x faster defer handlers without unsing ptr to original err
 	// named return val. Reason is unknown.
 	err := x.Whom(errPtr != nil, *errPtr, nil)
-	info.Err = &err
-	info.werr = *info.Err // remember change both our errors!
+	info.updateBothErrors(&err)
 
 	// We want the function who sets the handler, i.e. calls the
 	// err2.Handle function via defer. Because call stack is in reverse
@@ -315,7 +325,9 @@ func PreProcess(errPtr *error, info *Info, a []any) error {
 			*info.Err = nil // prevent dublicate "logging"
 		}
 	}
-	return err
+	// Return the final processed error from info.Err, which should be the same as err
+	// unless handlers modified it (e.g., set it to nil as above)
+	return *info.Err
 }
 
 func buildFormatStr(info *Info, lvl int) {
