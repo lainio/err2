@@ -74,13 +74,25 @@ func NilNoop(err error) error { return err }
 
 // func ErrorNoop(err error) {}
 
-// updateBothErrors updates both i.Err and i.werr to keep them in sync.
-func (i *Info) updateBothErrors(errPtr *error) {
+// initErrors initializes both i.Err and i.werr with a new error pointer.
+// Used by PreProcess for setting up error handling with a local error variable.
+func (i *Info) initErrors(errPtr *error) {
 	if errPtr == nil {
-		panic("updateBothErrors: errPtr cannot be nil")
+		panic("initErrors: error pointer cannot be nil")
 	}
 	i.Err = errPtr
 	i.werr = *errPtr
+}
+
+// setErrors updates both *i.Err and i.werr to keep them in sync.
+// Assumes i.Err is already initialized (non-nil pointer).
+// Used by error handlers to update the error value.
+func (i *Info) setErrors(err error) {
+	if i.Err == nil {
+		panic("setErrors: i.Err must be initialized before calling setErrors")
+	}
+	*i.Err = err
+	i.werr = err
 }
 
 func (i *Info) callNilHandler() {
@@ -96,7 +108,7 @@ func (i *Info) callNilHandler() {
 	}
 	if i.NilFn != nil {
 		result := i.NilFn(i.werr)
-		i.updateBothErrors(&result)
+		i.setErrors(result)
 	} else {
 		i.defaultNilHandler()
 	}
@@ -138,7 +150,7 @@ func (i *Info) callErrorHandler() {
 			result = i.ErrorFn(i.Any.(error))
 		}
 
-		i.updateBothErrors(&result)
+		i.setErrors(result)
 	} else {
 		i.defaultErrorHandler()
 	}
@@ -177,7 +189,7 @@ func (i *Info) workError() (err error) {
 
 func (i *Info) fmtErr() {
 	result := fmt.Errorf(i.Format+i.wrapStr(), append(i.Args, i.werr)...)
-	i.updateBothErrors(&result)
+	i.setErrors(result)
 }
 
 func (i *Info) buildFmtErr() {
@@ -290,10 +302,10 @@ func Process(info *Info) {
 func PreProcess(errPtr *error, info *Info, a []any) error {
 	// Bug in Go?
 	// start to use local error ptr only for optimization reasons.
-	// We get 3x faster defer handlers without unsing ptr to original err
+	// We get 3x faster defer handlers without using ptr to original err
 	// named return val. Reason is unknown.
 	err := x.Whom(errPtr != nil, *errPtr, nil)
-	info.updateBothErrors(&err)
+	info.initErrors(&err)
 
 	// We want the function who sets the handler, i.e. calls the
 	// err2.Handle function via defer. Because call stack is in reverse
@@ -322,12 +334,13 @@ func PreProcess(errPtr *error, info *Info, a []any) error {
 		const framesToSkip = 6
 		frame = x.Whom(ok, frame, framesToSkip)
 		if LogOutput(frame, curErr.Error()) == nil {
-			*info.Err = nil // prevent dublicate "logging"
+			*info.Err = nil // prevent duplicate "logging"
 		}
 	}
-	// Return the final processed error from info.Err, which should be the same as err
-	// unless handlers modified it (e.g., set it to nil as above)
-	return *info.Err
+
+	// Note: Since info.Err points to &err, any updates to *info.Err will also update err.
+	// Therefore, we can return the local err variable which reflects the final processed state.
+	return err
 }
 
 func buildFormatStr(info *Info, lvl int) {
