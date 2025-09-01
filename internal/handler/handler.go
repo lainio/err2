@@ -77,9 +77,6 @@ func NilNoop(err error) error { return err }
 // initErrors initializes both i.Err and i.werr with a new error pointer.
 // Used by PreProcess for setting up error handling with a local error variable.
 func (i *Info) initErrors(errPtr *error) {
-	if errPtr == nil {
-		panic("initErrors: error pointer cannot be nil")
-	}
 	i.Err = errPtr
 	i.werr = *errPtr
 }
@@ -88,9 +85,6 @@ func (i *Info) initErrors(errPtr *error) {
 // Assumes i.Err is already initialized (non-nil pointer).
 // Used by error handlers to update the error value.
 func (i *Info) setErrors(err error) {
-	if i.Err == nil {
-		panic("setErrors: i.Err must be initialized before calling setErrors")
-	}
 	*i.Err = err
 	i.werr = err
 }
