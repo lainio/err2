@@ -76,7 +76,97 @@ func (si StackInfo) isFuncAnchor(s string) bool {
 	if si.PackageName == "" && si.FuncName == "" {
 		return true // cannot calculate anchor, calling algorithm set it zero
 	}
-	return strings.Contains(s, si.fullName())
+	fullName := si.fullName()
+
+	// If only package name is provided (no function name), match the package name as-is
+	if si.FuncName == "" {
+		return strings.Contains(s, fullName)
+	}
+
+	// Build the needle to search for
+	var needle string
+	if strings.HasSuffix(fullName, "(") {
+		// FuncName already includes "(", use as-is
+		needle = fullName
+	} else {
+		// Add "(" to match function calls
+		needle = fullName + "("
+	}
+
+	// If there's no package name (only function name like "Handle"), we need to ensure
+	// we match at a function boundary (preceded by .) to prevent matching user functions
+	// like "FirstHandle" when searching for "Handle".
+	// This is critical because "FirstHandle(" contains "Handle(" as a substring.
+	if si.PackageName == "" && !strings.HasSuffix(si.FuncName, "(") {
+		searchFrom := 0
+		for {
+			idx := strings.Index(s[searchFrom:], needle)
+			if idx == -1 {
+				return false
+			}
+			// Adjust idx to absolute position in the original string
+			absIdx := searchFrom + idx
+
+			// Only allow a '.' boundary and require "err2" immediately before it.
+			// Note: Go stack lines never start with a bare function name, so we don't check absIdx == 0.
+			if absIdx > 0 && isErr2BeforeDot(s, absIdx) {
+				return true
+			}
+
+			// Continue search after this match
+			searchFrom = absIdx + 1
+		}
+	}
+
+	return strings.Contains(s, needle)
+}
+
+// isErr2BeforeDot returns true if the token immediately before the dot is "err2",
+// or a major version token "vN" whose previous path segment is "err2".
+// absIdx points to the start of the function name; absIdx-1 must be '.'.
+// Examples:
+//   - "github.com/lainio/err2.Handle(...)" -> true (package token is "err2")
+//   - "github.com/lainio/err2/v2.Handle(...)" -> true (versioned module)
+//   - "err2.Handle(...)" -> true (package token is "err2")
+//   - "main.Handle(...)" -> false (package token is "main")
+//   - "mypackage.Handle(...)" -> false (package token is "mypackage")
+func isErr2BeforeDot(s string, absIdx int) bool {
+	dot := absIdx - 1
+	if dot < 0 || s[dot] != '.' {
+		return false
+	}
+
+	// Find the last '/' before the dot to isolate the package token.
+	start := strings.LastIndex(s[:dot], "/")
+	if start == -1 {
+		start = 0
+	} else {
+		start++ // exclude '/'
+	}
+	pkg := s[start:dot]
+	if pkg == "err2" {
+		return true
+	}
+
+	// Support versioned imports like ".../err2/v2.Handle".
+	// If pkg == "vN" and the previous path token == "err2", accept.
+	if len(pkg) > 1 && pkg[0] == 'v' {
+		allDigits := true
+		for i := 1; i < len(pkg); i++ {
+			if pkg[i] < '0' || pkg[i] > '9' {
+				allDigits = false
+				break
+			}
+		}
+		if allDigits && start > 0 {
+			prev := strings.LastIndex(s[:start-1], "/")
+			if prev != -1 && s[prev+1:start-1] == "err2" {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (si StackInfo) needToCalcFnNameAnchor() bool {

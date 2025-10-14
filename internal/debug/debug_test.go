@@ -135,6 +135,36 @@ func TestIsFuncAnchor(t *testing.T) {
 		{"package name only", args{
 			"github.com/lainio/err2/try.To1[...](...)",
 			StackInfo{"lainio/err2", "", 0, nil, nil, false}}, true},
+		{"user function containing Handle should not match", args{
+			"main.FirstHandle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, false},
+		{"user function containing Handle matches err2.Handle", args{
+			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, true},
+		{"user function named exactly Handle should not match", args{
+			"main.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, false},
+		{"user package function named Handle should not match", args{
+			"mypackage.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, false},
+		{"err2.Handle should match", args{
+			"err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, true},
+		{"lainio/err2.Handle should match", args{
+			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, true},
+		{"user package with err2 in path should not match", args{
+			"github.com/mycompany/err2/mypackage.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, false},
+		{"versioned err2/v2.Handle should match", args{
+			"github.com/lainio/err2/v2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, true},
+		{"versioned err2/v10.Handle should match", args{
+			"github.com/lainio/err2/v10.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, true},
+		{"non-err2 versioned package should not match", args{
+			"github.com/someone/otherpkg/v2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"", "Handle", 0, nil, nil, false}}, false},
 	}
 	for _, ttv := range tests {
 		tt := ttv
