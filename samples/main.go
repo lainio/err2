@@ -41,6 +41,8 @@ func main() {
 	}
 
 	switch *mode {
+	case "overlap":
+		doOverlapMain()
 	case "db":
 		doDBMain()
 	case "nil":
