@@ -349,7 +349,7 @@ func doBuildFormatStr(info *Info, lvl int) (fs string, ok bool) {
 		fnName = info.CallerName
 	}
 	funcName, _, _, ok := debug.FuncName(debug.StackInfo{
-		PackageName: "",
+		PackageName: debug.Err2PackageID, // limit fn name search to err2 pkg
 		FuncName:    fnName,
 		Level:       lvl,
 	})

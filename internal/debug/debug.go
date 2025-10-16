@@ -56,6 +56,11 @@ var (
 	}
 )
 
+// Err2PackageID is the name ID of err2. When its API will update, e.g., v2, the
+// ID must be updated as following "lainio/err2/v2", etc. See tests for
+// isFuncAnchor.
+const Err2PackageID = "lainio/err2"
+
 func (si StackInfo) fullName() string {
 	dot := ""
 	if si.PackageName != "" && si.FuncName != "" {
