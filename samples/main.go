@@ -16,6 +16,7 @@ var (
 		"play",
 		"runs the wanted playground: db, play, nil, assert,"+
 			"\nassert-keep (= uses assert.Debug in GLS),"+
+			"\noverlap (= our fn names can be like MyHandle, myCatch, ..),"+
 			"\nplay-recursion (= runs recursion example)",
 	)
 	isErr = flag.Bool("err", false, "tells if we want to have an error")
