@@ -20,6 +20,6 @@ func FirstHandle() (err error) {
 
 func SecondHandle() (err error) {
 	defer err2.Handle(&err)
-	try.To(fmt.Errorf("my error"))
+	try.T(fmt.Errorf("my error"))("my call lvl annotation")
 	return nil
 }
