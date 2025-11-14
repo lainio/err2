@@ -119,28 +119,65 @@ func TestIsFuncAnchor(t *testing.T) {
 			StackInfo{"", "", 0, PackageRegexp, nil, false}}, true},
 		{"short", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"", "", 0, nil, nil, false}}, true},
+			StackInfo{Err2PackageID, "", 0, nil, nil, false}}, true},
 		{"short-but-false", args{
 			"github.com/lainio/err2.printStackIf({0x1545d2, 0x6}, 0x0, {0x12e3e0?, 0x188f50?})",
-			StackInfo{"err2", "Handle", 0, nil, nil, false}}, false},
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, false},
 		{"medium", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Returnw", 0, nil, nil, false}}, true},
+			StackInfo{Err2PackageID, "Returnw", 0, nil, nil, false}}, true},
 		{"medium-but-false", args{
 			"github.com/lainio/err2.Returnw(0x40000b3e60, {0x0, 0x0}, {0x0, 0x0, 0x0})",
-			StackInfo{"err2", "Return(", 0, nil, nil, false}}, false},
+			StackInfo{Err2PackageID, "Return(", 0, nil, nil, false}}, false},
 		{"long", args{
 			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
-			StackInfo{"err2", "Handle", 0, nil, nil, false}}, true},
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, true},
 		{"package name only", args{
 			"github.com/lainio/err2/try.To1[...](...)",
-			StackInfo{"lainio/err2", "", 0, nil, nil, false}}, true},
+			StackInfo{Err2PackageID, "", 0, nil, nil, false}}, true},
+
+		// From bug (issue #30 and PR #31) tests, Handle name in own pkg
+		{"user pkg containing Handle should not match", args{
+			"mainHandle.First(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, false},
+		{"user function containing Handle should not match", args{
+			"main.FirstHandle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, false},
+		{"user function containing Handle matches err2.Handle", args{
+			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, true},
+		{"user function named exactly Handle should not match", args{
+			"main.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, false},
+		{"user package function named Handle should not match", args{
+			"mypackage.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"err2", "Handle", 0, nil, nil, false}}, false},
+		{"err2.Handle should match", args{
+			"err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{"err2", "Handle", 0, nil, nil, false}}, true},
+		{"lainio/err2.Handle should match", args{
+			"github.com/lainio/err2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, true},
+		{"user package with err2 in path should not match", args{
+			"github.com/mycompany/err2/mypackage.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, false},
+		{"non-err2 versioned package should not match", args{
+			"github.com/someone/otherpkg/v2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID, "Handle", 0, nil, nil, false}}, false},
+
+		// See the PackageID!!
+		{"versioned err2/v2.Handle should match", args{
+			"github.com/lainio/err2/v2.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID + "/v2", "Handle", 0, nil, nil, false}}, true},
+		{"versioned err2/v10.Handle should match", args{
+			"github.com/lainio/err2/v10.Handle(0x40000b3ed8, 0x40000b3ef8)",
+			StackInfo{Err2PackageID + "/v10", "Handle", 0, nil, nil, false}}, true},
 	}
 	for _, ttv := range tests {
 		tt := ttv
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			expect.Equal(t, tt.retval, tt.isFuncAnchor(tt.input))
+			expect.Equal(t, tt.isFuncAnchor(tt.input), tt.retval)
 		})
 	}
 }

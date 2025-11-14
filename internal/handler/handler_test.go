@@ -157,7 +157,7 @@ func TestPreProcess_debug(t *testing.T) {
 	expect.ThatNot(t, nilHandlerCalled)
 
 	// See the name of this test function. Decamel it + error
-	const want = "testing: t runner: error"
+	const want = "error"
 	expect.Equal(t, myErrVal.Error(), want)
 
 	resetCalled()
