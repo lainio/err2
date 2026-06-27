@@ -1,6 +1,7 @@
 package assert
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -27,7 +28,12 @@ type Asserter = uint32
 //
 // Note that Plain is only [Asserter] that override auto-generated assertion
 // messages with given arguments like 'pool name cannot be empty'. Others add
-// given arguments at the end of the auto-generated assert message.
+// given arguments at the end of the auto-generated assert message. For that
+// reason Plain is useful when you want to return sentinel error values with
+// asserts and you don't need any extra information to be wrapped to an error
+// value:
+//
+//	assert.NotEmpty(c.PoolName, ErrMissingPoolName)
 //
 // [Production] (pkg's default) is the best [Asserter] for most cases. The
 // assertion violations are treated as Go error values. And only a pragmatic
@@ -774,13 +780,32 @@ func MKeyExists[M ~map[T]U, T comparable, U any](
 	val, ok = obj[key]
 
 	if !ok {
-		doMKeyExists(key, a)
+		doMKeyExists("doesn't", key, a)
 	}
 	return val
 }
 
-func doMKeyExists(key any, a []any) {
-	defMsg := fmt.Sprintf(assertionMsg+": key '%v' doesn't exist", key)
+// MKeyNotExists asserts that the map key NOT exists. If not it panics/errors
+// (current [Asserter]) the auto-generated (args appended) message.
+//
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
+// [SetDefault]), optional arguments are used to override the auto-generated
+// assert violation message.
+func MKeyNotExists[M ~map[T]U, T comparable, U any](
+	obj M,
+	key T,
+	a ...any,
+) {
+	var ok bool
+	_, ok = obj[key]
+
+	if ok {
+		doMKeyExists("shouldn't", key, a)
+	}
+}
+
+func doMKeyExists(not string, key any, a []any) {
+	defMsg := fmt.Sprintf(assertionMsg+": key '%v' %s exist", key, not)
 	current().reportAssertionFault(1, defMsg, a)
 }
 
@@ -927,6 +952,30 @@ func doError(a []any) {
 	current().reportAssertionFault(1, defMsg, a)
 }
 
+// ErrorIs asserts that the err is the target error. If it isn't it panics and
+// builds a violation message.
+//
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
+// [SetDefault]), optional arguments are used to override the auto-generated
+// assert violation message.
+func ErrorIs(err, target error, a ...any) {
+	if !errors.Is(err, target) {
+		doShouldBeEqual(assertionNotEqualMsg, err.Error(), target.Error(), a)
+	}
+}
+
+// ErrorIsNot asserts that the err isn't the target error. If it is it panics
+// and builds a violation message.
+//
+// Note that when [Plain] [Asserter] is used ([PushAsserter] or even
+// [SetDefault]), optional arguments are used to override the auto-generated
+// assert violation message.
+func ErrorIsNot(err, target error, a ...any) {
+	if errors.Is(err, target) {
+		doShouldBeEqual(assertionEqualMsg, err.Error(), target.Error(), a)
+	}
+}
+
 // Greater asserts that the value is greater than want. If it is not it panics
 // and builds a violation message. Thanks to inlining, the performance penalty
 // is equal to a single 'if-statement' that is almost nothing.
@@ -1049,15 +1098,22 @@ func SetDefault(i Asserter) (old Asserter) {
 	return
 }
 
-// PushAsserter set [Asserter] for the current GLS (Gorounine Local Storage).
+// PushAsserter set [Asserter] for the current GLS (Goroutine Local Storage).
 // That allows us to have multiple different [Asserter] in use in the same
 // process.
 //
-// Let's say that in some function you want to return plain error messages
-// instead of the panic asserts, you can use following in the top-level
-// function:
+// When you want to return plain error messages or sentinel error values, you
+// should use following in the top-level function:
 //
 //	defer assert.PushAsserter(assert.Plain)()
+//
+// The [Asserter] Plain prevents asserts wrapping extra information to an error
+// value.
+//
+// Note that [github.com/lainio/err2.Handle] is capable to annotate errors
+// automatically. You can prevent that using nil in the optional arguments:
+//
+//	defer err2.Handle(&err, nil)
 func PushAsserter(i Asserter) (retFn function) {
 	var (
 		prevFound    bool
@@ -1065,17 +1121,12 @@ func PushAsserter(i Asserter) (retFn function) {
 		currentGID   int
 	)
 
-	// get pkg lvl asserter
-	curAsserter := defAsserter[def]
-	// ..  to check if we are doing unit tests
-	if !curAsserter.isUnitTesting() {
-		// .. allow GLS specific asserter. NOTE see current()
-		currentGID = goid()
-		asserterMap.Tx(func(m map[int]asserter) {
-			prevAsserter, prevFound = m[currentGID]
-			m[currentGID] = defAsserter[i]
-		})
-	}
+	currentGID = goid()
+	asserterMap.Tx(func(m map[int]asserter) {
+		prevAsserter, prevFound = m[currentGID]
+		m[currentGID] = defAsserter[i]
+	})
+
 	if prevFound {
 		return func() {
 			asserterMap.Set(currentGID, prevAsserter)
@@ -1122,13 +1173,6 @@ func newDefInd(v string) Asserter {
 		return Plain
 	}
 	return ind
-}
-
-func combineArgs(format string, a []any) []any {
-	args := make([]any, 1, len(a)+1)
-	args[0] = format
-	args = append(args, a)
-	return args
 }
 
 func goid() int {

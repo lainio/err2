@@ -48,22 +48,30 @@ const (
 const officialTestOutputPrefix = "    "
 
 // reportAssertionFault reports assertion fault according the current asserter
-// and its config. If extra argumnets are given (a ...any) and the first is
+// and its config. If extra arguments are given (a ...any) and the first is
 // string, it's treated as format string and following args as its parameters.
 //
-// Note. We use the pattern where we build defaultMsg argument reaady in cases
+// Note. We use the pattern where we build defaultMsg argument ready in cases
 // like 'got: X, want: Y'. This hits two birds with one stone: we have automatic
 // and correct assert messages, and we can add information to it if we want to.
 // If asserter is Plain (isErrorOnly()) user wants to override automatic assert
-// messgages with our given, usually simple message.
+// messages with our given, usually simple message.
 func (asserter asserter) reportAssertionFault(
 	extraInd int,
 	defaultMsg string,
 	a []any,
 ) {
-	if asserter.hasStackTrace() {
+	var (
+		optionalArgsNotEmpty = len(a) > 0
+		err                  error
+		firstIsError         bool
+	)
+	if optionalArgsNotEmpty {
+		err, firstIsError = a[0].(error)
+	}
+	if !firstIsError && asserter.hasStackTrace() {
 		if asserter.isUnitTesting() {
-			// Note. that the assert in the test function is printed in
+			// Note. That the assert in the test function is printed in
 			// reportPanic below
 			const StackLvl = 5 // amount of functions before we're here
 			stackLvl := StackLvl + extraInd
@@ -79,8 +87,23 @@ func (asserter asserter) reportAssertionFault(
 	if asserter.hasCallerInfo() {
 		defaultMsg = asserter.callerInfo(defaultMsg, extraInd)
 	}
-	if len(a) > 0 {
-		if format, ok := a[0].(string); ok {
+	if optionalArgsNotEmpty {
+		if firstIsError {
+			// The first given argument's type is error. We treat it as a
+			// sentinel error value and let our catching part (err2.Handle)
+			// to report it as-it-is.
+			//    ==> Asserts can be used for error reporting.
+			// NOTE! If our package is allowed to annotate error value we do
+			// it with wrapping, which means that [errors.Is] must be used!
+			newErr := err
+			allowDefMsg := !asserter.isErrorOnly() && defaultMsg != ""
+			if allowDefMsg {
+				newErr = fmt.Errorf("%s: %w", defaultMsg, err)
+			}
+			// we don't want to use unit test's error reporting, and that's
+			// why cannot use asserter.reportPanic call here.
+			panic(newErr)
+		} else if format, ok := a[0].(string); ok {
 			allowDefMsg := !asserter.isErrorOnly() && defaultMsg != ""
 			f := x.Whom(allowDefMsg, defaultMsg+conCatErrStr+format, format)
 			asserter.reportPanic(fmt.Sprintf(f, a[1:]...))
