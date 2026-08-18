@@ -46,6 +46,7 @@ func CopyFile(src, dst string) (err error) {
 - [Assertion](#assertion)
   - [Asserters](#asserters)
   - [Assertion Package for Runtime Use](#assertion-package-for-runtime-use)
+  - [Returning Sentinel Error Values](#returning-sentinel-error-values)
   - [Assertion Package for Unit Testing](#assertion-package-for-unit-testing)
 - [Automatic Flags](#automatic-flags)
   - [Support for Cobra Flags](#support-for-cobra-flags)
@@ -370,6 +371,38 @@ We have now described design-by-contract for development and runtime use. What
 makes err2's assertion packages unique, and extremely powerful, is its use for
 automatic testing as well.
 
+#### Returning Sentinel Error Values
+
+An assertion can also return a sentinel error through `err2.Handle`. When the
+first optional argument is an `error`, a failed assertion uses that error as
+the cause. The normal asserters add useful assertion information by wrapping
+the error, so callers should check it with `errors.Is`:
+
+```go
+var ErrArgumentsNeeded = errors.New("arguments needed")
+
+func run(args []string) (err error) {
+    defer err2.Handle(&err)
+
+    assert.SNotEmpty(args, ErrArgumentsNeeded)
+    return nil
+}
+
+func main() {
+    if err := run(nil); errors.Is(err, ErrArgumentsNeeded) {
+        // handle missing arguments
+    }
+}
+```
+
+If a function must return the exact sentinel value for direct comparison, use
+the `Plain` asserter and disable `err2.Handle`'s automatic annotation:
+
+```go
+defer assert.PushAsserter(assert.Plain)()
+defer err2.Handle(&err, nil)
+```
+
 #### Assertion Package for Unit Testing
 
 The same asserts can be used **and shared** during the unit tests over module
@@ -391,10 +424,9 @@ func TestWebOfTrustInfo(t *testing.T) {
 
 	assert.Equal(wot.CommonInvider, 0)
 	assert.Equal(wot.Hops, 1)
-
-	wot = NewWebOfTrust(bob.Node, carol.Node)
-	assert.Equal(wot.CommonInvider, hop.NotConnected)
-	assert.Equal(wot.Hops, hop.NotConnected)
+	...
+	err := wrongPath2.Prove()                // shouldn't succeed!
+	assert.ErrorIs(err, ErrCycleOrDuplicate) // testing sentinel error value
 	...
 ```
 
