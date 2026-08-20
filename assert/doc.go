@@ -32,6 +32,33 @@ deep the recursion is or if parallel test runs are performed. The failure report
 includes all the locations of the meaningful call stack steps. See the next
 chapter.
 
+# Use Asserts To Return Sentinel Error Values
+
+We saw how same assertions can be used for app running and for automatic tests.
+There is a third way. If your function needs to report error values and you want
+to make your code easier to skim, i.e, less if statements, you can use asserts.
+
+The following code block illustrates the behavior:
+
+	func (p Path) ProveWithGetBKID(getBKID getBackupKey) (err error) {
+	     defer err2.Handle(&err)
+
+	     assert.Equal(p.FirstEdge().Body.Version, EdgeVersion, ErrUnsupportedVersion)
+	     assert.Equal(p.FirstEdge().Body.Prev, AnchorDigest(), ErrWrongAnchor)
+
+Now the caller can check the actual error values and decide what to do with a
+specific error.
+
+Note that if you want to support different asserter types you should guide your
+function callers to use [errors.Is] for error value checking. In cases where if
+statements are preferred it's good to prefix your functions like this:
+
+	func (p Path) ProveWithGetBKID(getBKID getBackupKey) (err error) {
+	     defer assert.PushAsserter(assert.Plain)() // no assert annotations
+	     defer err2.Handle(&err, nil)              // no error annotations
+
+More information can be found from [assert.That] examples.
+
 # Call Stack Traversal During Tests
 
 The Assert package allows us to track assertion violations over the package and

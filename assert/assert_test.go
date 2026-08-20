@@ -1,6 +1,7 @@
 package assert_test // Note!! Some tests here are related to line # of the file
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -18,7 +19,7 @@ func ExampleThat() {
 	}
 	err := sample()
 	fmt.Printf("%v", err)
-	// Output: testing: run example: assert_test.go:16: ExampleThat.func1(): assertion failure: optional message
+	// Output: testing: run example: assert_test.go:17: ExampleThat.func1(): assertion failure: optional message
 }
 
 func ExampleNotNil() {
@@ -32,7 +33,7 @@ func ExampleNotNil() {
 	var b *byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:29: ExampleNotNil.func1(): assertion failure: pointer should not be nil
+	// Output: sample: assert_test.go:30: ExampleNotNil.func1(): assertion failure: pointer should not be nil
 }
 
 func ExampleMNotNil() {
@@ -47,7 +48,7 @@ func ExampleMNotNil() {
 	var b map[string]byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:44: ExampleMNotNil.func1(): assertion failure: map should not be nil
+	// Output: sample: assert_test.go:45: ExampleMNotNil.func1(): assertion failure: map should not be nil
 }
 
 func ExampleCNotNil() {
@@ -61,7 +62,7 @@ func ExampleCNotNil() {
 	var c chan byte
 	err := sample(c)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:58: ExampleCNotNil.func1(): assertion failure: channel should not be nil
+	// Output: sample: assert_test.go:59: ExampleCNotNil.func1(): assertion failure: channel should not be nil
 }
 
 func ExampleSNotNil() {
@@ -76,7 +77,7 @@ func ExampleSNotNil() {
 	var b []byte
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:73: ExampleSNotNil.func1(): assertion failure: slice should not be nil
+	// Output: sample: assert_test.go:74: ExampleSNotNil.func1(): assertion failure: slice should not be nil
 }
 
 func ExampleEqual() {
@@ -89,7 +90,7 @@ func ExampleEqual() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:87: ExampleEqual.func1(): assertion failure: equal: got '2', want '1'
+	// Output: sample: assert_test.go:88: ExampleEqual.func1(): assertion failure: equal: got '2', want '1'
 }
 
 func ExampleSLen() {
@@ -101,7 +102,7 @@ func ExampleSLen() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:99: ExampleSLen.func1(): assertion failure: length: got '2', want '3'
+	// Output: sample: assert_test.go:100: ExampleSLen.func1(): assertion failure: length: got '2', want '3'
 }
 
 func ExampleSNotEmpty() {
@@ -113,7 +114,7 @@ func ExampleSNotEmpty() {
 	}
 	err := sample([]byte{})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:111: ExampleSNotEmpty.func1(): assertion failure: slice should not be empty
+	// Output: sample: assert_test.go:112: ExampleSNotEmpty.func1(): assertion failure: slice should not be empty
 }
 
 func ExampleNotEmpty() {
@@ -126,7 +127,7 @@ func ExampleNotEmpty() {
 	}
 	err := sample("")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:124: ExampleNotEmpty.func1(): assertion failure: string should not be empty
+	// Output: sample: assert_test.go:125: ExampleNotEmpty.func1(): assertion failure: string should not be empty
 }
 
 func ExampleMKeyExists() {
@@ -143,7 +144,7 @@ func ExampleMKeyExists() {
 	}
 	err := sample("2")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:141: ExampleMKeyExists.func1(): assertion failure: key '2' doesn't exist
+	// Output: sample: assert_test.go:142: ExampleMKeyExists.func1(): assertion failure: key '2' doesn't exist
 }
 
 func ExampleZero() {
@@ -156,7 +157,7 @@ func ExampleZero() {
 	var b int8 = 1 // we want sample to assert the violation.
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:153: ExampleZero.func1(): assertion failure: got '1', want (== '0')
+	// Output: sample: assert_test.go:154: ExampleZero.func1(): assertion failure: got '1', want (== '0')
 }
 
 func ExampleSLonger() {
@@ -169,7 +170,7 @@ func ExampleSLonger() {
 	}
 	err := sample([]byte{01}) // len = 1
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:167: ExampleSLonger.func1(): assertion failure: got '1', should be longer than '1'
+	// Output: sample: assert_test.go:168: ExampleSLonger.func1(): assertion failure: got '1', should be longer than '1'
 }
 
 func ExampleMShorter() {
@@ -183,7 +184,7 @@ func ExampleMShorter() {
 	}
 	err := sample(map[byte]byte{01: 01}) // len = 1
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:180: ExampleMShorter.func1(): assertion failure: got '1', should be shorter than '1'
+	// Output: sample: assert_test.go:181: ExampleMShorter.func1(): assertion failure: got '1', should be shorter than '1'
 }
 
 func ExampleSShorter() {
@@ -196,7 +197,7 @@ func ExampleSShorter() {
 	}
 	err := sample([]byte{01}) // len = 1
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:194: ExampleSShorter.func1(): assertion failure: got '1', should be shorter than '0': optional message (test_str)
+	// Output: sample: assert_test.go:195: ExampleSShorter.func1(): assertion failure: got '1', should be shorter than '0': optional message (test_str)
 }
 
 func ExampleLess() {
@@ -211,7 +212,7 @@ func ExampleLess() {
 	var b int8 = 1
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:208: ExampleLess.func1(): assertion failure: got '1', want >= '1'
+	// Output: sample: assert_test.go:209: ExampleLess.func1(): assertion failure: got '1', want >= '1'
 }
 
 func ExampleGreater() {
@@ -226,7 +227,7 @@ func ExampleGreater() {
 	var b int8 = 2
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:223: ExampleGreater.func1(): assertion failure: got '2', want <= '2'
+	// Output: sample: assert_test.go:224: ExampleGreater.func1(): assertion failure: got '2', want <= '2'
 }
 
 func ExampleNotZero() {
@@ -239,7 +240,7 @@ func ExampleNotZero() {
 	var b int8
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:236: ExampleNotZero.func1(): assertion failure: got '0', want (!= 0)
+	// Output: sample: assert_test.go:237: ExampleNotZero.func1(): assertion failure: got '0', want (!= 0)
 }
 
 func ExampleMLen() {
@@ -253,7 +254,7 @@ func ExampleMLen() {
 	}
 	err := sample(map[int]byte{1: 1, 2: 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:251: ExampleMLen.func1(): assertion failure: length: got '2', want '3'
+	// Output: sample: assert_test.go:252: ExampleMLen.func1(): assertion failure: length: got '2', want '3'
 }
 
 func ExampleCLen() {
@@ -270,7 +271,7 @@ func ExampleCLen() {
 	d <- int(1)
 	err := sample(d)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:265: ExampleCLen.func1(): assertion failure: length: got '2', want '3'
+	// Output: sample: assert_test.go:266: ExampleCLen.func1(): assertion failure: length: got '2', want '3'
 }
 
 func ExampleThatNot() {
@@ -300,7 +301,7 @@ func ExampleINotNil() {
 	var b = fmt.Errorf("test")
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:297: ExampleINotNil.func1(): assertion failure: interface should be nil
+	// Output: sample: assert_test.go:298: ExampleINotNil.func1(): assertion failure: interface should be nil
 }
 
 func ExampleLen() {
@@ -314,7 +315,7 @@ func ExampleLen() {
 	}
 	err := sample("12")
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:312: ExampleLen.func1(): assertion failure: length: got '2', want '3'
+	// Output: sample: assert_test.go:313: ExampleLen.func1(): assertion failure: length: got '2', want '3'
 }
 
 func ExampleDeepEqual() {
@@ -328,7 +329,7 @@ func ExampleDeepEqual() {
 	}
 	err := sample([]byte{1, 2})
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:326: ExampleDeepEqual.func1(): assertion failure: got '2', want '3'
+	// Output: sample: assert_test.go:327: ExampleDeepEqual.func1(): assertion failure: got '2', want '3'
 }
 
 func ExampleError() {
@@ -342,7 +343,7 @@ func ExampleError() {
 	var b = fmt.Errorf("test")
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:339: ExampleError.func1(): assertion failure: test
+	// Output: sample: assert_test.go:340: ExampleError.func1(): assertion failure: test
 }
 
 func ExampleNotImplemented() {
@@ -355,7 +356,91 @@ func ExampleNotImplemented() {
 	var b = fmt.Errorf("test")
 	err := sample(b)
 	fmt.Printf("%v", err)
-	// Output: sample: assert_test.go:352: ExampleNotImplemented.func1(): assertion failure: not implemented
+	// Output: sample: assert_test.go:353: ExampleNotImplemented.func1(): assertion failure: not implemented
+}
+
+func ExampleMKeyNotExists() {
+	sample := func(b string) (err error) {
+		defer err2.Handle(&err, "sample")
+
+		m := map[string]string{
+			"1": "one",
+		}
+		assert.MKeyNotExists(m, b)   // Doesn't fail: ∄ b ∈ m | b=2
+		assert.MKeyNotExists(m, "1") // Fails: ∃ 1 ∈ m
+		return err
+	}
+	err := sample("2")
+	fmt.Printf("%v", err)
+	// Output: sample: assert_test.go:370: ExampleMKeyNotExists.func1(): assertion failure: key '1' shouldn't exist
+}
+
+func ExampleThat_sentinelErrorWithIs() {
+	var ErrArgumentsNeeded = errors.New("arguments missing")
+
+	sample := func(a ...int) (err error) {
+		// [err2.Handle] default is automatic error annotation, caller needs
+		// to use [errors.Is] to check error values returned.
+		defer err2.Handle(&err)
+
+		// we can use asserts to return actual error values
+		assert.That(len(a) != 0, ErrArgumentsNeeded)
+		return err
+	}
+	err := sample()
+	// because sample function annotates error values we must use [errors.Is]
+	if errors.Is(err, ErrArgumentsNeeded) {
+		// err is wrapped (annotated) by [err2.Handle]
+		fmt.Printf("ERR: %v", err)
+	} else {
+		fmt.Print("never here!", err)
+	}
+	// Output: ERR: testing: run example: assert_test.go:387: ExampleThat_sentinelErrorWithIs.func1(): assertion failure: arguments missing
+}
+
+func ExampleThat_sentinelErrorWithValueComparison() {
+	var ErrArgumentsNeeded = errors.New("arguments missing")
+
+	sample := func(a ...int) (err error) {
+		// prevent assert pkg's to add extra info to err values
+		defer assert.PushAsserter(assert.Plain)()
+		// also remove automatic error annotation with nil argument
+		defer err2.Handle(&err, nil)
+
+		// we can use asserts to return actual error values
+		assert.That(len(a) != 0, ErrArgumentsNeeded)
+		return err
+	}
+
+	// sample function is documented to return just plain error values
+	err := sample()
+
+	if err == ErrArgumentsNeeded {
+		fmt.Printf("ERR: %v", err)
+	} else {
+		fmt.Print("never here!")
+	}
+	// Output: ERR: arguments missing
+}
+
+func ExampleEqual_sentinel() {
+	var ErrNotEqual = errors.New("different values")
+
+	sample := func(b []byte) (err error) {
+		defer assert.PushAsserter(assert.Plain)()
+
+		defer err2.Handle(&err, "sample")
+
+		assert.NotEqual(b[0], 3) // OK, b[0] != 3; (b[0] == 1)
+
+		// Note that only ErrNotEqual value is used, rest of the args are
+		// ignored.
+		assert.Equal(b[1], 1, ErrNotEqual, "%d", 1) // Not OK, b[1] == 2
+		return err
+	}
+	err := sample([]byte{1, 2})
+	fmt.Printf("%v", err)
+	// Output: sample: different values
 }
 
 func BenchmarkMKeyExists(b *testing.B) {
@@ -535,6 +620,12 @@ func BenchmarkError(b *testing.B) {
 	}
 }
 
+func BenchmarkErrorIs(b *testing.B) {
+	err := err2.ErrNotAccess
+	for n := 0; n < b.N; n++ {
+		assert.ErrorIs(err, err2.ErrNotAccess)
+	}
+}
 func BenchmarkEqual(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		assert.Equal(n, n)
@@ -662,3 +753,20 @@ func setUp() {
 }
 
 func tearDown() {}
+
+func TestPushAsserter(t *testing.T) {
+	sentinel := errors.New("sentinel")
+
+	functionReturningSentinel := func() (err error) {
+		defer err2.Handle(&err, nil /* <- no error annotations */)
+
+		assert.That(false, sentinel) // i.e., `sentinel` is returned
+		return nil
+	}
+
+	defer assert.PushTester(t, assert.Production)() // Examples need Production
+	defer assert.PushAsserter(assert.Plain)()       // We want sentinel
+
+	err := functionReturningSentinel()
+	assert.That(err == sentinel) // we can use ==; aren't forced to errors.Is
+}

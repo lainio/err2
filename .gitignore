@@ -3,6 +3,9 @@
 *.vim*
 coverage.*
 
+# AI
+/.codex/
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
