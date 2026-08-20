@@ -2,6 +2,12 @@
 
 ### Version history
 
+##### 1.2.3
+- Bug Fix (issue-30): automatic error annotation fixed, when app functions were
+  named like, e.g., `func MyHandle() (err error)`
+- Refactoring internal parts, will help maintenance and new contributors
+- Maintenance updates, like GitHub actions, etc.
+
 ##### 1.2.2
 - Bug Fix (issue-27): automatic error annotation works now for try.T functions
 - Updated documentation
