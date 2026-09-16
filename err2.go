@@ -97,7 +97,7 @@ var Stdnull = &nullDev{}
 //	)
 func Handle(err *error, a ...any) {
 	// This and others are similar but we need to call `recover` here because
-	// how how it works with defer.
+	// of how it works with defer.
 	r := recover()
 
 	if !handler.WorkToDo(r, err) && !handler.NoerrCallToDo(a) {
