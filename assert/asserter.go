@@ -14,7 +14,7 @@ import (
 type asserter uint32
 
 const (
-	// asserterDebug is the default mode where all asserts are treaded as
+	// asserterDebug is the mode where all asserts are treaded as
 	// panics
 	asserterDebug asserter = 0
 
