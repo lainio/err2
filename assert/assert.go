@@ -146,7 +146,7 @@ type (
 	mapAsserter = map[int]asserter
 
 	testersMap = map[int]testing.TB
-	function   = func()
+	Function   = func()
 )
 
 var (
@@ -206,7 +206,7 @@ const (
 // Note that the second argument, if given, changes the default [Asserter] for
 // whole package. The argument is mainly for temporary development use and isn't
 // not preferred API usage.
-func PushTester(t testing.TB, a ...Asserter) function {
+func PushTester(t testing.TB, a ...Asserter) Function {
 	if len(a) > 0 {
 		SetDefault(a[0])
 	} else if current()&asserterUnitTesting == 0 {
@@ -1114,7 +1114,7 @@ func SetDefault(i Asserter) (old Asserter) {
 // automatically. You can prevent that using nil in the optional arguments:
 //
 //	defer err2.Handle(&err, nil)
-func PushAsserter(i Asserter) (retFn function) {
+func PushAsserter(i Asserter) (retFn Function) {
 	var (
 		prevFound    bool
 		prevAsserter asserter
@@ -1146,21 +1146,21 @@ func PopAsserter() {
 
 // mapDefInd runtime asserters, that's why test asserts are removed for now.
 var mapDefInd = map[string]Asserter{
-	"Plain": Plain,
-	"Prod":  Production,
-	"Dev":   Development,
+	mapDefIndToString[Plain]:       Plain,
+	mapDefIndToString[Production]:  Production,
+	mapDefIndToString[Development]: Development,
 	//"Test":        Test,
 	//"TestFull":    TestFull,
-	"Debug": Debug,
+	mapDefIndToString[Debug]: Debug,
 }
 
-var mapDefIndToString = map[Asserter]string{
-	Plain:       "Plain",
-	Production:  "Prod",
-	Development: "Dev",
-	Test:        "Test",
-	TestFull:    "TestFull",
-	Debug:       "Debug",
+var mapDefIndToString = []string{
+	"Plain",
+	"Prod",
+	"Dev",
+	"Test",
+	"TestFull",
+	"Debug",
 }
 
 func defaultAsserterString() string {
