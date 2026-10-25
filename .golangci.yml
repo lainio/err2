@@ -1,142 +1,100 @@
-linters-settings:
-  dupl:
-    threshold: 100
-  depguard:
-    rules:
-      main:
-        deny:
-          - pkg: "io/ioutil"
-            desc: "ioutil is deprecated starting with Go 1.16"
-  funlen:
-    lines: 320
-    statements: 50
-  goconst:
-    min-len: 2
-    min-occurrences: 2
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-  gocyclo:
-    min-complexity: 15
-  nestif:
-    # Minimal complexity of if statements to report.
-    # Default: 5
-    min-complexity: 8
-  gomnd:
-  govet:
-  lll:
-    line-length: 140
-  maligned:
-    suggest-new: true
-  misspell:
-    locale: US
-  nolintlint:
-    allow-leading-space: true # don't require machine-readable nolint directives (i.e. with no leading space)
-    allow-unused: false # report any unused nolint directives
-    require-explanation: false # don't require an explanation for nolint directives
-    require-specific: false # don't require nolint directives to be specific about which linter is being skipped
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
     - asciicheck
     - bidichk
-    # bodyclose
     - contextcheck
-    #    - cyclop
     - depguard
     - dogsled
-    #    - dupl
     - durationcheck
     - errcheck
-    #    - errname
-    #    - errorlint
-    #    - exhaustive
-    #    - exhaustivestruct
-    # - exportloopref -> copyloopvar # but we are using go 1.18 
-    #    - forbidigo
-    #    - forcetypeassert
     - funlen
-    #    - gci
-    #    - gochecknoglobals
-    #    - gochecknoinits
-    #    - gocognit
     - goconst
-    #    - gocritic
-    #    - gocyclo
-    #    - godot
-    #    - godox
-    #    - goerr113
-    # gofmt
-    #    - gofumpt
     - goheader
-    - goimports
-    #    - gomnd
     - gomoddirectives
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
-    #    - gosec
-    - gosimple
     - govet
-    #    - ifshort
     - importas
     - ineffassign
-    #    - ireturn
-    #    - lll
-    # - copyloopvar # we have go 1.18
     - makezero
     - misspell
     - nakedret
     - nestif
     - nilerr
-    #    - nilnil
-    #    - nlreturn
-    # noctx
-    #    - nolintlint
-    #    - paralleltest
     - prealloc
     - predeclared
     - promlinter
     - revive
-      #- rowserrcheck
-      #- sqlclosecheck
     - staticcheck
-    - stylecheck
-    #    - tagliatelle
-    - usetesting
-    #    - testpackage
-    #    - thelper
     - tparallel
-    # typecheck
     - unconvert
     - unparam
-    #    - unused
-    #    - varnamelen
-    #- wastedassign
-    #    - whitespace
-    #    - wrapcheck
-    #    - wsl
-
-issues:
-  exclude-rules:
-    - path: (.*)_test\.go
-      linters:
-        - funlen
-        - goconst
-        - gosimple
-    - path: /
-      linters:
-      - typecheck
-run:
-service:
-  prepare:
-    - echo "here I can run custom commands, but no preparation needed for this repo"
+    - usetesting
+  settings:
+    depguard:
+      rules:
+        main:
+          deny:
+            - pkg: io/ioutil
+              desc: ioutil is deprecated starting with Go 1.16
+    dupl:
+      threshold: 100
+    funlen:
+      lines: 320
+      statements: 50
+    goconst:
+      min-len: 2
+      min-occurrences: 2
+    gocritic:
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+        - wrapperFunc
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 15
+    lll:
+      line-length: 140
+    misspell:
+      locale: US
+    nestif:
+      min-complexity: 8
+    nolintlint:
+      require-explanation: false
+      require-specific: false
+      allow-unused: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - funlen
+          - goconst
+          - staticcheck
+        path: (.*)_test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

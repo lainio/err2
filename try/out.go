@@ -63,7 +63,7 @@ func (o *Result1[T]) Logf(a ...any) *Result1[T] {
 	if o.Err == nil {
 		return o
 	}
-	o.Result.logf(logfFrameLvl, a)
+	o.logf(logfFrameLvl, a)
 	return o
 }
 
@@ -81,7 +81,7 @@ func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
 	if o.Err == nil {
 		return o
 	}
-	o.Result.logf(logfFrameLvl, a)
+	o.logf(logfFrameLvl, a)
 	return o
 }
 

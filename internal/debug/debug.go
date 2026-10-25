@@ -72,7 +72,7 @@ func (si StackInfo) fullName() string {
 func (si StackInfo) isAnchor(s string) bool {
 	// Regexp matching is high priority. That's why it's the first one.
 	if si.Regexp != nil {
-		return si.Regexp.MatchString(s)
+		return si.MatchString(s)
 	}
 	return si.isFuncAnchor(s)
 }

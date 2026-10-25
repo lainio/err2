@@ -131,7 +131,7 @@ const (
 )
 
 func (rm runMode) String() string {
-	return []string{"play", "play-recursion"}[rm]
+	return []string{"play", "play-recursion"}[rm] //nolint:goconst
 }
 
 var rMode runMode

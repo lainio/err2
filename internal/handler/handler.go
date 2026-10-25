@@ -312,6 +312,8 @@ func PreProcess(errPtr *error, info *Info, a []any) error {
 	} else {
 		buildFormatStr(info, lvl)
 	}
+	// no need to make consts for Catch
+	//nolint:goconst
 	defCatchCallMode := info.PanicFn == nil && info.CallerName == "Catch"
 	if defCatchCallMode {
 		info.PanicFn = PanicNoop
