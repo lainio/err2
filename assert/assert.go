@@ -952,27 +952,27 @@ func doError(a []any) {
 	current().reportAssertionFault(1, defMsg, a)
 }
 
-// ErrorIs asserts that the err is the target error. If it isn't it panics and
-// builds a violation message.
+// ErrorIs asserts that [errors.Is](err, target) is true. If it isn't it panics
+// and builds a violation message. Both err and target may be nil.
 //
 // Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func ErrorIs(err, target error, a ...any) {
 	if !errors.Is(err, target) {
-		doShouldBeEqual(assertionNotEqualMsg, err.Error(), target.Error(), a)
+		doShouldBeEqual(assertionNotEqualMsg, fmt.Sprint(err), fmt.Sprint(target), a)
 	}
 }
 
-// ErrorIsNot asserts that the err isn't the target error. If it is it panics
-// and builds a violation message.
+// ErrorIsNot asserts that [errors.Is](err, target) is false. If it isn't it panics
+// and builds a violation message. Both err and target may be nil.
 //
 // Note that when [Plain] [Asserter] is used ([PushAsserter] or even
 // [SetDefault]), optional arguments are used to override the auto-generated
 // assert violation message.
 func ErrorIsNot(err, target error, a ...any) {
 	if errors.Is(err, target) {
-		doShouldBeEqual(assertionEqualMsg, err.Error(), target.Error(), a)
+		doShouldBeEqual(assertionEqualMsg, fmt.Sprint(err), fmt.Sprint(target), a)
 	}
 }
 
