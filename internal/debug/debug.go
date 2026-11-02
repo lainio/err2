@@ -219,7 +219,7 @@ func funcName(r io.Reader,
 			foundIt := reachAnchor && i%2 == 0 && notOurFunction(line)
 			if foundIt {
 				n = fnName(line)
-				ok = n != "panic"
+				ok = n != "panic" //nolint:goconst
 			}
 		}
 	}
@@ -254,7 +254,7 @@ func fnName(line string) string {
 	tryFnNames := []string{".T.", ".T1[...]", ".T2[...]", ".T3[...]"}
 	line = cleanFuncNames(line[i:j], tryFnNames, true)
 
-	fnNames := []string{".func", "func"}
+	fnNames := []string{".func", "func"} //nolint:goconst
 	line = cleanFuncNames(line, fnNames, false)
 	return line
 }
