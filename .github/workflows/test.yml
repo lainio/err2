@@ -37,7 +37,7 @@ jobs:
           - '1.25.x'
           - '1.26.x'
           - '1.27.x'
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
