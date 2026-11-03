@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/lainio/err2"
+	"github.com/lainio/err2/internal/expect"
 	"github.com/lainio/err2/try"
 )
 
@@ -65,9 +66,8 @@ func TestResultHandleCombinations(t *testing.T) {
 					called := 0
 					handler := func(err error) error {
 						called++
-						if err != tt.err {
-							t.Errorf("handler received %v, want original %v", err, tt.err)
-						}
+						expect.Thatf(t, err == tt.err,
+							"handler received %v, want original %v", err, tt.err)
 						return tt.handlerErr
 					}
 					var args []any
@@ -87,28 +87,23 @@ func TestResultHandleCombinations(t *testing.T) {
 						if input == nil {
 							wantErr, wantCalled = nil, false
 						}
-						if (called == 1) != wantCalled || called > 1 {
-							t.Errorf("input %v: handler called %d times, want called=%v", input, called, wantCalled)
-						}
+						expect.Thatf(t, (called == 1) == wantCalled && called <= 1,
+							"input %v: handler called %d times, want called=%v", input, called, wantCalled)
 						if wantErr == nil {
-							if thrown != nil || current() != nil {
-								t.Errorf("input %v: panic=%v, Err=%v, want both nil", input, thrown, current())
-							}
+							expect.Thatf(t, thrown == nil && current() == nil,
+								"input %v: panic=%v, Err=%v, want both nil", input, thrown, current())
 							continue
 						}
 						got, ok := thrown.(error)
-						if !ok || !errors.Is(got, wantErr) {
-							t.Fatalf("panic=%v, want error wrapping %v", thrown, wantErr)
-						}
-						if current() != got {
-							t.Errorf("Err=%v, want thrown error %v", current(), got)
-						}
+						expect.Thatf(t, ok && errors.Is(got, wantErr),
+							"panic=%v, want error wrapping %v", thrown, wantErr)
+						expect.Thatf(t, current() == got,
+							"Err=%v, want thrown error %v", current(), got)
 						if tt.wantText != "" {
-							if got.Error() != tt.wantText {
-								t.Errorf("error text=%q, want %q", got.Error(), tt.wantText)
-							}
-						} else if got != wantErr {
-							t.Errorf("panic=%v, want exact error %v", got, wantErr)
+							expect.Equal(t, got.Error(), tt.wantText)
+						} else {
+							expect.Thatf(t, got == wantErr,
+								"panic=%v, want exact error %v", got, wantErr)
 						}
 					}
 				})
@@ -130,23 +125,21 @@ func resultHandle(t *testing.T, resultType string, err error) (func(...any), fun
 	case "Result1":
 		r := try.Out1(42, err)
 		return func(a ...any) {
-			if got := r.Handle(a...); got != r || got.Val1 != 42 {
-				t.Error("Handle must return the same Result1 and preserve Val1")
-			}
+			got := r.Handle(a...)
+			expect.That(t, got == r && got.Val1 == 42,
+				"Handle must return the same Result1 and preserve Val1")
 		}, func() error { return r.Err }
 	case "Result2":
 		r := try.Out2(42, "value", err)
 		return func(a ...any) {
-			if got := r.Handle(a...); got != r || got.Val1 != 42 || got.Val2 != "value" {
-				t.Error("Handle must return the same Result2 and preserve both values")
-			}
+			got := r.Handle(a...)
+			expect.That(t, got == r && got.Val1 == 42 && got.Val2 == "value",
+				"Handle must return the same Result2 and preserve both values")
 		}, func() error { return r.Err }
 	default:
 		r := try.Out(err)
 		return func(a ...any) {
-			if r.Handle(a...) != r {
-				t.Error("Handle must return the same Result")
-			}
+			expect.Equal(t, r.Handle(a...), r, "Handle must return the same Result")
 		}, func() error { return r.Err }
 	}
 }
