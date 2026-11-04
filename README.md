@@ -655,10 +655,6 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.3.0
-- Assertion failures can return sentinel error values through `err2.Handle`
-- `assert.PushAsserter` now honors goroutine-specific asserters during unit
-  tests, allowing `Plain` to preserve exact sentinel error values
-- New `assert.ErrorIs`, `assert.ErrorIsNot`, and `assert.MKeyNotExists`
-  functions
-- Extended assertion documentation and examples
+##### 1.3.1
+- in both `assert.ErrorIs(Not)` functions `nil` bug fixed
+- document fixes
