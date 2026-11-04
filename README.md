@@ -264,8 +264,15 @@ Nevertheless, there might be cases where you might want to:
    current error handler and will be handled there, but are also annotated with
    'fatal' prefix before that here.
    ```go
-   try.Out(doSomething()).Handle(ErrNotSoBad, err2.Reset).Handle("fatal")
+   try.Out(doSomething()).HandleIf(ErrNotSoBad, err2.Reset).Handle("fatal")
    ```
+   `HandleIf` matches errors using `errors.Is`, including wrapped errors.
+   A nonmatching filter leaves the error unchanged for the next handler.
+   Returning `nil` from a matching handler suppresses the error and skips later
+   handlers. Returning a non-nil error throws it immediately. Finish the chain
+   with `Handle()`, `Handle("annotation")`, or `Handle(fn)` to handle errors that
+   none of the filters matched.
+   The existing `Handle(target, fn)` still throws nonmatching errors immediately.
 
 The `err2/try` package offers other helpers based on the error-handling
 language/API. It's based on functions `try.Out`, `try.Out1`, and `try.Out2`,
@@ -655,10 +662,9 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.3.0
-- Assertion failures can return sentinel error values through `err2.Handle`
-- `assert.PushAsserter` now honors goroutine-specific asserters during unit
-  tests, allowing `Plain` to preserve exact sentinel error values
-- New `assert.ErrorIs`, `assert.ErrorIsNot`, and `assert.MKeyNotExists`
-  functions
-- Extended assertion documentation and examples
+##### 1.4.0
+- New `HandleIf(target, fn)` methods on `try.Result`, `try.Result1`, and
+  `try.Result2` allow conditional error handling chains while preserving the
+  existing `Handle` behavior
+- in both `assert.ErrorIs(Not)` functions `nil` bug fixed
+- document fixes

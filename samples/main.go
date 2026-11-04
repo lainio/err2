@@ -52,7 +52,7 @@ func main() {
 		doMain1()
 	case "nil2":
 		doMain2()
-	case "play", "play-recursion":
+	case "play", "play-recursion": //nolint:goconst
 		doPlayMain()
 	case "assert":
 		doAssertMainKeepGLSAsserter(false)

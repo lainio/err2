@@ -72,7 +72,7 @@ func (si StackInfo) fullName() string {
 func (si StackInfo) isAnchor(s string) bool {
 	// Regexp matching is high priority. That's why it's the first one.
 	if si.Regexp != nil {
-		return si.Regexp.MatchString(s)
+		return si.MatchString(s)
 	}
 	return si.isFuncAnchor(s)
 }
@@ -219,7 +219,7 @@ func funcName(r io.Reader,
 			foundIt := reachAnchor && i%2 == 0 && notOurFunction(line)
 			if foundIt {
 				n = fnName(line)
-				ok = n != "panic"
+				ok = n != "panic" //nolint:goconst
 			}
 		}
 	}
@@ -254,7 +254,7 @@ func fnName(line string) string {
 	tryFnNames := []string{".T.", ".T1[...]", ".T2[...]", ".T3[...]"}
 	line = cleanFuncNames(line[i:j], tryFnNames, true)
 
-	fnNames := []string{".func", "func"}
+	fnNames := []string{".func", "func"} //nolint:goconst
 	line = cleanFuncNames(line, fnNames, false)
 	return line
 }

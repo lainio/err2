@@ -2,6 +2,22 @@
 
 ### Version history
 
+##### 1.4.0
+- New `HandleIf(target, fn)` methods on `try.Result`, `try.Result1`, and
+  `try.Result2` support conditional error handling chains with `errors.Is`
+- Matching handlers can suppress or replace errors; nonmatching errors remain
+  available to later handlers
+- Existing `Handle` behavior is preserved, including throwing nonmatching errors
+- Added examples and tests for chained error handling
+
+##### 1.3.0
+- Assertion failures can return sentinel error values through `err2.Handle`
+- `assert.PushAsserter` now honors goroutine-specific asserters during unit
+  tests, allowing `Plain` to preserve exact sentinel error values
+- New `assert.ErrorIs`, `assert.ErrorIsNot`, and `assert.MKeyNotExists`
+  functions
+- Extended assertion documentation and examples
+
 ##### 1.2.3
 - Bug Fix (issue-30): automatic error annotation fixed, when app functions were
   named like, e.g., `func MyHandle() (err error)`
