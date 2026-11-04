@@ -99,6 +99,9 @@ func (o *Result2[T, U]) Logf(a ...any) *Result2[T, U] {
 // chain if [Result.Err] != nil. Handle supports error annotation similarly as
 // [fmt.Errorf].
 //
+// A nonmatching target also throws the current error. Use [Result.HandleIf]
+// to leave nonmatching errors for the next handler in the chain.
+//
 // For instance, to implement same as [try.To], you could do the following:
 //
 //	d := try.Out(json.Unmarshal(b, &v)).Handle()
@@ -152,6 +155,9 @@ func (o *Result) transportErr(a []any) {
 // chain if [Result.Err] != nil. Handle supports error annotation similarly as
 // [fmt.Errorf].
 //
+// A nonmatching target also throws the current error. Use [Result1.HandleIf]
+// to leave nonmatching errors for the next handler in the chain.
+//
 // For instance, to implement same as [try.To], you could do the following:
 //
 //	d := try.Out(json.Unmarshal(b, &v)).Handle()
@@ -174,11 +180,49 @@ func (o *Result1[T]) Handle(a ...any) *Result1[T] {
 // chain if [Result.Err] != nil. Handle supports error annotation similarly as
 // [fmt.Errorf].
 //
+// A nonmatching target also throws the current error. Use [Result2.HandleIf]
+// to leave nonmatching errors for the next handler in the chain.
+//
 // For instance, to implement same as [try.To], you could do the following:
 //
 //	d := try.Out(json.Unmarshal(b, &v)).Handle()
 func (o *Result2[T, U]) Handle(a ...any) *Result2[T, U] {
 	o.Result.Handle(a...)
+	return o
+}
+
+// HandleIf calls fn only when [Result.Err] is non-nil and matches target
+// according to [errors.Is]. A nonmatching error is left unchanged for the next
+// handler in the chain.
+//
+// Returning nil from fn suppresses the error, so later handlers are skipped.
+// A non-nil return value is stored in [Result.Err] and thrown immediately.
+// End the chain with [Result.Handle] to handle any remaining error.
+// HandleIf returns the same Result when no error is thrown.
+func (o *Result) HandleIf(target error, fn ErrFn) *Result {
+	if o.Err == nil || !errors.Is(o.Err, target) {
+		return o
+	}
+	o.Err = fn(o.Err)
+	if o.Err != nil {
+		panic(o.Err)
+	}
+	return o
+}
+
+// HandleIf calls fn only if the current error matches target, as described in
+// [Result.HandleIf]. It returns the same Result1, preserving Val1, when no error
+// is thrown.
+func (o *Result1[T]) HandleIf(target error, fn ErrFn) *Result1[T] {
+	o.Result.HandleIf(target, fn)
+	return o
+}
+
+// HandleIf calls fn only if the current error matches target, as described in
+// [Result.HandleIf]. It returns the same Result2, preserving both values, when
+// no error is thrown.
+func (o *Result2[T, U]) HandleIf(target error, fn ErrFn) *Result2[T, U] {
+	o.Result.HandleIf(target, fn)
 	return o
 }
 
