@@ -3,3 +3,5 @@ module github.com/lainio/err2
 go 1.18
 
 require golang.org/x/exp v0.0.0-20230105202349-8879d0199aa3
+
+require gitlab.com/YottaDB/Lang/goid v1.0.1 // indirect

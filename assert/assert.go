@@ -12,6 +12,7 @@ import (
 
 	"github.com/lainio/err2/internal/debug"
 	"github.com/lainio/err2/internal/x"
+	gid "gitlab.com/YottaDB/Lang/goid"
 	"golang.org/x/exp/constraints"
 )
 
@@ -143,9 +144,9 @@ func init() {
 }
 
 type (
-	mapAsserter = map[int]asserter
+	mapAsserter = map[uint64]asserter
 
-	testersMap = map[int]testing.TB
+	testersMap = map[uint64]testing.TB
 	Function   = func()
 )
 
@@ -1058,7 +1059,7 @@ func doNotZero[T Number](val T, a []any) {
 // NOTE that since our GLS [asserterMap] we still continue to use indexing.
 func current() (curAsserter asserter) {
 	glsID := goid()
-	asserterMap.Rx(func(m map[int]asserter) {
+	asserterMap.Rx(func(m map[uint64]asserter) {
 		aster, found := m[glsID]
 		if found {
 			curAsserter = aster
@@ -1118,11 +1119,11 @@ func PushAsserter(i Asserter) (retFn Function) {
 	var (
 		prevFound    bool
 		prevAsserter asserter
-		currentGID   int
+		currentGID   uint64
 	)
 
 	currentGID = goid()
-	asserterMap.Tx(func(m map[int]asserter) {
+	asserterMap.Tx(func(m map[uint64]asserter) {
 		prevAsserter, prevFound = m[currentGID]
 		m[currentGID] = defAsserter[i]
 	})
@@ -1175,10 +1176,8 @@ func newDefInd(v string) Asserter {
 	return ind
 }
 
-func goid() int {
-	var buf [64]byte
-	runtime.Stack(buf[:], false)
-	return asciiWordToInt(buf[10:])
+func goid() uint64 {
+	return gid.Get()
 }
 
 func asciiWordToInt(b []byte) int {
