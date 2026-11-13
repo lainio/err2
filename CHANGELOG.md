@@ -2,6 +2,14 @@
 
 ### Version history
 
+##### 1.4.1
+- Faster goroutine-local assertion handling with
+  [YottaDB's goid](https://gitlab.com/YottaDB/Lang/goid).
+  Many thanks to Berwyn Hoyt and the YottaDB team for an excellent, portable
+  implementation that removes costly stack parsing from the fast path of
+  `assert.PushAsserter` and `assert.PushTester`
+- Go 1.18 compatibility and existing APIs are preserved
+
 ##### 1.4.0
 - New `HandleIf(target, fn)` methods on `try.Result`, `try.Result1`, and
   `try.Result2` support conditional error handling chains with `errors.Is`

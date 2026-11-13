@@ -662,9 +662,10 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.4.0
-- New `HandleIf(target, fn)` methods on `try.Result`, `try.Result1`, and
-  `try.Result2` allow conditional error handling chains while preserving the
-  existing `Handle` behavior
-- in both `assert.ErrorIs(Not)` functions `nil` bug fixed
-- document fixes
+##### 1.4.1
+- Faster goroutine-local assertion handling with
+  [YottaDB's goid](https://gitlab.com/YottaDB/Lang/goid).
+  Many thanks to Berwyn Hoyt and the YottaDB team for an excellent, portable
+  implementation that removes costly stack parsing from the fast path of
+  `assert.PushAsserter` and `assert.PushTester`
+- Go 1.18 compatibility and existing APIs are preserved
