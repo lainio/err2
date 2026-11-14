@@ -7,7 +7,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
-	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/lainio/err2/internal/debug"
@@ -114,26 +114,10 @@ var (
 )
 
 var (
-	// These two are our indexing system for default asserter. Note, also the
-	// mutex below. All of this is done to keep client package race detector
-	// cool.
-	//
-	//  Plain
-	//  Production
-	//  Development
-	//  Test
-	//  TestFull
-	//  Debug
+	// defAsserter is immutable; def is accessed atomically so configuration
+	// changes can run concurrently with assertions and tester registration.
 	defAsserter = []asserter{plain, prod, dev, test, testFull, dbg}
 	def         Asserter
-
-	// mu is package lvl Mutex that is used to cool down race detector of
-	// client pkgs, i.e. packages that use us can use -race flag in their test
-	// runs where they change asserter. With the mutex we can at least allow
-	// the setters run at one of the time. AND when that's combined with the
-	// indexing system we are using for default asserter (above) we are pretty
-	// much theard safe.
-	mu sync.Mutex
 
 	asserterFlag flagAsserter
 )
@@ -146,9 +130,17 @@ func init() {
 type (
 	mapAsserter = map[uint64]asserter
 
-	testersMap = map[uint64]testing.TB
+	testersMap = map[uint64]*testerScope
 	Function   = func()
 )
+
+// testerScope links registrations so legacy PopTester can restore the same
+// context as a returned closure. All fields are protected by testers.
+type testerScope struct {
+	t        testing.TB
+	previous *testerScope
+	closed   bool
+}
 
 var (
 	// testers must be set if assertion package is used for the unit testing.
@@ -172,81 +164,126 @@ const (
 	conCatErrStr = ": "
 )
 
-// PushTester sets the current testing context for default [Asserter]. This must
-// be called at the beginning of every test. There is two way of doing it:
+// PushTester registers t for the current goroutine and returns a function that
+// restores its previous testing context. The recommended usage is:
 //
-//	for _, tt := range tests {
-//	     t.Run(tt.name, func(t *testing.T) { // Shorter way, litle magic
-//	          defer assert.PushTester(t)() // <- IMPORTANT! NOTE! (t)()
-//	          ...
-//	          assert.That(something, "test won't work")
-//	     })
-//	     t.Run(tt.name, func(t *testing.T) { // Longer, explicit way, 2 lines
-//	          assert.PushTester(t) // <- IMPORTANT!
-//	          defer assert.PopTester()
-//	          ...
-//	          assert.That(something, "test won't work")
-//	     })
-//	}
+//	defer assert.PushTester(t)()
 //
-// Because PushTester returns [PopTester] it allows us to merge these two calls
-// to one line. See the first t.Run call above. See more information in
-// [PopTester].
+// Nested calls temporarily replace the tester. Balance each push with its
+// restoration function, or one legacy [PopTester] call, in LIFO order on the
+// same goroutine. Restoring the outermost scope removes the registration.
+// Out-of-order or cross-goroutine restoration panics without changing the
+// registrations. A closure for an already-popped scope does nothing, but does
+// not recover a new panic.
 //
-// PushTester allows you to change the current default [Asserter] by accepting it
-// as a second argument.
+// When deferred directly, the returned function catches panics, reports them
+// through the failing scope's tester, and restores the previous context even
+// when reporting calls FailNow. Do not wrap it in another deferred function.
 //
-// Note that you MUST call PushTester for sub-goroutines:
+// Registrations are not inherited by goroutines, including t.Run and
+// t.Parallel subtests. Each must register and restore its own testing context.
 //
-//	defer assert.PushTester(t)() // does the cleanup
-//	...
-//	go func() {
-//	     assert.PushTester(t)()
-//	     ...
-//
-// Note that the second argument, if given, changes the default [Asserter] for
-// whole package. The argument is mainly for temporary development use and isn't
-// not preferred API usage.
+// An optional second argument changes the process-wide default [Asserter],
+// just like [SetDefault]; restoration does not undo that change. Without this
+// argument, PushTester selects [TestFull] if the effective asserter is not a
+// testing asserter. A goroutine's [PushAsserter] override remains in effect.
 func PushTester(t testing.TB, a ...Asserter) Function {
 	if len(a) > 0 {
 		SetDefault(a[0])
-	} else if current()&asserterUnitTesting == 0 {
-		// if this is forgotten or tests don't have proper place to set it
-		// it's good to keep the API as simple as possible
-		SetDefault(TestFull)
+	} else {
+		for {
+			old := atomic.LoadUint32(&def)
+			if current()&asserterUnitTesting != 0 || atomic.CompareAndSwapUint32(&def, old, TestFull) {
+				break
+			}
+		}
 	}
-	testers.Set(goid(), t)
-	return PopTester
+	id := goid()
+	scope := &testerScope{t: t}
+	testers.Tx(func(m testersMap) {
+		scope.previous = m[id]
+		m[id] = scope
+	})
+	return func() {
+		r := recover() // Must be called directly by the deferred function.
+		if goid() != id {
+			panic("assert: tester scope restored by a different goroutine")
+		}
+		if r != nil && !activeTesterScope(id, scope) {
+			panic(r) // A consumed closure must not suppress an unrelated panic.
+		}
+		defer restoreTester(id, scope)
+		reportTesterPanic(r)
+	}
 }
 
-// PopTester pops the testing context reference from the memory. This is for
-// memory cleanup and adding similar to err2.Catch error/panic safety for tests.
-// By using PopTester you get error logs tuned for unit testing.
+// PopTester restores the previous testing context of the current goroutine.
+// It supports legacy usage:
 //
-// You have two ways to call [PopTester]. With defer right after [PushTester]:
+//	assert.PushTester(t)
+//	defer assert.PopTester()
 //
-//	for _, tt := range tests {
-//	     t.Run(tt.name, func(t *testing.T) {
-//	          assert.PushTester(t) // <- important!
-//	          defer assert.PopTester() // <- for good girls and not so bad boys
-//	          ...
-//	          assert.That(something, "won't work")
-//	     })
-//	}
+// Each call consumes the innermost registration. Balance pushes and restores
+// in LIFO order, using either PopTester or the returned closure for each push.
+// A closure whose registration was consumed by PopTester becomes inert.
+// When deferred directly, PopTester reports panics through the current tester
+// and restores the previous context even if reporting calls FailNow. With no
+// registration it does nothing, and any panic continues unwinding.
 //
-// If you want, you can combine [PushTester] and PopTester to one-liner:
-//
-//	defer assert.PushTester(t)()
+// Deprecated: Use the restoration function returned by PushTester.
 func PopTester() {
-	defer testers.Del(goid())
-
 	r := recover()
+	id := goid()
+	scope := testers.Get(id)
+	if scope == nil && r != nil {
+		panic(r)
+	}
+	defer restoreTester(id, scope)
+	reportTesterPanic(r)
+}
+
+func activeTesterScope(id uint64, scope *testerScope) (active bool) {
+	testers.Rx(func(m testersMap) {
+		if scope.closed {
+			return
+		}
+		if m[id] != scope {
+			panic("assert: tester scopes must be restored in LIFO order")
+		}
+		active = true
+	})
+	return active
+}
+
+func restoreTester(id uint64, scope *testerScope) {
+	if scope == nil {
+		return
+	}
+	testers.Tx(func(m testersMap) {
+		if scope.closed {
+			return
+		}
+		if m[id] != scope {
+			panic("assert: tester scopes must be restored in LIFO order")
+		}
+		if scope.previous == nil {
+			delete(m, id)
+		} else {
+			m[id] = scope.previous
+		}
+		// Retained restoration closures must not keep completed testers alive.
+		scope.t, scope.previous, scope.closed = nil, nil, true
+	})
+}
+
+func reportTesterPanic(r any) {
 	if r == nil {
 		return
 	}
 
-	var stackLvl = 5     // amount of functions before we're here
-	var framesToSkip = 3 // how many fn calls there is before FuncName call
+	// One extra frame compared with reporting directly in PopTester.
+	var stackLvl = 6
+	var framesToSkip = 4
 
 	var msg string
 	switch t := r.(type) {
@@ -275,7 +312,13 @@ func PopTester() {
 }
 
 func tester() (t testing.TB) {
-	return testers.Get(goid())
+	id := goid()
+	testers.Rx(func(m testersMap) {
+		if scope := m[id]; scope != nil {
+			t = scope.t
+		}
+	})
+	return t
 }
 
 // NotImplemented always panics with 'not implemented' assertion message.
@@ -1052,11 +1095,8 @@ func doNotZero[T Number](val T, a []any) {
 // current returns a current default [Asserter] used for assert functions like
 // assert.That() in this gorounine.
 //
-// NOTE this indexing stuff is done because of race detection to work on client
-// packages. And, yes, we have tested it. This is fastest way to make it without
-// locks HERE. Only the setting the index is secured with the mutex.
-//
-// NOTE that since our GLS [asserterMap] we still continue to use indexing.
+// Goroutine overrides are protected by asserterMap; the process-wide default
+// is loaded atomically. Successful assertions do not need to call current.
 func current() (curAsserter asserter) {
 	glsID := goid()
 	asserterMap.Rx(func(m map[uint64]asserter) {
@@ -1065,7 +1105,7 @@ func current() (curAsserter asserter) {
 			curAsserter = aster
 		} else {
 			// use pkg lvl asserter if asserter is not set for goroutine.
-			curAsserter = defAsserter[def]
+			curAsserter = defAsserter[atomic.LoadUint32(&def)]
 		}
 	})
 	return curAsserter
@@ -1083,20 +1123,7 @@ func current() (curAsserter asserter) {
 // Note that if you are using tracers you might get overlapping call stacks, so
 // test what's best for your case.
 func SetDefault(i Asserter) (old Asserter) {
-	// pkg lvl lock to allow only one pkg client call this at one of the time
-	// together with the indexing, i.e we don't need to switch asserter
-	// variable or pointer to it but just index to array they are stored.
-	// All of this make race detector happy at the client pkgs.
-	mu.Lock()
-	defer mu.Unlock()
-
-	old = def
-	// theoretically, to make this fully thread safe the def var should be
-	// atomic, BUT it would be overkill. We need only defaults to be set at
-	// once. AND because we use indexing to actual asserter the thread-safety
-	// and performance are guaranteed,
-	def = i
-	return
+	return atomic.SwapUint32(&def, i)
 }
 
 // PushAsserter set [Asserter] for the current GLS (Goroutine Local Storage).
@@ -1165,7 +1192,7 @@ var mapDefIndToString = []string{
 }
 
 func defaultAsserterString() string {
-	return mapDefIndToString[def]
+	return mapDefIndToString[atomic.LoadUint32(&def)]
 }
 
 func newDefInd(v string) Asserter {
@@ -1206,7 +1233,7 @@ func (f *flagAsserter) String() string {
 
 // Get is part of the flag interfaces, getter.
 func (f *flagAsserter) Get() any {
-	return mapDefIndToString[def]
+	return defaultAsserterString()
 }
 
 // Set is part of the flag.Value interface.
