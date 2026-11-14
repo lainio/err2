@@ -1064,7 +1064,7 @@ func current() (curAsserter asserter) {
 		if found {
 			curAsserter = aster
 		} else {
-			// use pkg lvl asserter if asserter is not set for gorounine.
+			// use pkg lvl asserter if asserter is not set for goroutine.
 			curAsserter = defAsserter[def]
 		}
 	})
