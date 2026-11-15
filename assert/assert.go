@@ -215,7 +215,13 @@ func PushTester(t testing.TB, a ...Asserter) Function {
 }
 
 // PopTester removes the tester registration for the current goroutine.
-// It supports legacy usage:
+//
+// NOTE that the legacy usage does not provide nested restoration!
+// If you are using t.Parallel or goroutines you should always use:
+//
+//	defer assert.PushTester(t)()
+//
+// The deprecated legacy usage:
 //
 //	assert.PushTester(t)
 //	defer assert.PopTester()
