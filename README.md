@@ -662,10 +662,11 @@ Please see the full version history from [CHANGELOG](./CHANGELOG.md).
 
 ### Latest Release
 
-##### 1.4.1
-- Faster goroutine-local assertion handling with
-  [YottaDB's goid](https://gitlab.com/YottaDB/Lang/goid).
-  Many thanks to Berwyn Hoyt and the YottaDB team for an excellent, portable
-  implementation that removes costly stack parsing from the fast path of
-  `assert.PushAsserter` and `assert.PushTester`
-- Go 1.18 compatibility and existing APIs are preserved
+##### 1.4.2
+- Fixed nested `assert.PushTester` scopes: returned restoration functions
+  restore the previous tester in LIFO order and remove the final registration
+- Fixed data races in default asserter configuration
+- Deprecated `assert.PopTester`; use `defer assert.PushTester(t)()` for scoped
+  restoration and panic reporting
+- Added tests for nested and parallel scopes, concurrent configuration, panic
+  reporting, and cleanup, plus assertion setup benchmarks

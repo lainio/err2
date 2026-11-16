@@ -2,6 +2,15 @@
 
 ### Version history
 
+##### 1.4.2
+- Fixed nested `assert.PushTester` scopes: returned restoration functions
+  restore the previous tester in LIFO order and remove the final registration
+- Fixed data races in default asserter configuration
+- Deprecated `assert.PopTester`; use `defer assert.PushTester(t)()` for scoped
+  restoration and panic reporting
+- Added tests for nested and parallel scopes, concurrent configuration, panic
+  reporting, and cleanup, plus assertion setup benchmarks
+
 ##### 1.4.1
 - Faster goroutine-local assertion handling with
   [YottaDB's goid](https://gitlab.com/YottaDB/Lang/goid).
