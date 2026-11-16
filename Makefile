@@ -90,13 +90,16 @@ bench_zero:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkZero.*' $(PKG_ASSERT)
 
 bench_goid:
-	$(GO) test $(TEST_ARGS) -bench='BenchmarkGoid' $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkGoid' -run='^$$' $(PKG_ASSERT)
 
 bench_current:
-	$(GO) test $(TEST_ARGS) -bench='BenchmarkCurrentAsserter' $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkCurrentAsserter' -run='^$$' $(PKG_ASSERT)
+
+bench_pushtesterx:
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkPushTesterRestore' $(PKG_ASSERT)
 
 bench_pushtester:
-	$(GO) test $(TEST_ARGS) -bench='BenchmarkPushTesterRestore' $(PKG_ASSERT)
+	$(GO) test $(TEST_ARGS) -bench='BenchmarkPushTesterRestore' -run='^$$' $(PKG_ASSERT)
 
 bench_reca:
 	$(GO) test $(TEST_ARGS) -bench='BenchmarkRecursion.*' $(PKG_ERR2)
