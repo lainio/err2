@@ -114,16 +114,8 @@ var (
 )
 
 var (
-	// These two are our indexing system for default asserter. Note, also the
-	// mutex below. All of this is done to keep client package race detector
-	// cool.
-	//
-	//  Plain
-	//  Production
-	//  Development
-	//  Test
-	//  TestFull
-	//  Debug
+	// defAsserter is immutable; def is accessed atomically so configuration
+	// changes can run concurrently with assertions and tester registration.
 	defAsserter = []asserter{plain, prod, dev, test, testFull, dbg}
 	def         Asserter
 
@@ -1050,11 +1042,8 @@ func doNotZero[T Number](val T, a []any) {
 // current returns a current default [Asserter] used for assert functions like
 // assert.That() in this gorounine.
 //
-// NOTE this indexing stuff is done because of race detection to work on client
-// packages. And, yes, we have tested it. This is fastest way to make it without
-// locks HERE. Only the setting the index is secured with the mutex.
-//
-// NOTE that since our GLS [asserterMap] we still continue to use indexing.
+// Goroutine overrides are protected by asserterMap; the process-wide default
+// is loaded atomically. Successful assertions do not need to call current.
 func current() (curAsserter asserter) {
 	glsID := goid()
 	asserterMap.Rx(func(m map[uint64]asserter) {
@@ -1191,7 +1180,7 @@ func (f *flagAsserter) String() string {
 
 // Get is part of the flag interfaces, getter.
 func (f *flagAsserter) Get() any {
-	return mapDefIndToString[atomic.LoadUint32(&def)]
+	return defaultAsserterString()
 }
 
 // Set is part of the flag.Value interface.
